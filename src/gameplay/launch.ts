@@ -16,17 +16,14 @@ export function launchTop(top: TopEntity, towardCenterBias: THREE.Vector2, power
   top.spin = top.stats.maxSpin * (0.9 + charge * 0.22);
 
   // Apply Launcher Effects
-  const launcherId = top.build.LAUNCHER;
-  if (launcherId) {
-    const launcherInst = globalInventory.getItems().find(i => i.instanceId === launcherId);
-    if (launcherInst) {
-      const mult = TIER_MULTIPLIERS[launcherInst.tier] || 1;
-      top.spin *= mult;
-      
-      if (launcherInst.baseTemplateId === 'launcher_mjollnir') {
-        top.lightningTimer = 3; 
-        top.statusEffects.push({ id: 'lightningAura', duration: 3, elapsed: 0 });
-      }
+  const launcherInst = globalInventory.getItems().find(i => i.category === 'LAUNCHER');
+  if (launcherInst) {
+    const mult = TIER_MULTIPLIERS[launcherInst.tier] || 1;
+    top.spin *= mult;
+    
+    if (launcherInst.baseTemplateId === 'launcher_mjollnir') {
+      top.lightningTimer = 3; 
+      top.statusEffects.push({ id: 'lightningAura', duration: 3, remaining: 3, sourceSkill: 'launcher' as any });
     }
   }
 

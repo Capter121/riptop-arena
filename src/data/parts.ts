@@ -156,7 +156,6 @@ import type {
 import { BASE_COMPONENTS } from './recipes';
 
 const ATTRIBUTES: ElementAttribute[] = ['WIND', 'WATER', 'ROCK', 'LIGHTNING', 'FIRE', 'DARK', 'LIGHT', 'DIVINE'];
-const TIERS: MaterialTier[] = ['COMMON', 'REFINED', 'RARE', 'LEGENDARY', 'MYTHIC'];
 
 export class ItemGenerator {
   static generateId(): string {

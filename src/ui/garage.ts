@@ -1,7 +1,6 @@
-import type { PartUpgradeLevels } from '../app/progression';
-import { type NewBuildSelection } from '../data/parts';
+import { type BuildSelection } from '../data/parts';
 import { RadarChart } from './radar';
-import { type ComponentCategory, type InstanceComponent, ELEMENT_COLORS } from '../types/shopItems';
+import { type ComponentCategory } from '../types/shopItems';
 import { BASE_COMPONENTS } from '../data/recipes';
 import { globalInventory } from '../data/inventoryManager';
 
@@ -79,10 +78,15 @@ export class GaragePanel {
     this.root.append(this.progress, this.stats, this.collection, this.shopButton, this.battleButton);
   }
 
-  refreshOptions(currentBuild: NewBuildSelection) {
+  refreshOptions(currentBuild: BuildSelection) {
     const items = globalInventory.getItems();
     for (const [slot, select] of this.selects) {
-      const currentVal = select.value || currentBuild[slot];
+      let currentVal = select.value;
+      if (!currentVal) {
+        if (slot === 'CHIP') currentVal = currentBuild.core;
+        if (slot === 'LAYER') currentVal = currentBuild.attackRing;
+        if (slot === 'DRIVER') currentVal = currentBuild.driver;
+      }
       select.innerHTML = '';
       
       const emptyOpt = document.createElement('option');
@@ -93,7 +97,11 @@ export class GaragePanel {
       const slotItems = items.filter(it => it.category === slot);
       for (const item of slotItems) {
         // Prevent equipping if it's already equipped on another top (for future multi-top support)
-        if (item.equippedOnTopId && currentBuild[slot] !== item.instanceId) continue;
+        let equipId = '';
+        if (slot === 'CHIP') equipId = currentBuild.core;
+        if (slot === 'LAYER') equipId = currentBuild.attackRing;
+        if (slot === 'DRIVER') equipId = currentBuild.driver;
+        if (item.equippedOnTopId && equipId !== item.instanceId) continue;
 
         const base = BASE_COMPONENTS[item.baseTemplateId];
         const opt = document.createElement('option');
@@ -105,13 +113,11 @@ export class GaragePanel {
     }
   }
 
-  readBuild(): NewBuildSelection {
+  readBuild(): BuildSelection {
     return {
-      CHIP: this.selects.get('CHIP')!.value || null,
-      LAYER: this.selects.get('LAYER')!.value || null,
-      DISC: this.selects.get('DISC')!.value || null,
-      DRIVER: this.selects.get('DRIVER')!.value || null,
-      LAUNCHER: this.selects.get('LAUNCHER')!.value || null,
+      core: this.selects.get('CHIP')!.value || 'balanced',
+      attackRing: this.selects.get('LAYER')!.value || 'round',
+      driver: this.selects.get('DRIVER')!.value || 'grip',
     };
   }
 

@@ -1,12 +1,10 @@
 import * as THREE from 'three';
-import { type NewBuildSelection, getPartById } from '../data/parts';
+import { type BuildSelection, getPartById } from '../data/parts';
 import { globalInventory } from '../data/inventoryManager';
 import { BASE_COMPONENTS } from '../data/recipes';
-import { ELEMENT_COLORS } from '../types/shopItems';
 
 import { MAX_BURST, RING_EXTRUDE_DEPTH, TOP_HEIGHT, DRIVER_FIN_COUNT } from '../app/config';
-import type { BuildSelection } from '../data/parts';
-import { buildStats, getPart, getInstancePart, type BattleStats } from './build';
+import { buildStats, type BattleStats } from './build';
 import { clamp } from '../utils/math';
 import { createTopGeometry } from '../scene/topGeometry';
 import { createTopMaterials, getDynamicComponentMaterial, type TopMaterialSet } from '../scene/topMaterials';
@@ -44,7 +42,7 @@ type TurnMotionState = {
 
 export class TopEntity {
   readonly side: TopSide;
-  readonly build: NewBuildSelection;
+  readonly build: BuildSelection;
   readonly stats: BattleStats;
   readonly position = new THREE.Vector2();
   readonly velocity = new THREE.Vector2();
@@ -110,7 +108,7 @@ export class TopEntity {
     return Math.max(0.5, this.stats.weight - this.moiPenalty * 0.01);
   }
 
-  constructor(side: TopSide, build: NewBuildSelection, upgrades?: UpgradeLevels, partUpgrades?: PartUpgradeLevels) {
+  constructor(side: TopSide, build: BuildSelection, upgrades?: UpgradeLevels, partUpgrades?: PartUpgradeLevels) {
     this.side = side;
     this.build = build;
     this.stats = buildStats(build as any, upgrades, partUpgrades);
@@ -125,21 +123,19 @@ export class TopEntity {
 
     
     // Map instances to parts
-    const ringInst = globalInventory.getItems().find(i => i.instanceId === build.LAYER);
-    const coreInst = globalInventory.getItems().find(i => i.instanceId === build.CHIP);
-    const driverInst = globalInventory.getItems().find(i => i.instanceId === build.DRIVER);
-    const discInst = globalInventory.getItems().find(i => i.instanceId === build.DISC);
-    const launcherInst = globalInventory.getItems().find(i => i.instanceId === build.LAUNCHER);
+    const ringInst = globalInventory.getItems().find(i => i.instanceId === build.attackRing);
+    const coreInst = globalInventory.getItems().find(i => i.instanceId === build.core);
+    const driverInst = globalInventory.getItems().find(i => i.instanceId === build.driver);
 
     const ringBase = ringInst ? BASE_COMPONENTS[ringInst.baseTemplateId] : null;
     const coreBase = coreInst ? BASE_COMPONENTS[coreInst.baseTemplateId] : null;
     const driverBase = driverInst ? BASE_COMPONENTS[driverInst.baseTemplateId] : null;
 
-    const ringPart = ringBase?.visualId ? getPartById(ringBase.visualId) : getPartById('round');
-    const corePart = coreBase?.visualId ? getPartById(coreBase.visualId) : getPartById('balanced');
-    const driverPart = driverBase?.visualId ? getPartById(driverBase.visualId) : getPartById('grip');
+    const ringPart = ringBase?.visualId ? getPartById(ringBase.visualId) : getPartById(build.attackRing || 'round');
+    const corePart = coreBase?.visualId ? getPartById(coreBase.visualId) : getPartById(build.core || 'balanced');
+    const driverPart = driverBase?.visualId ? getPartById(driverBase.visualId) : getPartById(build.driver || 'grip');
 
-    this.hasRubberTip = TopEntity.isRubberTipDriver(driverPart.id);
+    this.hasRubberTip = TopEntity.isRubberTipDriver(driverPart!.id);
 
     // ── Procedural geometry ────────────────────────────────
     const geo = createTopGeometry();
@@ -235,7 +231,7 @@ export class TopEntity {
     // ── 7. Motion Blur Ring ────────────────────────────────
     const blurGeo = new THREE.RingGeometry(this.collisionRadius * 0.9, this.collisionRadius * 1.3, 48, 1);
     const blurMat = new THREE.MeshBasicMaterial({
-      color: ringPart.color,
+      color: ringPart!.color,
       transparent: true,
       opacity: 0.0,
       side: THREE.DoubleSide,
@@ -277,42 +273,6 @@ export class TopEntity {
       this.blurRing,
       this.shieldMesh,
     );
-
-    // Add GPU particles for invisible Disc
-    if (discInst) {
-      const particleGeo = new THREE.BufferGeometry();
-      const pCount = 300;
-      const positions = new Float32Array(pCount * 3);
-      const velocities = [];
-      for (let i = 0; i < pCount; i++) {
-        const theta = Math.random() * Math.PI * 2;
-        const radius = Math.random() * 0.4 + 0.1;
-        positions[i*3] = Math.cos(theta) * radius;
-        positions[i*3+1] = (Math.random() - 0.5) * 0.5;
-        positions[i*3+2] = Math.sin(theta) * radius;
-        
-        velocities.push({
-          x: -Math.cos(theta) * 0.05, // inverse suck in
-          y: (Math.random() - 0.5) * 0.02,
-          z: -Math.sin(theta) * 0.05
-        });
-      }
-      particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      
-      const particleMat = new THREE.PointsMaterial({
-        color: ELEMENT_COLORS[discInst.attribute] || 0xffffff,
-        size: 0.03,
-        transparent: true,
-        opacity: 0.6,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-      
-      const particleSystem = new THREE.Points(particleGeo, particleMat);
-      particleSystem.userData.velocities = velocities;
-      particleSystem.name = 'discSparks';
-      this.mesh.add(particleSystem);
-    }
 
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;

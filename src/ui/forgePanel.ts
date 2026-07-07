@@ -1,5 +1,4 @@
 import { globalInventory } from '../data/inventoryManager';
-import { type InstanceComponent, ELEMENT_COLORS } from '../types/shopItems';
 import { RecipesManager, BASE_COMPONENTS, type Recipe } from '../data/recipes';
 
 export class ForgePanel {

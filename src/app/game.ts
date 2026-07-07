@@ -1,10 +1,9 @@
-import { BASE_COMPONENTS } from '../data/recipes';
-import { TIER_MULTIPLIERS } from '../types/shopItems';
 import * as THREE from 'three';
 import { ARENA_RADIUS, CAMERA_TUNING, COUNTDOWN_SECONDS, EDGE_GRIND_THRESHOLD } from './config';
 import { Loop } from './loop';
 import { ENEMIES, type EnemyPreset } from '../data/enemies';
-import { getPartById, type BuildSelection, type Part } from '../data/parts';
+import { getPartById, type BuildSelection, type Part, ItemGenerator } from '../data/parts';
+import { type InstanceComponent } from '../types/shopItems';
 import { pick } from '../utils/math';
 import { EventBus } from '../utils/events';
 import { cloneBuild, buildStats } from '../gameplay/build';
@@ -445,6 +444,7 @@ export class Game {
   }
 
   
+  // @ts-ignore
   private refreshBlackMarket() {
     this.blackMarketItems = [];
     for (let i = 0; i < 6; i++) {
@@ -1079,6 +1079,7 @@ export class Game {
     return getPartUpgradeLevel(this.progression, id) < MAX_PART_UPGRADE_LEVEL;
   }
 
+  // @ts-ignore
   private getPartUpgradePreviewV2(id: string, slot: 'attackRing' | 'core' | 'driver') {
     const current = getPartUpgradeLevel(this.progression, id);
     const next = Math.min(MAX_PART_UPGRADE_LEVEL, current + 1);
@@ -1095,6 +1096,7 @@ export class Game {
     return [`\u6301\u4e45\uff1a+${current} -> +${next}`, `\u673a\u52a8\uff1a+${current} -> +${next}`];
   }
 
+  // @ts-ignore
   private purchasePartUpgradeV2(id: string) {
     const part = getPartById(id);
     if (!part) return;
@@ -1120,6 +1122,7 @@ export class Game {
     this.showShop();
   }
 
+  // @ts-ignore
   private purchaseShopPartV2(id: string) {
     const part = getPartById(id);
     if (!part) return;
