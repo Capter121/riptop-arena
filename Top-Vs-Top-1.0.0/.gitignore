@@ -1,0 +1,13 @@
+# Godot 4+ specific ignores
+.godot/
+export_credentials.cfg
+
+# Export builds
+*.x86_64
+*.exe
+*.pck
+*.console.exe
+
+# OS noise
+.DS_Store
+Thumbs.db

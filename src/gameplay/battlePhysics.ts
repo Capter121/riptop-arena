@@ -1,0 +1,677 @@
+import * as THREE from 'three';
+import { EnergySystem } from './energy';
+import {
+  ARENA_RADIUS,
+  ARENA_SLOPE_START,
+  COLLISION_COOLDOWN,
+  EDGE_GRIND_THRESHOLD,
+  MAX_BURST,
+  PLAYER_DASH_COOLDOWN,
+  SLOPE_STEEPNESS,
+  TOP_RADIUS,
+} from '../app/config';
+import { TUNING } from '../data/tuning';
+import type { EventBus } from '../utils/events';
+import { clamp } from '../utils/math';
+import { resolveModifiers } from './modifiers';
+import { SkillManager } from './skills';
+import type { TopEntity } from './top';
+import {
+  ELEMENT_ATTACKS,
+  MAX_SPIRIT,
+  TURN_CHARGE_SPIRIT,
+  type BattleSide,
+  type TurnAction,
+  type TurnVisual,
+} from '../types/battle';
+
+export type TurnResolutionKind =
+  | 'same_attack_cancel'
+  | 'attack_overpower'
+  | 'attack_catches_charge'
+  | 'defense_success'
+  | 'defense_fail'
+  | 'evade_success'
+  | 'evade_fail'
+  | 'charge'
+  | 'standoff';
+
+export type TurnResolution = {
+  kind: TurnResolutionKind;
+  playerAction: TurnAction;
+  aiAction: TurnAction;
+  winner: BattleSide | null;
+  loser: BattleSide | null;
+  playerSpiritDelta: number;
+  enemySpiritDelta: number;
+  playerVisual: TurnVisual;
+  enemyVisual: TurnVisual;
+  safeNoSpinDamage: boolean;
+  log: string;
+  knockbackBoost?: number;
+  firePenetration?: boolean;
+};
+
+import type { ElementAttribute } from '../types/shopItems';
+
+type TurnSpiritSnapshot = {
+  playerSpirit: number;
+  enemySpirit: number;
+  turnIndex: number;
+  playerAttributes?: Partial<Record<ElementAttribute, number>>;
+  enemyAttributes?: Partial<Record<ElementAttribute, number>>;
+};
+
+export class TurnArbitrator {
+  executeTurnResolution(playerAction: TurnAction, aiAction: TurnAction, player: TopEntity, enemy: TopEntity, turnIndex: number): TurnResolution {
+    const spirit = {
+      playerSpirit: player.spirit,
+      enemySpirit: enemy.spirit,
+      turnIndex: turnIndex,
+      playerAttributes: player.stats.attributes,
+      enemyAttributes: enemy.stats.attributes,
+    };
+    
+    const playerSpiritDelta = this.getActionCost(playerAction, spirit.turnIndex);
+    const enemySpiritDelta = this.getActionCost(aiAction, spirit.turnIndex);
+
+    const finish = (
+      kind: TurnResolutionKind,
+      winner: BattleSide | null,
+      loser: BattleSide | null,
+      playerVisual: TurnVisual,
+      enemyVisual: TurnVisual,
+      log: string,
+      safeNoSpinDamage = false,
+      chargePlayer = false,
+      chargeEnemy = false,
+      knockbackBoost = 0,
+      firePenetration = false,
+    ): TurnResolution => {
+      const getCharge = (base: number, isLight: boolean) => {
+        const gain = this.getChargeGain(base);
+        return isLight ? gain * 2 : gain; // LIGHT: Double passive Spirit regen
+      };
+
+      const playerHasLight = (spirit.playerAttributes?.['LIGHT'] || 0) > 0;
+      const enemyHasLight = (spirit.enemyAttributes?.['LIGHT'] || 0) > 0;
+
+      return {
+        kind,
+        playerAction,
+        aiAction,
+        winner,
+        loser,
+        playerSpiritDelta: playerSpiritDelta + (chargePlayer ? getCharge(spirit.playerSpirit + playerSpiritDelta, playerHasLight) : 0),
+        enemySpiritDelta: enemySpiritDelta + (chargeEnemy ? getCharge(spirit.enemySpirit + enemySpiritDelta, enemyHasLight) : 0),
+        playerVisual,
+        enemyVisual,
+        safeNoSpinDamage,
+        log,
+        knockbackBoost,
+        firePenetration,
+      };
+    };
+
+    if (playerAction.kind === 'attack' && aiAction.kind === 'attack') {
+      const playerAttack = ELEMENT_ATTACKS[playerAction.skillId];
+      const enemyAttack = ELEMENT_ATTACKS[aiAction.skillId];
+
+      if (playerAction.skillId === aiAction.skillId) {
+        const pDivine = (spirit.playerAttributes?.['DIVINE'] || 0) > 0;
+        const eDivine = (spirit.enemyAttributes?.['DIVINE'] || 0) > 0;
+        
+        if (pDivine && !eDivine) {
+          return finish('attack_overpower', 'player', 'enemy', 'attack', 'hit', `${playerAttack.label} 触发神圣裁决(DIVINE)，强制赢得拼刀！`);
+        } else if (eDivine && !pDivine) {
+          return finish('attack_overpower', 'enemy', 'player', 'hit', 'attack', `${enemyAttack.label} 触发神圣裁决(DIVINE)，玩家爆裂！`);
+        }
+
+        return finish('same_attack_cancel', null, null, 'clash', 'clash', `${playerAttack.label} 对 ${enemyAttack.label}：同级能量正面抵消，双方不损失转速。`, true);
+      }
+
+      if (playerAttack.tier > enemyAttack.tier) {
+        return finish('attack_overpower', 'player', 'enemy', 'attack', 'hit', `${playerAttack.label} 高阶碾压 ${enemyAttack.label}，对手爆裂出局。`);
+      }
+
+      return finish('attack_overpower', 'enemy', 'player', 'hit', 'attack', `${enemyAttack.label} 高阶碾压 ${playerAttack.label}，玩家爆裂出局。`);
+    }
+
+    if (playerAction.kind === 'attack') {
+      return this.resolveAttackAgainstDefense('player', playerAction, aiAction, finish, player, enemy, spirit);
+    }
+
+    if (aiAction.kind === 'attack') {
+      return this.resolveAttackAgainstDefense('enemy', aiAction, playerAction, finish, player, enemy, spirit);
+    }
+
+    const playerCharges = playerAction.kind === 'charge';
+    const enemyCharges = aiAction.kind === 'charge';
+
+    if (playerCharges || enemyCharges) {
+      return finish(
+        'charge',
+        null,
+        null,
+        playerCharges ? 'charge' : playerAction.kind,
+        enemyCharges ? 'charge' : aiAction.kind,
+        playerCharges && enemyCharges ? '双方同步蓄能，能量核心升档。' : '无人进攻，蓄能方安全升档。',
+        false,
+        playerCharges,
+        enemyCharges,
+      );
+    }
+
+    return finish('standoff', null, null, playerAction.kind, aiAction.kind, '双方观望防线，没有产生有效打击。');
+  }
+
+  private resolveAttackAgainstDefense(
+    attacker: BattleSide,
+    attackAction: Extract<TurnAction, { kind: 'attack' }>,
+    defenderAction: TurnAction,
+    finish: (
+      kind: TurnResolutionKind,
+      winner: BattleSide | null,
+      loser: BattleSide | null,
+      playerVisual: TurnVisual,
+      enemyVisual: TurnVisual,
+      log: string,
+      safeNoSpinDamage?: boolean,
+      chargePlayer?: boolean,
+      chargeEnemy?: boolean,
+      knockbackBoost?: number,
+      firePenetration?: boolean,
+    ) => TurnResolution,
+    player: TopEntity,
+    enemy: TopEntity,
+    spirit: TurnSpiritSnapshot,
+  ) {
+    const defender: BattleSide = attacker === 'player' ? 'enemy' : 'player';
+    const attack = ELEMENT_ATTACKS[attackAction.skillId];
+    const attackerVisual: TurnVisual = 'attack';
+    const playerIsAttacker = attacker === 'player';
+
+    const attackerTop = playerIsAttacker ? player : enemy;
+    const defenderTop = playerIsAttacker ? enemy : player;
+
+    const attackerAttributes = playerIsAttacker ? spirit.playerAttributes : spirit.enemyAttributes;
+    const defenderAttributes = playerIsAttacker ? spirit.enemyAttributes : spirit.playerAttributes;
+
+    const visual = (defenderVisual: TurnVisual): [TurnVisual, TurnVisual] =>
+      playerIsAttacker ? [attackerVisual, defenderVisual] : [defenderVisual, attackerVisual];
+
+    if (defenderAction.kind === 'charge') {
+      const [playerVisual, enemyVisual] = visual('hit');
+      
+      let hexLog = '';
+      if (attackerTop.stats.perks?.includes('hex_transformation')) {
+        defenderTop.isTransformedToSheep = true;
+        hexLog = ' 邪恶镰刀触发！对手被变形为废塑料！';
+      }
+
+      return finish(
+        'attack_catches_charge',
+        attacker,
+        defender,
+        playerVisual,
+        enemyVisual,
+        `${attack.label} 抓住蓄能空档，${defender === 'player' ? '玩家' : '对手'}立刻爆裂。${hexLog}`,
+      );
+    }
+
+    if (defenderAction.kind === 'defense') {
+      const evenTier = attack.tier % 2 === 0;
+      const [playerVisual, enemyVisual] = visual(evenTier ? 'defense' : 'hit');
+
+      if (evenTier) {
+        const isFire = (attackerAttributes?.['FIRE'] || 0) > 0;
+        const isWater = (defenderAttributes?.['WATER'] || 0) > 0;
+        
+        let reflectLog = '';
+        if (defenderTop.stats.perks?.includes('blade_mail_reflect')) {
+          attackerTop.integrity = Math.max(0, attackerTop.integrity - 350); // Direct damage calculation
+          reflectLog = ' 刃甲反弹了巨大的伤害！';
+        }
+
+        return finish(
+          'defense_success',
+          null,
+          null,
+          playerVisual,
+          enemyVisual,
+          `${attack.label} 是偶数档，防守扎根成功，只产生轻微摩擦。${isFire ? ' (火焰渗透伤害!)' : ''}${reflectLog}`,
+          true,
+          false,
+          false,
+          isWater ? 2.5 : 0, // WATER: increased knockback
+          isFire, // FIRE: 10% penetration
+        );
+      }
+
+      return finish(
+        'defense_fail',
+        attacker,
+        defender,
+        playerVisual,
+        enemyVisual,
+        `${attack.label} 是奇数档，防守判定失败，${defender === 'player' ? '玩家' : '对手'}爆裂。`,
+      );
+    }
+
+    if (defenderAction.kind === 'evade') {
+      const oddTier = attack.tier % 2 === 1;
+      const [playerVisual, enemyVisual] = visual(oddTier ? 'evade' : 'hit');
+
+      if (oddTier) {
+        const isWind = (defenderAttributes?.['WIND'] || 0) > 0;
+        // WIND gives extra spirit charge to defender
+        const chargePlayer = defender === 'player' ? isWind : false;
+        const chargeEnemy = defender === 'enemy' ? isWind : false;
+
+        return finish(
+          'evade_success',
+          null,
+          null,
+          playerVisual,
+          enemyVisual,
+          `${attack.label} 是奇数档，回避撤离成功。${isWind ? ' (风之加速!)' : ''}`,
+          true,
+          chargePlayer,
+          chargeEnemy,
+        );
+      }
+
+      return finish(
+        'evade_fail',
+        attacker,
+        defender,
+        playerVisual,
+        enemyVisual,
+        `${attack.label} 是偶数档，回避路线被封死，${defender === 'player' ? '玩家' : '对手'}爆裂。`,
+      );
+    }
+
+    const [playerVisual, enemyVisual] = visual('hit');
+    return finish(
+      'defense_fail',
+      attacker,
+      defender,
+      playerVisual,
+      enemyVisual,
+      `${attack.label} 命中裸露节奏，${defender === 'player' ? '玩家' : '对手'}没有正确防御而爆裂。`,
+    );
+  }
+
+  private getActionCost(action: TurnAction, turnIndex: number) {
+    if (action.kind === 'attack') return -ELEMENT_ATTACKS[action.skillId].spiritCost;
+    if (action.kind === 'defense' || action.kind === 'evade') {
+        return turnIndex <= 3 ? 0 : -1;
+    }
+    return 0;
+  }
+
+  private getChargeGain(currentSpirit: number) {
+    return Math.max(0, Math.min(TURN_CHARGE_SPIRIT, MAX_SPIRIT - currentSpirit));
+  }
+}
+
+export class BattlePhysicsSystem {
+  private collisionLock = 0;
+  private collisionCount = 0;
+  private readonly events: EventBus;
+
+  constructor(events: EventBus) {
+    this.events = events;
+  }
+
+  reset() {
+    this.collisionLock = 0;
+    this.collisionCount = 0;
+  }
+
+  update(player: TopEntity, enemy: TopEntity, dt: number, suppressCollision = false) {
+    this.collisionLock = Math.max(0, this.collisionLock - dt);
+    this.integrateTop(player, dt);
+    this.integrateTop(enemy, dt);
+    if (!suppressCollision) {
+      this.resolveCollision(player, enemy);
+      this.resolveCloneCollision(player, enemy);
+      this.resolveCloneCollision(enemy, player);
+    }
+  }
+
+  private resolveCloneCollision(caster: TopEntity, target: TopEntity) {
+    if (!caster.alive || !target.alive) return;
+    if (caster.clones && caster.clones.length > 0) {
+      const threshold = TOP_RADIUS * 2.15;
+      caster.clones.forEach(clone => {
+        const clonePos2D = new THREE.Vector2(clone.position.x, clone.position.z);
+        const distToEnemy = clonePos2D.distanceTo(target.position);
+        if (distToEnemy < threshold) {
+          // Push enemy slightly
+          const pushDir = target.position.clone().sub(clonePos2D).normalize();
+          if (pushDir.lengthSq() < 0.001) pushDir.set(1, 0);
+          target.velocity.addScaledVector(pushDir, 1.5);
+        }
+      });
+    }
+  }
+
+  checkClashProximity(player: TopEntity, enemy: TopEntity): boolean {
+    if (!player.alive || !enemy.alive) return false;
+    const distSq = player.position.distanceToSquared(enemy.position);
+    const triggerDistance = TOP_RADIUS * 2.15;
+    if (distSq > triggerDistance * triggerDistance) return false;
+
+    const relativeVelocity = new THREE.Vector2().subVectors(enemy.velocity, player.velocity);
+    return relativeVelocity.lengthSq() > 0.45;
+  }
+
+  applyClashImpulse(player: TopEntity, enemy: TopEntity, pPush: number, ePush: number, pDam: number, eDam: number) {
+    const playerShielded = this.consumeShield(player, player.position.x, player.position.y);
+    const enemyShielded = this.consumeShield(enemy, enemy.position.x, enemy.position.y);
+
+    const delta = new THREE.Vector2().subVectors(enemy.position, player.position);
+    if (delta.lengthSq() < 0.001) delta.set(1, 0);
+    const normal = delta.normalize();
+
+    const playerPush = playerShielded ? 0 : (pPush > 0 ? pPush : 1.4);
+    const enemyPush = enemyShielded ? 0 : (ePush > 0 ? ePush : 1.4);
+    const playerDamage = playerShielded ? 0 : pDam;
+    const enemyDamage = enemyShielded ? 0 : eDam;
+
+    player.velocity.add(normal.clone().multiplyScalar(-playerPush));
+    enemy.velocity.add(normal.clone().multiplyScalar(enemyPush));
+
+    player.integrity = Math.max(0, player.integrity - playerDamage);
+    enemy.integrity = Math.max(0, enemy.integrity - enemyDamage);
+
+    this.events.emit('spark', {
+      x: (player.position.x + enemy.position.x) * 0.5,
+      z: (player.position.y + enemy.position.y) * 0.5,
+      intensity: 1.5,
+    });
+    this.events.emit('impact', { intensity: 1.5 });
+
+    if (playerDamage > 0 && !player.alive && !player.flags.burstResolvedThisFrame) {
+      this.triggerBurstFinish(player, enemy);
+    }
+    if (enemyDamage > 0 && !enemy.alive && !enemy.flags.burstResolvedThisFrame) {
+      this.triggerBurstFinish(enemy, player);
+    }
+
+    this.collisionLock = COLLISION_COOLDOWN;
+  }
+
+  dashPlayer(player: TopEntity, worldTarget: THREE.Vector3, energy?: EnergySystem) {
+    if (player.dashCooldown > 0 || !player.alive || player.stunTimer > 0) return false;
+    if (energy && !energy.canAfford(player.side, 1)) return false;
+
+    const direction = new THREE.Vector2(worldTarget.x - player.position.x, worldTarget.z - player.position.y);
+    if (direction.lengthSq() < 0.2) return false;
+    direction.normalize();
+
+    const modifiers = resolveModifiers(player);
+    player.velocity.add(direction.multiplyScalar(TUNING.playerDashImpulse * modifiers.dashImpulseMultiplier));
+    if (energy) energy.add(player.side, -1);
+
+    player.dashCooldown = PLAYER_DASH_COOLDOWN;
+    this.events.emit('dash', { side: player.side });
+    return true;
+  }
+
+  private integrateTop(top: TopEntity, dt: number) {
+    if (!top.alive) return;
+
+    top.dashCooldown = Math.max(0, top.dashCooldown - dt);
+    top.stunTimer = Math.max(0, top.stunTimer - dt);
+
+    const modifiers = resolveModifiers(top);
+    const speed = top.velocity.length();
+    const radiusRatio = top.position.length() / ARENA_RADIUS;
+    const stunDrag = top.stunTimer > 0 ? 0.92 : 1.0;
+    const drag = (top.getTurnDragMultiplier() - clamp(speed * 0.002, 0, 0.06)) * stunDrag;
+
+    top.velocity.multiplyScalar(drag * (1 - dt * 0.22));
+    top.position.addScaledVector(top.velocity, dt);
+
+    const futurePos = top.position.clone().add(top.velocity.clone().multiplyScalar(dt));
+    const nextRadiusRatio = futurePos.length() / ARENA_RADIUS;
+
+    if (nextRadiusRatio > ARENA_SLOPE_START) {
+      const slopePenetration = (nextRadiusRatio - ARENA_SLOPE_START) / (1 - ARENA_SLOPE_START);
+      const slopeGradient = 2 * slopePenetration * SLOPE_STEEPNESS;
+      const gripBoost = top.hasRubberTip ? modifiers.wallGripMultiplier * 1.25 : 1;
+      const gravityPull = slopeGradient * 18.0 * gripBoost;
+      const inwardDir = top.position.clone().normalize().multiplyScalar(-gravityPull * dt);
+      top.velocity.add(inwardDir);
+
+      const tangentDir = new THREE.Vector2(-top.position.y, top.position.x).normalize();
+      const orbitForce = gravityPull * (top.hasRubberTip ? 0.72 : 0.85);
+      top.velocity.add(tangentDir.multiplyScalar(orbitForce * dt));
+
+      if (top.hasRubberTip && radiusRatio > EDGE_GRIND_THRESHOLD) {
+        this.events.emit('spark', {
+          x: top.position.x,
+          z: top.position.y,
+          intensity: clamp(speed / 10, 0.35, 1.1),
+        });
+      }
+    } else if (radiusRatio > 0.97 && top.position.lengthSq() > 0.01) {
+      const inward = top.position.clone().normalize().multiplyScalar(-dt * 2.4 * top.stats.defense * 0.06 * modifiers.wallGripMultiplier);
+      top.velocity.add(inward);
+    }
+
+    const spinLoss = 0;
+    top.spin = Math.max(0, top.spin - spinLoss);
+    top.stamina = Math.max(0, top.stamina - spinLoss * 0.86);
+
+    const tiltTarget = clamp(1 - top.spin / top.stats.maxSpin, 0, 1);
+    top.tilt = clamp(
+      top.tilt + (tiltTarget * TUNING.tiltGainScale - top.tilt * TUNING.tiltRecoverScale) * dt * 7,
+      0,
+      1.3,
+    );
+  }
+
+  private resolveCollision(a: TopEntity, b: TopEntity) {
+    if (!a.alive || !b.alive || this.collisionLock > 0 || a.flags.burstResolvedThisFrame || b.flags.burstResolvedThisFrame) return;
+
+    const delta = new THREE.Vector2().subVectors(b.position, a.position);
+    const distance = delta.length();
+    const minDistance = TOP_RADIUS * 1.5;
+
+    if (distance > minDistance || distance <= 0.0001) return;
+
+    const normal = delta.normalize();
+    const relativeVelocity = new THREE.Vector2().subVectors(b.velocity, a.velocity);
+    const separatingSpeed = relativeVelocity.dot(normal);
+    const modifiersA = resolveModifiers(a);
+    const modifiersB = resolveModifiers(b);
+    const attackFactorA = (1 + a.stats.attack * 0.05 + (a.spin / a.stats.maxSpin) * 0.25) * modifiersA.attackMultiplier;
+    const attackFactorB = (1 + b.stats.attack * 0.05 + (b.spin / b.stats.maxSpin) * 0.25) * modifiersB.attackMultiplier;
+    const impulseMagnitude = Math.max(3.2, Math.abs(separatingSpeed) + (attackFactorA + attackFactorB) * TUNING.collisionImpulseScale);
+
+    this.collisionCount += 1;
+
+    if (this.collisionCount <= 3 && this.tryResolveOpeningBurst(a, b, relativeVelocity.length(), impulseMagnitude)) {
+      this.collisionLock = COLLISION_COOLDOWN;
+      return;
+    }
+
+    const ratioA = b.effectiveWeight / (a.effectiveWeight + 1);
+    const ratioB = a.effectiveWeight / (b.effectiveWeight + 1);
+    const pushA = impulseMagnitude * ratioA * 0.8 * modifiersB.collisionImpulseMultiplier;
+    const pushB = impulseMagnitude * ratioB * 0.8 * modifiersA.collisionImpulseMultiplier;
+    const shieldedA = this.consumeShield(a, a.position.x, a.position.y);
+    const shieldedB = this.consumeShield(b, b.position.x, b.position.y);
+
+    const impulseA = normal.clone().multiplyScalar(shieldedA ? 0 : -pushA * modifiersA.velocityReflectionMultiplier);
+    const impulseB = normal.clone().multiplyScalar(shieldedB ? 0 : pushB * modifiersB.velocityReflectionMultiplier);
+
+    a.velocity.add(impulseA);
+    b.velocity.add(impulseB);
+    
+    // Aqua Surge additional push (convert reduced reflection into outward push to opponent)
+    if (modifiersA.velocityReflectionMultiplier < 1.0) {
+      const extraPush = pushA * (1.0 - modifiersA.velocityReflectionMultiplier);
+      b.velocity.add(normal.clone().multiplyScalar(extraPush * 1.5));
+    }
+    if (modifiersB.velocityReflectionMultiplier < 1.0) {
+      const extraPush = pushB * (1.0 - modifiersB.velocityReflectionMultiplier);
+      a.velocity.add(normal.clone().multiplyScalar(-extraPush * 1.5));
+    }
+
+    if (pushA > 5.0 && !shieldedA) a.stunTimer = Math.max(a.stunTimer, pushA * 0.06);
+    if (pushB > 5.0 && !shieldedB) b.stunTimer = Math.max(b.stunTimer, pushB * 0.06);
+
+    // Frost Bite trigger
+    if (a.flags.armedFrostBite) {
+      a.flags.armedFrostBite = false;
+      const existing = b.statusEffects.find((entry) => entry.id === 'frost_bite');
+      if (existing) { existing.remaining = 1.5; } else { b.statusEffects.push({ id: 'frost_bite', sourceSkill: 'frost_bite', duration: 1.5, remaining: 1.5 }); }
+      this.events.emit('spark', { x: b.position.x, z: b.position.y, intensity: 2.5 });
+    }
+    if (b.flags.armedFrostBite) {
+      b.flags.armedFrostBite = false;
+      const existing = a.statusEffects.find((entry) => entry.id === 'frost_bite');
+      if (existing) { existing.remaining = 1.5; } else { a.statusEffects.push({ id: 'frost_bite', sourceSkill: 'frost_bite', duration: 1.5, remaining: 1.5 }); }
+      this.events.emit('spark', { x: a.position.x, z: a.position.y, intensity: 2.5 });
+    }
+
+    // Lightning Bolt trigger
+    if (a.flags.armedLightningBolt) {
+      a.flags.armedLightningBolt = false;
+      b.lockStability = Math.max(0, b.lockStability - 15);
+      this.triggerLightning(a);
+    }
+    if (b.flags.armedLightningBolt) {
+      b.flags.armedLightningBolt = false;
+      a.lockStability = Math.max(0, a.lockStability - 15);
+      this.triggerLightning(b);
+    }
+
+    const damageToA = shieldedA
+      ? 0
+      : Math.max(
+          2,
+          (((b.stats.attack * modifiersB.attackMultiplier) * 1.1 - (a.stats.defense * modifiersA.defenseMultiplier) * 0.45) + impulseMagnitude) * 0.6 * modifiersB.damageMultiplier,
+        );
+    const damageToB = shieldedB
+      ? 0
+      : Math.max(
+          2,
+          (((a.stats.attack * modifiersA.attackMultiplier) * 1.1 - (b.stats.defense * modifiersB.defenseMultiplier) * 0.45) + impulseMagnitude) * 0.6 * modifiersA.damageMultiplier,
+        );
+
+    a.integrity = Math.max(0, a.integrity - damageToA * TUNING.collisionDamageScale * 0.08);
+    b.integrity = Math.max(0, b.integrity - damageToB * TUNING.collisionDamageScale * 0.08);
+    a.addBurst((damageToA * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + a.stats.burstResist * 0.25 * modifiersA.burstResistanceMultiplier));
+    b.addBurst((damageToB * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + b.stats.burstResist * 0.25 * modifiersB.burstResistanceMultiplier));
+
+    a.spin = Math.max(0, a.spin - damageToA * 0.7 * modifiersA.spinLossMultiplier);
+    b.spin = Math.max(0, b.spin - damageToB * 0.7 * modifiersB.spinLossMultiplier);
+
+    this.applyLockStabilityDamage(a, b, relativeVelocity.length(), modifiersB.damageMultiplier, modifiersA.lockStabilityLossMultiplier);
+    this.applyLockStabilityDamage(b, a, relativeVelocity.length(), modifiersA.damageMultiplier, modifiersB.lockStabilityLossMultiplier);
+
+    const overlap = minDistance - distance;
+    if (!shieldedA) a.position.addScaledVector(normal, -overlap * 0.5);
+    if (!shieldedB) b.position.addScaledVector(normal, overlap * 0.5);
+
+    this.events.emit('spark', {
+      x: (a.position.x + b.position.x) * 0.5,
+      z: (a.position.y + b.position.y) * 0.5,
+      intensity: clamp(impulseMagnitude / 12, 0.4, 1.8),
+    });
+    this.events.emit('impact', { intensity: clamp(impulseMagnitude / 10, 0.35, 1.4) });
+
+    if (!a.alive && !a.flags.burstResolvedThisFrame) this.triggerBurstFinish(a, b);
+    if (!b.alive && !b.flags.burstResolvedThisFrame) this.triggerBurstFinish(b, a);
+
+    if (this.collisionCount >= 50 && a.alive && b.alive) {
+      this.forceCollisionSettlement(a, b);
+    }
+
+    this.collisionLock = COLLISION_COOLDOWN;
+  }
+
+  private triggerLightning(caster: TopEntity) {
+    if (caster.lightningLines.length === 0) {
+      const mat = SkillManager.createLightningShaderMaterial();
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.4), mat);
+      caster.mesh.parent?.add(mesh);
+      caster.lightningLines.push(mesh);
+    }
+    caster.lightningTimer = 0.15; // User requested: short jitter and auto cleanup
+  }
+
+  private tryResolveOpeningBurst(a: TopEntity, b: TopEntity, relativeSpeed: number, impulseMagnitude: number) {
+    const spinDeltaAB = Math.max(0, (a.spin - b.spin) / Math.max(1, a.stats.maxSpin));
+    const spinDeltaBA = Math.max(0, (b.spin - a.spin) / Math.max(1, b.stats.maxSpin));
+    const modifiersA = resolveModifiers(a);
+    const modifiersB = resolveModifiers(b);
+    const burstChanceOnB = clamp(((relativeSpeed * modifiersA.damageMultiplier * 3.2) + (impulseMagnitude * 0.18) + spinDeltaAB * 12 - b.lockStability * 0.09) / 100, 0.02, 0.45);
+    const burstChanceOnA = clamp(((relativeSpeed * modifiersB.damageMultiplier * 3.2) + (impulseMagnitude * 0.18) + spinDeltaBA * 12 - a.lockStability * 0.09) / 100, 0.02, 0.45);
+
+    if (Math.random() < burstChanceOnB && !this.consumeShield(b, b.position.x, b.position.y)) {
+      this.triggerBurstFinish(b, a);
+      return true;
+    }
+
+    if (Math.random() < burstChanceOnA && !this.consumeShield(a, a.position.x, a.position.y)) {
+      this.triggerBurstFinish(a, b);
+      return true;
+    }
+
+    return false;
+  }
+
+  private applyLockStabilityDamage(target: TopEntity, attacker: TopEntity, relativeSpeed: number, attackerDamageMultiplier: number, targetLossMultiplier: number) {
+    const isLightning = (attacker.stats.attributes?.['LIGHTNING'] || 0) > 0;
+    const lightningBonus = isLightning ? 1.5 : 1.0;
+    const loss = relativeSpeed * attackerDamageMultiplier * targetLossMultiplier * lightningBonus;
+    
+    target.lockStability = Math.max(0, target.lockStability - loss);
+    if (target.lockStability <= 0 && target.alive && !target.flags.burstResolvedThisFrame) {
+      this.triggerBurstFinish(target, attacker);
+    }
+  }
+
+  private triggerBurstFinish(loser: TopEntity, winner: TopEntity) {
+    if (loser.flags.burstResolvedThisFrame) return;
+    loser.flags.burstResolvedThisFrame = true;
+    loser.addBurst(MAX_BURST);
+    loser.alive = false;
+    loser.integrity = 0;
+    this.events.emit('burst', { winner: winner.side, loser: loser.side });
+  }
+
+  private consumeShield(top: TopEntity, x: number, z: number) {
+    if (top.shieldHits <= 0) return false;
+    top.shieldHits = Math.max(0, top.shieldHits - 1);
+    top.flags.ignoreNextCollisionDamage = true;
+    this.events.emit('shield_block', {
+      x,
+      z,
+      side: top.side,
+      shieldHits: top.shieldHits,
+    });
+    this.events.emit('impact', { intensity: 0.45 });
+    return true;
+  }
+
+  private forceCollisionSettlement(a: TopEntity, b: TopEntity) {
+    const scoreA = a.spin + a.integrity * 0.35 + a.stats.defense * 4;
+    const scoreB = b.spin + b.integrity * 0.35 + b.stats.defense * 4;
+    if (scoreA >= scoreB) {
+      b.spin = 0;
+      b.stamina = 0;
+      b.setEliminated();
+    } else {
+      a.spin = 0;
+      a.stamina = 0;
+      a.setEliminated();
+    }
+  }
+}

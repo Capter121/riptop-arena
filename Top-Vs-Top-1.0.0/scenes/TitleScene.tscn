@@ -1,0 +1,177 @@
+[gd_scene format=3 uid="uid://dx3kukrhagavo"]
+
+[ext_resource type="Script" uid="uid://c3usumos0iwlj" path="res://scripts/TitleScreen.gd" id="1_title"]
+[ext_resource type="FontFile" uid="uid://buoubd1b8s3vy" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://b2ceyuh5vhv3" path="res://icon.svg" id="3_icon"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_norm"]
+content_margin_left = 32.0
+content_margin_top = 16.0
+content_margin_right = 32.0
+content_margin_bottom = 16.0
+bg_color = Color(0.2, 0.25, 0.45, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.55, 0.9, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+content_margin_left = 32.0
+content_margin_top = 16.0
+content_margin_right = 32.0
+content_margin_bottom = 16.0
+bg_color = Color(0.5, 0.6, 0.9, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.9, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+content_margin_left = 32.0
+content_margin_top = 16.0
+content_margin_right = 32.0
+content_margin_bottom = 16.0
+bg_color = Color(0.3, 0.4, 0.7, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.8, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="TitleScene" type="Node2D" unique_id=1230801499]
+script = ExtResource("1_title")
+
+[node name="Background" type="ColorRect" parent="." unique_id=898433450]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.06, 0.06, 0.12, 1)
+
+[node name="LogoIcon" type="Sprite2D" parent="." unique_id=788361234]
+modulate = Color(1, 1, 1, 0.47843137)
+position = Vector2(640, 360)
+scale = Vector2(5, 5)
+texture = ExtResource("3_icon")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=908855763]
+
+[node name="TitleLabel" type="Label" parent="UI" unique_id=114523655]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -320.0
+offset_top = 180.0
+offset_right = 320.0
+offset_bottom = 290.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 56
+text = "TOP VS TOP
+ARENA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="UI" unique_id=1755339066]
+modulate = Color(1, 0.85, 0.1, 1)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 300.0
+offset_right = 200.0
+offset_bottom = 340.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+text = "SPIN or DIE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayButton" type="Button" parent="UI" unique_id=204470689]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -130.0
+offset_top = 390.0
+offset_right = 130.0
+offset_bottom = 480.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "PLAY"
+
+[node name="AboutButton" type="Button" parent="UI" unique_id=66010291]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 510.0
+offset_right = 100.0
+offset_bottom = 570.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "ABOUT"
+
+[node name="HighScoreLabel" type="Label" parent="UI" unique_id=422243782]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -260.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="CreditsLabel" type="Label" parent="UI" unique_id=530116019]
+modulate = Color(0.4, 0.4, 0.5, 1)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 650.0
+offset_right = 200.0
+offset_bottom = 690.0
+theme_override_colors/font_color = Color(0.37413925, 0.37413928, 0.37413922, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "Made with Godot 4.6"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CreditsLabel2" type="Label" parent="UI" unique_id=233672270]
+modulate = Color(0.4, 0.4, 0.5, 1)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 650.0
+offset_right = 200.0
+offset_bottom = 690.0
+theme_override_colors/font_color = Color(0.44291073, 0.4429108, 0.4429106, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 14
+text = "Made with Godot 4.6"
+horizontal_alignment = 1
+vertical_alignment = 1

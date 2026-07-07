@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://p3xscp42rxwx"]
+
+[ext_resource type="Script" uid="uid://cvfm4givefk0x" path="res://scripts/EnemyTop.gd" id="1_elbre"]
+[ext_resource type="Texture2D" path="res://assets/svg/top_elite.svg" id="2_6brym"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ydr75"]
+radius = 34.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_et8q3"]
+friction = 0.3
+bounce = 0.0
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_f3gb5"]
+color = Color(0.6, 0.2, 0.8, 0.5)
+initial_velocity_min = 0.0
+initial_velocity_max = 0.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.5
+scale_max = 1.5
+lifetime_randomness = 0.3
+
+[node name="EliteEnemyTop" type="RigidBody2D" unique_id=1833388677 groups=["tops"]]
+physics_material_override = SubResource("PhysicsMaterial_et8q3")
+gravity_scale = 0.0
+continuous_cd = 1
+contact_monitor = true
+max_contacts_reported = 4
+linear_damp = 1.5
+angular_damp = 0.5
+script = ExtResource("1_elbre")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=941227388]
+shape = SubResource("CircleShape2D_ydr75")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_6brym")
+
+[node name="SpinRing" type="Node2D" parent="."]
+
+[node name="SpinSfx" type="AudioStreamPlayer" parent="."]
+
+[node name="Trail" type="GPUParticles2D" parent="." unique_id=49002559]
+emitting = true
+amount = 16
+lifetime = 0.5
+one_shot = false
+local_coords = false
+explosiveness = 0.0
+preprocess = 0.2
+process_material = SubResource("ParticleProcessMaterial_f3gb5")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

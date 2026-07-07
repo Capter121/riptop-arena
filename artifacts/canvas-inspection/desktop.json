@@ -1,0 +1,141 @@
+{
+  "url": "http://127.0.0.1:4174/?qa=1",
+  "mode": "desktop",
+  "screenshotPath": "artifacts\\canvas-inspection\\desktop.png",
+  "result": {
+    "ok": true,
+    "reason": "nonblank",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 720
+    },
+    "drawingBuffer": {
+      "width": 1280,
+      "height": 720
+    },
+    "alphaPixels": 4096,
+    "variance": 255,
+    "colorBuckets": 441,
+    "diagnostics": {
+      "phase": "battle",
+      "enemy": "烈焰獠牙",
+      "mode": "quick",
+      "progression": {
+        "ladderIndex": 0,
+        "bestLadder": 0,
+        "championshipCount": 0,
+        "coins": 0,
+        "unlockedParts": [
+          "round",
+          "balanced",
+          "grip"
+        ]
+      },
+      "player": {
+        "spin": 164.8896,
+        "integrity": 206,
+        "burst": 0,
+        "speed": 0,
+        "spirit": 100,
+        "tacticalMode": "balance",
+        "shieldHits": 0,
+        "flags": {
+          "ignoreNextWallSlowdown": false,
+          "ignoreNextCollisionDamage": false,
+          "burstResolvedThisFrame": false,
+          "armedFrostBite": false,
+          "armedLightningBolt": false
+        },
+        "activeEffects": [],
+        "modifiers": {
+          "attackMultiplier": 1,
+          "defenseMultiplier": 1,
+          "staminaDrainMultiplier": 1,
+          "burstResistanceMultiplier": 1,
+          "collisionImpulseMultiplier": 1,
+          "wallGripMultiplier": 1.08,
+          "damageMultiplier": 1,
+          "spinLossMultiplier": 1,
+          "dashImpulseMultiplier": 1,
+          "lockStabilityLossMultiplier": 1,
+          "velocityReflectionMultiplier": 1
+        }
+      },
+      "team": {
+        "size": 1,
+        "activePlayerIndex": 0,
+        "queuedTagState": null
+      },
+      "enemyState": {
+        "spin": 131.4638955052294,
+        "integrity": 139,
+        "burst": 0,
+        "speed": 0,
+        "spirit": 100,
+        "tacticalMode": "balance",
+        "shieldHits": 0,
+        "flags": {
+          "ignoreNextWallSlowdown": false,
+          "ignoreNextCollisionDamage": false,
+          "burstResolvedThisFrame": false,
+          "armedFrostBite": false,
+          "armedLightningBolt": false
+        },
+        "activeEffects": [],
+        "modifiers": {
+          "attackMultiplier": 1,
+          "defenseMultiplier": 1,
+          "staminaDrainMultiplier": 1,
+          "burstResistanceMultiplier": 1,
+          "collisionImpulseMultiplier": 1,
+          "wallGripMultiplier": 1,
+          "damageMultiplier": 1,
+          "spinLossMultiplier": 1,
+          "dashImpulseMultiplier": 1,
+          "lockStabilityLossMultiplier": 1,
+          "velocityReflectionMultiplier": 1
+        }
+      },
+      "turn": {
+        "state": "awaiting",
+        "timer": 0,
+        "index": 1,
+        "resolution": null
+      },
+      "paused": false,
+      "camera": {
+        "mode": "danger-frame",
+        "chaseWeight": 0,
+        "dangerWeight": 0.542635658914729,
+        "edgeDanger": 0.6976744186046512,
+        "separation": 12,
+        "relativeSpeed": 0,
+        "distance": 19.40146827008923,
+        "height": 7.785202734438854,
+        "angle": 0.6391378776457443,
+        "tuning": {
+          "chaseDistanceStart": 1.6,
+          "chaseDistanceRange": 1.9,
+          "chaseSpeedScale": 0.035,
+          "chaseOffsetScale": 0.95,
+          "dangerStart": 0.6,
+          "dangerRange": 0.18,
+          "dangerFocusBias": 0.72,
+          "dangerDistanceBoost": 3.45,
+          "dangerHeightBoost": 2.35,
+          "dangerCompressionBoost": 1.38
+        }
+      },
+      "renderer": {
+        "calls": 1,
+        "triangles": 1,
+        "geometries": 31,
+        "textures": 33
+      }
+    }
+  },
+  "consoleErrors": [],
+  "pageErrors": []
+}

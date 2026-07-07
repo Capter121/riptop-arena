@@ -1,0 +1,250 @@
+[gd_scene format=3 uid="uid://cnd2cc3epmgm"]
+
+[ext_resource type="Script" uid="uid://da3t0xuf20ain" path="res://scripts/AboutScreen.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://buoubd1b8s3vy" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://b2ceyuh5vhv3" path="res://icon.svg" id="3_icon"]
+[ext_resource type="Texture2D" uid="uid://bscfnte8qd2tg" path="res://screenshorts/spin-boost.png" id="5_spinboost"]
+[ext_resource type="Texture2D" uid="uid://6r53qx8luw5u" path="res://screenshorts/player-spinmeter.png" id="6_spinmeter"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_norm"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.2, 0.25, 0.45, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.55, 0.9, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_pressed"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.5, 0.6, 0.9, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.9, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_hover"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.3, 0.4, 0.7, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.8, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 24.0
+content_margin_top = 24.0
+content_margin_right = 24.0
+content_margin_bottom = 24.0
+bg_color = Color(0.29803923, 0.29803923, 0.29803923, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="AboutScene" type="Node2D" unique_id=694219613]
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="." unique_id=316945654]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.06, 0.06, 0.12, 1)
+
+[node name="LogoIcon" type="Sprite2D" parent="." unique_id=573920496]
+modulate = Color(1, 1, 1, 0.08)
+position = Vector2(640, 360)
+scale = Vector2(5, 5)
+texture = ExtResource("3_icon")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=646980305]
+
+[node name="BackButton" type="Button" parent="UI" unique_id=649270837]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 540.0
+offset_top = -70.0
+offset_right = 740.0
+offset_bottom = -20.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_back_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_back_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_back_hover")
+text = "BACK"
+
+[node name="ContentPanel" type="Panel" parent="UI" unique_id=1078441889]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -450.0
+offset_top = 20.0
+offset_right = 450.0
+offset_bottom = 635.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/ContentPanel" unique_id=1331753126]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+
+[node name="VBox" type="VBoxContainer" parent="UI/ContentPanel/ScrollContainer" unique_id=1283409515]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TitleLabel" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1999982054]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Separator1" type="ColorRect" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1000000001]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.4, 0.4, 0.5, 0.3)
+
+[node name="SectionGame" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=101882338]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+
+[node name="BodyGame" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=792976940]
+custom_minimum_size = Vector2(820, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="Separator2" type="ColorRect" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1000000002]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.4, 0.4, 0.5, 0.3)
+
+[node name="SectionControls" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=598727187]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+
+[node name="BodyControls" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=479884702]
+custom_minimum_size = Vector2(820, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="Separator3" type="ColorRect" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1000000003]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.4, 0.4, 0.5, 0.3)
+
+[node name="SectionWaves" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1217606057]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.6, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+
+[node name="BodyWaves" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=495218931]
+custom_minimum_size = Vector2(820, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="Separator5" type="ColorRect" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1000000005]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.4, 0.4, 0.5, 0.3)
+
+[node name="SectionSpin" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1832644060]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+
+[node name="BodySpin" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=191131079]
+custom_minimum_size = Vector2(820, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="SectionScreenshot2" type="TextureRect" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=854312088]
+custom_minimum_size = Vector2(820, 200)
+layout_mode = 2
+texture = ExtResource("6_spinmeter")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BodySpinPickup" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=191131080]
+custom_minimum_size = Vector2(820, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="SectionScreenshot3" type="TextureRect" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=247864228]
+custom_minimum_size = Vector2(820, 200)
+layout_mode = 2
+texture = ExtResource("5_spinboost")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SectionCreator" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1213818662]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.6, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+
+[node name="BodyCreator" type="Label" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=173054784]
+custom_minimum_size = Vector2(820, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="BottomSpacer" type="Control" parent="UI/ContentPanel/ScrollContainer/VBox" unique_id=1000000008]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2

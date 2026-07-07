@@ -1,0 +1,15 @@
+export const TUNING = {
+  spinDrainBase: 7.5,
+  spinDrainVelocityScale: 1.2,
+  collisionImpulseScale: 2.15,
+  collisionDamageScale: 9,
+  burstDamageScale: 14,
+  wallBounce: 0.92,
+  playerDashImpulse: 6.4,
+  aiSeekStrength: 1.35,
+  launchSpeedMin: 5.8,
+  launchSpeedMax: 10.4,
+  edgeSlipBonus: 1.5,
+  tiltGainScale: 0.28,
+  tiltRecoverScale: 0.16,
+};

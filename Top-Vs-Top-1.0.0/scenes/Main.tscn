@@ -1,0 +1,261 @@
+[gd_scene format=3 uid="uid://o2q0ept6hau8"]
+
+[ext_resource type="Script" uid="uid://ct5g05rpdbrm2" path="res://scripts/Arena.gd" id="1_elqb8"]
+[ext_resource type="Script" uid="uid://dip5li4xlx317" path="res://scripts/Main.gd" id="1_rvslj"]
+[ext_resource type="FontFile" uid="uid://buoubd1b8s3vy" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://b2ceyuh5vhv3" path="res://icon.svg" id="3_icon"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_arena"]
+friction = 0.3
+bounce = 0.5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2qk3"]
+bg_color = Color(0.29803923, 0.29803923, 0.29803923, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3x6y"]
+bg_color = Color(0.29803923, 0.29803923, 0.29803923, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 1, 1, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_norm"]
+content_margin_left = 24.0
+content_margin_right = 24.0
+bg_color = Color(0.2, 0.25, 0.45, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.55, 0.9, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+content_margin_left = 24.0
+content_margin_right = 24.0
+bg_color = Color(0.5, 0.6, 0.9, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.9, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+content_margin_left = 24.0
+content_margin_right = 24.0
+bg_color = Color(0.3, 0.4, 0.7, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.8, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="Main" type="Node2D" unique_id=1350427307]
+script = ExtResource("1_rvslj")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1943671616]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.06, 0.06, 0.12, 1)
+
+[node name="Arena" type="StaticBody2D" parent="." unique_id=778459836]
+physics_material_override = SubResource("PhysicsMaterial_arena")
+script = ExtResource("1_elqb8")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Arena" unique_id=1207533316]
+
+[node name="Polygon2D" type="Polygon2D" parent="Arena" unique_id=1330120006]
+
+[node name="GameLayer" type="Node2D" parent="." unique_id=1648978447]
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=562257993]
+
+[node name="SpinLabel" type="Label" parent="UI" unique_id=631605873]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -70.0
+offset_right = 200.0
+offset_bottom = -30.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="UI" unique_id=1165649848]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 10.0
+offset_right = 160.0
+offset_bottom = 45.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HighScoreLabel" type="Label" parent="UI" unique_id=1165649849]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="WaveLabel" type="Label" parent="UI" unique_id=1066647286]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 50.0
+offset_right = 160.0
+offset_bottom = 80.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WaveNotification" type="Label" parent="UI" unique_id=1066647287]
+offset_left = 390.0
+offset_top = 300.0
+offset_right = 890.0
+offset_bottom = 370.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EnemyStats" type="VBoxContainer" parent="UI" unique_id=1514784329]
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 164.0
+offset_bottom = 299.0
+
+[node name="HeaderLabel" type="Label" parent="UI/EnemyStats" unique_id=1276362631]
+modulate = Color(0.7, 0.7, 0.8, 1)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 16
+text = "ENEMIES"
+
+[node name="LowHealthVignette" type="ColorRect" parent="UI" unique_id=1981703058]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.8, 0, 0, 0)
+
+[node name="GameOverScreen" type="Panel" parent="UI" unique_id=239879794]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2qk3")
+
+[node name="GameOverPanel" type="Panel" parent="UI/GameOverScreen" unique_id=239879795]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_3x6y")
+
+[node name="LogoIcon" type="Sprite2D" parent="UI/GameOverScreen/GameOverPanel" unique_id=1019169101]
+modulate = Color(1, 1, 1, 0.47843137)
+position = Vector2(250, 200)
+scale = Vector2(3.5, 3.5)
+texture = ExtResource("3_icon")
+
+[node name="VBox" type="VBoxContainer" parent="UI/GameOverScreen/GameOverPanel" unique_id=239879796]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 28.0
+offset_right = -28.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="GameOverTitle" type="Label" parent="UI/GameOverScreen/GameOverPanel/VBox" unique_id=757310590]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+
+[node name="GameOverStats" type="Label" parent="UI/GameOverScreen/GameOverPanel/VBox" unique_id=757310591]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="UI/GameOverScreen/GameOverPanel/VBox" unique_id=546554418]
+custom_minimum_size = Vector2(260, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "RESTART"
+
+[node name="TitleButton" type="Button" parent="UI/GameOverScreen/GameOverPanel/VBox" unique_id=42800521]
+custom_minimum_size = Vector2(260, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "HOME"
+
+[node name="CameraPivot" type="Node2D" parent="." unique_id=736094011]
+
+[node name="Camera2D" type="Camera2D" parent="CameraPivot" unique_id=736094012]
+
+[connection signal="pressed" from="UI/GameOverScreen/GameOverPanel/VBox/RestartButton" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="UI/GameOverScreen/GameOverPanel/VBox/TitleButton" to="." method="_on_title_button_pressed"]
