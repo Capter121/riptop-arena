@@ -59,6 +59,17 @@ npm run preview -- --host 127.0.0.1 --port 4177
 - Release and deployment notes: [docs/RELEASE.md](C:/Users/Terla/Documents/战斗陀螺项目/docs/RELEASE.md)
 - Original design spec: [docs/superpowers/specs/2026-07-04-beyblade-arena-design.md](C:/Users/Terla/Documents/战斗陀螺项目/docs/superpowers/specs/2026-07-04-beyblade-arena-design.md)
 
+## Deploy to Cloudflare Pages
+
+This repository includes a GitHub Actions workflow at `.github/workflows/pages-deployment.yml`.
+
+Create a Cloudflare Pages project named `riptop-arena`, then add these GitHub repository secrets:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN`
+
+After the secrets are set, every push to `main` will run `npm ci`, `npm run build`, and deploy the `dist/` output to Cloudflare Pages.
+
 ## Stack
 
 - `Three.js`
