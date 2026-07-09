@@ -4,12 +4,80 @@ type InventoryListener = (inventory: InstanceComponent[]) => void;
 
 import { BASE_COMPONENTS } from './recipes';
 
+export interface MarketSlot {
+  item: InstanceComponent;
+  price: number;
+  sold: boolean;
+}
+
+import { ItemGenerator } from './parts';
+import type { MaterialTier } from '../types/shopItems';
+
+const TIER_PRICES: Record<MaterialTier, number> = {
+  COMMON: 200,
+  REFINED: 400,
+  RARE: 800,
+  LEGENDARY: 1500,
+  MYTHIC: 3000,
+};
+
 export class InventoryManager {
   private items: InstanceComponent[] = [];
   private listeners: Set<InventoryListener> = new Set();
 
+  public marketItems: MarketSlot[] = [];
+  public refreshCount: number = 0;
+
   constructor() {
     this.initMockInventory();
+    this.refreshMarket(true); // Initial free refresh
+  }
+
+  public getRefreshCost(): number {
+    if (this.refreshCount === 0) return 0;
+    return this.refreshCount * 200;
+  }
+
+  public refreshMarket(free: boolean = false): void {
+    if (!free) {
+      this.refreshCount++;
+    }
+    
+    this.marketItems = [];
+    // Always 1 guaranteed blind box (COMMON)
+    const blindBox = ItemGenerator.generateRandom({ minTier: 'COMMON', allowDivine: false });
+    this.marketItems.push({
+      item: blindBox,
+      price: 200,
+      sold: false
+    });
+
+    // Generate 5 random items with varying rarity
+    for (let i = 0; i < 5; i++) {
+      const item = ItemGenerator.generateRandom({ allowDivine: true });
+      this.marketItems.push({
+        item,
+        price: TIER_PRICES[item.tier] || 200,
+        sold: false
+      });
+    }
+  }
+
+  public purchaseMarketItem(index: number, currentCoins: number, maxCapacity: number = 100): { success: boolean; cost: number; error?: string } {
+    const slot = this.marketItems[index];
+    if (!slot || slot.sold) {
+      return { success: false, cost: 0, error: '商品不存在或已售罄' };
+    }
+    if (currentCoins < slot.price) {
+      return { success: false, cost: 0, error: '金币不足' };
+    }
+    if (this.items.length >= maxCapacity) {
+      return { success: false, cost: 0, error: '背包已满' };
+    }
+
+    slot.sold = true;
+    this.addComponent(slot.item);
+    return { success: true, cost: slot.price };
   }
 
   private initMockInventory() {

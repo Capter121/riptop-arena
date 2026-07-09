@@ -68,6 +68,7 @@ export class TopEntity {
 
   spin: number;
   spirit: number;
+  freeDefensiveMoves: number = 3;
   maxSpirit: number;
   stamina: number;
   integrity: number;

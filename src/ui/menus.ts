@@ -5,8 +5,10 @@ export class MenuPanel {
   readonly tournament = document.createElement('button');
   readonly garage = document.createElement('button');
   readonly forge = document.createElement('button');
+  readonly blackMarket = document.createElement('button');
   readonly meta = document.createElement('div');
   readonly trophyShelf = document.createElement('div');
+  readonly stageSelect = document.createElement('select');
 
   constructor() {
     this.root.className = 'card menu';
@@ -21,6 +23,14 @@ export class MenuPanel {
     this.forge = document.createElement('button');
     this.forge.className = 'button button--warning';
     this.forge.textContent = '铁匠铺 (Forge)';
+    
+    // Add Black Market Button
+    this.blackMarket = document.createElement('button');
+    this.blackMarket.className = 'button button--danger';
+    this.blackMarket.textContent = '黑色商城';
+    this.blackMarket.style.boxShadow = '0 0 10px rgba(255, 0, 85, 0.5)';
+    this.blackMarket.style.textShadow = '0 0 5px #ff0055';
+
     this.meta.className = 'menu__meta';
     this.trophyShelf.className = 'trophy-shelf';
 
@@ -44,7 +54,23 @@ export class MenuPanel {
       <span>商城养成</span>
     `;
 
-    this.root.append(eyebrow, title, intro, stageStrip, this.start, this.survival, this.tournament, this.garage, this.forge, this.meta, this.trophyShelf);
+    const stageWrap = document.createElement('label');
+    stageWrap.className = 'field stage-select';
+    stageWrap.style.margin = '1rem 0';
+    const stageLabel = document.createElement('span');
+    stageLabel.textContent = '场地风格 (Stage Theme)';
+    this.stageSelect.innerHTML = `
+      <option value="classic_grid">经典赛博网格 (Classic Grid)</option>
+      <option value="neon_magma" selected>霓虹熔岩废土 (Neon Magma)</option>
+      <option value="absolute_zero">全息绝对零度镜面 (Absolute Zero)</option>
+    `;
+    stageWrap.append(stageLabel, this.stageSelect);
+
+    this.root.append(
+      eyebrow, title, intro, stageStrip, stageWrap, 
+      this.start, this.survival, this.tournament, this.garage, this.forge, this.blackMarket,
+      this.meta, this.trophyShelf
+    );
   }
 
   setMeta(text: string) {

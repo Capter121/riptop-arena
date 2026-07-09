@@ -10,8 +10,10 @@ type TurnPanelState = {
   resolving: boolean;
   spirit: number;
   maxSpirit: number;
+  freeDefensiveMoves: number;
   turnIndex: number;
   lastLog: string;
+  guardCrush: boolean;
 };
 
 const ATTACK_ORDER: ElementAttackSkillId[] = [
@@ -41,8 +43,10 @@ export class TurnPanel {
     resolving: false,
     spirit: 0,
     maxSpirit: 100,
+    freeDefensiveMoves: 3,
     turnIndex: 1,
-    lastLog: '等待发射',
+    lastLog: 'Ready',
+    guardCrush: false,
   };
 
   constructor(onAction: (action: TurnAction) => void) {
@@ -154,8 +158,9 @@ export class TurnPanel {
       const cost = ELEMENT_ATTACKS[action.skillId].spiritCost;
       if (this.state.spirit < cost) return;
     }
-    const evadeDefendCost = this.state.turnIndex <= 3 ? 0 : 1;
-    if ((action.kind === 'evade' || action.kind === 'defense') && evadeDefendCost > 0 && this.state.spirit < evadeDefendCost) return;
+    const evadeDefendCost = this.state.spirit >= 1 ? 1 : 0;
+    const outOfFreeMoves = evadeDefendCost === 0 && this.state.freeDefensiveMoves <= 0;
+    if ((action.kind === 'evade' || action.kind === 'defense') && (outOfFreeMoves || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost))) return;
     if (action.kind === 'charge' && this.state.spirit >= this.state.maxSpirit) return;
 
     this.expanded = false;
@@ -177,14 +182,21 @@ export class TurnPanel {
     this.attackButton.textContent = '进攻';
     this.attackButton.disabled = this.state.resolving;
     
-    const evadeDefendCost = this.state.turnIndex <= 3 ? 0 : 1;
+    const evadeDefendCost = this.state.spirit >= 1 ? 1 : 0;
     const hideCost = evadeDefendCost === 0;
+    const outOfFreeMoves = evadeDefendCost === 0 && this.state.freeDefensiveMoves <= 0;
     
-    this.evadeButton.disabled = this.expanded || this.state.resolving || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost);
-    this.defenseButton.disabled = this.expanded || this.state.resolving || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost);
+    this.evadeButton.disabled = this.expanded || this.state.resolving || this.state.guardCrush || outOfFreeMoves || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost);
+    this.defenseButton.disabled = this.expanded || this.state.resolving || this.state.guardCrush || outOfFreeMoves || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost);
     
-    this.evadeButton.innerHTML = `回避 <span class="cost">${hideCost ? '0斗志' : `-${evadeDefendCost}斗志`}</span>`;
-    this.defenseButton.innerHTML = `防守 <span class="cost">${hideCost ? '0斗志' : `-${evadeDefendCost}斗志`}</span>`;
+    const freeText = `0斗志 <span style="font-size: 0.6em; opacity: 0.8;">(${this.state.freeDefensiveMoves}次)</span>`;
+    this.evadeButton.innerHTML = `回避 <span class="cost">${hideCost ? freeText : `-${evadeDefendCost}斗志`}</span>`;
+    this.defenseButton.innerHTML = `防守 <span class="cost">${hideCost ? freeText : `-${evadeDefendCost}斗志`}</span>`;
+    
+    if (this.state.guardCrush) {
+      this.evadeButton.innerHTML = `<span style="color: #ff3333; text-decoration: line-through;">回避</span>`;
+      this.defenseButton.innerHTML = `<span style="color: #ff3333; text-decoration: line-through;">防守</span>`;
+    }
     
     this.chargeButton.disabled = this.expanded || this.state.resolving || this.state.spirit >= this.state.maxSpirit;
 

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { EnergySystem } from './energy';
+import { arenaManager } from './arenaManager';
 import {
   ARENA_RADIUS,
   ARENA_SLOPE_START,
-  COLLISION_COOLDOWN,
   EDGE_GRIND_THRESHOLD,
   MAX_BURST,
   PLAYER_DASH_COOLDOWN,
@@ -34,7 +34,9 @@ export type TurnResolutionKind =
   | 'evade_success'
   | 'evade_fail'
   | 'charge'
-  | 'standoff';
+  | 'standoff'
+  | 'qte_parry'
+  | 'clash_qte';
 
 export type TurnResolution = {
   kind: TurnResolutionKind;
@@ -72,8 +74,8 @@ export class TurnArbitrator {
       enemyAttributes: enemy.stats.attributes,
     };
     
-    const playerSpiritDelta = this.getActionCost(playerAction, spirit.turnIndex);
-    const enemySpiritDelta = this.getActionCost(aiAction, spirit.turnIndex);
+    const playerSpiritDelta = this.getActionCost(playerAction, spirit.playerSpirit);
+    const enemySpiritDelta = this.getActionCost(aiAction, spirit.enemySpirit);
 
     const finish = (
       kind: TurnResolutionKind,
@@ -117,7 +119,7 @@ export class TurnArbitrator {
       const playerAttack = ELEMENT_ATTACKS[playerAction.skillId];
       const enemyAttack = ELEMENT_ATTACKS[aiAction.skillId];
 
-      if (playerAction.skillId === aiAction.skillId) {
+      if (playerAttack.tier === enemyAttack.tier) {
         const pDivine = (spirit.playerAttributes?.['DIVINE'] || 0) > 0;
         const eDivine = (spirit.enemyAttributes?.['DIVINE'] || 0) > 0;
         
@@ -127,7 +129,7 @@ export class TurnArbitrator {
           return finish('attack_overpower', 'enemy', 'player', 'hit', 'attack', `${enemyAttack.label} 触发神圣裁决(DIVINE)，玩家爆裂！`);
         }
 
-        return finish('same_attack_cancel', null, null, 'clash', 'clash', `${playerAttack.label} 对 ${enemyAttack.label}：同级能量正面抵消，双方不损失转速。`, true);
+        return finish('clash_qte', null, null, 'clash', 'clash', `${playerAttack.label} 对 ${enemyAttack.label}：同级能量正面抵消，双方不损失转速。`, true);
       }
 
       if (playerAttack.tier > enemyAttack.tier) {
@@ -233,16 +235,19 @@ export class TurnArbitrator {
           reflectLog = ' 刃甲反弹了巨大的伤害！';
         }
 
+        const chargePlayer = defender === 'player';
+        const chargeEnemy = defender === 'enemy';
+
         return finish(
-          'defense_success',
+          defender === 'player' ? 'qte_parry' : 'defense_success',
           null,
           null,
           playerVisual,
           enemyVisual,
           `${attack.label} 是偶数档，防守扎根成功，只产生轻微摩擦。${isFire ? ' (火焰渗透伤害!)' : ''}${reflectLog}`,
           true,
-          false,
-          false,
+          chargePlayer,
+          chargeEnemy,
           isWater ? 2.5 : 0, // WATER: increased knockback
           isFire, // FIRE: 10% penetration
         );
@@ -264,12 +269,11 @@ export class TurnArbitrator {
 
       if (oddTier) {
         const isWind = (defenderAttributes?.['WIND'] || 0) > 0;
-        // WIND gives extra spirit charge to defender
-        const chargePlayer = defender === 'player' ? isWind : false;
-        const chargeEnemy = defender === 'enemy' ? isWind : false;
+        const chargePlayer = defender === 'player';
+        const chargeEnemy = defender === 'enemy';
 
         return finish(
-          'evade_success',
+          defender === 'player' ? 'qte_parry' : 'evade_success',
           null,
           null,
           playerVisual,
@@ -302,10 +306,10 @@ export class TurnArbitrator {
     );
   }
 
-  private getActionCost(action: TurnAction, turnIndex: number) {
+  private getActionCost(action: TurnAction, currentSpirit: number) {
     if (action.kind === 'attack') return -ELEMENT_ATTACKS[action.skillId].spiritCost;
     if (action.kind === 'defense' || action.kind === 'evade') {
-        return turnIndex <= 3 ? 0 : -1;
+        return currentSpirit >= 1 ? -1 : 0;
     }
     return 0;
   }
@@ -316,7 +320,6 @@ export class TurnArbitrator {
 }
 
 export class BattlePhysicsSystem {
-  private collisionLock = 0;
   private collisionCount = 0;
   private readonly events: EventBus;
 
@@ -325,16 +328,18 @@ export class BattlePhysicsSystem {
   }
 
   reset() {
-    this.collisionLock = 0;
     this.collisionCount = 0;
   }
 
-  update(player: TopEntity, enemy: TopEntity, dt: number, suppressCollision = false) {
-    this.collisionLock = Math.max(0, this.collisionLock - dt);
-    this.integrateTop(player, dt);
-    this.integrateTop(enemy, dt);
-    if (!suppressCollision) {
-      this.resolveCollision(player, enemy);
+  update(player: TopEntity, enemy: TopEntity, dt: number, suppressDamage = false) {
+    if (dt <= 0) return;
+    const SUB_STEPS = 5;
+    const stepDt = dt / SUB_STEPS;
+    
+    for (let i = 0; i < SUB_STEPS; i++) {
+      this.integrateTop(player, stepDt);
+      this.integrateTop(enemy, stepDt);
+      this.resolveCollision(player, enemy, suppressDamage);
       this.resolveCloneCollision(player, enemy);
       this.resolveCloneCollision(enemy, player);
     }
@@ -361,10 +366,7 @@ export class BattlePhysicsSystem {
     if (!player.alive || !enemy.alive) return false;
     const distSq = player.position.distanceToSquared(enemy.position);
     const triggerDistance = TOP_RADIUS * 2.15;
-    if (distSq > triggerDistance * triggerDistance) return false;
-
-    const relativeVelocity = new THREE.Vector2().subVectors(enemy.velocity, player.velocity);
-    return relativeVelocity.lengthSq() > 0.45;
+    return distSq <= triggerDistance * triggerDistance;
   }
 
   applyClashImpulse(player: TopEntity, enemy: TopEntity, pPush: number, ePush: number, pDam: number, eDam: number) {
@@ -400,7 +402,6 @@ export class BattlePhysicsSystem {
       this.triggerBurstFinish(enemy, player);
     }
 
-    this.collisionLock = COLLISION_COOLDOWN;
   }
 
   dashPlayer(player: TopEntity, worldTarget: THREE.Vector3, energy?: EnergySystem) {
@@ -430,9 +431,19 @@ export class BattlePhysicsSystem {
     const speed = top.velocity.length();
     const radiusRatio = top.position.length() / ARENA_RADIUS;
     const stunDrag = top.stunTimer > 0 ? 0.92 : 1.0;
-    const drag = (top.getTurnDragMultiplier() - clamp(speed * 0.002, 0, 0.06)) * stunDrag;
+    
+    // Apply arena friction multiplier
+    const frictionMulti = arenaManager.getFrictionMultiplier();
+    const baseDragMultiplier = top.getTurnDragMultiplier() - clamp(speed * 0.002, 0, 0.06);
+    // frictionLost is the velocity lost per frame (e.g., 1.0 - 0.98 = 0.02)
+    const frictionLost = 1.0 - baseDragMultiplier;
+    // Scale the lost velocity by the arena's friction multiplier (0.2 for ice means 80% less friction lost)
+    const effectiveFrictionLost = frictionLost * frictionMulti;
+    
+    const drag = Math.max(0, 1.0 - effectiveFrictionLost) * stunDrag;
+    const subStepDrag = Math.pow(drag, Math.max(0.001, dt * 60));
 
-    top.velocity.multiplyScalar(drag * (1 - dt * 0.22));
+    top.velocity.multiplyScalar(subStepDrag * (1 - dt * 0.22));
     top.position.addScaledVector(top.velocity, dt);
 
     const futurePos = top.position.clone().add(top.velocity.clone().multiplyScalar(dt));
@@ -458,11 +469,20 @@ export class BattlePhysicsSystem {
         });
       }
     } else if (radiusRatio > 0.97 && top.position.lengthSq() > 0.01) {
-      const inward = top.position.clone().normalize().multiplyScalar(-dt * 2.4 * top.stats.defense * 0.06 * modifiers.wallGripMultiplier);
+      const edgeBounceMulti = arenaManager.getEdgeBounceMultiplier();
+      const inward = top.position.clone().normalize().multiplyScalar(-dt * 2.4 * top.stats.defense * 0.06 * modifiers.wallGripMultiplier * edgeBounceMulti);
       top.velocity.add(inward);
+      
+      // Force push-back vector to prevent clipping in extremely low friction environments (like ICE_GRID)
+      if (edgeBounceMulti > 1.0) {
+         const pushback = top.position.clone().normalize().multiplyScalar(-2.0 * dt);
+         top.position.add(pushback);
+      }
     }
 
-    const spinLoss = 0;
+    // Apply spin loss with angular damping multiplier
+    const baseSpinLoss = 5.0 * dt; // Give top a natural spin loss so the damping multiplier works
+    const spinLoss = baseSpinLoss * arenaManager.getAngularDampingMultiplier();
     top.spin = Math.max(0, top.spin - spinLoss);
     top.stamina = Math.max(0, top.stamina - spinLoss * 0.86);
 
@@ -474,8 +494,8 @@ export class BattlePhysicsSystem {
     );
   }
 
-  private resolveCollision(a: TopEntity, b: TopEntity) {
-    if (!a.alive || !b.alive || this.collisionLock > 0 || a.flags.burstResolvedThisFrame || b.flags.burstResolvedThisFrame) return;
+  private resolveCollision(a: TopEntity, b: TopEntity, suppressDamage: boolean) {
+    if (!a.alive || !b.alive || a.flags.burstResolvedThisFrame || b.flags.burstResolvedThisFrame) return;
 
     const delta = new THREE.Vector2().subVectors(b.position, a.position);
     const distance = delta.length();
@@ -495,7 +515,6 @@ export class BattlePhysicsSystem {
     this.collisionCount += 1;
 
     if (this.collisionCount <= 3 && this.tryResolveOpeningBurst(a, b, relativeVelocity.length(), impulseMagnitude)) {
-      this.collisionLock = COLLISION_COOLDOWN;
       return;
     }
 
@@ -564,20 +583,31 @@ export class BattlePhysicsSystem {
           (((a.stats.attack * modifiersA.attackMultiplier) * 1.1 - (b.stats.defense * modifiersB.defenseMultiplier) * 0.45) + impulseMagnitude) * 0.6 * modifiersA.damageMultiplier,
         );
 
-    a.integrity = Math.max(0, a.integrity - damageToA * TUNING.collisionDamageScale * 0.08);
-    b.integrity = Math.max(0, b.integrity - damageToB * TUNING.collisionDamageScale * 0.08);
-    a.addBurst((damageToA * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + a.stats.burstResist * 0.25 * modifiersA.burstResistanceMultiplier));
-    b.addBurst((damageToB * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + b.stats.burstResist * 0.25 * modifiersB.burstResistanceMultiplier));
+    if (!suppressDamage) {
+      a.integrity = Math.max(0, a.integrity - damageToA * TUNING.collisionDamageScale * 0.08);
+      b.integrity = Math.max(0, b.integrity - damageToB * TUNING.collisionDamageScale * 0.08);
+      a.addBurst((damageToA * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + a.stats.burstResist * 0.25 * modifiersA.burstResistanceMultiplier));
+      b.addBurst((damageToB * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + b.stats.burstResist * 0.25 * modifiersB.burstResistanceMultiplier));
 
-    a.spin = Math.max(0, a.spin - damageToA * 0.7 * modifiersA.spinLossMultiplier);
-    b.spin = Math.max(0, b.spin - damageToB * 0.7 * modifiersB.spinLossMultiplier);
+      a.spin = Math.max(0, a.spin - damageToA * 0.7 * modifiersA.spinLossMultiplier);
+      b.spin = Math.max(0, b.spin - damageToB * 0.7 * modifiersB.spinLossMultiplier);
 
-    this.applyLockStabilityDamage(a, b, relativeVelocity.length(), modifiersB.damageMultiplier, modifiersA.lockStabilityLossMultiplier);
-    this.applyLockStabilityDamage(b, a, relativeVelocity.length(), modifiersA.damageMultiplier, modifiersB.lockStabilityLossMultiplier);
+      this.applyLockStabilityDamage(a, b, relativeVelocity.length(), modifiersB.damageMultiplier, modifiersA.lockStabilityLossMultiplier);
+      this.applyLockStabilityDamage(b, a, relativeVelocity.length(), modifiersA.damageMultiplier, modifiersB.lockStabilityLossMultiplier);
+    }
 
     const overlap = minDistance - distance;
     if (!shieldedA) a.position.addScaledVector(normal, -overlap * 0.5);
     if (!shieldedB) b.position.addScaledVector(normal, overlap * 0.5);
+
+    // Rotational Friction (Tangential Deflection)
+    const tangent = new THREE.Vector2(-normal.y, normal.x);
+    const spinFactor = Math.max(0.1, ((a.spin / a.stats.maxSpin) + (b.spin / b.stats.maxSpin)) * 0.5);
+    const frictionImpulse = impulseMagnitude * 0.45 * spinFactor;
+    
+    // Apply heavy kick to sides
+    a.velocity.add(tangent.clone().multiplyScalar(frictionImpulse * ratioA));
+    b.velocity.add(tangent.clone().multiplyScalar(-frictionImpulse * ratioB));
 
     this.events.emit('spark', {
       x: (a.position.x + b.position.x) * 0.5,
@@ -586,14 +616,14 @@ export class BattlePhysicsSystem {
     });
     this.events.emit('impact', { intensity: clamp(impulseMagnitude / 10, 0.35, 1.4) });
 
-    if (!a.alive && !a.flags.burstResolvedThisFrame) this.triggerBurstFinish(a, b);
-    if (!b.alive && !b.flags.burstResolvedThisFrame) this.triggerBurstFinish(b, a);
+    if (!suppressDamage) {
+      if (!a.alive && !a.flags.burstResolvedThisFrame) this.triggerBurstFinish(a, b);
+      if (!b.alive && !b.flags.burstResolvedThisFrame) this.triggerBurstFinish(b, a);
 
-    if (this.collisionCount >= 50 && a.alive && b.alive) {
-      this.forceCollisionSettlement(a, b);
+      if (this.collisionCount >= 50 && a.alive && b.alive) {
+        this.forceCollisionSettlement(a, b);
+      }
     }
-
-    this.collisionLock = COLLISION_COOLDOWN;
   }
 
   private triggerLightning(caster: TopEntity) {
@@ -606,25 +636,8 @@ export class BattlePhysicsSystem {
     caster.lightningTimer = 0.15; // User requested: short jitter and auto cleanup
   }
 
-  private tryResolveOpeningBurst(a: TopEntity, b: TopEntity, relativeSpeed: number, impulseMagnitude: number) {
-    const spinDeltaAB = Math.max(0, (a.spin - b.spin) / Math.max(1, a.stats.maxSpin));
-    const spinDeltaBA = Math.max(0, (b.spin - a.spin) / Math.max(1, b.stats.maxSpin));
-    const modifiersA = resolveModifiers(a);
-    const modifiersB = resolveModifiers(b);
-    const burstChanceOnB = clamp(((relativeSpeed * modifiersA.damageMultiplier * 3.2) + (impulseMagnitude * 0.18) + spinDeltaAB * 12 - b.lockStability * 0.09) / 100, 0.02, 0.45);
-    const burstChanceOnA = clamp(((relativeSpeed * modifiersB.damageMultiplier * 3.2) + (impulseMagnitude * 0.18) + spinDeltaBA * 12 - a.lockStability * 0.09) / 100, 0.02, 0.45);
-
-    if (Math.random() < burstChanceOnB && !this.consumeShield(b, b.position.x, b.position.y)) {
-      this.triggerBurstFinish(b, a);
-      return true;
-    }
-
-    if (Math.random() < burstChanceOnA && !this.consumeShield(a, a.position.x, a.position.y)) {
-      this.triggerBurstFinish(a, b);
-      return true;
-    }
-
-    return false;
+  private tryResolveOpeningBurst(_a: TopEntity, _b: TopEntity, _relativeSpeed: number, _impulseMagnitude: number) {
+    return false; // Disabled insta-kill mechanic
   }
 
   private applyLockStabilityDamage(target: TopEntity, attacker: TopEntity, relativeSpeed: number, attackerDamageMultiplier: number, targetLossMultiplier: number) {

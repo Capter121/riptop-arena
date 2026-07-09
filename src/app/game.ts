@@ -11,6 +11,7 @@ import { TopEntity } from '../gameplay/top';
 import { ArenaScene } from '../scene/arena';
 import { CameraRig } from '../scene/cameraRig';
 import { BattlePhysicsSystem, TurnArbitrator, type TurnResolution } from '../gameplay/battlePhysics';
+import { arenaManager } from '../gameplay/arenaManager';
 import { RuleSystem, type BattleResult } from '../gameplay/rules';
 import { launchTop } from '../gameplay/launch';
 import { clearTransientFlags } from '../gameplay/flags';
@@ -26,6 +27,7 @@ import { ShopPanel } from '../ui/shop';
 import { Hud } from '../ui/hud';
 import { CutinPanel } from '../ui/cutinPanel';
 import { ForgePanel } from '../ui/forgePanel';
+import { BlackMarketPanel } from '../ui/blackMarket';
 import { globalInventory } from '../data/inventoryManager';
 import { SparksSystem } from '../fx/sparks';
 import type { Phase } from '../utils/state';
@@ -98,6 +100,7 @@ export class Game {
   private readonly garage = new GaragePanel();
   private readonly results = new ResultPanel();
   private readonly shop = new ShopPanel();
+  private readonly blackMarket = new BlackMarketPanel();
   private readonly forgePanel = new ForgePanel(
     () => this.progression.unlockedSet,
     (id) => {
@@ -120,7 +123,7 @@ export class Game {
   private skillManager = new SkillManager(this.spirit);
   private readonly turnArbitrator = new TurnArbitrator();
   private readonly turnPanel = new TurnPanel((action) => this.submitTurnAction(action));
-  private turnState: 'awaiting' | 'resolving' | 'cutin' = 'awaiting';
+  private turnState: 'awaiting' | 'approaching' | 'resolving' | 'cutin' = 'awaiting';
   private turnTimer = 0;
   private turnIndex = 1;
   private activeTurnResolution: TurnResolution | null = null;
@@ -223,6 +226,7 @@ export class Game {
     const envMap = pmremGen.fromScene(envScene, 0.04).texture;
     this.scene.environment = envMap;
     pmremGen.dispose();
+    this.arena.setScene(this.scene);
 
     // 閳光偓閳光偓 Post-processing pipeline (Bloom + SSAO) 閳光偓閳光偓
     this.bloom = createBloomPipeline(this.renderer, this.scene, this.camera);
@@ -257,7 +261,7 @@ export class Game {
     `;
     this.mount.innerHTML = '';
     this.mount.append(this.renderer.domElement, this.overlay, this.launchFlash, this.introCard);
-    this.overlay.append(this.menu.root, this.garage.root, this.shop.root, this.results.root, this.cutinPanel.root, this.forgePanel.root);
+    this.overlay.append(this.menu.root, this.garage.root, this.shop.root, this.results.root, this.cutinPanel.root, this.forgePanel.root, this.blackMarket.root);
     if (this.camDebugEnabled) {
       this.mount.append(this.cameraDebug);
     }
@@ -352,6 +356,28 @@ export class Game {
     this.menu.forge.addEventListener('click', () => {
       this.forgePanel.open();
     });
+    this.menu.blackMarket.addEventListener('click', () => {
+      this.blackMarket.open(
+        (cost) => {
+          this.progression = spendCoins(this.progression, cost);
+          saveProgression(this.progression);
+          this.menu.setMeta(this.getMenuMetaCn());
+        },
+        () => this.progression.coins
+      );
+    });
+    this.menu.stageSelect.addEventListener('change', () => {
+      const theme = this.menu.stageSelect.value;
+      this.arena.setTheme(theme);
+      this.garage.stageSelect.value = theme;
+    });
+
+    this.garage.stageSelect.addEventListener('change', () => {
+      const theme = this.garage.stageSelect.value;
+      this.arena.setTheme(theme);
+      this.menu.stageSelect.value = theme;
+    });
+
     
     this.garage.backButton.addEventListener('click', () => {
       this.showMenu();
@@ -362,6 +388,7 @@ export class Game {
       this.progression = setProgressionBuild(this.progression, this.build);
       saveProgression(this.progression);
       this.enemyPreset = this.mode === 'tournament' ? this.getTournamentEnemy() : pick(ENEMIES);
+      this.arena.setTheme(this.garage.stageSelect.value);
       this.startBattle();
     });
     for (const select of this.garage.selects.values()) {
@@ -370,6 +397,7 @@ export class Game {
 
     this.results.retry.addEventListener('click', () => {
       this.enemyPreset = this.mode === 'tournament' ? this.getTournamentEnemy() : pick(ENEMIES);
+      this.arena.setTheme(this.garage.stageSelect.value);
       this.startBattle();
     });
     this.results.garage.addEventListener('click', () => this.showGarage());
@@ -405,6 +433,7 @@ export class Game {
   private showMenu() {
     this.phase = 'menu';
     this.audio.startMenuAmbience();
+    this.arena.setTheme(this.menu.stageSelect.value);
     this.menu.setMeta(this.getMenuMetaCn());
     this.menu.setTrophyShelf(this.getTrophyTitle(), this.getTrophyBody());
     this.menu.root.style.display = 'grid';
@@ -626,8 +655,8 @@ export class Game {
   }
 
   private submitTurnAction(playerAction: TurnAction) {
-    if (this.phase !== 'battle' || this.paused || this.turnState !== 'awaiting' || this.currentResult) return;
-    if (!this.canAffordTurnAction(this.player, playerAction, this.turnIndex)) {
+    if (this.phase !== 'battle' || this.paused || this.turnState !== 'awaiting' || this.currentResult || this.rules.timeLeft <= 0) return;
+    if (!this.canAffordTurnAction(this.player, playerAction)) {
       this.hud.combatLog.log('Spirit 不足，无法执行该行动。', '#ff7b5b');
       return;
     }
@@ -645,14 +674,19 @@ export class Game {
           this.turnIndex
         );
 
-        this.applyTurnSpiritDelta(resolution);
-        this.applyTurnVisuals(resolution);
-        this.turnState = 'resolving';
-        this.turnTimer = 1.5;
         this.activeTurnResolution = resolution;
+        this.turnState = 'approaching';
+        this.turnTimer = 0;
         this.timeScale = 1.0;
-        this.hud.combatLog.log(resolution.log, resolution.winner === 'player' ? '#ffd166' : resolution.winner === 'enemy' ? '#ff7b5b' : '#7ef0ff');
-        this.turnPanel.showResolution(resolution);
+        this.rules.reset();
+        
+        this.player.dashCooldown = 0;
+        this.player.stunTimer = 0;
+        this.enemy.dashCooldown = 0;
+        this.enemy.stunTimer = 0;
+        
+        this.physics.dashPlayer(this.player, new THREE.Vector3(this.enemy.position.x, 0, this.enemy.position.y));
+        this.physics.dashPlayer(this.enemy, new THREE.Vector3(this.player.position.x, 0, this.player.position.y));
     };
 
     if (playerAction.kind === 'attack') {
@@ -672,10 +706,10 @@ export class Game {
     }
   }
 
-  private canAffordTurnAction(top: TopEntity, action: TurnAction, turnIndex: number) {
+  private canAffordTurnAction(top: TopEntity, action: TurnAction) {
     if (action.kind === 'attack') return top.spirit >= ELEMENT_ATTACKS[action.skillId].spiritCost;
     if (action.kind === 'defense' || action.kind === 'evade') {
-        return turnIndex <= 3 ? true : top.spirit >= 1;
+        return top.spirit >= 1 || top.freeDefensiveMoves > 0;
     }
     return true;
   }
@@ -732,8 +766,19 @@ export class Game {
   }
 
   private applyTurnSpiritDelta(resolution: TurnResolution) {
+    const pOld = this.player.spirit;
+    const eOld = this.enemy.spirit;
     this.spirit.set(this.player, this.player.spirit + resolution.playerSpiritDelta);
     this.spirit.set(this.enemy, this.enemy.spirit + resolution.enemySpiritDelta);
+    
+    if ((resolution.playerAction.kind === 'evade' || resolution.playerAction.kind === 'defense') && pOld < 1) {
+      const penalty = arenaManager.getTheme() === 'absolute_zero' ? 2 : 1;
+      this.player.freeDefensiveMoves = Math.max(0, this.player.freeDefensiveMoves - penalty);
+    }
+    if ((resolution.aiAction.kind === 'evade' || resolution.aiAction.kind === 'defense') && eOld < 1) {
+      const penalty = arenaManager.getTheme() === 'absolute_zero' ? 2 : 1;
+      this.enemy.freeDefensiveMoves = Math.max(0, this.enemy.freeDefensiveMoves - penalty);
+    }
   }
 
   private applyTurnVisuals(resolution: TurnResolution) {
@@ -831,6 +876,7 @@ export class Game {
       resolving: false,
       spirit: this.player.spirit,
       maxSpirit: this.player.maxSpirit,
+      freeDefensiveMoves: this.player.freeDefensiveMoves,
       turnIndex: this.turnIndex,
       lastLog: resolution.log,
     });
@@ -1388,6 +1434,7 @@ export class Game {
       resolving: false,
       spirit: this.player.spirit,
       maxSpirit: this.player.maxSpirit,
+      freeDefensiveMoves: this.player.freeDefensiveMoves,
       turnIndex: this.turnIndex,
       lastLog: '选择行动：进攻展开元素技能，或使用回避、防守、蓄能。',
     });
@@ -1456,7 +1503,37 @@ export class Game {
     if (this.phase === 'battle') {
       document.body.classList.toggle('vignette-active', this.turnState === 'resolving');
 
-      if (this.turnState === 'resolving') {
+      if (this.turnState === 'awaiting') {
+        this.rules.timeLeft = Math.max(0, this.rules.timeLeft - dt);
+        if (this.rules.timeLeft <= 0 && !this.currentResult) {
+          this.rules.timeLeft = 0;
+          this.player.spin = Math.max(0, this.player.spin - this.player.stats.maxSpin * 0.4 * dt);
+          if (this.player.spin <= 0) {
+            this.player.alive = false;
+            const result: BattleResult = {
+              winner: 'enemy',
+              loser: 'player',
+              kind: 'timeout',
+              label: '超时判负'
+            };
+            this.showResult(result);
+          }
+        }
+      }
+
+      if (this.turnState === 'approaching') {
+        this.turnTimer += dt;
+        this.physics.update(this.player, this.enemy, simulationDt, true);
+        if (this.physics.checkClashProximity(this.player, this.enemy) || this.turnTimer > 1.5) {
+          const resolution = this.activeTurnResolution!;
+          this.applyTurnSpiritDelta(resolution);
+          this.applyTurnVisuals(resolution);
+          this.turnState = 'resolving';
+          this.turnTimer = 2.0; // 2 seconds delay as requested
+          this.hud.combatLog.log(resolution.log, resolution.winner === 'player' ? '#ffd166' : resolution.winner === 'enemy' ? '#ff7b5b' : '#7ef0ff');
+          this.turnPanel.showResolution(resolution);
+        }
+      } else if (this.turnState === 'resolving') {
         this.turnTimer = Math.max(0, this.turnTimer - dt);
         this.physics.update(this.player, this.enemy, simulationDt, true);
         this.emitTurnChargeParticles();
@@ -1470,10 +1547,11 @@ export class Game {
       }
 
       this.turnPanel.update({
-        visible: true,
+        visible: (this.turnState === 'awaiting' && this.rules.timeLeft > 0) || this.turnState === 'resolving',
         resolving: this.turnState === 'resolving',
         spirit: this.player.spirit,
         maxSpirit: this.player.maxSpirit,
+        freeDefensiveMoves: this.player.freeDefensiveMoves,
         turnIndex: this.turnIndex,
       });
 
@@ -1502,7 +1580,7 @@ export class Game {
     // 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
 
     this.energyRings.update(this.player, this.enemy, this.time, this.energy.get('player'));
-    this.arena.update(dt);
+    this.arena.update(dt, this.time);
     this.hud.combatLog.update(dt);
 
     // 閳光偓閳光偓 Edge-grind sparks & scuff marks 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓

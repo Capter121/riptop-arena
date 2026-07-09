@@ -35,6 +35,8 @@ export class CutinPanel {
         this.charLayer.style.backgroundImage = `url('/aqua_surge_character.jpg')`;
       } else if (skillId === 'blazing_meteor') {
         this.charLayer.style.backgroundImage = `url('/blazing_meteor_character.jpg')`;
+      } else if (skillId === 'phantom_clone') {
+        this.charLayer.style.backgroundImage = `url('/phantom_clone_character.jpg')`;
       } else {
         this.charLayer.style.backgroundImage = `url('/character_cutin.jpg')`;
       }

@@ -10,6 +10,8 @@ export type BattleStats = StatBlock & {
   weight: number;
   attributes: Partial<Record<ElementAttribute, number>>;
   perks: string[];
+  guardStamina: number;
+  guardCrush: boolean;
   hasStealthEffect?: boolean;
 };
 
@@ -114,6 +116,8 @@ export function buildStats(
     weight: 1 + combined.defense * 0.12 + combined.burstResist * 0.05,
     attributes,
     perks,
+    guardStamina: 3,
+    guardCrush: false,
     hasStealthEffect: (attributes['DARK'] || 0) >= 3,
   };
 }

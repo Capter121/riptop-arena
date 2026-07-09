@@ -10,7 +10,7 @@ export class ClashAI {
   decide(energy: number, playerLastAction: ClashAction | null, hasStealthEffect: boolean = false): ClashAction {
     const r = Math.random();
 
-    if (hasStealthEffect && Math.random() < 0.3) {
+    if (hasStealthEffect) {
       // Tactical stealth misdirection: 30% chance to completely ignore player's pattern
       const roll = Math.random();
       if (roll < 0.25) return { type: 'attack', power: Math.random() > 0.5 ? 2 : 1 };

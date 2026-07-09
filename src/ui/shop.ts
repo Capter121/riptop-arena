@@ -27,7 +27,7 @@ export class ShopPanel {
     this.backButton.innerHTML = '&larr; 返回改装库';
 
     const title = document.createElement('h2');
-    title.textContent = '黑市商城';
+    title.textContent = '进阶改装';
 
     const intro = document.createElement('p');
     intro.textContent = '在这里购买基础盲盒或搜刮随机刷新的极品词条装备。';

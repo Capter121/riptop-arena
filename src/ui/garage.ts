@@ -24,6 +24,7 @@ export class GaragePanel {
   readonly battleButton = document.createElement('button');
   readonly shopButton = document.createElement('button');
   readonly backButton = document.createElement('button');
+  readonly stageSelect = document.createElement('select');
 
   constructor() {
     this.root.className = 'card garage';
@@ -71,11 +72,23 @@ export class GaragePanel {
     this.summary.innerHTML = '<div class="garage-summary__empty">选择配置后，这里会显示总加成摘要。</div>';
     this.stats.append(this.radar.canvas, this.summary);
     this.collection.className = 'collection';
+    
+    const stageWrap = document.createElement('label');
+    stageWrap.className = 'field stage-select';
+    const stageLabel = document.createElement('span');
+    stageLabel.textContent = '场地风格 (Stage Theme)';
+    this.stageSelect.innerHTML = `
+      <option value="classic_grid">经典赛博网格 (Classic Grid)</option>
+      <option value="neon_magma" selected>霓虹熔岩废土 (Neon Magma)</option>
+      <option value="absolute_zero">全息绝对零度镜面 (Absolute Zero)</option>
+    `;
+    stageWrap.append(stageLabel, this.stageSelect);
+
     this.shopButton.className = 'button';
-    this.shopButton.textContent = '进入黑市商城';
+    this.shopButton.textContent = '进阶改装';
     this.battleButton.className = 'button button--primary';
     this.battleButton.textContent = '进入竞技场';
-    this.root.append(this.progress, this.stats, this.collection, this.shopButton, this.battleButton);
+    this.root.append(this.progress, this.stats, this.collection, stageWrap, this.shopButton, this.battleButton);
   }
 
   refreshOptions(currentBuild: BuildSelection) {
