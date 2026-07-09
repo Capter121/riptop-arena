@@ -2494,7 +2494,8 @@ body.vignette-active::after {
 }
 
 /* Black Market Panel */
-.black-market {\n  pointer-events: auto;
+.black-market {
+  pointer-events: auto;
   position: fixed;
   top: 0;
   left: 0;

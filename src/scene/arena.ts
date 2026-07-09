@@ -82,7 +82,7 @@ export class ArenaScene {
   }
 
   constructor() {
-    this.absoluteZeroVisuals = new ArenaVisuals();
+    this.absoluteZeroVisuals = new ArenaVisuals(ARENA_RADIUS);
 
     this.baseMesh = new THREE.Mesh(
       new THREE.CylinderGeometry(ARENA_RADIUS + 1.5, ARENA_RADIUS + 1.5, 2.0, 8, 1),

@@ -3,6 +3,7 @@ import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
 
 export class ArenaVisuals {
   public root = new THREE.Group();
+  private readonly radius: number;
   private reflector: Reflector | null = null;
   private fallbackMesh: THREE.Mesh | null = null;
   private gridHelper: THREE.GridHelper | null = null;
@@ -10,9 +11,11 @@ export class ArenaVisuals {
   private glitchTimer = 0;
   private isActive = false;
 
-  constructor(private radius: number) {}
+  constructor(radius: number) {
+    this.radius = radius;
+  }
 
-  public initAbsoluteZero(scene: THREE.Scene) {
+  public initAbsoluteZero(parent: THREE.Object3D) {
     this.isActive = true;
     
     const isLowEnd = window.innerWidth < 768 || window.devicePixelRatio < 1.5;
@@ -92,15 +95,18 @@ export class ArenaVisuals {
     }
     this.root.add(this.iceGroup);
     
-    scene.add(this.root);
+    parent.add(this.root);
   }
 
-  public remove(scene: THREE.Scene) {
+  public remove(parent: THREE.Object3D) {
     this.isActive = false;
-    scene.remove(this.root);
+    parent.remove(this.root);
     if (this.reflector) {
       this.reflector.geometry.dispose();
-      this.reflector.material.dispose();
+      const materials = Array.isArray(this.reflector.material)
+        ? this.reflector.material
+        : [this.reflector.material];
+      materials.forEach((material) => material.dispose());
       this.reflector.dispose();
       this.root.remove(this.reflector);
       this.reflector = null;
@@ -113,7 +119,10 @@ export class ArenaVisuals {
     }
     if (this.gridHelper) {
       this.gridHelper.geometry.dispose();
-      (this.gridHelper.material as THREE.Material).dispose();
+      const materials = Array.isArray(this.gridHelper.material)
+        ? this.gridHelper.material
+        : [this.gridHelper.material];
+      materials.forEach((material) => material.dispose());
       this.root.remove(this.gridHelper);
       this.gridHelper = null;
     }
@@ -121,7 +130,8 @@ export class ArenaVisuals {
       this.iceGroup.children.forEach(child => {
         const mesh = child as THREE.Mesh;
         mesh.geometry.dispose();
-        (mesh.material as THREE.Material).dispose();
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((material) => material.dispose());
       });
       this.root.remove(this.iceGroup);
       this.iceGroup = null;
