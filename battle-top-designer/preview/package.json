@@ -1,0 +1,14 @@
+{
+  "name": "nova-spin-phase2a-preview",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1"
+  },
+  "scripts": {
+    "test": "playwright test"
+  }
+}
