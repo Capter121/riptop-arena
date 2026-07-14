@@ -10,7 +10,7 @@
   "geometry": {
     "kind": "radial_core", "segments": 72, "outer_radius_mm": 17.5,
     "inner_radius_mm": 10.8, "height_mm": 3.6, "arc_count": 4,
-    "arc_span_deg": 64.0, "arc_width_mm": 3.1, "phase_offset_deg": 31.0
+    "arc_span_deg": 26.0, "arc_width_mm": 3.1, "phase_offset_deg": 31.0
   },
   "mounts": {
     "top": { "position_mm": [0.0, 0.0, 1.8], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 10.8, "interface_role": "terminal", "orientation_key_deg": 0.0 },

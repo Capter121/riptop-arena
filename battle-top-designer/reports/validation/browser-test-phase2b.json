@@ -1,0 +1,20 @@
+{
+  "result": "PASS",
+  "models": [
+    {
+      "model_id": "core_void_falcon",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": []
+      }
+    }
+  ]
+}

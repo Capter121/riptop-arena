@@ -1,0 +1,21 @@
+{
+  "part_id": "core_void_falcon",
+  "result": "PASS",
+  "errors": [],
+  "colliders": [
+    {
+      "object": "COLLIDER_core_void_falcon",
+      "vertices": 160,
+      "triangles": 320,
+      "non_manifold_edges": 0,
+      "boundary_edges": 0,
+      "zero_area_faces": 0,
+      "duplicate_vertices": 0,
+      "signed_volume_m3": 4.4494339330594866e-06,
+      "normals_outward": true,
+      "export_exclude": true,
+      "hidden_render": true,
+      "hidden_viewport": true
+    }
+  ]
+}

@@ -221,6 +221,43 @@ def _closed_annulus(
     return obj
 
 
+def create_void_falcon(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    arc_count = geometry["arc_count"]
+    if arc_count % 2:
+        raise ValueError("void_falcon_split_arc requires an even arc_count")
+    group_count = arc_count // 2
+    inner_radius = geometry["inner_radius_mm"] * MM
+    outer_radius = geometry["outer_radius_mm"] * MM
+    short_radius = outer_radius - geometry["arc_width_mm"] * MM
+    hub_radius = inner_radius + geometry["arc_width_mm"] * MM * 0.5
+    bottom = -geometry["height_mm"] * MM * 0.5
+    top = geometry["height_mm"] * MM * 0.5
+    half_span = math.radians(geometry["arc_span_deg"]) * 0.5
+    phase_offset = math.radians(geometry["phase_offset_deg"])
+    steps = max(4, geometry["segments"] // arc_count)
+    objects = [_closed_annulus(
+        f"GEO_{spec['id']}_HUB", inner_radius, hub_radius, bottom, top,
+        geometry["segments"], collection, materials[1 if len(materials) > 1 else 0],
+    )]
+    for index in range(group_count):
+        base = math.tau * index / group_count
+        objects.append(_closed_sector(
+            f"GEO_{spec['id']}_INNER_ARC_{index + 1}", hub_radius, short_radius, bottom, top,
+            base - half_span, base + half_span, steps, collection, materials[1 if len(materials) > 1 else 0],
+        ))
+        outer_center = base + phase_offset
+        objects.append(_closed_sector(
+            f"GEO_{spec['id']}_OUTER_ARC_{index + 1}", hub_radius, outer_radius, bottom, top,
+            outer_center - half_span, outer_center + half_span, steps, collection, materials[0],
+        ))
+    for obj in objects:
+        obj["part_id"] = spec["id"]
+        obj["geometry_kind"] = geometry["kind"]
+        obj["profile_family"] = spec["profile_family"]
+    return objects
+
+
 def create_orbit_halo(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     geometry = spec["geometry"]
     count = geometry["window_count"]
@@ -427,6 +464,8 @@ def create_revolved_tip(spec: dict, collection: bpy.types.Collection, materials:
 
 def create_part(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     kind = spec["geometry"]["kind"]
+    if kind == "radial_core" and spec.get("profile_family") == "void_falcon_split_arc":
+        return create_void_falcon(spec, collection, materials)
     if kind == "radial_blade":
         if spec.get("profile_family") == "iron_bastion_damper":
             return create_iron_bastion(spec, collection, materials)

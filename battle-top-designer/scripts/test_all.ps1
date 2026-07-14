@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression")]
+    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BCore")]
     [string]$Scope = "VerticalSlice"
 )
 
@@ -9,6 +9,8 @@ $LogDir = Join-Path $ProjectRoot "build\logs"
 $VerticalParts = @("core_solar_wolf", "blade_storm_fang", "assist_heavy", "gear_low", "tip_flat_attack")
 $Phase2AParts = @("core_solar_wolf", "blade_storm_fang", "blade_iron_bastion", "blade_orbit_halo", "blade_dual_comet", "assist_heavy", "gear_low", "tip_flat_attack")
 $Phase2AAssemblies = @("assembly_phase2a_storm_fang", "assembly_phase2a_iron_bastion", "assembly_phase2a_orbit_halo", "assembly_phase2a_dual_comet")
+$Phase2BCoreParts = @("core_void_falcon")
+$Phase2BCoreAssemblies = @("assembly_phase2b_core_void_falcon")
 
 function Find-Blender {
     $candidates = @(
@@ -41,9 +43,9 @@ $Blender = Find-Blender
 Write-Host "NSS_BLENDER=$Blender"
 Push-Location $ProjectRoot
 try {
-    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } else { $VerticalParts }
-    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } else { @("assembly_storm_attack") }
-    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } else { "vertical_slice" }
+    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreParts } else { $VerticalParts }
+    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreAssemblies } else { @("assembly_storm_attack") }
+    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BCore") { "phase2b" } else { "vertical_slice" }
     Invoke-Logged "python" @("scripts\validate_specs.py", "--self-test") "test-spec-self-test.log"
     Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", $SpecScope) "test-specs.log"
     Invoke-Logged $Blender @("--background", "--python", "blender\test_collision.py") "test-collision.log"
@@ -103,6 +105,16 @@ try {
             fixtures = $fixtureRecords
         }
         $collisionSummary | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 "reports\validation\phase2a-collision-summary.json"
+    } elseif ($Scope -eq "Phase2BCore") {
+        foreach ($view in @("top", "perspective_45", "side", "silhouette")) { Require-File "reports\renders\core_void_falcon_${view}.png" }
+        Require-File "reports\renders\core_void_falcon_contact_sheet.png"
+        Require-File "reports\renders\preview_core_void_falcon.png"
+        Require-File "preview\vendor\three\0.185.1\LICENSE"
+        Invoke-Logged "npm.cmd" @("--prefix", "preview", "test", "--", "phase2b-preview.spec.mjs") "test-browser-phase2b-core.log"
+        Invoke-Logged "python" @("scripts\verify_phase2a_baseline.py", "--manifest", "docs\baselines\v0.2.0-phase2a-approved.json", "--blender", $Blender, "--glb-only", "--verify-only", "--report", "reports\validation\stage2-approved-baseline.json") "test-phase2b-approved-baseline.log"
+        Require-File "reports\validation\stage7-storm-regression-standalone.json"
+        $StormRegression = Get-Content -Raw "reports\validation\stage7-storm-regression-standalone.json" | ConvertFrom-Json
+        if ($StormRegression.result -ne "PASS") { throw "Storm Attack regression is not PASS" }
     } else {
         Require-File "build\blend\exploded_storm_attack.blend"
         Require-File "reports\renders\storm_fang_contact_sheet.png"
@@ -114,7 +126,7 @@ try {
     }
     $summary = [ordered]@{
         result = "PASS"
-        scope = if ($Scope -eq "Phase2A") { "phase2a" } else { "vertical_slice" }
+        scope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BCore") { "phase2b_core" } else { "vertical_slice" }
         parts_tested = $Parts.Count
         assemblies_tested = $Assemblies.Count
         fail_count = $failCount
@@ -126,8 +138,10 @@ try {
         gltf_validator_warnings = 0
         playwright_failures = 0
         silhouette_pair_count = if ($Scope -eq "Phase2A") { 6 } else { 0 }
+        approved_baseline_result = if ($Scope -eq "Phase2BCore") { "PASS" } else { $null }
+        storm_attack_regression_result = if ($Scope -eq "Phase2BCore") { "PASS" } else { $null }
     }
-    $SummaryPath = if ($Scope -eq "Phase2A") { "reports\validation\phase2a-quality-gate.json" } else { "reports\validation\vertical-slice-summary.json" }
+    $SummaryPath = if ($Scope -eq "Phase2A") { "reports\validation\phase2a-quality-gate.json" } elseif ($Scope -eq "Phase2BCore") { "reports\validation\stage2b-core-regression.json" } else { "reports\validation\vertical-slice-summary.json" }
     $summary | ConvertTo-Json | Set-Content -Encoding utf8 $SummaryPath
     Write-Host "NSS_TEST=PASS"
     Write-Host "NSS_SUMMARY=$SummaryPath"
