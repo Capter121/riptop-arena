@@ -25,8 +25,31 @@
         "blade": { "type": "string", "pattern": "^blade_[a-z0-9_]+$" },
         "assist": { "type": "string", "pattern": "^assist_[a-z0-9_]+$" },
         "gear": { "type": "string", "pattern": "^gear_[a-z0-9_]+$" },
-        "tip": { "type": "string", "pattern": "^tip_[a-z0-9_]+$" }
-      }
+        "tip": { "type": "string", "pattern": "^tip_[a-z0-9_]+$" },
+        "purpose": { "const": "phase2a_blade_test_fixture" },
+        "official_configuration": { "type": "boolean" },
+        "baseline_fixture": { "const": "storm_attack_vertical_slice" },
+        "variable_part_type": { "const": "main_blade" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "id": { "pattern": "^assembly_phase2a_" } } },
+          "then": {
+            "required": ["purpose", "official_configuration", "baseline_fixture", "variable_part_type"],
+            "properties": { "official_configuration": { "const": false } }
+          }
+        },
+        {
+          "if": { "required": ["purpose"] },
+          "then": {
+            "required": ["official_configuration", "baseline_fixture", "variable_part_type"],
+            "properties": {
+              "id": { "pattern": "^assembly_phase2a_" },
+              "official_configuration": { "const": false }
+            }
+          }
+        }
+      ]
     }
   }
 }

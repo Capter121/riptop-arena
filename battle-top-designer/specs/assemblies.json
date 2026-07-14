@@ -9,6 +9,58 @@
       "assist": "assist_heavy",
       "gear": "gear_low",
       "tip": "tip_flat_attack"
+    },
+    {
+      "id": "assembly_phase2a_storm_fang",
+      "display_name": "Phase 2A Storm Fang Blade Test Fixture",
+      "core": "core_solar_wolf",
+      "blade": "blade_storm_fang",
+      "assist": "assist_heavy",
+      "gear": "gear_low",
+      "tip": "tip_flat_attack",
+      "purpose": "phase2a_blade_test_fixture",
+      "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice",
+      "variable_part_type": "main_blade"
+    },
+    {
+      "id": "assembly_phase2a_iron_bastion",
+      "display_name": "Phase 2A Iron Bastion Blade Test Fixture",
+      "core": "core_solar_wolf",
+      "blade": "blade_iron_bastion",
+      "assist": "assist_heavy",
+      "gear": "gear_low",
+      "tip": "tip_flat_attack",
+      "purpose": "phase2a_blade_test_fixture",
+      "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice",
+      "variable_part_type": "main_blade"
+    },
+    {
+      "id": "assembly_phase2a_orbit_halo",
+      "display_name": "Phase 2A Orbit Halo Blade Test Fixture",
+      "core": "core_solar_wolf",
+      "blade": "blade_orbit_halo",
+      "assist": "assist_heavy",
+      "gear": "gear_low",
+      "tip": "tip_flat_attack",
+      "purpose": "phase2a_blade_test_fixture",
+      "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice",
+      "variable_part_type": "main_blade"
+    },
+    {
+      "id": "assembly_phase2a_dual_comet",
+      "display_name": "Phase 2A Dual Comet Blade Test Fixture",
+      "core": "core_solar_wolf",
+      "blade": "blade_dual_comet",
+      "assist": "assist_heavy",
+      "gear": "gear_low",
+      "tip": "tip_flat_attack",
+      "purpose": "phase2a_blade_test_fixture",
+      "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice",
+      "variable_part_type": "main_blade"
     }
   ]
 }

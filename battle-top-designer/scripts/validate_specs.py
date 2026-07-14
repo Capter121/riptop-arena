@@ -16,6 +16,16 @@ ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_DIR = ROOT / "schemas"
 SPEC_DIR = ROOT / "specs"
 REPORT_DIR = ROOT / "reports" / "validation"
+PHASE2A_BLADES = {
+    "blade_storm_fang": "storm_fang_upper",
+    "blade_iron_bastion": "iron_bastion_damper",
+    "blade_orbit_halo": "orbit_halo_streamline",
+    "blade_dual_comet": "dual_comet_alternating",
+}
+PHASE2A_FIXTURES = {
+    f"assembly_phase2a_{part_id.removeprefix('blade_')}": part_id
+    for part_id in PHASE2A_BLADES
+}
 
 
 def load_json(path: Path) -> object:
@@ -72,6 +82,36 @@ def semantic_errors(
         if len(top) == 3 and len(bottom) == 3 and top[2] <= bottom[2]:
             add(source, "$.mounts", "top mount Z must be greater than bottom mount Z")
 
+        if part.get("part_type") == "main_blade":
+            geometry = part.get("geometry", {})
+            profile_family = part.get("profile_family")
+            expected_contact = {
+                "storm_fang_upper": "upper",
+                "iron_bastion_damper": "rounded_damper",
+                "orbit_halo_streamline": "low_drag",
+                "dual_comet_alternating": "alternating",
+            }.get(profile_family)
+            if expected_contact and geometry.get("contact_profile") != expected_contact:
+                add(source, "$.geometry.contact_profile", f"{profile_family} requires {expected_contact}")
+            if part.get("dimensions", {}).get("outer_radius_mm") != geometry.get("outer_radius_mm"):
+                add(source, "$.geometry.outer_radius_mm", "must match dimensions.outer_radius_mm")
+            if part.get("dimensions", {}).get("height_mm") != geometry.get("height_mm"):
+                add(source, "$.geometry.height_mm", "must match dimensions.height_mm")
+            if profile_family == "iron_bastion_damper" and geometry.get("damper_count") != geometry.get("blade_count"):
+                add(source, "$.geometry.damper_count", "must match blade_count")
+            if profile_family == "orbit_halo_streamline":
+                if geometry.get("window_count") != geometry.get("blade_count"):
+                    add(source, "$.geometry.window_count", "must match blade_count")
+                if geometry.get("spoke_count") != geometry.get("blade_count"):
+                    add(source, "$.geometry.spoke_count", "must match blade_count")
+                if geometry.get("window_inner_radius_mm", 0) >= geometry.get("window_outer_radius_mm", 0):
+                    add(source, "$.geometry", "window inner radius must be less than outer radius")
+            if profile_family == "dual_comet_alternating":
+                if geometry.get("blade_count") != geometry.get("unit_count", 0) * 2:
+                    add(source, "$.geometry.blade_count", "must equal unit_count * 2")
+                if geometry.get("attack_radius_mm", 0) <= geometry.get("damper_radius_mm", 0):
+                    add(source, "$.geometry", "attack radius must be greater than damper radius")
+
     expected_types = {
         "core": "emblem_core",
         "blade": "main_blade",
@@ -80,7 +120,15 @@ def semantic_errors(
         "tip": "performance_tip",
     }
     if assemblies:
+        assembly_ids = set()
+        phase2a_seen = {}
         for assembly_index, assembly in enumerate(assemblies.get("assemblies", [])):
+            assembly_id = assembly.get("id")
+            if assembly_id in assembly_ids:
+                add("assemblies.json", f"$.assemblies[{assembly_index}].id", f"duplicate assembly id: {assembly_id}")
+            assembly_ids.add(assembly_id)
+            if assembly_id in PHASE2A_FIXTURES:
+                phase2a_seen[assembly_id] = assembly.get("blade")
             for field, expected_type in expected_types.items():
                 part_id = assembly.get(field)
                 part = part_by_id.get(part_id)
@@ -93,6 +141,26 @@ def semantic_errors(
                         path,
                         f"part {part_id} has type {part.get('part_type')}; expected {expected_type}",
                     )
+            assembly_parts = [part_by_id.get(assembly.get(field)) for field in expected_types]
+            assembly_interfaces = {part.get("interface_id") for part in assembly_parts if part}
+            if len(assembly_interfaces) > 1:
+                add("assemblies.json", f"$.assemblies[{assembly_index}]", "all parts must use the same interface id")
+
+        if phase2a_seen:
+            if phase2a_seen != PHASE2A_FIXTURES:
+                add("assemblies.json", "$.assemblies", "Phase 2A fixtures must contain exactly the four approved blade mappings")
+            fixed_parts = {
+                "core": "core_solar_wolf",
+                "assist": "assist_heavy",
+                "gear": "gear_low",
+                "tip": "tip_flat_attack",
+            }
+            for assembly_index, assembly in enumerate(assemblies.get("assemblies", [])):
+                if assembly.get("id") not in PHASE2A_FIXTURES:
+                    continue
+                for field, expected_part in fixed_parts.items():
+                    if assembly.get(field) != expected_part:
+                        add("assemblies.json", f"$.assemblies[{assembly_index}].{field}", f"fixture requires {expected_part}")
     return errors
 
 
@@ -143,6 +211,7 @@ def valid_fixtures() -> tuple[dict, dict, list[dict], dict]:
     base_part = {
         "schema_version": "1.0", "id": "blade_test", "display_name": "Test Blade",
         "part_type": "main_blade", "interface_id": "NSS-V1", "spin_direction": "right",
+        "profile_family": "storm_fang_upper",
         "dimensions": {"outer_radius_mm": 36, "inner_radius_mm": 10, "height_mm": 4.8},
         "geometry": {
             "kind": "radial_blade", "segments": 48, "blade_count": 3,
@@ -185,6 +254,7 @@ def valid_fixtures() -> tuple[dict, dict, list[dict], dict]:
         part["part_type"] = part_type
         part["geometry"]["kind"] = kind
         if part_type != "main_blade":
+            part.pop("profile_family", None)
             for key in ("blade_count", "base_radius_mm", "outer_radius_mm", "height_mm", "blade_angle_deg", "contact_profile"):
                 part["geometry"].pop(key, None)
         parts.append(part)
@@ -222,6 +292,16 @@ def run_self_test(all_validators: dict[str, Draft202012Validator]) -> tuple[bool
     errors = schema_errors(all_validators["part"], wrong_type, "fixture")
     record("wrong_type_fails", bool(errors), f"errors={len(errors)}")
 
+    missing_profile = copy.deepcopy(parts[1])
+    missing_profile.pop("profile_family")
+    errors = schema_errors(all_validators["part"], missing_profile, "fixture")
+    record("missing_blade_profile_family_fails", bool(errors), f"errors={len(errors)}")
+
+    unknown_profile = copy.deepcopy(parts[1])
+    unknown_profile["profile_family"] = "unknown_profile"
+    errors = schema_errors(all_validators["part"], unknown_profile, "fixture")
+    record("unknown_blade_profile_family_fails", bool(errors), f"errors={len(errors)}")
+
     missing_material = copy.deepcopy(parts)
     missing_material[1]["material_slots"] = ["missing_material"]
     errors = semantic_errors(interfaces, materials, missing_material, assemblies)
@@ -231,6 +311,27 @@ def run_self_test(all_validators: dict[str, Draft202012Validator]) -> tuple[bool
     wrong_assembly["assemblies"][0]["core"] = "blade_test"
     errors = semantic_errors(interfaces, materials, parts, wrong_assembly)
     record("wrong_assembly_part_type_fails", any("expected emblem_core" in e["message"] for e in errors), f"errors={len(errors)}")
+
+    phase_fixture = copy.deepcopy(assemblies)
+    phase_fixture["assemblies"][0].update({
+        "id": "assembly_phase2a_storm_fang",
+        "purpose": "phase2a_blade_test_fixture",
+        "official_configuration": False,
+        "baseline_fixture": "storm_attack_vertical_slice",
+        "variable_part_type": "main_blade",
+    })
+    errors = schema_errors(all_validators["assembly"], phase_fixture, "fixture")
+    record("phase2a_fixture_schema_passes", not errors, f"errors={len(errors)}")
+
+    missing_fixture_field = copy.deepcopy(phase_fixture)
+    missing_fixture_field["assemblies"][0].pop("purpose")
+    errors = schema_errors(all_validators["assembly"], missing_fixture_field, "fixture")
+    record("missing_phase2a_fixture_field_fails", bool(errors), f"errors={len(errors)}")
+
+    official_fixture = copy.deepcopy(phase_fixture)
+    official_fixture["assemblies"][0]["official_configuration"] = True
+    errors = schema_errors(all_validators["assembly"], official_fixture, "fixture")
+    record("official_phase2a_fixture_fails", bool(errors), f"errors={len(errors)}")
     return all(item["passed"] for item in cases), cases
 
 

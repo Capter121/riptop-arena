@@ -17,6 +17,16 @@
       "detail": "errors=1"
     },
     {
+      "name": "missing_blade_profile_family_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "unknown_blade_profile_family_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
       "name": "missing_material_reference_fails",
       "passed": true,
       "detail": "errors=1"
@@ -25,6 +35,21 @@
       "name": "wrong_assembly_part_type_fails",
       "passed": true,
       "detail": "errors=1"
+    },
+    {
+      "name": "phase2a_fixture_schema_passes",
+      "passed": true,
+      "detail": "errors=0"
+    },
+    {
+      "name": "missing_phase2a_fixture_field_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "official_phase2a_fixture_fails",
+      "passed": true,
+      "detail": "errors=2"
     }
   ]
 }
