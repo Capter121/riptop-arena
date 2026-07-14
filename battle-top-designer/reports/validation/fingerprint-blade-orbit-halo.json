@@ -1,0 +1,1328 @@
+{
+  "canonical": {
+    "dimensions_mm": [
+      70.623703003,
+      70.623703003,
+      4.400000095
+    ],
+    "interface_information": [
+      {
+        "key": "datum_radius_mm",
+        "value": 10.8
+      },
+      {
+        "key": "interface_id",
+        "value": "NSS-V1"
+      },
+      {
+        "key": "interface_role",
+        "value": "female"
+      },
+      {
+        "key": "interface_role",
+        "value": "male"
+      },
+      {
+        "key": "lug_count",
+        "value": 5
+      },
+      {
+        "key": "mount_role",
+        "value": "bottom"
+      },
+      {
+        "key": "mount_role",
+        "value": "top"
+      },
+      {
+        "key": "orientation_key_deg",
+        "value": 0.0
+      }
+    ],
+    "materials": [
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "brushed_silver"
+        },
+        "diffuse_color": [
+          0.579999983,
+          0.620000005,
+          0.680000007,
+          1.0
+        ],
+        "name": "MAT_brushed_silver",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.949999988,
+          "Roughness": 0.319999993
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "BLEND",
+          "material_id": "cobalt_blue_translucent"
+        },
+        "diffuse_color": [
+          0.02,
+          0.180000007,
+          0.720000029,
+          0.720000029
+        ],
+        "name": "MAT_cobalt_blue_translucent",
+        "principled_bsdf": {
+          "Alpha": 0.720000029,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.0,
+          "Roughness": 0.239999995
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "obsidian_polymer"
+        },
+        "diffuse_color": [
+          0.025,
+          0.029999999,
+          0.045000002,
+          1.0
+        ],
+        "name": "MAT_obsidian_polymer",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.0,
+          "Roughness": 0.379999995
+        },
+        "use_nodes": true
+      }
+    ],
+    "mounts": [
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_orbit_halo_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_orbit_halo_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0032,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_orbit_halo_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_orbit_halo_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0032,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "objects": [
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -17.0,
+              -17.0,
+              -2.099999905
+            ],
+            [
+              -17.0,
+              -17.0,
+              2.299999952
+            ],
+            [
+              -17.0,
+              17.0,
+              2.299999952
+            ],
+            [
+              -17.0,
+              17.0,
+              -2.099999905
+            ],
+            [
+              17.0,
+              -17.0,
+              -2.099999905
+            ],
+            [
+              17.0,
+              -17.0,
+              2.299999952
+            ],
+            [
+              17.0,
+              17.0,
+              2.299999952
+            ],
+            [
+              17.0,
+              17.0,
+              -2.099999905
+            ]
+          ],
+          "material_slots": [
+            "MAT_cobalt_blue_translucent"
+          ],
+          "mesh": "GEO_blade_orbit_halo_HUB",
+          "object": "GEO_blade_orbit_halo_HUB",
+          "topology_sha256": "700e42f1e322bc4ed7ee4d3a832c71f182e5672b574ebfd3482ad514c260545a",
+          "triangle_count": 768,
+          "vertex_count": 1152
+        },
+        "name": "GEO_blade_orbit_halo_HUB",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_HUB",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "interface_id": "NSS-V1",
+          "lug_count": 5,
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              -10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              -0.539999962
+            ]
+          ],
+          "material_slots": [
+            "MAT_brushed_silver"
+          ],
+          "mesh": "GEO_blade_orbit_halo_NSS_V1_COLLAR",
+          "object": "GEO_blade_orbit_halo_NSS_V1_COLLAR",
+          "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+          "triangle_count": 480,
+          "vertex_count": 720
+        },
+        "name": "GEO_blade_orbit_halo_NSS_V1_COLLAR",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_NSS_V1_COLLAR",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              16.549913406,
+              -17.210741043,
+              -2.099999905
+            ],
+            [
+              16.549913406,
+              -17.210741043,
+              2.099999905
+            ],
+            [
+              16.549913406,
+              28.351560593,
+              2.099999905
+            ],
+            [
+              16.549913406,
+              28.351560593,
+              -2.099999905
+            ],
+            [
+              35.311851501,
+              -17.210741043,
+              -2.099999905
+            ],
+            [
+              35.311851501,
+              -17.210741043,
+              2.099999905
+            ],
+            [
+              35.311851501,
+              28.351560593,
+              2.099999905
+            ],
+            [
+              35.311851501,
+              28.351560593,
+              -2.099999905
+            ]
+          ],
+          "material_slots": [
+            "MAT_brushed_silver"
+          ],
+          "mesh": "GEO_blade_orbit_halo_RING_1",
+          "object": "GEO_blade_orbit_halo_RING_1",
+          "topology_sha256": "acb7eae3fab16727aea68c503cd4584bc31ad83714b28378b5109d99a6b366c5",
+          "triangle_count": 196,
+          "vertex_count": 300
+        },
+        "name": "GEO_blade_orbit_halo_RING_1",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_RING_1",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -28.351560593,
+              16.549913406,
+              -2.099999905
+            ],
+            [
+              -28.351560593,
+              16.549913406,
+              2.099999905
+            ],
+            [
+              -28.351560593,
+              35.311851501,
+              2.099999905
+            ],
+            [
+              -28.351560593,
+              35.311851501,
+              -2.099999905
+            ],
+            [
+              17.210741043,
+              16.549913406,
+              -2.099999905
+            ],
+            [
+              17.210741043,
+              16.549913406,
+              2.099999905
+            ],
+            [
+              17.210741043,
+              35.311851501,
+              2.099999905
+            ],
+            [
+              17.210741043,
+              35.311851501,
+              -2.099999905
+            ]
+          ],
+          "material_slots": [
+            "MAT_brushed_silver"
+          ],
+          "mesh": "GEO_blade_orbit_halo_RING_2",
+          "object": "GEO_blade_orbit_halo_RING_2",
+          "topology_sha256": "a5f2b2e67f0f78581f35c61e9e256552e71ce40c2815035d7832533fd4469e07",
+          "triangle_count": 196,
+          "vertex_count": 300
+        },
+        "name": "GEO_blade_orbit_halo_RING_2",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_RING_2",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -35.311851501,
+              -28.351560593,
+              -2.099999905
+            ],
+            [
+              -35.311851501,
+              -28.351560593,
+              2.099999905
+            ],
+            [
+              -35.311851501,
+              17.210741043,
+              2.099999905
+            ],
+            [
+              -35.311851501,
+              17.210741043,
+              -2.099999905
+            ],
+            [
+              -16.549913406,
+              -28.351560593,
+              -2.099999905
+            ],
+            [
+              -16.549913406,
+              -28.351560593,
+              2.099999905
+            ],
+            [
+              -16.549913406,
+              17.210741043,
+              2.099999905
+            ],
+            [
+              -16.549913406,
+              17.210741043,
+              -2.099999905
+            ]
+          ],
+          "material_slots": [
+            "MAT_brushed_silver"
+          ],
+          "mesh": "GEO_blade_orbit_halo_RING_3",
+          "object": "GEO_blade_orbit_halo_RING_3",
+          "topology_sha256": "81f60def2b1a914af6028ba23b90147bba8db8d8fc770208221952084bde2995",
+          "triangle_count": 196,
+          "vertex_count": 300
+        },
+        "name": "GEO_blade_orbit_halo_RING_3",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_RING_3",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -17.210741043,
+              -35.311851501,
+              -2.099999905
+            ],
+            [
+              -17.210741043,
+              -35.311851501,
+              2.099999905
+            ],
+            [
+              -17.210741043,
+              -16.549913406,
+              2.099999905
+            ],
+            [
+              -17.210741043,
+              -16.549913406,
+              -2.099999905
+            ],
+            [
+              28.351560593,
+              -35.311851501,
+              -2.099999905
+            ],
+            [
+              28.351560593,
+              -35.311851501,
+              2.099999905
+            ],
+            [
+              28.351560593,
+              -16.549913406,
+              2.099999905
+            ],
+            [
+              28.351560593,
+              -16.549913406,
+              -2.099999905
+            ]
+          ],
+          "material_slots": [
+            "MAT_brushed_silver"
+          ],
+          "mesh": "GEO_blade_orbit_halo_RING_4",
+          "object": "GEO_blade_orbit_halo_RING_4",
+          "topology_sha256": "63fff2661ebb8e7959a059bc1af54760064f0d35bf43531cc11d4daccacfe46e",
+          "triangle_count": 196,
+          "vertex_count": 300
+        },
+        "name": "GEO_blade_orbit_halo_RING_4",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_RING_4",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              16.961381912,
+              -1.852528572,
+              -1.899999976
+            ],
+            [
+              16.961381912,
+              -1.852528572,
+              1.899999976
+            ],
+            [
+              16.961381912,
+              1.852528572,
+              1.899999976
+            ],
+            [
+              16.961381912,
+              1.852528572,
+              -1.899999976
+            ],
+            [
+              27.437532425,
+              -1.852528572,
+              -1.899999976
+            ],
+            [
+              27.437532425,
+              -1.852528572,
+              1.899999976
+            ],
+            [
+              27.437532425,
+              1.852528572,
+              1.899999976
+            ],
+            [
+              27.437532425,
+              1.852528572,
+              -1.899999976
+            ]
+          ],
+          "material_slots": [
+            "MAT_obsidian_polymer"
+          ],
+          "mesh": "GEO_blade_orbit_halo_SPOKE_1",
+          "object": "GEO_blade_orbit_halo_SPOKE_1",
+          "topology_sha256": "a622f81951509d495d27f291d8e38cba5b3b5dbfd768991119cfd18ee61185cd",
+          "triangle_count": 20,
+          "vertex_count": 36
+        },
+        "name": "GEO_blade_orbit_halo_SPOKE_1",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_SPOKE_1",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -1.852528572,
+              16.961381912,
+              -1.899999976
+            ],
+            [
+              -1.852528572,
+              16.961381912,
+              1.899999976
+            ],
+            [
+              -1.852528572,
+              27.437532425,
+              1.899999976
+            ],
+            [
+              -1.852528572,
+              27.437532425,
+              -1.899999976
+            ],
+            [
+              1.852528572,
+              16.961381912,
+              -1.899999976
+            ],
+            [
+              1.852528572,
+              16.961381912,
+              1.899999976
+            ],
+            [
+              1.852528572,
+              27.437532425,
+              1.899999976
+            ],
+            [
+              1.852528572,
+              27.437532425,
+              -1.899999976
+            ]
+          ],
+          "material_slots": [
+            "MAT_obsidian_polymer"
+          ],
+          "mesh": "GEO_blade_orbit_halo_SPOKE_2",
+          "object": "GEO_blade_orbit_halo_SPOKE_2",
+          "topology_sha256": "a2ce743c7b0d099b80ad621a4fd8b589db9509ebcdd77fa2a5f4adc1409b5849",
+          "triangle_count": 20,
+          "vertex_count": 36
+        },
+        "name": "GEO_blade_orbit_halo_SPOKE_2",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_SPOKE_2",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -27.437532425,
+              -1.852528572,
+              -1.899999976
+            ],
+            [
+              -27.437532425,
+              -1.852528572,
+              1.899999976
+            ],
+            [
+              -27.437532425,
+              1.852528572,
+              1.899999976
+            ],
+            [
+              -27.437532425,
+              1.852528572,
+              -1.899999976
+            ],
+            [
+              -16.961381912,
+              -1.852528572,
+              -1.899999976
+            ],
+            [
+              -16.961381912,
+              -1.852528572,
+              1.899999976
+            ],
+            [
+              -16.961381912,
+              1.852528572,
+              1.899999976
+            ],
+            [
+              -16.961381912,
+              1.852528572,
+              -1.899999976
+            ]
+          ],
+          "material_slots": [
+            "MAT_obsidian_polymer"
+          ],
+          "mesh": "GEO_blade_orbit_halo_SPOKE_3",
+          "object": "GEO_blade_orbit_halo_SPOKE_3",
+          "topology_sha256": "f0d124e7f326f2679e872a8b2fd3cbe1a04ef0a6b6f50b17a8d82c32bd58b70b",
+          "triangle_count": 20,
+          "vertex_count": 36
+        },
+        "name": "GEO_blade_orbit_halo_SPOKE_3",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_SPOKE_3",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade",
+          "profile_family": "orbit_halo_streamline"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -1.852528572,
+              -27.437532425,
+              -1.899999976
+            ],
+            [
+              -1.852528572,
+              -27.437532425,
+              1.899999976
+            ],
+            [
+              -1.852528572,
+              -16.961381912,
+              1.899999976
+            ],
+            [
+              -1.852528572,
+              -16.961381912,
+              -1.899999976
+            ],
+            [
+              1.852528572,
+              -27.437532425,
+              -1.899999976
+            ],
+            [
+              1.852528572,
+              -27.437532425,
+              1.899999976
+            ],
+            [
+              1.852528572,
+              -16.961381912,
+              1.899999976
+            ],
+            [
+              1.852528572,
+              -16.961381912,
+              -1.899999976
+            ]
+          ],
+          "material_slots": [
+            "MAT_obsidian_polymer"
+          ],
+          "mesh": "GEO_blade_orbit_halo_SPOKE_4",
+          "object": "GEO_blade_orbit_halo_SPOKE_4",
+          "topology_sha256": "9cee147d17b7c6f4a5b5260b1451086faad20e890753b6901b16f3595112d0a2",
+          "triangle_count": 20,
+          "vertex_count": 36
+        },
+        "name": "GEO_blade_orbit_halo_SPOKE_4",
+        "parent": null,
+        "path": "GEO_blade_orbit_halo_SPOKE_4",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_orbit_halo_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_orbit_halo_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_orbit_halo",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0032,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_orbit_halo_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_orbit_halo_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0032,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "schema_version": 1
+  },
+  "input": "blade_orbit_halo.glb",
+  "semantic_fingerprint": "2eb218ba71b0ced283dfea153d0eb867b96795ed20f9a75fa9b2e5cda70d2e39"
+}

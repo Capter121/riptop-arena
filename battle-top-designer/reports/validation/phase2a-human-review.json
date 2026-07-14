@@ -1,0 +1,26 @@
+{
+  "status": "Phase 2A awaiting visual review",
+  "resolved_decisions": [
+    {
+      "id": "phase2a-stage2-geo-prefix-migration",
+      "type": "BINARY_DRIFT",
+      "result": "CONFIRMED",
+      "confirmed_by": "project_owner",
+      "confirmed_on": "2026-07-14",
+      "evidence": "reports/validation/stage2-binary-drift-disposition.json"
+    }
+  ],
+  "contact_reviews": [],
+  "pending_visual_questions": [
+    "Are the four silhouettes sufficiently distinct at product-identification distance?",
+    "Do the attack, defense, stamina, and balance contact intentions read clearly without labels?",
+    "Are the transparent-plastic, metal, and accent layers visually legible in the browser preview?",
+    "Do the high-IoU pairs still show an acceptable qualitative silhouette difference?"
+  ],
+  "silhouette_iou_attention": [
+    {"first": "blade_iron_bastion", "second": "blade_dual_comet", "iou": 0.8295028798300061},
+    {"first": "blade_storm_fang", "second": "blade_iron_bastion", "iou": 0.8031246504343935},
+    {"first": "blade_storm_fang", "second": "blade_dual_comet", "iou": 0.7952846116739025}
+  ],
+  "disclaimer": "Silhouette overlap is an internal visual heuristic only, not legal proof of originality or non-infringement."
+}

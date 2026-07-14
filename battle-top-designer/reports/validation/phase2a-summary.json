@@ -1,0 +1,87 @@
+{
+  "status": "Phase 2A awaiting visual review",
+  "interface_id": "NSS-V1",
+  "environment": {
+    "blender": "4.5.11 LTS",
+    "gltf_validator": "2.0.0-dev.3.10",
+    "three_js": "0.185.1",
+    "playwright": "1.61.1"
+  },
+  "quality_gate": {
+    "result": "PASS",
+    "parts_tested": 8,
+    "blade_count": 4,
+    "fixture_count": 4,
+    "fail_count": 0,
+    "collision_count": 0,
+    "unresolved_contact_review_count": 0,
+    "unconfirmed_binary_drift_count": 0,
+    "semantic_regression_count": 0,
+    "gltf_validator_errors": 0,
+    "gltf_validator_warnings": 0,
+    "playwright_failures": 0
+  },
+  "blades": [
+    {
+      "id": "blade_storm_fang",
+      "dimensions_mm": [64.731658936, 66.860778809, 5.89943409],
+      "triangle_count": 1056,
+      "material_count": 3,
+      "glb_file_size_bytes": 52436,
+      "raw_sha256": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac",
+      "semantic_fingerprint": "476eaf1adbf65244ffaaef4e571b9d26f3217e73923d20c8d81b2ec2b4469df1"
+    },
+    {
+      "id": "blade_iron_bastion",
+      "dimensions_mm": [70.0, 70.0, 5.400000095],
+      "triangle_count": 2016,
+      "material_count": 3,
+      "glb_file_size_bytes": 84580,
+      "raw_sha256": "339a70425692b8ff1acc185b580fb8a63a420965c6afb75ec2280ee83e546f57",
+      "semantic_fingerprint": "4e4043f994f124c03e689e8c9994312a1769b3163f196e582c015cb3138817cf"
+    },
+    {
+      "id": "blade_orbit_halo",
+      "dimensions_mm": [70.623703003, 70.623703003, 4.400000095],
+      "triangle_count": 2112,
+      "material_count": 3,
+      "glb_file_size_bytes": 100304,
+      "raw_sha256": "6283ea0689a3eebd46f3e9817fc67fe05e79e6ae54d116dc58ee7a8ae122908f",
+      "semantic_fingerprint": "2eb218ba71b0ced283dfea153d0eb867b96795ed20f9a75fa9b2e5cda70d2e39"
+    },
+    {
+      "id": "blade_dual_comet",
+      "dimensions_mm": [64.30292511, 68.818771362, 5.48854208],
+      "triangle_count": 1632,
+      "material_count": 3,
+      "glb_file_size_bytes": 73228,
+      "raw_sha256": "5f48110aeec076f552a4f11d6800e7a369ef170f13555a6a27cd82a744f07e20",
+      "semantic_fingerprint": "a05b93d88efeb4b22a6ed8f3423bce236061533e48e9587852c9b703d21620f2"
+    }
+  ],
+  "fixture_results": [
+    {"id": "assembly_phase2a_storm_fang", "result": "PASS", "collision_count": 0, "contact_review_count": 0, "diameter_mm": 66.86078011989594, "height_mm": 23.940001847222447},
+    {"id": "assembly_phase2a_iron_bastion", "result": "PASS", "collision_count": 0, "contact_review_count": 0, "diameter_mm": 70.00000029802322, "height_mm": 23.940001847222447},
+    {"id": "assembly_phase2a_orbit_halo", "result": "PASS", "collision_count": 0, "contact_review_count": 0, "diameter_mm": 70.62370330095291, "height_mm": 23.64000235684216},
+    {"id": "assembly_phase2a_dual_comet", "result": "PASS", "collision_count": 0, "contact_review_count": 0, "diameter_mm": 68.81877034902573, "height_mm": 24.04000167734921}
+  ],
+  "storm_attack_regression": {
+    "result": "PASS",
+    "baseline_glb_count": 6,
+    "binary_drifts": 0,
+    "semantic_regressions": 0
+  },
+  "browser": {
+    "result": "PASS",
+    "model_count": 4,
+    "canvas": [1118, 638],
+    "console_errors": 0,
+    "page_errors": 0,
+    "failed_requests": 0
+  },
+  "human_dispositions": {
+    "confirmed_binary_drift_records": 1,
+    "contact_review_records": 0,
+    "pending_visual_review": true
+  }
+}

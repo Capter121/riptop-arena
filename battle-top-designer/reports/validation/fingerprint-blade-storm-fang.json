@@ -1,0 +1,521 @@
+{
+  "canonical": {
+    "dimensions_mm": [
+      64.731658936,
+      66.860778809,
+      5.89943409
+    ],
+    "interface_information": [
+      {
+        "key": "datum_radius_mm",
+        "value": 10.8
+      },
+      {
+        "key": "interface_id",
+        "value": "NSS-V1"
+      },
+      {
+        "key": "interface_role",
+        "value": "female"
+      },
+      {
+        "key": "interface_role",
+        "value": "male"
+      },
+      {
+        "key": "lug_count",
+        "value": 5
+      },
+      {
+        "key": "mount_role",
+        "value": "bottom"
+      },
+      {
+        "key": "mount_role",
+        "value": "top"
+      },
+      {
+        "key": "orientation_key_deg",
+        "value": 0.0
+      }
+    ],
+    "materials": [
+      {
+        "custom_properties": {
+          "alpha_mode": "BLEND",
+          "material_id": "cobalt_blue_translucent"
+        },
+        "diffuse_color": [
+          0.02,
+          0.180000007,
+          0.720000029,
+          0.720000029
+        ],
+        "name": "MAT_cobalt_blue_translucent",
+        "principled_bsdf": {
+          "Alpha": 0.720000029,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.0,
+          "Roughness": 0.239999995
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "gunmetal"
+        },
+        "diffuse_color": [
+          0.119999997,
+          0.150000006,
+          0.180000007,
+          1.0
+        ],
+        "name": "MAT_gunmetal",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.920000017,
+          "Roughness": 0.280000001
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "solar_amber"
+        },
+        "diffuse_color": [
+          1.0,
+          0.379999995,
+          0.029999999,
+          1.0
+        ],
+        "name": "MAT_solar_amber",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.119999997,
+          "Roughness": 0.300000012
+        },
+        "use_nodes": true
+      }
+    ],
+    "mounts": [
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_storm_fang",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_storm_fang_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_storm_fang_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_storm_fang",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_storm_fang_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_storm_fang_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "objects": [
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_storm_fang",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -35.353912354,
+              -35.246646881,
+              -2.400000095
+            ],
+            [
+              -35.353912354,
+              -35.246646881,
+              3.499433517
+            ],
+            [
+              -35.353912354,
+              31.614131927,
+              3.499433517
+            ],
+            [
+              -35.353912354,
+              31.614131927,
+              -2.400000095
+            ],
+            [
+              29.377738953,
+              -35.246646881,
+              -2.400000095
+            ],
+            [
+              29.377738953,
+              -35.246646881,
+              3.499433517
+            ],
+            [
+              29.377738953,
+              31.614131927,
+              3.499433517
+            ],
+            [
+              29.377738953,
+              31.614131927,
+              -2.400000095
+            ]
+          ],
+          "material_slots": [
+            "MAT_gunmetal",
+            "MAT_cobalt_blue_translucent",
+            "MAT_solar_amber"
+          ],
+          "mesh": "GEO_blade_storm_fang_BODY",
+          "object": "GEO_blade_storm_fang_BODY",
+          "topology_sha256": "01a43f7f298cb6e87982da7a81c844da571f1ec28636856a74d02023a9491f55",
+          "triangle_count": 576,
+          "vertex_count": 1008
+        },
+        "name": "GEO_blade_storm_fang_BODY",
+        "parent": null,
+        "path": "GEO_blade_storm_fang_BODY",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "interface_id": "NSS-V1",
+          "lug_count": 5,
+          "part_id": "blade_storm_fang",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              -10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              -0.539999962
+            ]
+          ],
+          "material_slots": [
+            "MAT_gunmetal"
+          ],
+          "mesh": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+          "object": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+          "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+          "triangle_count": 480,
+          "vertex_count": 720
+        },
+        "name": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+        "parent": null,
+        "path": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_storm_fang",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_storm_fang_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_storm_fang_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_storm_fang",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_storm_fang_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_storm_fang_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "schema_version": 1
+  },
+  "input": "blade_storm_fang.glb",
+  "semantic_fingerprint": "476eaf1adbf65244ffaaef4e571b9d26f3217e73923d20c8d81b2ec2b4469df1"
+}

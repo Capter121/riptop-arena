@@ -1,0 +1,522 @@
+{
+  "canonical": {
+    "dimensions_mm": [
+      70.0,
+      70.0,
+      5.400000095
+    ],
+    "interface_information": [
+      {
+        "key": "datum_radius_mm",
+        "value": 10.8
+      },
+      {
+        "key": "interface_id",
+        "value": "NSS-V1"
+      },
+      {
+        "key": "interface_role",
+        "value": "female"
+      },
+      {
+        "key": "interface_role",
+        "value": "male"
+      },
+      {
+        "key": "lug_count",
+        "value": 5
+      },
+      {
+        "key": "mount_role",
+        "value": "bottom"
+      },
+      {
+        "key": "mount_role",
+        "value": "top"
+      },
+      {
+        "key": "orientation_key_deg",
+        "value": 0.0
+      }
+    ],
+    "materials": [
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "brushed_silver"
+        },
+        "diffuse_color": [
+          0.579999983,
+          0.620000005,
+          0.680000007,
+          1.0
+        ],
+        "name": "MAT_brushed_silver",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.949999988,
+          "Roughness": 0.319999993
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "obsidian_polymer"
+        },
+        "diffuse_color": [
+          0.025,
+          0.029999999,
+          0.045000002,
+          1.0
+        ],
+        "name": "MAT_obsidian_polymer",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.0,
+          "Roughness": 0.379999995
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "solar_amber"
+        },
+        "diffuse_color": [
+          1.0,
+          0.379999995,
+          0.029999999,
+          1.0
+        ],
+        "name": "MAT_solar_amber",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.119999997,
+          "Roughness": 0.300000012
+        },
+        "use_nodes": true
+      }
+    ],
+    "mounts": [
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_iron_bastion",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_iron_bastion_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_iron_bastion_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_iron_bastion",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_iron_bastion_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_iron_bastion_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "objects": [
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_iron_bastion",
+          "part_type": "main_blade",
+          "profile_family": "iron_bastion_damper"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -35.0,
+              -35.0,
+              -2.400000095
+            ],
+            [
+              -35.0,
+              -35.0,
+              3.0
+            ],
+            [
+              -35.0,
+              35.0,
+              3.0
+            ],
+            [
+              -35.0,
+              35.0,
+              -2.400000095
+            ],
+            [
+              35.0,
+              -35.0,
+              -2.400000095
+            ],
+            [
+              35.0,
+              -35.0,
+              3.0
+            ],
+            [
+              35.0,
+              35.0,
+              3.0
+            ],
+            [
+              35.0,
+              35.0,
+              -2.400000095
+            ]
+          ],
+          "material_slots": [
+            "MAT_brushed_silver",
+            "MAT_obsidian_polymer",
+            "MAT_solar_amber"
+          ],
+          "mesh": "GEO_blade_iron_bastion_BODY",
+          "object": "GEO_blade_iron_bastion_BODY",
+          "topology_sha256": "4cca91db0fc41eba5c0a96a487cb7f46da7ea8916456509cd220eb90efaf67dc",
+          "triangle_count": 1536,
+          "vertex_count": 2112
+        },
+        "name": "GEO_blade_iron_bastion_BODY",
+        "parent": null,
+        "path": "GEO_blade_iron_bastion_BODY",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "interface_id": "NSS-V1",
+          "lug_count": 5,
+          "part_id": "blade_iron_bastion",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              -10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              -0.539999962
+            ]
+          ],
+          "material_slots": [
+            "MAT_brushed_silver"
+          ],
+          "mesh": "GEO_blade_iron_bastion_NSS_V1_COLLAR",
+          "object": "GEO_blade_iron_bastion_NSS_V1_COLLAR",
+          "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+          "triangle_count": 480,
+          "vertex_count": 720
+        },
+        "name": "GEO_blade_iron_bastion_NSS_V1_COLLAR",
+        "parent": null,
+        "path": "GEO_blade_iron_bastion_NSS_V1_COLLAR",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_iron_bastion",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_iron_bastion_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_iron_bastion_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_iron_bastion",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_iron_bastion_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_iron_bastion_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0035,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "schema_version": 1
+  },
+  "input": "blade_iron_bastion.glb",
+  "semantic_fingerprint": "4e4043f994f124c03e689e8c9994312a1769b3163f196e582c015cb3138817cf"
+}

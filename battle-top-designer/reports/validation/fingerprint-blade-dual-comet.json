@@ -1,0 +1,522 @@
+{
+  "canonical": {
+    "dimensions_mm": [
+      64.30292511,
+      68.818771362,
+      5.48854208
+    ],
+    "interface_information": [
+      {
+        "key": "datum_radius_mm",
+        "value": 10.8
+      },
+      {
+        "key": "interface_id",
+        "value": "NSS-V1"
+      },
+      {
+        "key": "interface_role",
+        "value": "female"
+      },
+      {
+        "key": "interface_role",
+        "value": "male"
+      },
+      {
+        "key": "lug_count",
+        "value": 5
+      },
+      {
+        "key": "mount_role",
+        "value": "bottom"
+      },
+      {
+        "key": "mount_role",
+        "value": "top"
+      },
+      {
+        "key": "orientation_key_deg",
+        "value": 0.0
+      }
+    ],
+    "materials": [
+      {
+        "custom_properties": {
+          "alpha_mode": "BLEND",
+          "material_id": "cobalt_blue_translucent"
+        },
+        "diffuse_color": [
+          0.02,
+          0.180000007,
+          0.720000029,
+          0.720000029
+        ],
+        "name": "MAT_cobalt_blue_translucent",
+        "principled_bsdf": {
+          "Alpha": 0.720000029,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.0,
+          "Roughness": 0.239999995
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "gunmetal"
+        },
+        "diffuse_color": [
+          0.119999997,
+          0.150000006,
+          0.180000007,
+          1.0
+        ],
+        "name": "MAT_gunmetal",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.920000017,
+          "Roughness": 0.280000001
+        },
+        "use_nodes": true
+      },
+      {
+        "custom_properties": {
+          "alpha_mode": "OPAQUE",
+          "material_id": "solar_amber"
+        },
+        "diffuse_color": [
+          1.0,
+          0.379999995,
+          0.029999999,
+          1.0
+        ],
+        "name": "MAT_solar_amber",
+        "principled_bsdf": {
+          "Alpha": 1.0,
+          "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+          "IOR": 1.5,
+          "Metallic": 0.119999997,
+          "Roughness": 0.300000012
+        },
+        "use_nodes": true
+      }
+    ],
+    "mounts": [
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_dual_comet",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_dual_comet_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_dual_comet_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_dual_comet",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0036,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_dual_comet_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_dual_comet_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0036,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "objects": [
+      {
+        "custom_properties": {
+          "geometry_kind": "radial_blade",
+          "interface_id": "NSS-V1",
+          "part_id": "blade_dual_comet",
+          "part_type": "main_blade",
+          "profile_family": "dual_comet_alternating"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -31.002262115,
+              -35.900287628,
+              -2.5
+            ],
+            [
+              -31.002262115,
+              -35.900287628,
+              2.988541842
+            ],
+            [
+              -31.002262115,
+              32.918483734,
+              2.988541842
+            ],
+            [
+              -31.002262115,
+              32.918483734,
+              -2.5
+            ],
+            [
+              33.300662994,
+              -35.900287628,
+              -2.5
+            ],
+            [
+              33.300662994,
+              -35.900287628,
+              2.988541842
+            ],
+            [
+              33.300662994,
+              32.918483734,
+              2.988541842
+            ],
+            [
+              33.300662994,
+              32.918483734,
+              -2.5
+            ]
+          ],
+          "material_slots": [
+            "MAT_gunmetal",
+            "MAT_cobalt_blue_translucent",
+            "MAT_solar_amber"
+          ],
+          "mesh": "GEO_blade_dual_comet_BODY",
+          "object": "GEO_blade_dual_comet_BODY",
+          "topology_sha256": "299e3362f41bb25f4a447bf4c34f9339e114da65973612abd4038784d5158912",
+          "triangle_count": 1152,
+          "vertex_count": 1728
+        },
+        "name": "GEO_blade_dual_comet_BODY",
+        "parent": null,
+        "path": "GEO_blade_dual_comet_BODY",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "interface_id": "NSS-V1",
+          "lug_count": 5,
+          "part_id": "blade_dual_comet",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "mesh_record": {
+          "local_bounds_mm": [
+            [
+              -10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              -10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              -10.700000763,
+              10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              -0.539999962
+            ],
+            [
+              10.700000763,
+              -10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              0.539999962
+            ],
+            [
+              10.700000763,
+              10.700000763,
+              -0.539999962
+            ]
+          ],
+          "material_slots": [
+            "MAT_gunmetal"
+          ],
+          "mesh": "GEO_blade_dual_comet_NSS_V1_COLLAR",
+          "object": "GEO_blade_dual_comet_NSS_V1_COLLAR",
+          "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+          "triangle_count": 480,
+          "vertex_count": 720
+        },
+        "name": "GEO_blade_dual_comet_NSS_V1_COLLAR",
+        "parent": null,
+        "path": "GEO_blade_dual_comet_NSS_V1_COLLAR",
+        "type": "MESH",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "male",
+          "mount_role": "bottom",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_dual_comet",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_dual_comet_BOTTOM",
+        "parent": null,
+        "path": "MOUNT_blade_dual_comet_BOTTOM",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          -0.0024,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      {
+        "custom_properties": {
+          "datum_radius_mm": 10.8,
+          "interface_id": "NSS-V1",
+          "interface_role": "female",
+          "mount_role": "top",
+          "orientation_key_deg": 0.0,
+          "part_id": "blade_dual_comet",
+          "part_type": "main_blade"
+        },
+        "local_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0036,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "name": "MOUNT_blade_dual_comet_TOP",
+        "parent": null,
+        "path": "MOUNT_blade_dual_comet_TOP",
+        "type": "EMPTY",
+        "world_matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0036,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    ],
+    "schema_version": 1
+  },
+  "input": "blade_dual_comet.glb",
+  "semantic_fingerprint": "a05b93d88efeb4b22a6ed8f3423bce236061533e48e9587852c9b703d21620f2"
+}
