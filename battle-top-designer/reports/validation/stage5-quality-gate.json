@@ -1,0 +1,31 @@
+{
+  "stage": "Stage 5: Orbit Halo",
+  "result": "PASS",
+  "part": {
+    "id": "blade_orbit_halo",
+    "profile_family": "orbit_halo_streamline",
+    "render_mesh_count": 10,
+    "triangle_count": 2112,
+    "material_count": 3,
+    "glb_file_size_bytes": 100304,
+    "boolean_render_operations": 0
+  },
+  "fixture": {
+    "id": "assembly_phase2a_orbit_halo",
+    "official_configuration": false,
+    "total_diameter_mm": 70.62370330095291,
+    "total_height_mm": 23.64000235684216,
+    "collision_count": 0,
+    "contact_review_count": 0
+  },
+  "preview_models_tested": 3,
+  "blocking_counts": {
+    "binary_drift_unconfirmed": 0,
+    "contact_review_unresolved": 0,
+    "semantic_regression": 0,
+    "gltf_validator_errors": 0,
+    "gltf_validator_warnings": 0,
+    "browser_errors": 0
+  },
+  "storm_attack_regression": "PASS"
+}

@@ -146,6 +146,117 @@ def create_iron_bastion(spec: dict, collection: bpy.types.Collection, materials:
     return [obj]
 
 
+def _closed_sector(
+    name: str,
+    inner_radius: float,
+    outer_radius: float,
+    bottom: float,
+    top: float,
+    start_angle: float,
+    end_angle: float,
+    steps: int,
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+) -> bpy.types.Object:
+    vertices = []
+    for index in range(steps + 1):
+        phase = index / steps
+        angle = start_angle + (end_angle - start_angle) * phase
+        streamlined_outer = outer_radius - math.sin(math.pi * phase) * 0.2 * MM
+        vertices.extend([
+            (inner_radius * math.cos(angle), inner_radius * math.sin(angle), bottom),
+            (streamlined_outer * math.cos(angle), streamlined_outer * math.sin(angle), bottom),
+            (inner_radius * math.cos(angle), inner_radius * math.sin(angle), top),
+            (streamlined_outer * math.cos(angle), streamlined_outer * math.sin(angle), top),
+        ])
+    faces = []
+    for index in range(steps):
+        bi, bo, ti, to = index * 4, index * 4 + 1, index * 4 + 2, index * 4 + 3
+        nbi, nbo, nti, nto = bi + 4, bo + 4, ti + 4, to + 4
+        faces.extend([(ti, to, nto, nti), (bi, nbi, nbo, bo), (bo, nbo, nto, to), (bi, ti, nti, nbi)])
+    last = steps * 4
+    faces.extend([(0, 1, 3, 2), (last, last + 2, last + 3, last + 1)])
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata(vertices, [], faces)
+    mesh.materials.append(material)
+    mesh.validate(verbose=False)
+    mesh.update(calc_edges=True)
+    obj = bpy.data.objects.new(name, mesh)
+    collection.objects.link(obj)
+    return obj
+
+
+def _closed_annulus(
+    name: str,
+    inner_radius: float,
+    outer_radius: float,
+    bottom: float,
+    top: float,
+    segments: int,
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+) -> bpy.types.Object:
+    vertices = []
+    for index in range(segments):
+        angle = math.tau * index / segments
+        vertices.extend([
+            (inner_radius * math.cos(angle), inner_radius * math.sin(angle), bottom),
+            (outer_radius * math.cos(angle), outer_radius * math.sin(angle), bottom),
+            (inner_radius * math.cos(angle), inner_radius * math.sin(angle), top),
+            (outer_radius * math.cos(angle), outer_radius * math.sin(angle), top),
+        ])
+    faces = []
+    for index in range(segments):
+        nxt = (index + 1) % segments
+        bi, bo, ti, to = index * 4, index * 4 + 1, index * 4 + 2, index * 4 + 3
+        nbi, nbo, nti, nto = nxt * 4, nxt * 4 + 1, nxt * 4 + 2, nxt * 4 + 3
+        faces.extend([(ti, to, nto, nti), (bi, nbi, nbo, bo), (bo, nbo, nto, to), (bi, ti, nti, nbi)])
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata(vertices, [], faces)
+    mesh.materials.append(material)
+    mesh.validate(verbose=False)
+    mesh.update(calc_edges=True)
+    obj = bpy.data.objects.new(name, mesh)
+    collection.objects.link(obj)
+    return obj
+
+
+def create_orbit_halo(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    count = geometry["window_count"]
+    bottom = -geometry["height_mm"] * MM * 0.5
+    top = geometry["height_mm"] * MM * 0.5
+    window_inner = geometry["window_inner_radius_mm"] * MM
+    window_outer = geometry["window_outer_radius_mm"] * MM
+    outer = geometry["outer_radius_mm"] * MM
+    inner = geometry["inner_radius_mm"] * MM
+    gap = math.radians(8.0)
+    objects = [_closed_annulus(
+        f"GEO_{spec['id']}_HUB", inner, window_inner, bottom, top + 0.2 * MM,
+        geometry["segments"], collection, materials[1 if len(materials) > 1 else 0],
+    )]
+    sector_span = math.tau / count - gap
+    spoke_half_angle = (geometry["spoke_width_mm"] * MM * 0.5) / ((window_inner + window_outer) * 0.5)
+    for index in range(count):
+        center = math.tau * index / count + math.radians(geometry["streamline_sweep_deg"])
+        objects.append(_closed_sector(
+            f"GEO_{spec['id']}_RING_{index + 1}", window_outer, outer, bottom, top,
+            center - sector_span * 0.5, center + sector_span * 0.5,
+            max(8, geometry["segments"] // count), collection, materials[0],
+        ))
+        spoke_center = math.tau * index / count
+        objects.append(_closed_sector(
+            f"GEO_{spec['id']}_SPOKE_{index + 1}", window_inner, window_outer, bottom + 0.2 * MM, top - 0.2 * MM,
+            spoke_center - spoke_half_angle, spoke_center + spoke_half_angle,
+            2, collection, materials[2 if len(materials) > 2 else 0],
+        ))
+    for obj in objects:
+        obj["part_id"] = spec["id"]
+        obj["geometry_kind"] = geometry["kind"]
+        obj["profile_family"] = spec["profile_family"]
+    return objects
+
+
 def create_profiled_annulus(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     geometry = spec["geometry"]
     segments = geometry["segments"]
@@ -243,6 +354,8 @@ def create_part(spec: dict, collection: bpy.types.Collection, materials: list[bp
     if kind == "radial_blade":
         if spec.get("profile_family") == "iron_bastion_damper":
             return create_iron_bastion(spec, collection, materials)
+        if spec.get("profile_family") == "orbit_halo_streamline":
+            return create_orbit_halo(spec, collection, materials)
         return create_radial_blade(spec, collection, materials)
     if kind in {"radial_core", "annular_ring", "radial_gear"}:
         return create_profiled_annulus(spec, collection, materials)

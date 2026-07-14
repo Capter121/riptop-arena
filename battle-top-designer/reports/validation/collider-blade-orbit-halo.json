@@ -1,0 +1,21 @@
+{
+  "part_id": "blade_orbit_halo",
+  "result": "PASS",
+  "errors": [],
+  "colliders": [
+    {
+      "object": "COLLIDER_blade_orbit_halo",
+      "vertices": 160,
+      "triangles": 320,
+      "non_manifold_edges": 0,
+      "boundary_edges": 0,
+      "zero_area_faces": 0,
+      "duplicate_vertices": 0,
+      "signed_volume_m3": 2.7307765986639207e-05,
+      "normals_outward": true,
+      "export_exclude": true,
+      "hidden_render": true,
+      "hidden_viewport": true
+    }
+  ]
+}

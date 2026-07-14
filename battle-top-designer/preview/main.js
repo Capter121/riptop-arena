@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const models = {
   blade_storm_fang: '../public/models/parts/blade_storm_fang.glb',
   blade_iron_bastion: '../public/models/parts/blade_iron_bastion.glb',
+  blade_orbit_halo: '../public/models/parts/blade_orbit_halo.glb',
 };
 const viewport = document.querySelector('#viewport');
 const select = document.querySelector('#model-select');

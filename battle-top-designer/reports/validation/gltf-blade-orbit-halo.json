@@ -1,8 +1,8 @@
 {
-  "uri": "assist_heavy.glb",
+  "uri": "blade_orbit_halo.glb",
   "mimeType": "model/gltf-binary",
   "validatorVersion": "2.0.0-dev.3.10",
-  "validatedAt": "2026-07-14T15:43:16.412Z",
+  "validatedAt": "2026-07-14T15:41:46.569Z",
   "issues": {
     "numErrors": 0,
     "numWarnings": 0,
@@ -14,23 +14,26 @@
   "info": {
     "version": "2.0",
     "generator": "Khronos glTF Blender I/O v4.5.51",
+    "extensionsUsed": [
+      "KHR_materials_transmission"
+    ],
     "resources": [
       {
         "pointer": "/buffers/0",
         "mimeType": "application/gltf-buffer",
         "storage": "glb",
-        "byteLength": 44352
+        "byteLength": 89856
       }
     ],
     "animationCount": 0,
-    "materialCount": 2,
+    "materialCount": 3,
     "hasMorphTargets": false,
     "hasSkins": false,
     "hasTextures": false,
     "hasDefaultScene": true,
-    "drawCallCount": 3,
-    "totalVertexCount": 1584,
-    "totalTriangleCount": 1056,
+    "drawCallCount": 10,
+    "totalVertexCount": 3216,
+    "totalTriangleCount": 2112,
     "maxUVs": 0,
     "maxInfluences": 0,
     "maxAttributes": 2

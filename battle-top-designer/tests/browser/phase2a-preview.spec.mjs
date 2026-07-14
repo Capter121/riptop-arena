@@ -2,7 +2,7 @@ import playwrightTest from '../../preview/node_modules/@playwright/test/index.js
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const models = ['blade_storm_fang', 'blade_iron_bastion'];
+const models = ['blade_storm_fang', 'blade_iron_bastion', 'blade_orbit_halo'];
 const { test, expect } = playwrightTest;
 const results = [];
 
