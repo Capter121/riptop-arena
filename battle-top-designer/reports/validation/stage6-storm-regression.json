@@ -1,0 +1,25 @@
+{
+  "baseline": "v0.1.0-vertical-slice",
+  "binary_drifts": [],
+  "disposition": null,
+  "errors": [],
+  "glb_unchanged": true,
+  "raw_sha256": {
+    "public/models/assemblies/assembly_storm_attack.glb": "52357cb7847dd12c919446fcbd9b57d125e2b99e5adf184f061e4948c0d821b7",
+    "public/models/parts/assist_heavy.glb": "44949136aeb7c1e1e219575c6798595d2fb0b584b346eb116b4ce33e12b8be70",
+    "public/models/parts/blade_storm_fang.glb": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac",
+    "public/models/parts/core_solar_wolf.glb": "78407099c4a962a7d30f6a7a62009ca7f04c5e91487aa17899089143d8bd102c",
+    "public/models/parts/gear_low.glb": "c772a6bbcb4907f4c7805e3571fb3bdaa6a1b7b1ff45d3beddace6632e076b8a",
+    "public/models/parts/tip_flat_attack.glb": "56bd25f90f6898dc3148cc5eb4c8c14741bd8b7ed71e77f6ffae64606b517629"
+  },
+  "result": "PASS",
+  "semantic_fingerprint": {
+    "public/models/assemblies/assembly_storm_attack.glb": "dc54d195ff6628585591e3fab8327b08d4a32c6d0d841f4560fd7028397c3d68",
+    "public/models/parts/assist_heavy.glb": "ad9876a939375dbd2f8f57d4c59a08280400e6f30305e7aa76389d8aa1c53e5f",
+    "public/models/parts/blade_storm_fang.glb": "476eaf1adbf65244ffaaef4e571b9d26f3217e73923d20c8d81b2ec2b4469df1",
+    "public/models/parts/core_solar_wolf.glb": "52e06b727ec452cb54853096b7cbf5dbd5ed5b75b8cb90bad118ad3e2ddfd6d5",
+    "public/models/parts/gear_low.glb": "a9f397571c350d95600a48a1461d5f2aa8d1ed52d3d8be3858365e2496d25abe",
+    "public/models/parts/tip_flat_attack.glb": "98974a705457d521ccde061b11d4ac17c3cb8b8ed51547cb173ac71125e0cce7"
+  },
+  "source_commit": "f55e260"
+}

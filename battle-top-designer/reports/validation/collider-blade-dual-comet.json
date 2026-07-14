@@ -1,0 +1,21 @@
+{
+  "part_id": "blade_dual_comet",
+  "result": "PASS",
+  "errors": [],
+  "colliders": [
+    {
+      "object": "COLLIDER_blade_dual_comet",
+      "vertices": 160,
+      "triangles": 320,
+      "non_manifold_edges": 0,
+      "boundary_edges": 0,
+      "zero_area_faces": 0,
+      "duplicate_vertices": 0,
+      "signed_volume_m3": 4.006505096315013e-05,
+      "normals_outward": true,
+      "export_exclude": true,
+      "hidden_render": true,
+      "hidden_viewport": true
+    }
+  ]
+}

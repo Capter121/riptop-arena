@@ -257,6 +257,82 @@ def create_orbit_halo(spec: dict, collection: bpy.types.Collection, materials: l
     return objects
 
 
+def create_dual_comet(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    segments = geometry["segments"]
+    units = geometry["unit_count"]
+    phase = math.radians(geometry.get("phase_deg", 0.0))
+    inner_radius = geometry["inner_radius_mm"] * MM
+    base_radius = geometry["base_radius_mm"] * MM
+    attack_radius = geometry["attack_radius_mm"] * MM
+    damper_radius = geometry["damper_radius_mm"] * MM
+    bottom = -geometry["height_mm"] * MM * 0.5
+
+    vertices = []
+    contact_types = []
+    for index in range(segments):
+        angle = math.tau * index / segments + phase
+        unit_phase = ((angle - phase) / math.tau * units) % 1.0
+        if unit_phase < 0.42:
+            contact_phase = unit_phase / 0.42
+            attack = math.sin(math.pi * contact_phase) ** 1.35
+            radius = base_radius + 0.15 * MM + (attack_radius - base_radius - 0.15 * MM) * attack
+            top = (geometry["attack_height_mm"] * 0.5 + 0.35 * contact_phase) * MM
+            contact_types.append("attack")
+        else:
+            contact_phase = (unit_phase - 0.42) / 0.58
+            damper = math.sin(math.pi * contact_phase) ** 2
+            radius = base_radius + 0.15 * MM + (damper_radius - base_radius - 0.15 * MM) * damper
+            top = geometry["damper_height_mm"] * MM * 0.5
+            contact_types.append("damper")
+        for ring_radius, ring_top in ((inner_radius, top + 0.15 * MM), (base_radius, top), (radius, top)):
+            vertices.extend([
+                (ring_radius * math.cos(angle), ring_radius * math.sin(angle), bottom),
+                (ring_radius * math.cos(angle), ring_radius * math.sin(angle), ring_top),
+            ])
+
+    faces = []
+    material_indices = []
+    ring_count = 3
+    for index in range(segments):
+        nxt = (index + 1) % segments
+        for ring in range(ring_count - 1):
+            lower = index * ring_count * 2 + ring * 2
+            upper = lower + 2
+            next_lower = nxt * ring_count * 2 + ring * 2
+            next_upper = next_lower + 2
+            faces.extend([
+                (lower + 1, upper + 1, next_upper + 1, next_lower + 1),
+                (lower, next_lower, next_upper, upper),
+            ])
+            material_indices.extend([1 if ring == 0 and len(materials) > 1 else 0, 0])
+        inner = index * ring_count * 2
+        next_inner = nxt * ring_count * 2
+        outer = inner + (ring_count - 1) * 2
+        next_outer = next_inner + (ring_count - 1) * 2
+        outer_material = 2 if contact_types[index] == "attack" and len(materials) > 2 else 0
+        faces.extend([
+            (inner, inner + 1, next_inner + 1, next_inner),
+            (outer, next_outer, next_outer + 1, outer + 1),
+        ])
+        material_indices.extend([0, outer_material])
+
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
+    mesh.from_pydata(vertices, [], faces)
+    for material in materials:
+        mesh.materials.append(material)
+    for polygon, material_index in zip(mesh.polygons, material_indices):
+        polygon.material_index = material_index
+    mesh.validate(verbose=False)
+    mesh.update(calc_edges=True)
+    obj = bpy.data.objects.new(f"GEO_{spec['id']}_BODY", mesh)
+    collection.objects.link(obj)
+    obj["part_id"] = spec["id"]
+    obj["geometry_kind"] = geometry["kind"]
+    obj["profile_family"] = spec["profile_family"]
+    return [obj]
+
+
 def create_profiled_annulus(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     geometry = spec["geometry"]
     segments = geometry["segments"]
@@ -356,6 +432,8 @@ def create_part(spec: dict, collection: bpy.types.Collection, materials: list[bp
             return create_iron_bastion(spec, collection, materials)
         if spec.get("profile_family") == "orbit_halo_streamline":
             return create_orbit_halo(spec, collection, materials)
+        if spec.get("profile_family") == "dual_comet_alternating":
+            return create_dual_comet(spec, collection, materials)
         return create_radial_blade(spec, collection, materials)
     if kind in {"radial_core", "annular_ring", "radial_gear"}:
         return create_profiled_annulus(spec, collection, materials)

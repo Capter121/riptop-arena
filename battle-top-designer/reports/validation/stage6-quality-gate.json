@@ -1,0 +1,43 @@
+{
+  "stage": "Stage 6 - Dual Comet minimum quality slice",
+  "result": "PASS",
+  "part": {
+    "id": "blade_dual_comet",
+    "profile_family": "dual_comet_alternating",
+    "triangle_count": 1632,
+    "material_count": 3,
+    "glb_file_size_bytes": 73228,
+    "geometry_validation": "PASS",
+    "collider_validation": "PASS",
+    "gltf_validator_errors": 0,
+    "gltf_validator_warnings": 0
+  },
+  "fixture": {
+    "id": "assembly_phase2a_dual_comet",
+    "result": "PASS",
+    "collision_count": 0,
+    "contact_review_count": 0,
+    "diameter_mm": 68.81877034902573,
+    "height_mm": 24.04000167734921,
+    "gltf_validator_errors": 0,
+    "gltf_validator_warnings": 0
+  },
+  "browser": {
+    "result": "PASS",
+    "tested_model_count": 4,
+    "console_errors": 0,
+    "page_errors": 0,
+    "failed_requests": 0
+  },
+  "storm_attack_regression": {
+    "result": "PASS",
+    "binary_drifts": 0,
+    "semantic_regressions": 0
+  },
+  "unresolved": {
+    "binary_drift": 0,
+    "contact_review": 0,
+    "semantic_regression": 0
+  },
+  "visual_observation": "Three balanced units alternate a narrow attack peak with a broad rounded damper shoulder; final originality and design quality remain subject to human review."
+}

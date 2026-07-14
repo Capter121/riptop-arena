@@ -1,8 +1,8 @@
 {
-  "uri": "gear_low.glb",
+  "uri": "blade_dual_comet.glb",
   "mimeType": "model/gltf-binary",
   "validatorVersion": "2.0.0-dev.3.10",
-  "validatedAt": "2026-07-14T15:49:48.300Z",
+  "validatedAt": "2026-07-14T15:47:58.585Z",
   "issues": {
     "numErrors": 0,
     "numWarnings": 0,
@@ -14,23 +14,26 @@
   "info": {
     "version": "2.0",
     "generator": "Khronos glTF Blender I/O v4.5.51",
+    "extensionsUsed": [
+      "KHR_materials_transmission"
+    ],
     "resources": [
       {
         "pointer": "/buffers/0",
         "mimeType": "application/gltf-buffer",
         "storage": "glb",
-        "byteLength": 40320
+        "byteLength": 68544
       }
     ],
     "animationCount": 0,
-    "materialCount": 2,
+    "materialCount": 3,
     "hasMorphTargets": false,
     "hasSkins": false,
     "hasTextures": false,
     "hasDefaultScene": true,
-    "drawCallCount": 3,
-    "totalVertexCount": 1440,
-    "totalTriangleCount": 960,
+    "drawCallCount": 4,
+    "totalVertexCount": 2448,
+    "totalTriangleCount": 1632,
     "maxUVs": 0,
     "maxInfluences": 0,
     "maxAttributes": 2
