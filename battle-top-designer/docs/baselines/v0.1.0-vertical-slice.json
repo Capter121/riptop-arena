@@ -24,7 +24,7 @@
     "summary_report": "reports/validation/vertical-slice-summary.json",
     "assembly_report": "reports/validation/assembly-storm-attack.json"
   },
-  "sha256": {
+  "raw_sha256": {
     "public/models/assemblies/assembly_storm_attack.glb": "dcb2bc4c2c19252079e7bd95880a505f8c87afce4f2432e00bc065007fce9126",
     "public/models/parts/assist_heavy.glb": "b6f1dbf006949c761af06735baacba34dd489c4aa9783feb111f8d73896f6367",
     "public/models/parts/blade_storm_fang.glb": "80dd75d2bc173c02b1c31474babe555776394473d306dc7f802c36c3c499039f",
@@ -43,5 +43,5078 @@
     "specs/parts/core_solar_wolf.json": "9d0ca0e77090f2741f41773a9c95b67db96779dc7a933ad990c7394a0fb104ee",
     "specs/parts/gear_low.json": "7b1966d08315afd51a500cc91e6d217b880b9f71dc64f55681aba682e3d199c2",
     "specs/parts/tip_flat_attack.json": "4baa9d2e19a06ad89ea0c81665e3678501b5c046c41af1eae0aaa2774b435674"
+  },
+  "semantic_fingerprint": {
+    "schema_version": 1,
+    "source_commit": "f55e260",
+    "artifacts": {
+      "public/models/parts/core_solar_wolf.glb": {
+        "sha256": "985318cf8d571dc5521415201dffe62f9196cb468d536415851238d6f11464b1",
+        "canonical": {
+          "dimensions_mm": [
+            35.391056061,
+            35.172000885,
+            3.599999905
+          ],
+          "interface_information": [
+            {
+              "key": "datum_radius_mm",
+              "value": 10.8
+            },
+            {
+              "key": "interface_id",
+              "value": "NSS-V1"
+            },
+            {
+              "key": "interface_role",
+              "value": "male"
+            },
+            {
+              "key": "interface_role",
+              "value": "terminal"
+            },
+            {
+              "key": "lug_count",
+              "value": 5
+            },
+            {
+              "key": "mount_role",
+              "value": "bottom"
+            },
+            {
+              "key": "mount_role",
+              "value": "top"
+            },
+            {
+              "key": "orientation_key_deg",
+              "value": 0.0
+            }
+          ],
+          "materials": [
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            }
+          ],
+          "mounts": [
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_core_solar_wolf_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_TOP",
+              "parent": null,
+              "path": "MOUNT_core_solar_wolf_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "objects": [
+            {
+              "custom_properties": {
+                "geometry_kind": "radial_core",
+                "interface_id": "NSS-V1",
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -17.69552803,
+                    -17.171998978,
+                    -1.799999952
+                  ],
+                  [
+                    -17.69552803,
+                    -17.171998978,
+                    1.799999952
+                  ],
+                  [
+                    -17.69552803,
+                    18.0,
+                    1.799999952
+                  ],
+                  [
+                    -17.69552803,
+                    18.0,
+                    -1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    -17.171998978,
+                    -1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    -17.171998978,
+                    1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    18.0,
+                    1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    18.0,
+                    -1.799999952
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_solar_amber",
+                  "MAT_obsidian_polymer"
+                ],
+                "mesh": "MESH_core_solar_wolf_BODY",
+                "object": "GEO_core_solar_wolf_BODY",
+                "topology_sha256": "07df38f25e6bec0bd69a2d2f2ab0a7fde5bd29290e25be7bb7f61613d4ce7d37",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_core_solar_wolf_BODY",
+              "parent": null,
+              "path": "GEO_core_solar_wolf_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_solar_amber"
+                ],
+                "mesh": "MESH_core_solar_wolf_NSS_V1",
+                "object": "GEO_core_solar_wolf_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_core_solar_wolf_NSS_V1_COLLAR",
+              "parent": null,
+              "path": "GEO_core_solar_wolf_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_core_solar_wolf_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_TOP",
+              "parent": null,
+              "path": "MOUNT_core_solar_wolf_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "schema_version": 1
+        }
+      },
+      "public/models/parts/blade_storm_fang.glb": {
+        "sha256": "dc3f329ca72b97d8e120222d75c5bd421731b63b0865920461597432b4121eb8",
+        "canonical": {
+          "dimensions_mm": [
+            64.731658936,
+            66.860778809,
+            5.89943409
+          ],
+          "interface_information": [
+            {
+              "key": "datum_radius_mm",
+              "value": 10.8
+            },
+            {
+              "key": "interface_id",
+              "value": "NSS-V1"
+            },
+            {
+              "key": "interface_role",
+              "value": "female"
+            },
+            {
+              "key": "interface_role",
+              "value": "male"
+            },
+            {
+              "key": "lug_count",
+              "value": 5
+            },
+            {
+              "key": "mount_role",
+              "value": "bottom"
+            },
+            {
+              "key": "mount_role",
+              "value": "top"
+            },
+            {
+              "key": "orientation_key_deg",
+              "value": 0.0
+            }
+          ],
+          "materials": [
+            {
+              "custom_properties": {
+                "alpha_mode": "BLEND",
+                "material_id": "cobalt_blue_translucent"
+              },
+              "diffuse_color": [
+                0.02,
+                0.180000007,
+                0.720000029,
+                0.720000029
+              ],
+              "name": "MAT_cobalt_blue_translucent",
+              "principled_bsdf": {
+                "Alpha": 0.720000029,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.239999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "gunmetal"
+              },
+              "diffuse_color": [
+                0.119999997,
+                0.150000006,
+                0.180000007,
+                1.0
+              ],
+              "name": "MAT_gunmetal",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.920000017,
+                "Roughness": 0.280000001
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            }
+          ],
+          "mounts": [
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0024,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_blade_storm_fang_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0024,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0035,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_TOP",
+              "parent": null,
+              "path": "MOUNT_blade_storm_fang_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0035,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "objects": [
+            {
+              "custom_properties": {
+                "geometry_kind": "radial_blade",
+                "interface_id": "NSS-V1",
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -35.353912354,
+                    -35.246646881,
+                    -2.400000095
+                  ],
+                  [
+                    -35.353912354,
+                    -35.246646881,
+                    3.499433517
+                  ],
+                  [
+                    -35.353912354,
+                    31.614131927,
+                    3.499433517
+                  ],
+                  [
+                    -35.353912354,
+                    31.614131927,
+                    -2.400000095
+                  ],
+                  [
+                    29.377738953,
+                    -35.246646881,
+                    -2.400000095
+                  ],
+                  [
+                    29.377738953,
+                    -35.246646881,
+                    3.499433517
+                  ],
+                  [
+                    29.377738953,
+                    31.614131927,
+                    3.499433517
+                  ],
+                  [
+                    29.377738953,
+                    31.614131927,
+                    -2.400000095
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_gunmetal",
+                  "MAT_cobalt_blue_translucent",
+                  "MAT_solar_amber"
+                ],
+                "mesh": "MESH_blade_storm_fang_BODY",
+                "object": "GEO_blade_storm_fang_BODY",
+                "topology_sha256": "01a43f7f298cb6e87982da7a81c844da571f1ec28636856a74d02023a9491f55",
+                "triangle_count": 576,
+                "vertex_count": 1008
+              },
+              "name": "GEO_blade_storm_fang_BODY",
+              "parent": null,
+              "path": "GEO_blade_storm_fang_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_gunmetal"
+                ],
+                "mesh": "MESH_blade_storm_fang_NSS_V1",
+                "object": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+              "parent": null,
+              "path": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0024,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_blade_storm_fang_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0024,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0035,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_TOP",
+              "parent": null,
+              "path": "MOUNT_blade_storm_fang_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0035,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "schema_version": 1
+        }
+      },
+      "public/models/parts/assist_heavy.glb": {
+        "sha256": "d32a2ee26b20b59682427e473e8f3659472daed0e7915e68a9c1aa5cca2dfa9d",
+        "canonical": {
+          "dimensions_mm": [
+            62.0,
+            59.98500061,
+            3.400000095
+          ],
+          "interface_information": [
+            {
+              "key": "datum_radius_mm",
+              "value": 10.8
+            },
+            {
+              "key": "interface_id",
+              "value": "NSS-V1"
+            },
+            {
+              "key": "interface_role",
+              "value": "female"
+            },
+            {
+              "key": "interface_role",
+              "value": "male"
+            },
+            {
+              "key": "lug_count",
+              "value": 5
+            },
+            {
+              "key": "mount_role",
+              "value": "bottom"
+            },
+            {
+              "key": "mount_role",
+              "value": "top"
+            },
+            {
+              "key": "orientation_key_deg",
+              "value": 0.0
+            }
+          ],
+          "materials": [
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "brushed_silver"
+              },
+              "diffuse_color": [
+                0.579999983,
+                0.620000005,
+                0.680000007,
+                1.0
+              ],
+              "name": "MAT_brushed_silver",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.949999988,
+                "Roughness": 0.319999993
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            }
+          ],
+          "mounts": [
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_assist_heavy_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_TOP",
+              "parent": null,
+              "path": "MOUNT_assist_heavy_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "objects": [
+            {
+              "custom_properties": {
+                "geometry_kind": "annular_ring",
+                "interface_id": "NSS-V1",
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -31.0,
+                    -29.992500305,
+                    -1.700000048
+                  ],
+                  [
+                    -31.0,
+                    -29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    -31.0,
+                    29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    -31.0,
+                    29.992500305,
+                    -1.700000048
+                  ],
+                  [
+                    31.0,
+                    -29.992500305,
+                    -1.700000048
+                  ],
+                  [
+                    31.0,
+                    -29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    31.0,
+                    29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    31.0,
+                    29.992500305,
+                    -1.700000048
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_brushed_silver",
+                  "MAT_obsidian_polymer"
+                ],
+                "mesh": "MESH_assist_heavy_BODY",
+                "object": "GEO_assist_heavy_BODY",
+                "topology_sha256": "db5edd9d4dd39e7d422e91a3df24218fdc109c5a29eaff1201d8eaf61c51e3a4",
+                "triangle_count": 576,
+                "vertex_count": 864
+              },
+              "name": "GEO_assist_heavy_BODY",
+              "parent": null,
+              "path": "GEO_assist_heavy_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_brushed_silver"
+                ],
+                "mesh": "MESH_assist_heavy_NSS_V1",
+                "object": "GEO_assist_heavy_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_assist_heavy_NSS_V1_COLLAR",
+              "parent": null,
+              "path": "GEO_assist_heavy_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_assist_heavy_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_TOP",
+              "parent": null,
+              "path": "MOUNT_assist_heavy_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "schema_version": 1
+        }
+      },
+      "public/models/parts/gear_low.glb": {
+        "sha256": "5bc9365637388e5dd335ecb16e789593377660dadbf94be4765117a4e1517607",
+        "canonical": {
+          "dimensions_mm": [
+            33.581401825,
+            33.581401825,
+            4.0
+          ],
+          "interface_information": [
+            {
+              "key": "datum_radius_mm",
+              "value": 10.8
+            },
+            {
+              "key": "interface_id",
+              "value": "NSS-V1"
+            },
+            {
+              "key": "interface_role",
+              "value": "female"
+            },
+            {
+              "key": "interface_role",
+              "value": "male"
+            },
+            {
+              "key": "lug_count",
+              "value": 5
+            },
+            {
+              "key": "mount_role",
+              "value": "bottom"
+            },
+            {
+              "key": "mount_role",
+              "value": "top"
+            },
+            {
+              "key": "orientation_key_deg",
+              "value": 0.0
+            }
+          ],
+          "materials": [
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            }
+          ],
+          "mounts": [
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_gear_low_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_TOP",
+              "parent": null,
+              "path": "MOUNT_gear_low_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "objects": [
+            {
+              "custom_properties": {
+                "geometry_kind": "radial_gear",
+                "interface_id": "NSS-V1",
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -16.790700912,
+                    -16.790700912,
+                    -2.0
+                  ],
+                  [
+                    -16.790700912,
+                    -16.790700912,
+                    2.0
+                  ],
+                  [
+                    -16.790700912,
+                    16.790700912,
+                    2.0
+                  ],
+                  [
+                    -16.790700912,
+                    16.790700912,
+                    -2.0
+                  ],
+                  [
+                    16.790700912,
+                    -16.790700912,
+                    -2.0
+                  ],
+                  [
+                    16.790700912,
+                    -16.790700912,
+                    2.0
+                  ],
+                  [
+                    16.790700912,
+                    16.790700912,
+                    2.0
+                  ],
+                  [
+                    16.790700912,
+                    16.790700912,
+                    -2.0
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer",
+                  "MAT_solar_amber"
+                ],
+                "mesh": "MESH_gear_low_BODY",
+                "object": "GEO_gear_low_BODY",
+                "topology_sha256": "4700759494cbc755f414b774f8b80b92969d8f149f1b2b762fa37ced4e32f6c3",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_gear_low_BODY",
+              "parent": null,
+              "path": "GEO_gear_low_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer"
+                ],
+                "mesh": "MESH_gear_low_NSS_V1",
+                "object": "GEO_gear_low_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_gear_low_NSS_V1_COLLAR",
+              "parent": null,
+              "path": "GEO_gear_low_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_gear_low_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_TOP",
+              "parent": null,
+              "path": "MOUNT_gear_low_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "schema_version": 1
+        }
+      },
+      "public/models/parts/tip_flat_attack.glb": {
+        "sha256": "4d1136c74dd77d68dc30f2daff8d1d942fa1db6b9cb34aedb63b695af1dad6a6",
+        "canonical": {
+          "dimensions_mm": [
+            21.400001526,
+            21.400001526,
+            7.039999962
+          ],
+          "interface_information": [
+            {
+              "key": "datum_radius_mm",
+              "value": 10.8
+            },
+            {
+              "key": "datum_radius_mm",
+              "value": 2.8
+            },
+            {
+              "key": "interface_id",
+              "value": "NSS-V1"
+            },
+            {
+              "key": "interface_role",
+              "value": "female"
+            },
+            {
+              "key": "interface_role",
+              "value": "terminal"
+            },
+            {
+              "key": "lug_count",
+              "value": 5
+            },
+            {
+              "key": "mount_role",
+              "value": "bottom"
+            },
+            {
+              "key": "mount_role",
+              "value": "top"
+            },
+            {
+              "key": "orientation_key_deg",
+              "value": 0.0
+            }
+          ],
+          "materials": [
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            }
+          ],
+          "mounts": [
+            {
+              "custom_properties": {
+                "datum_radius_mm": 2.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0065,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_tip_flat_attack_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0065,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.00054,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_TOP",
+              "parent": null,
+              "path": "MOUNT_tip_flat_attack_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.00054,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "objects": [
+            {
+              "custom_properties": {
+                "geometry_kind": "revolved_tip",
+                "interface_id": "NSS-V1",
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -8.0,
+                    -8.0,
+                    -6.5
+                  ],
+                  [
+                    -8.0,
+                    -8.0,
+                    -0.649999976
+                  ],
+                  [
+                    -8.0,
+                    8.0,
+                    -0.649999976
+                  ],
+                  [
+                    -8.0,
+                    8.0,
+                    -6.5
+                  ],
+                  [
+                    8.0,
+                    -8.0,
+                    -6.5
+                  ],
+                  [
+                    8.0,
+                    -8.0,
+                    -0.649999976
+                  ],
+                  [
+                    8.0,
+                    8.0,
+                    -0.649999976
+                  ],
+                  [
+                    8.0,
+                    8.0,
+                    -6.5
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer",
+                  "MAT_solar_amber"
+                ],
+                "mesh": "MESH_tip_flat_attack_BODY",
+                "object": "GEO_tip_flat_attack_BODY",
+                "topology_sha256": "2c29c31eb2770cb80694cade4c7faebcbbb1f1e5f8eb529623fadbbb052317bb",
+                "triangle_count": 480,
+                "vertex_count": 866
+              },
+              "name": "GEO_tip_flat_attack_BODY",
+              "parent": null,
+              "path": "GEO_tip_flat_attack_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer"
+                ],
+                "mesh": "MESH_tip_flat_attack_NSS_V1",
+                "object": "GEO_tip_flat_attack_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_tip_flat_attack_NSS_V1_COLLAR",
+              "parent": null,
+              "path": "GEO_tip_flat_attack_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 2.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0065,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_BOTTOM",
+              "parent": null,
+              "path": "MOUNT_tip_flat_attack_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0065,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.00054,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_TOP",
+              "parent": null,
+              "path": "MOUNT_tip_flat_attack_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.00054,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "schema_version": 1
+        }
+      },
+      "public/models/assemblies/assembly_storm_attack.glb": {
+        "sha256": "03f6f9736d98faeea1afd20a9dc5cceb154e9ae182bd4c73a2ae71d4b51e5497",
+        "canonical": {
+          "dimensions_mm": [
+            66.353919983,
+            66.860778809,
+            23.940002441
+          ],
+          "interface_information": [
+            {
+              "key": "datum_radius_mm",
+              "value": 10.8
+            },
+            {
+              "key": "datum_radius_mm",
+              "value": 2.8
+            },
+            {
+              "key": "interface_id",
+              "value": "NSS-V1"
+            },
+            {
+              "key": "interface_role",
+              "value": "female"
+            },
+            {
+              "key": "interface_role",
+              "value": "male"
+            },
+            {
+              "key": "interface_role",
+              "value": "terminal"
+            },
+            {
+              "key": "lug_count",
+              "value": 5
+            },
+            {
+              "key": "mount_role",
+              "value": "bottom"
+            },
+            {
+              "key": "mount_role",
+              "value": "top"
+            },
+            {
+              "key": "orientation_key_deg",
+              "value": 0.0
+            }
+          ],
+          "materials": [
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "brushed_silver"
+              },
+              "diffuse_color": [
+                0.579999983,
+                0.620000005,
+                0.680000007,
+                1.0
+              ],
+              "name": "MAT_brushed_silver",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.949999988,
+                "Roughness": 0.319999993
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "BLEND",
+                "material_id": "cobalt_blue_translucent"
+              },
+              "diffuse_color": [
+                0.02,
+                0.180000007,
+                0.720000029,
+                0.720000029
+              ],
+              "name": "MAT_cobalt_blue_translucent",
+              "principled_bsdf": {
+                "Alpha": 0.720000029,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.239999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "gunmetal"
+              },
+              "diffuse_color": [
+                0.119999997,
+                0.150000006,
+                0.180000007,
+                1.0
+              ],
+              "name": "MAT_gunmetal",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.920000017,
+                "Roughness": 0.280000001
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer.001",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer.002",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "obsidian_polymer"
+              },
+              "diffuse_color": [
+                0.025,
+                0.029999999,
+                0.045000002,
+                1.0
+              ],
+              "name": "MAT_obsidian_polymer.003",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.0,
+                "Roughness": 0.379999995
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber.001",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber.002",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            },
+            {
+              "custom_properties": {
+                "alpha_mode": "OPAQUE",
+                "material_id": "solar_amber"
+              },
+              "diffuse_color": [
+                1.0,
+                0.379999995,
+                0.029999999,
+                1.0
+              ],
+              "name": "MAT_solar_amber.003",
+              "principled_bsdf": {
+                "Alpha": 1.0,
+                "Base Color": "<bpy_float[4], NodeSocketColor.default_value>",
+                "IOR": 1.5,
+                "Metallic": 0.119999997,
+                "Roughness": 0.300000012
+              },
+              "use_nodes": true
+            }
+          ],
+          "mounts": [
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_BOTTOM",
+              "parent": "INSTANCE_assist_heavy",
+              "path": "INSTANCE_assist_heavy/MOUNT_assist_heavy_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.011100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_TOP",
+              "parent": "INSTANCE_assist_heavy",
+              "path": "INSTANCE_assist_heavy/MOUNT_assist_heavy_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.007700001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0024,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_BOTTOM",
+              "parent": "INSTANCE_blade_storm_fang",
+              "path": "INSTANCE_blade_storm_fang/MOUNT_blade_storm_fang_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0077,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0035,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_TOP",
+              "parent": "INSTANCE_blade_storm_fang",
+              "path": "INSTANCE_blade_storm_fang/MOUNT_blade_storm_fang_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_BOTTOM",
+              "parent": "INSTANCE_core_solar_wolf",
+              "path": "INSTANCE_core_solar_wolf/MOUNT_core_solar_wolf_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_TOP",
+              "parent": "INSTANCE_core_solar_wolf",
+              "path": "INSTANCE_core_solar_wolf/MOUNT_core_solar_wolf_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_BOTTOM",
+              "parent": "INSTANCE_gear_low",
+              "path": "INSTANCE_gear_low/MOUNT_gear_low_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_TOP",
+              "parent": "INSTANCE_gear_low",
+              "path": "INSTANCE_gear_low/MOUNT_gear_low_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.011100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 2.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0065,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_BOTTOM",
+              "parent": "INSTANCE_tip_flat_attack",
+              "path": "INSTANCE_tip_flat_attack/MOUNT_tip_flat_attack_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.022140002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.00054,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_TOP",
+              "parent": "INSTANCE_tip_flat_attack",
+              "path": "INSTANCE_tip_flat_attack/MOUNT_tip_flat_attack_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "objects": [
+            {
+              "custom_properties": {
+                "assembly_id": "assembly_storm_attack",
+                "assembly_role": "assist",
+                "part_id": "assist_heavy"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.009400001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "INSTANCE_assist_heavy",
+              "parent": null,
+              "path": "INSTANCE_assist_heavy",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.009400001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "geometry_kind": "annular_ring",
+                "interface_id": "NSS-V1",
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -31.0,
+                    -29.992500305,
+                    -1.700000048
+                  ],
+                  [
+                    -31.0,
+                    -29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    -31.0,
+                    29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    -31.0,
+                    29.992500305,
+                    -1.700000048
+                  ],
+                  [
+                    31.0,
+                    -29.992500305,
+                    -1.700000048
+                  ],
+                  [
+                    31.0,
+                    -29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    31.0,
+                    29.992500305,
+                    1.700000048
+                  ],
+                  [
+                    31.0,
+                    29.992500305,
+                    -1.700000048
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_brushed_silver",
+                  "MAT_obsidian_polymer.001"
+                ],
+                "mesh": "MESH_assist_heavy_BODY",
+                "object": "GEO_assist_heavy_BODY",
+                "topology_sha256": "db5edd9d4dd39e7d422e91a3df24218fdc109c5a29eaff1201d8eaf61c51e3a4",
+                "triangle_count": 576,
+                "vertex_count": 864
+              },
+              "name": "GEO_assist_heavy_BODY",
+              "parent": "INSTANCE_assist_heavy",
+              "path": "INSTANCE_assist_heavy/GEO_assist_heavy_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.009400001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_brushed_silver"
+                ],
+                "mesh": "MESH_assist_heavy_NSS_V1",
+                "object": "GEO_assist_heavy_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_assist_heavy_NSS_V1_COLLAR",
+              "parent": "INSTANCE_assist_heavy",
+              "path": "INSTANCE_assist_heavy/GEO_assist_heavy_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.009400001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_BOTTOM",
+              "parent": "INSTANCE_assist_heavy",
+              "path": "INSTANCE_assist_heavy/MOUNT_assist_heavy_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.011100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "assist_heavy",
+                "part_type": "assist_ring"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0017,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_assist_heavy_TOP",
+              "parent": "INSTANCE_assist_heavy",
+              "path": "INSTANCE_assist_heavy/MOUNT_assist_heavy_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.007700001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "assembly_id": "assembly_storm_attack",
+                "assembly_role": "blade",
+                "part_id": "blade_storm_fang"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0053,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "INSTANCE_blade_storm_fang",
+              "parent": null,
+              "path": "INSTANCE_blade_storm_fang",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0053,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "geometry_kind": "radial_blade",
+                "interface_id": "NSS-V1",
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -35.353912354,
+                    -35.246646881,
+                    -2.400000095
+                  ],
+                  [
+                    -35.353912354,
+                    -35.246646881,
+                    3.499433517
+                  ],
+                  [
+                    -35.353912354,
+                    31.614131927,
+                    3.499433517
+                  ],
+                  [
+                    -35.353912354,
+                    31.614131927,
+                    -2.400000095
+                  ],
+                  [
+                    29.377738953,
+                    -35.246646881,
+                    -2.400000095
+                  ],
+                  [
+                    29.377738953,
+                    -35.246646881,
+                    3.499433517
+                  ],
+                  [
+                    29.377738953,
+                    31.614131927,
+                    3.499433517
+                  ],
+                  [
+                    29.377738953,
+                    31.614131927,
+                    -2.400000095
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_gunmetal",
+                  "MAT_cobalt_blue_translucent",
+                  "MAT_solar_amber.001"
+                ],
+                "mesh": "MESH_blade_storm_fang_BODY",
+                "object": "GEO_blade_storm_fang_BODY",
+                "topology_sha256": "01a43f7f298cb6e87982da7a81c844da571f1ec28636856a74d02023a9491f55",
+                "triangle_count": 576,
+                "vertex_count": 1008
+              },
+              "name": "GEO_blade_storm_fang_BODY",
+              "parent": "INSTANCE_blade_storm_fang",
+              "path": "INSTANCE_blade_storm_fang/GEO_blade_storm_fang_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0053,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_gunmetal"
+                ],
+                "mesh": "MESH_blade_storm_fang_NSS_V1",
+                "object": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+              "parent": "INSTANCE_blade_storm_fang",
+              "path": "INSTANCE_blade_storm_fang/GEO_blade_storm_fang_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0053,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0024,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_BOTTOM",
+              "parent": "INSTANCE_blade_storm_fang",
+              "path": "INSTANCE_blade_storm_fang/MOUNT_blade_storm_fang_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0077,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "blade_storm_fang",
+                "part_type": "main_blade"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0035,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_blade_storm_fang_TOP",
+              "parent": "INSTANCE_blade_storm_fang",
+              "path": "INSTANCE_blade_storm_fang/MOUNT_blade_storm_fang_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "assembly_id": "assembly_storm_attack",
+                "assembly_role": "core",
+                "part_id": "core_solar_wolf"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "INSTANCE_core_solar_wolf",
+              "parent": null,
+              "path": "INSTANCE_core_solar_wolf",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "geometry_kind": "radial_core",
+                "interface_id": "NSS-V1",
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -17.69552803,
+                    -17.171998978,
+                    -1.799999952
+                  ],
+                  [
+                    -17.69552803,
+                    -17.171998978,
+                    1.799999952
+                  ],
+                  [
+                    -17.69552803,
+                    18.0,
+                    1.799999952
+                  ],
+                  [
+                    -17.69552803,
+                    18.0,
+                    -1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    -17.171998978,
+                    -1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    -17.171998978,
+                    1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    18.0,
+                    1.799999952
+                  ],
+                  [
+                    17.69552803,
+                    18.0,
+                    -1.799999952
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_solar_amber",
+                  "MAT_obsidian_polymer"
+                ],
+                "mesh": "MESH_core_solar_wolf_BODY",
+                "object": "GEO_core_solar_wolf_BODY",
+                "topology_sha256": "07df38f25e6bec0bd69a2d2f2ab0a7fde5bd29290e25be7bb7f61613d4ce7d37",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_core_solar_wolf_BODY",
+              "parent": "INSTANCE_core_solar_wolf",
+              "path": "INSTANCE_core_solar_wolf/GEO_core_solar_wolf_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_solar_amber"
+                ],
+                "mesh": "MESH_core_solar_wolf_NSS_V1",
+                "object": "GEO_core_solar_wolf_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_core_solar_wolf_NSS_V1_COLLAR",
+              "parent": "INSTANCE_core_solar_wolf",
+              "path": "INSTANCE_core_solar_wolf/GEO_core_solar_wolf_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_BOTTOM",
+              "parent": "INSTANCE_core_solar_wolf",
+              "path": "INSTANCE_core_solar_wolf/MOUNT_core_solar_wolf_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "core_solar_wolf",
+                "part_type": "emblem_core"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_core_solar_wolf_TOP",
+              "parent": "INSTANCE_core_solar_wolf",
+              "path": "INSTANCE_core_solar_wolf/MOUNT_core_solar_wolf_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0018,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "assembly_id": "assembly_storm_attack",
+                "assembly_role": "gear",
+                "part_id": "gear_low"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.013100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "INSTANCE_gear_low",
+              "parent": null,
+              "path": "INSTANCE_gear_low",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.013100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "geometry_kind": "radial_gear",
+                "interface_id": "NSS-V1",
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -16.790700912,
+                    -16.790700912,
+                    -2.0
+                  ],
+                  [
+                    -16.790700912,
+                    -16.790700912,
+                    2.0
+                  ],
+                  [
+                    -16.790700912,
+                    16.790700912,
+                    2.0
+                  ],
+                  [
+                    -16.790700912,
+                    16.790700912,
+                    -2.0
+                  ],
+                  [
+                    16.790700912,
+                    -16.790700912,
+                    -2.0
+                  ],
+                  [
+                    16.790700912,
+                    -16.790700912,
+                    2.0
+                  ],
+                  [
+                    16.790700912,
+                    16.790700912,
+                    2.0
+                  ],
+                  [
+                    16.790700912,
+                    16.790700912,
+                    -2.0
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer.002",
+                  "MAT_solar_amber.002"
+                ],
+                "mesh": "MESH_gear_low_BODY",
+                "object": "GEO_gear_low_BODY",
+                "topology_sha256": "4700759494cbc755f414b774f8b80b92969d8f149f1b2b762fa37ced4e32f6c3",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_gear_low_BODY",
+              "parent": "INSTANCE_gear_low",
+              "path": "INSTANCE_gear_low/GEO_gear_low_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.013100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer.002"
+                ],
+                "mesh": "MESH_gear_low_NSS_V1",
+                "object": "GEO_gear_low_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_gear_low_NSS_V1_COLLAR",
+              "parent": "INSTANCE_gear_low",
+              "path": "INSTANCE_gear_low/GEO_gear_low_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.013100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "male",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_BOTTOM",
+              "parent": "INSTANCE_gear_low",
+              "path": "INSTANCE_gear_low/MOUNT_gear_low_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "gear_low",
+                "part_type": "height_gear"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_gear_low_TOP",
+              "parent": "INSTANCE_gear_low",
+              "path": "INSTANCE_gear_low/MOUNT_gear_low_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.011100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "assembly_id": "assembly_storm_attack",
+                "assembly_role": "tip",
+                "part_id": "tip_flat_attack"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015640002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "INSTANCE_tip_flat_attack",
+              "parent": null,
+              "path": "INSTANCE_tip_flat_attack",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015640002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "geometry_kind": "revolved_tip",
+                "interface_id": "NSS-V1",
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -8.0,
+                    -8.0,
+                    -6.5
+                  ],
+                  [
+                    -8.0,
+                    -8.0,
+                    -0.649999976
+                  ],
+                  [
+                    -8.0,
+                    8.0,
+                    -0.649999976
+                  ],
+                  [
+                    -8.0,
+                    8.0,
+                    -6.5
+                  ],
+                  [
+                    8.0,
+                    -8.0,
+                    -6.5
+                  ],
+                  [
+                    8.0,
+                    -8.0,
+                    -0.649999976
+                  ],
+                  [
+                    8.0,
+                    8.0,
+                    -0.649999976
+                  ],
+                  [
+                    8.0,
+                    8.0,
+                    -6.5
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer.003",
+                  "MAT_solar_amber.003"
+                ],
+                "mesh": "MESH_tip_flat_attack_BODY",
+                "object": "GEO_tip_flat_attack_BODY",
+                "topology_sha256": "2c29c31eb2770cb80694cade4c7faebcbbb1f1e5f8eb529623fadbbb052317bb",
+                "triangle_count": 480,
+                "vertex_count": 866
+              },
+              "name": "GEO_tip_flat_attack_BODY",
+              "parent": "INSTANCE_tip_flat_attack",
+              "path": "INSTANCE_tip_flat_attack/GEO_tip_flat_attack_BODY",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015640002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "interface_id": "NSS-V1",
+                "lug_count": 5,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "mesh_record": {
+                "local_bounds_mm": [
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    -10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    -0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    -10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    0.539999962
+                  ],
+                  [
+                    10.700000763,
+                    10.700000763,
+                    -0.539999962
+                  ]
+                ],
+                "material_slots": [
+                  "MAT_obsidian_polymer.003"
+                ],
+                "mesh": "MESH_tip_flat_attack_NSS_V1",
+                "object": "GEO_tip_flat_attack_NSS_V1_COLLAR",
+                "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
+                "triangle_count": 480,
+                "vertex_count": 720
+              },
+              "name": "GEO_tip_flat_attack_NSS_V1_COLLAR",
+              "parent": "INSTANCE_tip_flat_attack",
+              "path": "INSTANCE_tip_flat_attack/GEO_tip_flat_attack_NSS_V1_COLLAR",
+              "type": "MESH",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015640002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 2.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "terminal",
+                "mount_role": "bottom",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.0065,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_BOTTOM",
+              "parent": "INSTANCE_tip_flat_attack",
+              "path": "INSTANCE_tip_flat_attack/MOUNT_tip_flat_attack_BOTTOM",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.022140002,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "custom_properties": {
+                "datum_radius_mm": 10.8,
+                "interface_id": "NSS-V1",
+                "interface_role": "female",
+                "mount_role": "top",
+                "orientation_key_deg": 0.0,
+                "part_id": "tip_flat_attack",
+                "part_type": "performance_tip"
+              },
+              "local_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.00054,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "name": "MOUNT_tip_flat_attack_TOP",
+              "parent": "INSTANCE_tip_flat_attack",
+              "path": "INSTANCE_tip_flat_attack/MOUNT_tip_flat_attack_TOP",
+              "type": "EMPTY",
+              "world_matrix": [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                -0.015100001,
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ],
+          "schema_version": 1
+        }
+      }
+    }
   }
 }

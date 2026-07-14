@@ -1,0 +1,26 @@
+﻿{
+    "result":  "PASS",
+    "errors":  [
+
+               ],
+    "blender":  {
+                    "path":  "D:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe",
+                    "version":  "4.5.11 LTS"
+                },
+    "gltf_validator":  {
+                           "package":  "E:\\战斗陀螺项目\\battle-top-designer\\build\\tools\\gltf-validator\\node_modules\\gltf-validator\\package.json",
+                           "version":  "2.0.0-dev.3.10"
+                       },
+    "node":  {
+                 "executable":  "C:\\Program Files\\nodejs\\node.exe",
+                 "version":  "v22.20.0"
+             },
+    "python":  {
+                   "executable":  "C:\\Users\\Terla\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                   "version":  "Python 3.12.10"
+               },
+    "browser_test":  {
+                         "playwright_version":  "1.61.1",
+                         "three_version":  "0.185.1"
+                     }
+}
