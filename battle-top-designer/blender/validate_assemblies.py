@@ -167,21 +167,27 @@ def main() -> None:
 
     matrix_path = ROOT / "reports" / "assembly_matrix.csv"
     matrix_path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "assembly_id", "core", "blade", "assist", "gear", "tip", "result", "error_code",
+        "axis_error_mm", "phase_error_deg", "unexpected_overlap_mm3", "total_height_mm", "total_diameter_mm",
+    ]
+    rows = []
+    if matrix_path.is_file():
+        with matrix_path.open("r", newline="", encoding="utf-8") as handle:
+            rows = [row for row in csv.DictReader(handle) if row.get("assembly_id") != args.assembly]
+    rows.append({
+        "assembly_id": args.assembly,
+        "core": spec["core"], "blade": spec["blade"], "assist": spec["assist"],
+        "gear": spec["gear"], "tip": spec["tip"], "result": result,
+        "error_code": "|".join(errors), "axis_error_mm": maximum_axis_error_mm,
+        "phase_error_deg": maximum_phase_error_deg,
+        "unexpected_overlap_mm3": sum(item["overlap_volume_mm3"] for item in collisions),
+        "total_height_mm": total_height_mm, "total_diameter_mm": total_diameter_mm,
+    })
     with matrix_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=[
-            "assembly_id", "core", "blade", "assist", "gear", "tip", "result", "error_code",
-            "axis_error_mm", "phase_error_deg", "unexpected_overlap_mm3", "total_height_mm", "total_diameter_mm",
-        ])
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerow({
-            "assembly_id": args.assembly,
-            "core": spec["core"], "blade": spec["blade"], "assist": spec["assist"],
-            "gear": spec["gear"], "tip": spec["tip"], "result": result,
-            "error_code": "|".join(errors), "axis_error_mm": maximum_axis_error_mm,
-            "phase_error_deg": maximum_phase_error_deg,
-            "unexpected_overlap_mm3": sum(item["overlap_volume_mm3"] for item in collisions),
-            "total_height_mm": total_height_mm, "total_diameter_mm": total_diameter_mm,
-        })
+        writer.writerows(sorted(rows, key=lambda row: row["assembly_id"]))
     print(f"NSS_ASSEMBLY_VALIDATION={result}")
     print(f"NSS_ASSEMBLY_REPORT={report_path}")
     print(f"NSS_ASSEMBLY_MATRIX={matrix_path}")

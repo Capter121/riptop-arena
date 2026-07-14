@@ -1,5 +1,7 @@
 """Compose rendered catalog PNG files into review sheets."""
 
+import argparse
+
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -28,6 +30,16 @@ def contact_sheet(target: str, names: list[str], output_name: str) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--target")
+    args = parser.parse_args()
+    if args.target:
+        contact_sheet(
+            args.target,
+            ["top", "perspective_45", "side", "silhouette"],
+            f"{args.target}_contact_sheet.png",
+        )
+        return
     contact_sheet(
         "assembly_storm_attack",
         ["top", "angle", "front", "side", "bottom", "rotated", "exploded", "silhouette"],

@@ -1,0 +1,35 @@
+{
+  "stage": "Stage 3: Iron Bastion minimum vertical slice",
+  "result": "PASS",
+  "part": {
+    "id": "blade_iron_bastion",
+    "profile_family": "iron_bastion_damper",
+    "triangle_count": 2016,
+    "material_count": 3,
+    "glb_file_size_bytes": 84580
+  },
+  "fixture": {
+    "id": "assembly_phase2a_iron_bastion",
+    "official_configuration": false,
+    "triangle_count": 5952,
+    "total_diameter_mm": 70.00000029802322,
+    "total_height_mm": 23.940001847222447,
+    "collision_count": 0,
+    "contact_review_count": 0
+  },
+  "blocking_counts": {
+    "binary_drift_unconfirmed": 0,
+    "contact_review_unresolved": 0,
+    "semantic_regression": 0,
+    "gltf_validator_errors": 0,
+    "gltf_validator_warnings": 0
+  },
+  "storm_attack_regression": "PASS",
+  "visual_outputs": [
+    "reports/renders/blade_iron_bastion_top.png",
+    "reports/renders/blade_iron_bastion_perspective_45.png",
+    "reports/renders/blade_iron_bastion_side.png",
+    "reports/renders/blade_iron_bastion_silhouette.png",
+    "reports/renders/blade_iron_bastion_contact_sheet.png"
+  ]
+}

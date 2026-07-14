@@ -124,6 +124,7 @@ def main() -> None:
         raise FileNotFoundError(blend_path)
     standard_views = [
         ("top", (0.0, 0.0, 1.0)),
+        ("perspective_45", (1.0, -1.0, 0.8)),
         ("angle", (1.0, -1.0, 0.8)),
         ("front", (0.0, -1.0, 0.12)),
         ("side", (1.0, 0.0, 0.12)),

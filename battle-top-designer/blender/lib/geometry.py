@@ -79,6 +79,73 @@ def create_radial_blade(spec: dict, collection: bpy.types.Collection, materials:
     return [obj]
 
 
+def create_iron_bastion(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    segments = geometry["segments"]
+    phase = math.radians(geometry.get("phase_deg", 0.0))
+    inner_radius = geometry.get("inner_radius_mm", spec["dimensions"]["inner_radius_mm"]) * MM
+    weight_radius = geometry["inner_weight_radius_mm"] * MM
+    base_radius = geometry["base_radius_mm"] * MM
+    outer_radius = geometry["outer_radius_mm"] * MM
+    amplitude = geometry["radial_amplitude_mm"] * MM
+    bottom = -geometry["height_mm"] * MM * 0.5
+    outer_top = geometry["height_mm"] * MM * 0.5
+    inner_top = outer_top + geometry["inner_band_width_mm"] * MM * 0.1
+    rings = (inner_radius, weight_radius, base_radius)
+
+    vertices = []
+    for index in range(segments):
+        angle = math.tau * index / segments + phase
+        damper = 0.5 + 0.5 * math.cos(geometry["damper_count"] * (angle - phase))
+        radii = rings + (outer_radius - amplitude * (1.0 - damper),)
+        tops = (inner_top, inner_top, outer_top + 0.15 * MM, outer_top)
+        for radius, top in zip(radii, tops):
+            vertices.extend([
+                (radius * math.cos(angle), radius * math.sin(angle), bottom),
+                (radius * math.cos(angle), radius * math.sin(angle), top),
+            ])
+
+    faces = []
+    material_indices = []
+    ring_count = 4
+    for index in range(segments):
+        nxt = (index + 1) % segments
+        for ring in range(ring_count - 1):
+            lower = index * ring_count * 2 + ring * 2
+            upper = lower + 2
+            next_lower = nxt * ring_count * 2 + ring * 2
+            next_upper = next_lower + 2
+            faces.extend([
+                (lower + 1, upper + 1, next_upper + 1, next_lower + 1),
+                (lower, next_lower, next_upper, upper),
+            ])
+            material_indices.extend([1 if ring == 0 and len(materials) > 1 else 0, 0])
+        inner = index * ring_count * 2
+        next_inner = nxt * ring_count * 2
+        outer = inner + (ring_count - 1) * 2
+        next_outer = next_inner + (ring_count - 1) * 2
+        faces.extend([
+            (inner, inner + 1, next_inner + 1, next_inner),
+            (outer, next_outer, next_outer + 1, outer + 1),
+        ])
+        material_indices.extend([2 if len(materials) > 2 else 0, 0])
+
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
+    mesh.from_pydata(vertices, [], faces)
+    for material in materials:
+        mesh.materials.append(material)
+    for polygon, material_index in zip(mesh.polygons, material_indices):
+        polygon.material_index = material_index
+    mesh.validate(verbose=False)
+    mesh.update(calc_edges=True)
+    obj = bpy.data.objects.new(f"GEO_{spec['id']}_BODY", mesh)
+    collection.objects.link(obj)
+    obj["part_id"] = spec["id"]
+    obj["geometry_kind"] = geometry["kind"]
+    obj["profile_family"] = spec["profile_family"]
+    return [obj]
+
+
 def create_profiled_annulus(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     geometry = spec["geometry"]
     segments = geometry["segments"]
@@ -174,6 +241,8 @@ def create_revolved_tip(spec: dict, collection: bpy.types.Collection, materials:
 def create_part(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     kind = spec["geometry"]["kind"]
     if kind == "radial_blade":
+        if spec.get("profile_family") == "iron_bastion_damper":
+            return create_iron_bastion(spec, collection, materials)
         return create_radial_blade(spec, collection, materials)
     if kind in {"radial_core", "annular_ring", "radial_gear"}:
         return create_profiled_annulus(spec, collection, materials)
