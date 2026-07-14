@@ -1,7 +1,7 @@
 # Nova Spin System Phase 2A：Main Blade 设计质量门
 
 日期：2026-07-14
-状态：有条件通过修订版，等待复审
+状态：有条件通过修订版，等待最终复审
 基线：`v0.1.0-vertical-slice`（提交 `f55e260`）
 
 ## 1. 目标与范围
@@ -21,7 +21,7 @@ NSS-V1 在本阶段冻结。不得修改 `specs/interfaces.json`、接口尺寸�
 
 ## 2. 基线与回归
 
-`docs/baselines/v0.1.0-vertical-slice.json` 保存规格文件的原始 SHA-256，并为每个基线 GLB 同时保存两类指纹：
+`docs/baselines/v0.1.0-vertical-slice.json` 统一记录工具链版本、规格文件原始哈希、构建测试结果，并为每个基线 GLB 保存以下两类指纹：
 
 - `raw_sha256`：直接对 GLB 原始字节计算 SHA-256，用于判断二进制产物是否完全一致；
 - `semantic_fingerprint`：将 GLB 重新导入 Blender 后生成排序、规范化 JSON，再对该 JSON 计算 SHA-256；
@@ -35,7 +35,7 @@ NSS-V1 在本阶段冻结。不得修改 `specs/interfaces.json`、接口尺寸�
 - 每个渲染网格的顶点数、三角面数、规范化拓扑哈希和包围盒；
 - 模型总尺寸和每个对象的局部、世界变换；
 - 材质名称、材质槽映射及 Principled BSDF 的有效 PBR 参数；
-- `MOUNT_TOP`、`MOUNT_BOTTOM` 的完整变换和自定义属性；
+- `MOUNT_<PART_ID>_TOP`、`MOUNT_<PART_ID>_BOTTOM` 的完整变换和自定义属性；
 - 排序后的对象类型、父子层级和对象路径；
 - `interface_id`、接口角色、方向键和接口相关自定义属性。
 
@@ -43,10 +43,10 @@ NSS-V1 在本阶段冻结。不得修改 `specs/interfaces.json`、接口尺寸�
 
 - 两个指纹都相同：`PASS`；
 - `raw_sha256` 不同但 `semantic_fingerprint` 相同：`BINARY_DRIFT`，表示二进制序列化变化；必须记录差异原因并经人工确认，未确认前阻止 Phase 2A 通过；
-- `semantic_fingerprint` 不同：`SEMANTIC_REGRESSION`，无论原始哈希结果如何均为硬失败；
+- `semantic_fingerprint` 出现未批准变化：`SEMANTIC_REGRESSION`，无论原始哈希结果如何均为硬失败；
 - `raw_sha256` 相同但 `semantic_fingerprint` 不同：`FINGERPRINT_INCONSISTENT`，视为指纹工具缺陷并硬失败。
 
-Phase 2A 修改共享生成器后，必须重新生成并测试 Storm Attack。现有五个零件和 Storm Attack 的 GLB 必须通过上述双指纹回归；任何未批准的二进制漂移或语义变化均阻止通过。
+Phase 2A 修改共享生成器后，必须重新生成并测试 Storm Attack。现有五个零件和 Storm Attack 的 GLB 分别按上述双指纹规则判定；原始字节单独变化只产生 `BINARY_DRIFT`，不自动等同于语义回归。未确认的 `BINARY_DRIFT` 和未批准的语义变化均阻止通过。
 
 ## 3. JSON 与几何策略
 
@@ -72,7 +72,18 @@ Phase 2A 修改共享生成器后，必须重新生成并测试 Storm Attack。�
 
 ## 4. 碰撞代理
 
-每个现有零件和四枚 Main Blade 都生成一个低面数代理：
+碰撞代理覆盖以下 8 个唯一零件：
+
+- `core_solar_wolf`；
+- `blade_storm_fang`；
+- `assist_heavy`；
+- `gear_low`；
+- `tip_flat_attack`；
+- `blade_iron_bastion`；
+- `blade_orbit_halo`；
+- `blade_dual_comet`。
+
+当前 5 个纵向切片零件已经包含 Storm Fang，再加 3 个新增 Blade，共计 8 个；Storm Fang 只生成和统计一次。每个零件生成一个低面数代理：
 
 ```text
 COLLIDER_<PART_ID>
@@ -118,7 +129,9 @@ NSS-V1 接口验证和非接口碰撞验证职责严格分离：
 ```json
 {
   "purpose": "phase2a_blade_test_fixture",
-  "official_configuration": false
+  "official_configuration": false,
+  "baseline_fixture": "storm_attack_vertical_slice",
+  "variable_part_type": "main_blade"
 }
 ```
 
@@ -132,21 +145,15 @@ NSS-V1 接口验证和非接口碰撞验证职责严格分离：
 - perspective_45；
 - side；
 - silhouette；
-- contact_sheet。
+- contact_sheet（1536×1536）。
 
 额外输出：
 
-- `reports/renders/all_blades_silhouette.png`；
-- `reports/renders/all_blades_comparison.png`；
+- `reports/renders/all_blades_silhouette.png`（2048×512）；
+- `reports/renders/all_blades_comparison.png`（2048×2048）；
 - `reports/validation/blade-silhouette-overlap.json`。
 
 剪影报告计算标准化二值剪影的两两 IoU。报告必须声明该数值仅为内部设计启发式指标，不构成法律意义上的原创性证明。
-
-高分辨率输出固定为：
-
-- 每枚 `contact_sheet`：1536×1536；
-- `all_blades_silhouette.png`：2048×512；
-- `all_blades_comparison.png`：2048×2048。
 
 高分辨率组合图不得先缩放各模型再拼接；必须复用同一标准化 512×512 单视图源图，以保证比例和相机一致。
 
@@ -229,12 +236,14 @@ Phase 2A 只有在以下条件全部满足时完成：
 2. 四枚 Blade 进入不同 `profile_family` 几何策略；
 3. 所有导出 GLB 的 Validator error 和 warning 均为 0；
 4. Storm Attack 基线测试、`raw_sha256` 和 `semantic_fingerprint` 回归通过，且不存在未决 `BINARY_DRIFT`；
-5. 四套 Phase 2A 测试夹具的意外碰撞均为 0，且不存在未决 `CONTACT_REVIEW`；
-6. 所有视觉质量输出生成；
-7. 完全离线预览可切换四枚 Blade，全部 Playwright 量化断言通过并生成四张预览截图和 `browser-test.json`；
-8. 未生成本阶段范围外零件；
-9. 未宣称全部 MVP 完成；
-10. 最终状态标记为 `Phase 2A awaiting visual review`。
+5. 所有碰撞报告中的 `FAIL` 数量为 0；
+6. 未解决的 `CONTACT_REVIEW` 数量为 0；
+7. 每一条曾产生的 `CONTACT_REVIEW` 都保存人工处理结论、处理人、处理时间和最终状态；
+8. 所有视觉质量输出生成；
+9. 完全离线预览可切换四枚 Blade，全部 Playwright 量化断言通过并生成四张预览截图和浏览器测试报告；
+10. 未生成本阶段范围外零件；
+11. 未宣称全部 MVP 完成；
+12. 最终状态标记为 `Phase 2A awaiting visual review`。
 
 ## 10. 人工复审
 
