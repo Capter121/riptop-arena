@@ -1,8 +1,8 @@
 ﻿{
     "result":  "PASS",
-    "scope":  "vertical_slice",
-    "parts_tested":  5,
-    "assemblies_tested":  1,
+    "scope":  "phase2a",
+    "parts_tested":  8,
+    "assemblies_tested":  4,
     "fail_count":  0,
     "unresolved_contact_review_count":  0,
     "collision_count":  0,
@@ -11,5 +11,5 @@
     "gltf_validator_errors":  0,
     "gltf_validator_warnings":  0,
     "playwright_failures":  0,
-    "silhouette_pair_count":  0
+    "silhouette_pair_count":  6
 }

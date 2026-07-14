@@ -119,6 +119,11 @@ def render_file(target: str, blend_path: Path, views: list[tuple[str, tuple[floa
 def main() -> None:
     args = script_args()
     target = args.target
+    if target == "phase2a_all_blades":
+        views = [("top", (0.0, 0.0, 1.0)), ("perspective_45", (1.0, -1.0, 0.8)), ("side", (1.0, 0.0, 0.12))]
+        for blade in ("blade_storm_fang", "blade_iron_bastion", "blade_orbit_halo", "blade_dual_comet"):
+            render_file(blade, ROOT / "build" / "blend" / f"{blade}.blend", views, silhouette=True)
+        return
     blend_path = ROOT / "build" / "blend" / f"{target}.blend"
     if not blend_path.is_file():
         raise FileNotFoundError(blend_path)

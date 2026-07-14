@@ -1,0 +1,71 @@
+{
+  "result": "PASS",
+  "blade_order": [
+    "blade_storm_fang",
+    "blade_iron_bastion",
+    "blade_orbit_halo",
+    "blade_dual_comet"
+  ],
+  "pair_count": 6,
+  "pairs": [
+    {
+      "first": "blade_storm_fang",
+      "second": "blade_iron_bastion",
+      "iou": 0.8031246504343935
+    },
+    {
+      "first": "blade_storm_fang",
+      "second": "blade_orbit_halo",
+      "iou": 0.3302468648947078
+    },
+    {
+      "first": "blade_storm_fang",
+      "second": "blade_dual_comet",
+      "iou": 0.7952846116739025
+    },
+    {
+      "first": "blade_iron_bastion",
+      "second": "blade_orbit_halo",
+      "iou": 0.40318402265264935
+    },
+    {
+      "first": "blade_iron_bastion",
+      "second": "blade_dual_comet",
+      "iou": 0.8295028798300061
+    },
+    {
+      "first": "blade_orbit_halo",
+      "second": "blade_dual_comet",
+      "iou": 0.32073670270103793
+    }
+  ],
+  "render_conditions": {
+    "camera": "orthographic top",
+    "source_size": [
+      512,
+      512
+    ],
+    "lighting": "render_catalog.py shared setup_scene",
+    "background": "render_catalog.py shared world"
+  },
+  "render_conditions_sha256": "08cec474a7e80c59c500f85cb45a87fdbe9900bc60b7e5fcf793932eb9806eb6",
+  "output_dimensions": {
+    "single_view": [
+      512,
+      512
+    ],
+    "contact_sheet": [
+      1536,
+      1536
+    ],
+    "all_blades_silhouette": [
+      2048,
+      512
+    ],
+    "all_blades_comparison": [
+      2048,
+      2048
+    ]
+  },
+  "disclaimer": "Internal visual heuristic only; this is not legal proof of originality or non-infringement."
+}

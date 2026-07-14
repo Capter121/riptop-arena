@@ -1,0 +1,38 @@
+﻿{
+    "result":  "PASS",
+    "unique_proxy_part_count":  8,
+    "fixture_count":  4,
+    "fail_count":  0,
+    "collision_count":  0,
+    "unresolved_contact_review_count":  0,
+    "fixtures":  [
+                     {
+                         "assembly_id":  "assembly_phase2a_storm_fang",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2a_iron_bastion",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2a_orbit_halo",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2a_dual_comet",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     }
+                 ]
+}

@@ -32,7 +32,12 @@ def contact_sheet(target: str, names: list[str], output_name: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target")
+    parser.add_argument("--scope")
     args = parser.parse_args()
+    if args.scope == "phase2a":
+        for target in ("blade_storm_fang", "blade_iron_bastion", "blade_orbit_halo", "blade_dual_comet"):
+            contact_sheet(target, ["top", "perspective_45", "side", "silhouette"], f"{target}_contact_sheet.png")
+        return
     if args.target:
         contact_sheet(
             args.target,

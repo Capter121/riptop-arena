@@ -1,7 +1,14 @@
+param(
+    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression")]
+    [string]$Scope = "VerticalSlice"
+)
+
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $LogDir = Join-Path $ProjectRoot "build\logs"
-$Parts = @("core_solar_wolf", "blade_storm_fang", "assist_heavy", "gear_low", "tip_flat_attack")
+$VerticalParts = @("core_solar_wolf", "blade_storm_fang", "assist_heavy", "gear_low", "tip_flat_attack")
+$Phase2AParts = @("core_solar_wolf", "blade_storm_fang", "blade_iron_bastion", "blade_orbit_halo", "blade_dual_comet", "assist_heavy", "gear_low", "tip_flat_attack")
+$Phase2AAssemblies = @("assembly_phase2a_storm_fang", "assembly_phase2a_iron_bastion", "assembly_phase2a_orbit_halo", "assembly_phase2a_dual_comet")
 
 function Find-Blender {
     $candidates = @(
@@ -29,14 +36,25 @@ $Blender = Find-Blender
 Write-Host "NSS_BLENDER=$Blender"
 Push-Location $ProjectRoot
 try {
-    Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", "vertical_slice") "build-specs.log"
+    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } else { $VerticalParts }
+    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } else { @("assembly_storm_attack") }
+    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } else { "vertical_slice" }
+    Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", $SpecScope) "build-specs.log"
     foreach ($part in $Parts) {
         Invoke-Logged $Blender @("--background", "--python", "blender\generate_parts.py", "--", "--part", $part) "generate-$part.log"
     }
-    Invoke-Logged $Blender @("--background", "--python", "blender\generate_assemblies.py", "--", "--assembly", "assembly_storm_attack") "generate-assembly_storm_attack.log"
-    Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "blade_storm_fang") "render-blade_storm_fang.log"
-    Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "assembly_storm_attack") "render-assembly_storm_attack.log"
-    Invoke-Logged "python" @("scripts\make_contact_sheets.py") "build-contact-sheets.log"
+    foreach ($assembly in $Assemblies) {
+        Invoke-Logged $Blender @("--background", "--python", "blender\generate_assemblies.py", "--", "--assembly", $assembly) "generate-$assembly.log"
+    }
+    if ($Scope -eq "Phase2A") {
+        Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "phase2a_all_blades") "render-phase2a-all-blades.log"
+        Invoke-Logged "python" @("scripts\make_contact_sheets.py", "--scope", "phase2a") "build-contact-sheets.log"
+        Invoke-Logged "python" @("scripts\analyze_silhouettes.py", "--input", "reports\renders", "--output", "reports\validation\blade-silhouette-overlap.json") "analyze-silhouettes.log"
+    } elseif ($Scope -eq "VerticalSlice") {
+        Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "blade_storm_fang") "render-blade_storm_fang.log"
+        Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "assembly_storm_attack") "render-assembly_storm_attack.log"
+        Invoke-Logged "python" @("scripts\make_contact_sheets.py") "build-contact-sheets.log"
+    }
     Write-Host "NSS_BUILD=PASS"
 } finally {
     Pop-Location

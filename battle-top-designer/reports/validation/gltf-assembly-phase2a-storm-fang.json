@@ -1,8 +1,8 @@
 {
-  "uri": "blade_orbit_halo.glb",
+  "uri": "assembly_phase2a_storm_fang.glb",
   "mimeType": "model/gltf-binary",
   "validatorVersion": "2.0.0-dev.3.10",
-  "validatedAt": "2026-07-14T15:58:57.084Z",
+  "validatedAt": "2026-07-14T15:59:15.789Z",
   "issues": {
     "numErrors": 0,
     "numWarnings": 0,
@@ -22,18 +22,18 @@
         "pointer": "/buffers/0",
         "mimeType": "application/gltf-buffer",
         "storage": "glb",
-        "byteLength": 89856
+        "byteLength": 204384
       }
     ],
     "animationCount": 0,
-    "materialCount": 3,
+    "materialCount": 11,
     "hasMorphTargets": false,
     "hasSkins": false,
     "hasTextures": false,
     "hasDefaultScene": true,
-    "drawCallCount": 10,
-    "totalVertexCount": 3216,
-    "totalTriangleCount": 2112,
+    "drawCallCount": 16,
+    "totalVertexCount": 7778,
+    "totalTriangleCount": 4992,
     "maxUVs": 0,
     "maxInfluences": 0,
     "maxAttributes": 2
