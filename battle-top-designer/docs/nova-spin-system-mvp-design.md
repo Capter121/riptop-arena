@@ -27,7 +27,15 @@
 
 只导出以上 4 套 assembled GLB。全部 `2 × 4 × 3 × 3 × 4 = 288` 种组合在 Blender 内存中执行接口测试，不逐一导出。
 
-### 2.3 不在 MVP 范围内
+### 2.3 拆解演示
+
+拆解演示只使用 `assembly_storm_attack`：
+
+- 保存 `build/blend/exploded_storm_attack.blend`。
+- 渲染 `reports/renders/assembly_storm_attack_exploded.png`。
+- MVP 不导出拆解动画或拆解 GLB。
+
+### 2.4 不在 MVP 范围内
 
 - 动力学仿真、空气动力学仿真和真实战斗性能保证。
 - 生产公差、材料疲劳、儿童安全和高速爆裂认证。
@@ -38,6 +46,11 @@
 
 ```text
 battle-top-designer/
+├── AGENTS.md
+├── README.md
+├── docs/
+│   ├── nova-spin-system-mvp-design.md
+│   └── implementation-plan.md
 ├── blender/
 │   ├── generate_parts.py
 │   ├── generate_assemblies.py
@@ -67,9 +80,10 @@ battle-top-designer/
 │   ├── validate_specs.py
 │   ├── build_all.ps1
 │   └── test_all.ps1
-├── public/models/
-│   ├── parts/
-│   └── assemblies/
+├── public/
+│   └── models/
+│       ├── parts/
+│       └── assemblies/
 ├── build/
 │   ├── blend/
 │   ├── temporary/
@@ -77,7 +91,9 @@ battle-top-designer/
 └── reports/
     ├── renders/
     ├── validation/
-    │   └── build-manifest.json
+    │   ├── build-manifest.json
+    │   ├── full-report.md
+    │   └── summary.json
     └── assembly_matrix.csv
 ```
 
@@ -123,6 +139,11 @@ height_gear.bottom → performance_tip.top
 
 四份 JSON Schema 分别约束零件、接口、材质和组合。在启动 Blender 前，`scripts/validate_specs.py` 必须完成：
 
+- 所有 Schema 使用 `additionalProperties: false`，禁止拼错或未声明字段静默通过。
+- 每份 Schema 明确 `required`、`enum`、`const`、字符串 `pattern`、数组长度和数值范围。
+- ID 必须匹配 `^[a-z][a-z0-9_]*$`，`schema_version` 固定为 `1.0`。
+- `part_type` 必须与文件类型一致；颜色分量限制在 0–1。
+
 - JSON Schema 错误数为 0。
 - 重复 ID、缺失引用和非法数值数量为 0。
 - 刃数为正整数，角度和尺寸在允许范围。
@@ -146,7 +167,7 @@ height_gear.bottom → performance_tip.top
 }
 ```
 
-Blender 中的 `MOUNT_TOP`、`MOUNT_BOTTOM` 必须保存对应位置和旋转，而不是只保存 Z 高度。装配对齐以完整变换、基准半径、接口角色和定向键为准。
+Blender 中的 `MOUNT_<PART_ID>_TOP`、`MOUNT_<PART_ID>_BOTTOM` 必须保存对应位置和旋转，而不是只保存 Z 高度。装配对齐以完整变换、基准半径、接口角色和定向键为准。
 
 ### 4.6 确定性生成
 
@@ -172,16 +193,16 @@ NSS-V1 是原创五凸耳定向旋锁概念接口：
 - 轴向对齐容差 0.02 mm
 - 相位容差 0.1°
 
-一个加宽定位凸耳用于防反装。定位凸耳属于内部装配特征，不影响外部轮廓。接口标记为 `concept_only`，不声明兼容现有产品；`digital_clearance_mm` 只用于避免数字模型视觉穿模，不是生产公差。MVP 不计算真实质量分布，未来实体版本必须进行静态平衡和动平衡验证。
+一个加宽定位凸耳用于防反装。定位凸耳属于内部装配特征，不影响外部轮廓。接口标记为 `concept_only`，不声明兼容现有产品。`digital_clearance_mm` 只用于数字模型避免共面闪烁和非预期穿模，不得解释为 3D 打印公差、注塑公差、高速旋转安全间隙或可制造性依据。MVP 不计算真实质量分布，未来实体版本必须进行静态平衡和动平衡验证。
 
-每个零件具有 `PART_<ID>` Collection、主网格、`MOUNT_TOP` 和 `MOUNT_BOTTOM`。终端零件也保留两个挂载空对象，以维持统一协议。
+每个零件具有 `PART_<ID>` Collection、主网格和两个全局唯一的挂载空对象。终端零件也保留顶部与底部挂载对象，以维持统一协议。
 
 ### 5.1 对象命名
 
 ```text
 零件 Collection：PART_<ID>
 主网格：MESH_<ID>
-安装点：MOUNT_TOP / MOUNT_BOTTOM
+安装点：MOUNT_<PART_ID>_TOP / MOUNT_<PART_ID>_BOTTOM
 碰撞代理：COLLIDER_<ID>
 材质：MAT_<MATERIAL_ID>
 临时对象：TMP_<PURPOSE>
@@ -190,7 +211,7 @@ NSS-V1 是原创五凸耳定向旋锁概念接口：
 
 导出时排除 `TMP_`、`COLLIDER_`、相机和灯光。所有生产网格必须位于对应 `PART_<ID>` Collection 中。
 
-单零件场景中的安装点严格命名为 `MOUNT_TOP`、`MOUNT_BOTTOM`。多零件装配场景中，Blender 对象名必须全局唯一，因此运行时名称使用 `MOUNT_TOP__<ID>`、`MOUNT_BOTTOM__<ID>`，并通过自定义属性 `mount_role` 保留逻辑角色；验证器不得依赖 Blender 自动生成的 `.001` 后缀。
+所有场景中的安装点使用全局唯一名称 `MOUNT_<PART_ID>_TOP`、`MOUNT_<PART_ID>_BOTTOM`。安装点同时保存 `mount_role`、`interface_id` 和 `interface_role` 自定义属性。装配程序优先按自定义属性查找，再校验对象名；不得依赖 Blender 自动生成的 `.001` 后缀。
 
 ## 6. 几何生成
 
@@ -244,15 +265,16 @@ MVP 不使用布尔修改器。一个零件可以由多个彼此独立但各自�
 
 ### 8.2 `generate_assemblies.py`
 
-读取 `specs/assemblies.json`，使用共享库重新生成零件，通过相邻挂载点沿 Z 轴对齐，导出 4 个正式组合和 `nss_v1_exploded.glb`。统计结果写入 `reports/validation/assemblies.json`。
+读取 `specs/assemblies.json`，使用共享库重新生成零件，通过相邻挂载点沿 Z 轴对齐并导出 4 个正式组合。拆解演示固定使用 `assembly_storm_attack`，保存为 `build/blend/exploded_storm_attack.blend`；MVP 不导出拆解动画或拆解 GLB。统计结果写入 `reports/validation/assemblies.json`。
 
 ### 8.3 `render_catalog.py`
 
 导入已生成 GLB，使用固定相机和灯光渲染：
 
 - 每个零件：俯视、45°、侧视和黑色剪影。
-- 每个正式组合：45°、俯视、侧视和拆解视图。
-- 每套正式组合额外合成正面、俯视、45°、侧面、底部、拆解、旋转轮廓、纯黑剪影和材质预览九宫格。
+- 每个正式组合：45°、俯视和侧视。
+- `assembly_storm_attack` 额外渲染 `reports/renders/assembly_storm_attack_exploded.png`。
+- 每套正式组合合成九宫格；只有 Storm Attack 使用真实拆解视图，其余组合使用接口定位视图替代该格。
 - 额外生成 `all_blades_silhouette.png`。
 
 固定输出为 1024×1024 PNG、浅灰不透明背景、AgX 色彩管理、固定三点光和开启阴影。目录比较图使用正交相机；拆解图可使用轻微透视相机。
@@ -278,6 +300,8 @@ MVP 不使用布尔修改器。一个零件可以由多个彼此独立但各自�
 5. 运行 Khronos glTF Validator。
 6. 生成目录渲染和构建清单。
 
+构建开始前读取上一轮 `build-manifest.json`。构建完成后比较当前预期输出、实际存在输出和上一轮输出；任何不再属于当前规格的文件标记为 `STALE`。构建不自动删除陈旧文件，但必须把它们写入报告，并使发布检查失败。
+
 ## 10. 四层测试
 
 ### 10.1 第一层：规格测试
@@ -299,7 +323,7 @@ MVP 不使用布尔修改器。一个零件可以由多个彼此独立但各自�
 - 法线一致且朝外。
 - Scale 为 `(1,1,1)`，Rotation 为 `(0,0,0)`。
 - 每个零件三角面不超过 50,000，材质不超过 6。
-- `MOUNT_TOP`、`MOUNT_BOTTOM` 存在。
+- `MOUNT_<PART_ID>_TOP`、`MOUNT_<PART_ID>_BOTTOM` 存在，且自定义属性完整。
 
 ### 10.3 第三层：288 组合接口测试
 
@@ -314,9 +338,11 @@ MVP 不使用布尔修改器。一个零件可以由多个彼此独立但各自�
 - 挂载间隙、总高度和最大直径在系统包络内。
 - 组合三角面不超过 150,000。
 
-输出 `reports/assembly_matrix.csv`，包含 core、blade、assist、gear、tip、result、collision_count、failure_reason、axis_offset_mm、mount_gap_mm、phase_error_deg、total_height_mm 和 max_diameter_mm。
+输出 `reports/assembly_matrix.csv`，字段为 `assembly_id,core,blade,assist,gear,tip,result,error_code,axis_error_mm,phase_error_deg,unexpected_overlap_mm3,total_height_mm,total_diameter_mm`。
 
-碰撞检测先使用 AABB 快速筛选，再使用低面数 `COLLIDER_` 代理做精确检测。`NSS_V1_MATING_SURFACE` 属于允许接触白名单；非白名单重叠体积不得超过 0.5 mm³。包围盒重叠本身不视为穿模。
+首版错误码固定为：`SPEC_REFERENCE_MISSING`、`INTERFACE_VERSION_MISMATCH`、`ROLE_MISMATCH`、`MOUNT_NOT_FOUND`、`AXIS_MISALIGNED`、`PHASE_MISALIGNED`、`UNEXPECTED_COLLISION`、`DIMENSION_OUT_OF_RANGE`、`GLB_REIMPORT_FAILED`、`GLTF_VALIDATION_FAILED`。
+
+碰撞检测先使用 AABB 快速筛选，再使用低面数 `COLLIDER_` 代理做精确检测。在高精度网格或代理交叠检查前，必须排除 NSS-V1 合法插入区、锁定凸耳接触区和基准面接触区。非白名单重叠体积不得超过 0.5 mm³；包围盒重叠本身不视为穿模。
 
 ### 10.4 第四层：导出与 GLB 格式测试
 
@@ -327,7 +353,7 @@ MVP 不使用布尔修改器。一个零件可以由多个彼此独立但各自�
 - 生产对象名称存在。
 - 文件大小大于 0。
 
-对 16 个零件、4 个正式组合和 1 个拆解 GLB 运行 Khronos 官方 [glTF Validator](https://github.com/KhronosGroup/glTF-Validator)。官方工具支持 glTF 2.0、GLB 二进制缓冲、内部引用和资源验证，并输出 JSON 报告；错误应产生非零退出码。
+对 16 个零件和 4 个正式组合共 20 个 GLB 运行 Khronos 官方 [glTF Validator](https://github.com/KhronosGroup/glTF-Validator)。官方工具支持 glTF 2.0、GLB 二进制缓冲、内部引用和资源验证，并输出 JSON 报告；错误应产生非零退出码。
 
 接受标准：
 
@@ -378,6 +404,7 @@ MVP 不使用布尔修改器。一个零件可以由多个彼此独立但各自�
 - 16 个零件、4 套组合和 288 种组合测试计数。
 - 所有规格文件的 SHA-256。
 - 每个输出文件的路径、字节数、SHA-256、三角面、材质数、最大尺寸和来源 JSON。
+- 当前预期输出、实际输出和上一轮输出的差异，以及所有 `STALE` 文件。
 - 构建与测试最终状态。
 
 构建清单用于区分代码、规格和 Blender 版本造成的输出变化。
@@ -401,13 +428,13 @@ MVP 只有满足以下全部条件才算完成：
 
 1. 16 个零件 JSON 全部通过 Schema 和语义验证。
 2. Blender 成功生成 16 个独立零件。
-3. 4 套正式组合和 1 个拆解场景成功生成 GLB。
+3. 4 套正式组合成功生成 assembled GLB；拆解演示成功生成 `.blend` 和 PNG，不生成拆解 GLB。
 4. 288 种组合全部在内存中完成装配验证并写入矩阵。
 5. 所有中心轴、安装点、接口角色和允许连接关系正确。
 6. 不存在不可接受的非流形几何、错误法线、自相交或穿模。
 7. 所有 GLB 通过空场景重新导入测试。
-8. 21 个 GLB 的 Khronos Validator 错误数为 0。
-9. 目录渲染、四套九宫格、拆解视图和主刃剪影总览生成。
-10. build-manifest、assembly_matrix 和完整测试报告生成。
+8. 20 个 GLB 的 Khronos Validator 错误数为 0。
+9. 目录渲染、四套九宫格、Storm Attack 拆解视图和主刃剪影总览生成。
+10. build-manifest、assembly_matrix 和完整测试报告生成，且不存在未处理的 `STALE` 产物。
 11. `build_all.ps1` 和 `test_all.ps1` 退出码均为 0。
 12. 必须实际执行 Blender 构建和测试；仅生成脚本不算完成。
