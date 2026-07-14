@@ -44,7 +44,6 @@ NSS-V1 在本阶段冻结。不得修改 `specs/interfaces.json`、接口尺寸�
 - 两个指纹都相同：`PASS`；
 - `raw_sha256` 不同但 `semantic_fingerprint` 相同：`BINARY_DRIFT`，表示二进制序列化变化；必须记录差异原因并经人工确认，未确认前阻止 Phase 2A 通过；
 - `semantic_fingerprint` 出现未批准变化：`SEMANTIC_REGRESSION`，无论原始哈希结果如何均为硬失败；
-- `raw_sha256` 相同但 `semantic_fingerprint` 不同：`FINGERPRINT_INCONSISTENT`，视为指纹工具缺陷并硬失败。
 
 Phase 2A 修改共享生成器后，必须重新生成并测试 Storm Attack。现有五个零件和 Storm Attack 的 GLB 分别按上述双指纹规则判定；原始字节单独变化只产生 `BINARY_DRIFT`，不自动等同于语义回归。未确认的 `BINARY_DRIFT` 和未批准的语义变化均阻止通过。
 
