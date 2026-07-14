@@ -26,10 +26,14 @@
         "assist": { "type": "string", "pattern": "^assist_[a-z0-9_]+$" },
         "gear": { "type": "string", "pattern": "^gear_[a-z0-9_]+$" },
         "tip": { "type": "string", "pattern": "^tip_[a-z0-9_]+$" },
-        "purpose": { "const": "phase2a_blade_test_fixture" },
+        "purpose": {
+          "enum": ["phase2a_blade_test_fixture", "phase2b_single_variable_fixture", "phase2b_representative_fixture"]
+        },
         "official_configuration": { "type": "boolean" },
-        "baseline_fixture": { "const": "storm_attack_vertical_slice" },
-        "variable_part_type": { "const": "main_blade" }
+        "baseline_fixture": { "enum": ["storm_attack_vertical_slice", "phase2a_approved"] },
+        "variable_part_type": {
+          "enum": ["emblem_core", "main_blade", "assist_ring", "height_gear", "performance_tip", "mixed_phase2b_modules"]
+        }
       },
       "allOf": [
         {
@@ -40,13 +44,10 @@
           }
         },
         {
-          "if": { "required": ["purpose"] },
+          "if": { "properties": { "id": { "pattern": "^assembly_phase2b_" } } },
           "then": {
-            "required": ["official_configuration", "baseline_fixture", "variable_part_type"],
-            "properties": {
-              "id": { "pattern": "^assembly_phase2a_" },
-              "official_configuration": { "const": false }
-            }
+            "required": ["purpose", "official_configuration", "baseline_fixture", "variable_part_type"],
+            "properties": { "official_configuration": { "const": false } }
           }
         }
       ]

@@ -32,7 +32,12 @@
         "storm_fang_upper",
         "iron_bastion_damper",
         "orbit_halo_streamline",
-        "dual_comet_alternating"
+        "dual_comet_alternating",
+        "void_falcon_split_arc",
+        "guard_cushion_ring",
+        "air_truss_windows",
+        "medium_chevron_rib",
+        "high_tower_buttress"
       ]
     },
     "dimensions": { "$ref": "#/$defs/dimensions" },
@@ -113,7 +118,19 @@
         "attack_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
         "damper_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
         "attack_slope_deg": { "type": "number", "minimum": -80, "maximum": 80 },
-        "damper_arc_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 }
+        "damper_arc_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 },
+        "arc_count": { "type": "integer", "minimum": 2, "maximum": 16 },
+        "arc_span_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 170 },
+        "arc_width_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 12 },
+        "phase_offset_deg": { "type": "number", "minimum": -180, "maximum": 180 },
+        "shoulder_count": { "type": "integer", "minimum": 2, "maximum": 32 },
+        "shoulder_amplitude_mm": { "type": "number", "minimum": 0, "maximum": 5 },
+        "inner_bearing_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 45 },
+        "bridge_width_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 },
+        "chevron_count": { "type": "integer", "minimum": 3, "maximum": 32 },
+        "waist_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 45 },
+        "buttress_count": { "type": "integer", "minimum": 3, "maximum": 32 },
+        "contact_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 }
       }
     },
     "mount": {

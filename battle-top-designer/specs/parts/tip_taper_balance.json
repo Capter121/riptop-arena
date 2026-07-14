@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0", "id": "tip_taper_balance", "display_name": "Taper Balance Tip",
+  "part_type": "performance_tip", "interface_id": "NSS-V1", "spin_direction": "right",
+  "dimensions": { "outer_radius_mm": 8.0, "height_mm": 8.5 },
+  "geometry": {
+    "kind": "revolved_tip", "segments": 64, "outer_radius_mm": 8.0, "height_mm": 8.5,
+    "contact_profile": "taper", "contact_radius_mm": 1.6,
+    "profile_points_mm": [[1.6, -7.96], [2.0, -7.6], [3.2, -6.2], [5.2, -4.0], [7.3, -2.0], [8.0, -1.1], [8.0, -0.65]]
+  },
+  "mounts": {
+    "top": { "position_mm": [0.0, 0.0, 0.54], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 10.8, "interface_role": "female", "orientation_key_deg": 0.0 },
+    "bottom": { "position_mm": [0.0, 0.0, -7.96], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 1.6, "interface_role": "terminal", "orientation_key_deg": 0.0 }
+  },
+  "material_slots": ["obsidian_polymer", "solar_amber"],
+  "originality_rules": { "no_existing_logo": true, "no_existing_name": true, "no_reference_outline_tracing": true, "no_existing_interface_copy": true, "minimum_primary_dimensions_changed": 4 },
+  "engineering_status": { "status": "concept_only", "mass_properties_validated": false, "manufacturing_validated": false },
+  "generation": { "seed": 71553, "generator_version": "0.1.0" }
+}

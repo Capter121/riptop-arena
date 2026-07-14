@@ -61,6 +61,90 @@
       "official_configuration": false,
       "baseline_fixture": "storm_attack_vertical_slice",
       "variable_part_type": "main_blade"
+    },
+    {
+      "id": "assembly_phase2b_core_void_falcon",
+      "display_name": "Phase 2B Void Falcon Single-Variable Fixture",
+      "core": "core_void_falcon", "blade": "blade_storm_fang", "assist": "assist_heavy", "gear": "gear_low", "tip": "tip_flat_attack",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "emblem_core"
+    },
+    {
+      "id": "assembly_phase2b_assist_guard",
+      "display_name": "Phase 2B Guard Assist Single-Variable Fixture",
+      "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_guard", "gear": "gear_low", "tip": "tip_flat_attack",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "assist_ring"
+    },
+    {
+      "id": "assembly_phase2b_assist_air",
+      "display_name": "Phase 2B Air Assist Single-Variable Fixture",
+      "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_air", "gear": "gear_low", "tip": "tip_flat_attack",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "assist_ring"
+    },
+    {
+      "id": "assembly_phase2b_gear_medium",
+      "display_name": "Phase 2B Medium Gear Single-Variable Fixture",
+      "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_heavy", "gear": "gear_medium", "tip": "tip_flat_attack",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "height_gear"
+    },
+    {
+      "id": "assembly_phase2b_gear_high",
+      "display_name": "Phase 2B High Gear Single-Variable Fixture",
+      "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_heavy", "gear": "gear_high", "tip": "tip_flat_attack",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "height_gear"
+    },
+    {
+      "id": "assembly_phase2b_tip_ball_defense",
+      "display_name": "Phase 2B Ball Tip Single-Variable Fixture",
+      "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_heavy", "gear": "gear_low", "tip": "tip_ball_defense",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "performance_tip"
+    },
+    {
+      "id": "assembly_phase2b_tip_needle_stamina",
+      "display_name": "Phase 2B Needle Tip Single-Variable Fixture",
+      "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_heavy", "gear": "gear_low", "tip": "tip_needle_stamina",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "performance_tip"
+    },
+    {
+      "id": "assembly_phase2b_tip_taper_balance",
+      "display_name": "Phase 2B Taper Tip Single-Variable Fixture",
+      "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_heavy", "gear": "gear_low", "tip": "tip_taper_balance",
+      "purpose": "phase2b_single_variable_fixture", "official_configuration": false,
+      "baseline_fixture": "storm_attack_vertical_slice", "variable_part_type": "performance_tip"
+    },
+    {
+      "id": "assembly_phase2b_attack_representative",
+      "display_name": "Phase 2B Attack Representative",
+      "core": "core_void_falcon", "blade": "blade_storm_fang", "assist": "assist_air", "gear": "gear_low", "tip": "tip_flat_attack",
+      "purpose": "phase2b_representative_fixture", "official_configuration": false,
+      "baseline_fixture": "phase2a_approved", "variable_part_type": "mixed_phase2b_modules"
+    },
+    {
+      "id": "assembly_phase2b_defense_representative",
+      "display_name": "Phase 2B Defense Representative",
+      "core": "core_solar_wolf", "blade": "blade_iron_bastion", "assist": "assist_guard", "gear": "gear_medium", "tip": "tip_ball_defense",
+      "purpose": "phase2b_representative_fixture", "official_configuration": false,
+      "baseline_fixture": "phase2a_approved", "variable_part_type": "mixed_phase2b_modules"
+    },
+    {
+      "id": "assembly_phase2b_stamina_representative",
+      "display_name": "Phase 2B Stamina Representative",
+      "core": "core_solar_wolf", "blade": "blade_orbit_halo", "assist": "assist_air", "gear": "gear_high", "tip": "tip_needle_stamina",
+      "purpose": "phase2b_representative_fixture", "official_configuration": false,
+      "baseline_fixture": "phase2a_approved", "variable_part_type": "mixed_phase2b_modules"
+    },
+    {
+      "id": "assembly_phase2b_balance_representative",
+      "display_name": "Phase 2B Balance Representative",
+      "core": "core_void_falcon", "blade": "blade_dual_comet", "assist": "assist_heavy", "gear": "gear_medium", "tip": "tip_taper_balance",
+      "purpose": "phase2b_representative_fixture", "official_configuration": false,
+      "baseline_fixture": "phase2a_approved", "variable_part_type": "mixed_phase2b_modules"
     }
   ]
 }

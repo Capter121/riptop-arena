@@ -26,6 +26,44 @@ PHASE2A_FIXTURES = {
     f"assembly_phase2a_{part_id.removeprefix('blade_')}": part_id
     for part_id in PHASE2A_BLADES
 }
+PHASE2B_PARTS = {
+    "core_void_falcon": "void_falcon_split_arc",
+    "assist_guard": "guard_cushion_ring",
+    "assist_air": "air_truss_windows",
+    "gear_medium": "medium_chevron_rib",
+    "gear_high": "high_tower_buttress",
+    "tip_ball_defense": "ball",
+    "tip_needle_stamina": "needle",
+    "tip_taper_balance": "taper",
+}
+PHASE2B_SINGLE_FIXTURES = {
+    "assembly_phase2b_core_void_falcon": {"core": "core_void_falcon"},
+    "assembly_phase2b_assist_guard": {"assist": "assist_guard"},
+    "assembly_phase2b_assist_air": {"assist": "assist_air"},
+    "assembly_phase2b_gear_medium": {"gear": "gear_medium"},
+    "assembly_phase2b_gear_high": {"gear": "gear_high"},
+    "assembly_phase2b_tip_ball_defense": {"tip": "tip_ball_defense"},
+    "assembly_phase2b_tip_needle_stamina": {"tip": "tip_needle_stamina"},
+    "assembly_phase2b_tip_taper_balance": {"tip": "tip_taper_balance"},
+}
+PHASE2B_REPRESENTATIVES = {
+    "assembly_phase2b_attack_representative": {
+        "core": "core_void_falcon", "blade": "blade_storm_fang", "assist": "assist_air",
+        "gear": "gear_low", "tip": "tip_flat_attack",
+    },
+    "assembly_phase2b_defense_representative": {
+        "core": "core_solar_wolf", "blade": "blade_iron_bastion", "assist": "assist_guard",
+        "gear": "gear_medium", "tip": "tip_ball_defense",
+    },
+    "assembly_phase2b_stamina_representative": {
+        "core": "core_solar_wolf", "blade": "blade_orbit_halo", "assist": "assist_air",
+        "gear": "gear_high", "tip": "tip_needle_stamina",
+    },
+    "assembly_phase2b_balance_representative": {
+        "core": "core_void_falcon", "blade": "blade_dual_comet", "assist": "assist_heavy",
+        "gear": "gear_medium", "tip": "tip_taper_balance",
+    },
+}
 
 
 def load_json(path: Path) -> object:
@@ -112,6 +150,14 @@ def semantic_errors(
                 if geometry.get("attack_radius_mm", 0) <= geometry.get("damper_radius_mm", 0):
                     add(source, "$.geometry", "attack radius must be greater than damper radius")
 
+        if part_id in PHASE2B_PARTS:
+            expected_profile = PHASE2B_PARTS[part_id]
+            actual_profile = part.get("geometry", {}).get("contact_profile") if part_id.startswith("tip_") else part.get("profile_family")
+            if actual_profile != expected_profile:
+                add(source, "$.profile_family", f"{part_id} requires {expected_profile}")
+            if part.get("interface_id") != "NSS-V1":
+                add(source, "$.interface_id", "Phase 2B parts must use NSS-V1")
+
     expected_types = {
         "core": "emblem_core",
         "blade": "main_blade",
@@ -119,9 +165,15 @@ def semantic_errors(
         "gear": "height_gear",
         "tip": "performance_tip",
     }
+    phase2b_part_ids = set(part_by_id) & set(PHASE2B_PARTS)
+    if phase2b_part_ids and phase2b_part_ids != set(PHASE2B_PARTS):
+        add("specs/parts", "$", "Phase 2B scope must contain exactly the eight approved new part IDs")
+    if phase2b_part_ids and len(part_by_id) != 16:
+        add("specs/parts", "$", "Phase 2B scope must contain exactly 16 total part specifications")
     if assemblies:
         assembly_ids = set()
         phase2a_seen = {}
+        phase2b_seen = {}
         for assembly_index, assembly in enumerate(assemblies.get("assemblies", [])):
             assembly_id = assembly.get("id")
             if assembly_id in assembly_ids:
@@ -129,6 +181,8 @@ def semantic_errors(
             assembly_ids.add(assembly_id)
             if assembly_id in PHASE2A_FIXTURES:
                 phase2a_seen[assembly_id] = assembly.get("blade")
+            if assembly_id in PHASE2B_SINGLE_FIXTURES or assembly_id in PHASE2B_REPRESENTATIVES:
+                phase2b_seen[assembly_id] = assembly
             for field, expected_type in expected_types.items():
                 part_id = assembly.get(field)
                 part = part_by_id.get(part_id)
@@ -161,6 +215,40 @@ def semantic_errors(
                 for field, expected_part in fixed_parts.items():
                     if assembly.get(field) != expected_part:
                         add("assemblies.json", f"$.assemblies[{assembly_index}].{field}", f"fixture requires {expected_part}")
+        if phase2b_seen:
+            expected_ids = set(PHASE2B_SINGLE_FIXTURES) | set(PHASE2B_REPRESENTATIVES)
+            if set(phase2b_seen) != expected_ids:
+                add("assemblies.json", "$.assemblies", "Phase 2B scope must contain exactly 8 single-variable and 4 representative fixtures")
+            baseline = {
+                "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_heavy",
+                "gear": "gear_low", "tip": "tip_flat_attack",
+            }
+            for assembly_id, replacement in PHASE2B_SINGLE_FIXTURES.items():
+                assembly = phase2b_seen.get(assembly_id, {})
+                expected = baseline | replacement
+                for field, value in expected.items():
+                    if assembly.get(field) != value:
+                        add("assemblies.json", "$.assemblies", f"{assembly_id} requires {field}={value}")
+                metadata = {
+                    "purpose": "phase2b_single_variable_fixture", "official_configuration": False,
+                    "baseline_fixture": "storm_attack_vertical_slice",
+                    "variable_part_type": expected_types[next(iter(replacement))],
+                }
+                for field, value in metadata.items():
+                    if assembly.get(field) != value:
+                        add("assemblies.json", "$.assemblies", f"{assembly_id} requires {field}={value}")
+            for assembly_id, expected in PHASE2B_REPRESENTATIVES.items():
+                assembly = phase2b_seen.get(assembly_id, {})
+                for field, value in expected.items():
+                    if assembly.get(field) != value:
+                        add("assemblies.json", "$.assemblies", f"{assembly_id} requires {field}={value}")
+                metadata = {
+                    "purpose": "phase2b_representative_fixture", "official_configuration": False,
+                    "baseline_fixture": "phase2a_approved", "variable_part_type": "mixed_phase2b_modules",
+                }
+                for field, value in metadata.items():
+                    if assembly.get(field) != value:
+                        add("assemblies.json", "$.assemblies", f"{assembly_id} requires {field}={value}")
     return errors
 
 
@@ -301,6 +389,16 @@ def run_self_test(all_validators: dict[str, Draft202012Validator]) -> tuple[bool
     unknown_profile["profile_family"] = "unknown_profile"
     errors = schema_errors(all_validators["part"], unknown_profile, "fixture")
     record("unknown_blade_profile_family_fails", bool(errors), f"errors={len(errors)}")
+
+    unknown_phase2b_profile = copy.deepcopy(parts[0])
+    unknown_phase2b_profile["profile_family"] = "void_falcon_split_arcs"
+    errors = schema_errors(all_validators["part"], unknown_phase2b_profile, "fixture")
+    record("unknown_phase2b_profile_family_fails", bool(errors), f"errors={len(errors)}")
+
+    unknown_tip_profile = copy.deepcopy(parts[4])
+    unknown_tip_profile["geometry"]["contact_profile"] = "sharp_point"
+    errors = schema_errors(all_validators["part"], unknown_tip_profile, "fixture")
+    record("unknown_tip_contact_profile_fails", bool(errors), f"errors={len(errors)}")
 
     missing_material = copy.deepcopy(parts)
     missing_material[1]["material_slots"] = ["missing_material"]

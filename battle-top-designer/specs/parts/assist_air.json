@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0", "id": "assist_air", "display_name": "Air Assist",
+  "part_type": "assist_ring", "interface_id": "NSS-V1", "spin_direction": "right",
+  "profile_family": "air_truss_windows",
+  "dimensions": { "outer_radius_mm": 29.5, "inner_radius_mm": 10.8, "height_mm": 3.0 },
+  "geometry": {
+    "kind": "annular_ring", "segments": 96, "outer_radius_mm": 29.5,
+    "inner_radius_mm": 10.8, "height_mm": 3.0, "window_count": 6,
+    "window_inner_radius_mm": 16.0, "window_outer_radius_mm": 25.0,
+    "window_width_deg": 31.0, "bridge_width_deg": 18.0, "spoke_count": 6, "spoke_width_mm": 2.4
+  },
+  "mounts": {
+    "top": { "position_mm": [0.0, 0.0, 1.5], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 10.8, "interface_role": "female", "orientation_key_deg": 0.0 },
+    "bottom": { "position_mm": [0.0, 0.0, -1.5], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 10.8, "interface_role": "male", "orientation_key_deg": 0.0 }
+  },
+  "material_slots": ["cobalt_blue_translucent", "obsidian_polymer"],
+  "originality_rules": { "no_existing_logo": true, "no_existing_name": true, "no_reference_outline_tracing": true, "no_existing_interface_copy": true, "minimum_primary_dimensions_changed": 4 },
+  "engineering_status": { "status": "concept_only", "mass_properties_validated": false, "manufacturing_validated": false },
+  "generation": { "seed": 71532, "generator_version": "0.1.0" }
+}

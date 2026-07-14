@@ -27,6 +27,16 @@
       "detail": "errors=1"
     },
     {
+      "name": "unknown_phase2b_profile_family_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "unknown_tip_contact_profile_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
       "name": "missing_material_reference_fails",
       "passed": true,
       "detail": "errors=1"
@@ -49,7 +59,7 @@
     {
       "name": "official_phase2a_fixture_fails",
       "passed": true,
-      "detail": "errors=2"
+      "detail": "errors=1"
     }
   ]
 }

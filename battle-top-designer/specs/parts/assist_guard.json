@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0", "id": "assist_guard", "display_name": "Guard Assist",
+  "part_type": "assist_ring", "interface_id": "NSS-V1", "spin_direction": "right",
+  "profile_family": "guard_cushion_ring",
+  "dimensions": { "outer_radius_mm": 30.5, "inner_radius_mm": 10.8, "height_mm": 3.2 },
+  "geometry": {
+    "kind": "annular_ring", "segments": 96, "outer_radius_mm": 30.5,
+    "inner_radius_mm": 10.8, "height_mm": 3.2, "shoulder_count": 12,
+    "shoulder_amplitude_mm": 1.1, "inner_bearing_radius_mm": 20.0, "roundness": 0.92
+  },
+  "mounts": {
+    "top": { "position_mm": [0.0, 0.0, 1.6], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 10.8, "interface_role": "female", "orientation_key_deg": 0.0 },
+    "bottom": { "position_mm": [0.0, 0.0, -1.6], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 10.8, "interface_role": "male", "orientation_key_deg": 0.0 }
+  },
+  "material_slots": ["brushed_silver", "obsidian_polymer"],
+  "originality_rules": { "no_existing_logo": true, "no_existing_name": true, "no_reference_outline_tracing": true, "no_existing_interface_copy": true, "minimum_primary_dimensions_changed": 4 },
+  "engineering_status": { "status": "concept_only", "mass_properties_validated": false, "manufacturing_validated": false },
+  "generation": { "seed": 71531, "generator_version": "0.1.0" }
+}
