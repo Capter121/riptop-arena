@@ -25,12 +25,12 @@
     "assembly_report": "reports/validation/assembly-storm-attack.json"
   },
   "raw_sha256": {
-    "public/models/assemblies/assembly_storm_attack.glb": "dcb2bc4c2c19252079e7bd95880a505f8c87afce4f2432e00bc065007fce9126",
-    "public/models/parts/assist_heavy.glb": "b6f1dbf006949c761af06735baacba34dd489c4aa9783feb111f8d73896f6367",
-    "public/models/parts/blade_storm_fang.glb": "80dd75d2bc173c02b1c31474babe555776394473d306dc7f802c36c3c499039f",
-    "public/models/parts/core_solar_wolf.glb": "c32b6708ee0b57cfabd11479adfa4a675e5153eea959c40727101b0de47bd78b",
-    "public/models/parts/gear_low.glb": "e6e33ff87fb0f8e8c121032447144fe847089095ac92dabd5af1c033a2ecf3a0",
-    "public/models/parts/tip_flat_attack.glb": "36c34593a2be0f25af8712e94742647a5c7fb90e37e20365ded31652d4f688ff",
+    "public/models/assemblies/assembly_storm_attack.glb": "52357cb7847dd12c919446fcbd9b57d125e2b99e5adf184f061e4948c0d821b7",
+    "public/models/parts/assist_heavy.glb": "44949136aeb7c1e1e219575c6798595d2fb0b584b346eb116b4ce33e12b8be70",
+    "public/models/parts/blade_storm_fang.glb": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac",
+    "public/models/parts/core_solar_wolf.glb": "78407099c4a962a7d30f6a7a62009ca7f04c5e91487aa17899089143d8bd102c",
+    "public/models/parts/gear_low.glb": "c772a6bbcb4907f4c7805e3571fb3bdaa6a1b7b1ff45d3beddace6632e076b8a",
+    "public/models/parts/tip_flat_attack.glb": "56bd25f90f6898dc3148cc5eb4c8c14741bd8b7ed71e77f6ffae64606b517629",
     "schemas/assembly.schema.json": "f571238c7930bf792c38c4226b19b68dd447823da2bf9c15c3753332050f841c",
     "schemas/interface.schema.json": "b5d18076bfe316a995989d4fa6b437252ce96d6ffb1bf6cec1e74ab48973db82",
     "schemas/material.schema.json": "ead757f865d2f667fee8883cd0adc4325c04187fa622fdf82d7fe3f5f5f590df",
@@ -49,7 +49,7 @@
     "source_commit": "f55e260",
     "artifacts": {
       "public/models/parts/core_solar_wolf.glb": {
-        "sha256": "985318cf8d571dc5521415201dffe62f9196cb468d536415851238d6f11464b1",
+        "sha256": "52e06b727ec452cb54853096b7cbf5dbd5ed5b75b8cb90bad118ad3e2ddfd6d5",
         "canonical": {
           "dimensions_mm": [
             35.391056061,
@@ -311,7 +311,7 @@
                   "MAT_solar_amber",
                   "MAT_obsidian_polymer"
                 ],
-                "mesh": "MESH_core_solar_wolf_BODY",
+                "mesh": "GEO_core_solar_wolf_BODY",
                 "object": "GEO_core_solar_wolf_BODY",
                 "topology_sha256": "07df38f25e6bec0bd69a2d2f2ab0a7fde5bd29290e25be7bb7f61613d4ce7d37",
                 "triangle_count": 480,
@@ -411,7 +411,7 @@
                 "material_slots": [
                   "MAT_solar_amber"
                 ],
-                "mesh": "MESH_core_solar_wolf_NSS_V1",
+                "mesh": "GEO_core_solar_wolf_NSS_V1_COLLAR",
                 "object": "GEO_core_solar_wolf_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -547,7 +547,7 @@
         }
       },
       "public/models/parts/blade_storm_fang.glb": {
-        "sha256": "dc3f329ca72b97d8e120222d75c5bd421731b63b0865920461597432b4121eb8",
+        "sha256": "476eaf1adbf65244ffaaef4e571b9d26f3217e73923d20c8d81b2ec2b4469df1",
         "canonical": {
           "dimensions_mm": [
             64.731658936,
@@ -831,7 +831,7 @@
                   "MAT_cobalt_blue_translucent",
                   "MAT_solar_amber"
                 ],
-                "mesh": "MESH_blade_storm_fang_BODY",
+                "mesh": "GEO_blade_storm_fang_BODY",
                 "object": "GEO_blade_storm_fang_BODY",
                 "topology_sha256": "01a43f7f298cb6e87982da7a81c844da571f1ec28636856a74d02023a9491f55",
                 "triangle_count": 576,
@@ -931,7 +931,7 @@
                 "material_slots": [
                   "MAT_gunmetal"
                 ],
-                "mesh": "MESH_blade_storm_fang_NSS_V1",
+                "mesh": "GEO_blade_storm_fang_NSS_V1_COLLAR",
                 "object": "GEO_blade_storm_fang_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -1067,7 +1067,7 @@
         }
       },
       "public/models/parts/assist_heavy.glb": {
-        "sha256": "d32a2ee26b20b59682427e473e8f3659472daed0e7915e68a9c1aa5cca2dfa9d",
+        "sha256": "ad9876a939375dbd2f8f57d4c59a08280400e6f30305e7aa76389d8aa1c53e5f",
         "canonical": {
           "dimensions_mm": [
             62.0,
@@ -1329,7 +1329,7 @@
                   "MAT_brushed_silver",
                   "MAT_obsidian_polymer"
                 ],
-                "mesh": "MESH_assist_heavy_BODY",
+                "mesh": "GEO_assist_heavy_BODY",
                 "object": "GEO_assist_heavy_BODY",
                 "topology_sha256": "db5edd9d4dd39e7d422e91a3df24218fdc109c5a29eaff1201d8eaf61c51e3a4",
                 "triangle_count": 576,
@@ -1429,7 +1429,7 @@
                 "material_slots": [
                   "MAT_brushed_silver"
                 ],
-                "mesh": "MESH_assist_heavy_NSS_V1",
+                "mesh": "GEO_assist_heavy_NSS_V1_COLLAR",
                 "object": "GEO_assist_heavy_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -1565,7 +1565,7 @@
         }
       },
       "public/models/parts/gear_low.glb": {
-        "sha256": "5bc9365637388e5dd335ecb16e789593377660dadbf94be4765117a4e1517607",
+        "sha256": "a9f397571c350d95600a48a1461d5f2aa8d1ed52d3d8be3858365e2496d25abe",
         "canonical": {
           "dimensions_mm": [
             33.581401825,
@@ -1827,7 +1827,7 @@
                   "MAT_obsidian_polymer",
                   "MAT_solar_amber"
                 ],
-                "mesh": "MESH_gear_low_BODY",
+                "mesh": "GEO_gear_low_BODY",
                 "object": "GEO_gear_low_BODY",
                 "topology_sha256": "4700759494cbc755f414b774f8b80b92969d8f149f1b2b762fa37ced4e32f6c3",
                 "triangle_count": 480,
@@ -1927,7 +1927,7 @@
                 "material_slots": [
                   "MAT_obsidian_polymer"
                 ],
-                "mesh": "MESH_gear_low_NSS_V1",
+                "mesh": "GEO_gear_low_NSS_V1_COLLAR",
                 "object": "GEO_gear_low_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -2063,7 +2063,7 @@
         }
       },
       "public/models/parts/tip_flat_attack.glb": {
-        "sha256": "4d1136c74dd77d68dc30f2daff8d1d942fa1db6b9cb34aedb63b695af1dad6a6",
+        "sha256": "98974a705457d521ccde061b11d4ac17c3cb8b8ed51547cb173ac71125e0cce7",
         "canonical": {
           "dimensions_mm": [
             21.400001526,
@@ -2329,7 +2329,7 @@
                   "MAT_obsidian_polymer",
                   "MAT_solar_amber"
                 ],
-                "mesh": "MESH_tip_flat_attack_BODY",
+                "mesh": "GEO_tip_flat_attack_BODY",
                 "object": "GEO_tip_flat_attack_BODY",
                 "topology_sha256": "2c29c31eb2770cb80694cade4c7faebcbbb1f1e5f8eb529623fadbbb052317bb",
                 "triangle_count": 480,
@@ -2429,7 +2429,7 @@
                 "material_slots": [
                   "MAT_obsidian_polymer"
                 ],
-                "mesh": "MESH_tip_flat_attack_NSS_V1",
+                "mesh": "GEO_tip_flat_attack_NSS_V1_COLLAR",
                 "object": "GEO_tip_flat_attack_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -2565,7 +2565,7 @@
         }
       },
       "public/models/assemblies/assembly_storm_attack.glb": {
-        "sha256": "03f6f9736d98faeea1afd20a9dc5cceb154e9ae182bd4c73a2ae71d4b51e5497",
+        "sha256": "dc54d195ff6628585591e3fab8327b08d4a32c6d0d841f4560fd7028397c3d68",
         "canonical": {
           "dimensions_mm": [
             66.353919983,
@@ -3479,7 +3479,7 @@
                   "MAT_brushed_silver",
                   "MAT_obsidian_polymer.001"
                 ],
-                "mesh": "MESH_assist_heavy_BODY",
+                "mesh": "GEO_assist_heavy_BODY",
                 "object": "GEO_assist_heavy_BODY",
                 "topology_sha256": "db5edd9d4dd39e7d422e91a3df24218fdc109c5a29eaff1201d8eaf61c51e3a4",
                 "triangle_count": 576,
@@ -3579,7 +3579,7 @@
                 "material_slots": [
                   "MAT_brushed_silver"
                 ],
-                "mesh": "MESH_assist_heavy_NSS_V1",
+                "mesh": "GEO_assist_heavy_NSS_V1_COLLAR",
                 "object": "GEO_assist_heavy_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -3830,7 +3830,7 @@
                   "MAT_cobalt_blue_translucent",
                   "MAT_solar_amber.001"
                 ],
-                "mesh": "MESH_blade_storm_fang_BODY",
+                "mesh": "GEO_blade_storm_fang_BODY",
                 "object": "GEO_blade_storm_fang_BODY",
                 "topology_sha256": "01a43f7f298cb6e87982da7a81c844da571f1ec28636856a74d02023a9491f55",
                 "triangle_count": 576,
@@ -3930,7 +3930,7 @@
                 "material_slots": [
                   "MAT_gunmetal"
                 ],
-                "mesh": "MESH_blade_storm_fang_NSS_V1",
+                "mesh": "GEO_blade_storm_fang_NSS_V1_COLLAR",
                 "object": "GEO_blade_storm_fang_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -4180,7 +4180,7 @@
                   "MAT_solar_amber",
                   "MAT_obsidian_polymer"
                 ],
-                "mesh": "MESH_core_solar_wolf_BODY",
+                "mesh": "GEO_core_solar_wolf_BODY",
                 "object": "GEO_core_solar_wolf_BODY",
                 "topology_sha256": "07df38f25e6bec0bd69a2d2f2ab0a7fde5bd29290e25be7bb7f61613d4ce7d37",
                 "triangle_count": 480,
@@ -4280,7 +4280,7 @@
                 "material_slots": [
                   "MAT_solar_amber"
                 ],
-                "mesh": "MESH_core_solar_wolf_NSS_V1",
+                "mesh": "GEO_core_solar_wolf_NSS_V1_COLLAR",
                 "object": "GEO_core_solar_wolf_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -4530,7 +4530,7 @@
                   "MAT_obsidian_polymer.002",
                   "MAT_solar_amber.002"
                 ],
-                "mesh": "MESH_gear_low_BODY",
+                "mesh": "GEO_gear_low_BODY",
                 "object": "GEO_gear_low_BODY",
                 "topology_sha256": "4700759494cbc755f414b774f8b80b92969d8f149f1b2b762fa37ced4e32f6c3",
                 "triangle_count": 480,
@@ -4630,7 +4630,7 @@
                 "material_slots": [
                   "MAT_obsidian_polymer.002"
                 ],
-                "mesh": "MESH_gear_low_NSS_V1",
+                "mesh": "GEO_gear_low_NSS_V1_COLLAR",
                 "object": "GEO_gear_low_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -4880,7 +4880,7 @@
                   "MAT_obsidian_polymer.003",
                   "MAT_solar_amber.003"
                 ],
-                "mesh": "MESH_tip_flat_attack_BODY",
+                "mesh": "GEO_tip_flat_attack_BODY",
                 "object": "GEO_tip_flat_attack_BODY",
                 "topology_sha256": "2c29c31eb2770cb80694cade4c7faebcbbb1f1e5f8eb529623fadbbb052317bb",
                 "triangle_count": 480,
@@ -4980,7 +4980,7 @@
                 "material_slots": [
                   "MAT_obsidian_polymer.003"
                 ],
-                "mesh": "MESH_tip_flat_attack_NSS_V1",
+                "mesh": "GEO_tip_flat_attack_NSS_V1_COLLAR",
                 "object": "GEO_tip_flat_attack_NSS_V1_COLLAR",
                 "topology_sha256": "5706b186a1d59b9dcd9c8ef45fe46d6a004a692d0e7378d7c472f6be5206ab46",
                 "triangle_count": 480,
@@ -5116,5 +5116,29 @@
         }
       }
     }
-  }
+  },
+  "accepted_migrations": [
+    {
+      "id": "phase2a-stage2-geo-prefix-migration",
+      "result": "CONFIRMED",
+      "confirmed_on": "2026-07-14",
+      "confirmed_by": "project_owner",
+      "confirmation_source": "Codex task user confirmation",
+      "scope": [
+        "public/models/parts/core_solar_wolf.glb",
+        "public/models/parts/blade_storm_fang.glb",
+        "public/models/parts/assist_heavy.glb",
+        "public/models/parts/gear_low.glb",
+        "public/models/parts/tip_flat_attack.glb",
+        "public/models/assemblies/assembly_storm_attack.glb"
+      ],
+      "reason": "Apply the approved GEO_ prefix to visible Blender object and mesh data names.",
+      "semantic_diff_report": "reports/validation/stage2-semantic-diff.json",
+      "allowed_semantic_paths": [
+        "$.objects[*].mesh_record.mesh"
+      ],
+      "geometry_change_allowed": false,
+      "interface_change_allowed": false
+    }
+  ]
 }

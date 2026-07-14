@@ -1,0 +1,63 @@
+{
+  "result": "PASS",
+  "errors": [],
+  "cases": {
+    "aabb_separated": {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0
+    },
+    "contact_review": {
+      "result": "CONTACT_REVIEW",
+      "stage": "VOXEL_ESTIMATE",
+      "overlap_volume_mm3": 0.0,
+      "overlap_center_mm": [
+        0.4113081693649292,
+        0.0,
+        0.0
+      ],
+      "overlap_aabb_mm": [
+        [
+          0.3226163685321808,
+          -0.5,
+          -0.5
+        ],
+        [
+          0.5,
+          0.5,
+          0.5
+        ]
+      ],
+      "triangle_pair_count": 10,
+      "voxel_size_mm": 0.5,
+      "sample_count": 9,
+      "occupied_voxel_count": 0
+    },
+    "volume_fail": {
+      "result": "FAIL",
+      "stage": "VOXEL_ESTIMATE",
+      "overlap_volume_mm3": 1.0,
+      "overlap_center_mm": [
+        0.06065194308757782,
+        0.0,
+        0.0
+      ],
+      "overlap_aabb_mm": [
+        [
+          -0.37869611382484436,
+          -0.5,
+          -0.5
+        ],
+        [
+          0.5,
+          0.5,
+          0.5
+        ]
+      ],
+      "triangle_pair_count": 12,
+      "voxel_size_mm": 0.5,
+      "sample_count": 18,
+      "occupied_voxel_count": 8
+    }
+  }
+}

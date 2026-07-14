@@ -31,7 +31,7 @@ def _create_annular_collar(part_id: str, interface: dict, collection: bpy.types.
         bi, bo, ti, to = index * 4, index * 4 + 1, index * 4 + 2, index * 4 + 3
         nbi, nbo, nti, nto = nxt * 4, nxt * 4 + 1, nxt * 4 + 2, nxt * 4 + 3
         faces.extend([(ti, to, nto, nti), (bi, nbi, nbo, bo), (bo, nbo, nto, to), (bi, ti, nti, nbi)])
-    mesh = bpy.data.meshes.new(f"MESH_{part_id}_NSS_V1")
+    mesh = bpy.data.meshes.new(f"GEO_{part_id}_NSS_V1_COLLAR")
     mesh.from_pydata(vertices, [], faces)
     mesh.materials.append(material)
     mesh.validate(verbose=False)

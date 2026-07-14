@@ -1,0 +1,22 @@
+{
+  "id": "phase2a-stage2-geo-prefix-migration",
+  "result": "CONFIRMED",
+  "confirmed_on": "2026-07-14",
+  "confirmed_by": "project_owner",
+  "confirmation_source": "Codex task user confirmation",
+  "scope": [
+    "public/models/parts/core_solar_wolf.glb",
+    "public/models/parts/blade_storm_fang.glb",
+    "public/models/parts/assist_heavy.glb",
+    "public/models/parts/gear_low.glb",
+    "public/models/parts/tip_flat_attack.glb",
+    "public/models/assemblies/assembly_storm_attack.glb"
+  ],
+  "reason": "Apply the approved GEO_ prefix to visible Blender object and mesh data names.",
+  "semantic_diff_report": "reports/validation/stage2-semantic-diff.json",
+  "allowed_semantic_paths": [
+    "$.objects[*].mesh_record.mesh"
+  ],
+  "geometry_change_allowed": false,
+  "interface_change_allowed": false
+}

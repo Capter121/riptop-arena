@@ -1,0 +1,114 @@
+{
+  "public/models/parts/core_solar_wolf.glb": [
+    {
+      "path": "$.objects[0].mesh_record.mesh",
+      "before": "MESH_core_solar_wolf_BODY",
+      "after": "GEO_core_solar_wolf_BODY"
+    },
+    {
+      "path": "$.objects[1].mesh_record.mesh",
+      "before": "MESH_core_solar_wolf_NSS_V1",
+      "after": "GEO_core_solar_wolf_NSS_V1_COLLAR"
+    }
+  ],
+  "public/models/parts/blade_storm_fang.glb": [
+    {
+      "path": "$.objects[0].mesh_record.mesh",
+      "before": "MESH_blade_storm_fang_BODY",
+      "after": "GEO_blade_storm_fang_BODY"
+    },
+    {
+      "path": "$.objects[1].mesh_record.mesh",
+      "before": "MESH_blade_storm_fang_NSS_V1",
+      "after": "GEO_blade_storm_fang_NSS_V1_COLLAR"
+    }
+  ],
+  "public/models/parts/assist_heavy.glb": [
+    {
+      "path": "$.objects[0].mesh_record.mesh",
+      "before": "MESH_assist_heavy_BODY",
+      "after": "GEO_assist_heavy_BODY"
+    },
+    {
+      "path": "$.objects[1].mesh_record.mesh",
+      "before": "MESH_assist_heavy_NSS_V1",
+      "after": "GEO_assist_heavy_NSS_V1_COLLAR"
+    }
+  ],
+  "public/models/parts/gear_low.glb": [
+    {
+      "path": "$.objects[0].mesh_record.mesh",
+      "before": "MESH_gear_low_BODY",
+      "after": "GEO_gear_low_BODY"
+    },
+    {
+      "path": "$.objects[1].mesh_record.mesh",
+      "before": "MESH_gear_low_NSS_V1",
+      "after": "GEO_gear_low_NSS_V1_COLLAR"
+    }
+  ],
+  "public/models/parts/tip_flat_attack.glb": [
+    {
+      "path": "$.objects[0].mesh_record.mesh",
+      "before": "MESH_tip_flat_attack_BODY",
+      "after": "GEO_tip_flat_attack_BODY"
+    },
+    {
+      "path": "$.objects[1].mesh_record.mesh",
+      "before": "MESH_tip_flat_attack_NSS_V1",
+      "after": "GEO_tip_flat_attack_NSS_V1_COLLAR"
+    }
+  ],
+  "public/models/assemblies/assembly_storm_attack.glb": [
+    {
+      "path": "$.objects[1].mesh_record.mesh",
+      "before": "MESH_assist_heavy_BODY",
+      "after": "GEO_assist_heavy_BODY"
+    },
+    {
+      "path": "$.objects[2].mesh_record.mesh",
+      "before": "MESH_assist_heavy_NSS_V1",
+      "after": "GEO_assist_heavy_NSS_V1_COLLAR"
+    },
+    {
+      "path": "$.objects[6].mesh_record.mesh",
+      "before": "MESH_blade_storm_fang_BODY",
+      "after": "GEO_blade_storm_fang_BODY"
+    },
+    {
+      "path": "$.objects[7].mesh_record.mesh",
+      "before": "MESH_blade_storm_fang_NSS_V1",
+      "after": "GEO_blade_storm_fang_NSS_V1_COLLAR"
+    },
+    {
+      "path": "$.objects[11].mesh_record.mesh",
+      "before": "MESH_core_solar_wolf_BODY",
+      "after": "GEO_core_solar_wolf_BODY"
+    },
+    {
+      "path": "$.objects[12].mesh_record.mesh",
+      "before": "MESH_core_solar_wolf_NSS_V1",
+      "after": "GEO_core_solar_wolf_NSS_V1_COLLAR"
+    },
+    {
+      "path": "$.objects[16].mesh_record.mesh",
+      "before": "MESH_gear_low_BODY",
+      "after": "GEO_gear_low_BODY"
+    },
+    {
+      "path": "$.objects[17].mesh_record.mesh",
+      "before": "MESH_gear_low_NSS_V1",
+      "after": "GEO_gear_low_NSS_V1_COLLAR"
+    },
+    {
+      "path": "$.objects[21].mesh_record.mesh",
+      "before": "MESH_tip_flat_attack_BODY",
+      "after": "GEO_tip_flat_attack_BODY"
+    },
+    {
+      "path": "$.objects[22].mesh_record.mesh",
+      "before": "MESH_tip_flat_attack_NSS_V1",
+      "after": "GEO_tip_flat_attack_NSS_V1_COLLAR"
+    }
+  ]
+}

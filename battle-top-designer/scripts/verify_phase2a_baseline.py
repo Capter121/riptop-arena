@@ -24,6 +24,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", default="docs/baselines/v0.1.0-vertical-slice.json")
     parser.add_argument("--blender", required=True)
+    parser.add_argument("--glb-only", action="store_true")
+    parser.add_argument("--verify-only", action="store_true")
+    parser.add_argument("--report", default="reports/validation/phase2a-baseline-check.json")
+    parser.add_argument("--accept-approved-drift", action="store_true")
+    parser.add_argument("--disposition")
     return parser.parse_args()
 
 
@@ -66,15 +71,25 @@ def main() -> None:
     args = parse_args()
     manifest_path = (ROOT / args.manifest).resolve()
     blender = Path(args.blender).resolve()
-    report_path = ROOT / "reports" / "validation" / "phase2a-baseline-check.json"
+    report_path = (ROOT / args.report).resolve()
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     expected_hashes = manifest.get("raw_sha256", manifest.get("sha256", {}))
+    disposition = None
+    if args.accept_approved_drift:
+        if not args.disposition:
+            raise ValueError("--disposition is required with --accept-approved-drift")
+        disposition = json.loads((ROOT / args.disposition).read_text(encoding="utf-8"))
+        if disposition.get("result") != "CONFIRMED":
+            raise ValueError("drift disposition is not CONFIRMED")
 
     errors = []
+    binary_drifts = []
     raw_results = {}
     before_stats = {}
     semantic_results = {}
-    for relative_path, expected_hash in sorted(expected_hashes.items()):
+    paths_to_check = GLB_PATHS if args.glb_only else tuple(sorted(expected_hashes))
+    for relative_path in paths_to_check:
+        expected_hash = expected_hashes.get(relative_path)
         artifact_path = ROOT / relative_path
         if not artifact_path.is_file():
             errors.append(f"MISSING_BASELINE_ARTIFACT:{relative_path}")
@@ -82,7 +97,10 @@ def main() -> None:
         actual_hash = sha256(artifact_path)
         raw_results[relative_path] = actual_hash
         if actual_hash != expected_hash:
-            errors.append(f"RAW_SHA256_MISMATCH:{relative_path}")
+            binary_drifts.append(relative_path)
+            if not args.accept_approved_drift:
+                error_code = "BINARY_DRIFT" if args.verify_only else "RAW_SHA256_MISMATCH"
+                errors.append(f"{error_code}:{relative_path}")
 
     work_directory = ROOT / "build" / "fingerprint-work"
     work_directory.mkdir(parents=True, exist_ok=True)
@@ -96,7 +114,7 @@ def main() -> None:
             "mtime_ns": model_path.stat().st_mtime_ns,
         }
         actual_hash = raw_results.get(relative_path)
-        if expected_hashes.get(relative_path) != actual_hash:
+        if expected_hashes.get(relative_path) != actual_hash and not (args.verify_only or args.accept_approved_drift):
             continue
 
         first = fingerprint(blender, model_path, work_directory / f"{index}-first.json")
@@ -108,6 +126,11 @@ def main() -> None:
             "sha256": first["semantic_fingerprint"],
             "canonical": first["canonical"],
         }
+
+        if args.verify_only:
+            expected_semantic = manifest.get("semantic_fingerprint", {}).get("artifacts", {}).get(relative_path, {}).get("sha256")
+            if first["semantic_fingerprint"] != expected_semantic:
+                errors.append(f"SEMANTIC_REGRESSION:{relative_path}")
 
     for relative_path, before in before_stats.items():
         model_path = ROOT / relative_path
@@ -128,6 +151,8 @@ def main() -> None:
             path: record["sha256"] for path, record in semantic_results.items()
         },
         "glb_unchanged": not any(error.startswith("GLB_CHANGED_DURING_VERIFICATION") for error in errors),
+        "binary_drifts": binary_drifts,
+        "disposition": args.disposition if disposition else None,
     }
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -136,13 +161,18 @@ def main() -> None:
         print("PHASE2A_BASELINE_ERRORS=" + ",".join(errors))
         raise SystemExit(1)
 
-    manifest["raw_sha256"] = manifest.pop("sha256", expected_hashes)
-    manifest["semantic_fingerprint"] = {
-        "schema_version": 1,
-        "source_commit": "f55e260",
-        "artifacts": semantic_results,
-    }
-    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if not args.verify_only:
+        manifest["raw_sha256"] = manifest.pop("sha256", expected_hashes)
+        if args.accept_approved_drift:
+            manifest["raw_sha256"].update({path: raw_results[path] for path in GLB_PATHS})
+        manifest["semantic_fingerprint"] = {
+            "schema_version": 1,
+            "source_commit": "f55e260",
+            "artifacts": semantic_results,
+        }
+        if disposition:
+            manifest.setdefault("accepted_migrations", []).append(disposition)
+        manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print("PHASE2A_BASELINE_RESULT=PASS")
     print(f"PHASE2A_BASELINE_GLBS={len(GLB_PATHS)}")
     print(f"PHASE2A_BASELINE_REPORT={report_path}")

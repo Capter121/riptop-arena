@@ -13,7 +13,7 @@ import bpy
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from lib import exporter, geometry, interfaces, materials  # noqa: E402
+from lib import collision, exporter, geometry, interfaces, materials  # noqa: E402
 
 
 def script_args() -> argparse.Namespace:
@@ -57,6 +57,12 @@ def main() -> None:
         collection,
         part_materials[0],
     )
+    objects.append(collision.create_proxy(
+        part_spec,
+        interface_by_id[part_spec["interface_id"]],
+        collection,
+        objects,
+    ))
     for obj in objects:
         obj["part_id"] = part_spec["id"]
         obj["part_type"] = part_spec["part_type"]

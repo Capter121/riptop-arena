@@ -36,7 +36,9 @@ Push-Location $ProjectRoot
 try {
     Invoke-Logged "python" @("scripts\validate_specs.py", "--self-test") "test-spec-self-test.log"
     Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", "vertical_slice") "test-specs.log"
+    Invoke-Logged $Blender @("--background", "--python", "blender\test_collision.py") "test-collision.log"
     foreach ($part in $Parts) {
+        Invoke-Logged $Blender @("--background", "--python", "blender\validate_collision_proxies.py", "--", "--part", $part) "validate-collider-$part.log"
         Invoke-Logged $Blender @("--background", "--python", "blender\validate_geometry.py", "--", "--part", $part) "validate-$part.log"
         $slug = $part.Replace("_", "-")
         Invoke-Logged "node" @("scripts\validate_gltf.mjs", "--input", "public\models\parts\$part.glb", "--output", "reports\validation\gltf-$slug.json") "gltf-$part.log"
@@ -52,7 +54,7 @@ try {
     Require-File "reports\renders\all_blades_silhouette.png"
 
     $assemblyReport = Get-Content -Raw "reports\validation\assembly-storm-attack.json" | ConvertFrom-Json
-    if ($assemblyReport.result -ne "PASS" -or $assemblyReport.collision_count -ne 0) {
+    if ($assemblyReport.result -ne "PASS" -or $assemblyReport.collision_count -ne 0 -or $assemblyReport.contact_review_count -ne 0) {
         throw "Assembly validation report is not a collision-free PASS."
     }
     $summary = [ordered]@{

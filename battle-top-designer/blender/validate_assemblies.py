@@ -16,6 +16,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from lib.collision import staged_overlap  # noqa: E402
 from lib.reporting import write_json  # noqa: E402
 
 
@@ -39,11 +40,6 @@ def world_bounds(objects: list[bpy.types.Object]) -> tuple[Vector, Vector]:
     )
 
 
-def overlap_volume(first: tuple[Vector, Vector], second: tuple[Vector, Vector]) -> float:
-    lengths = [max(0.0, min(first[1][axis], second[1][axis]) - max(first[0][axis], second[0][axis])) for axis in range(3)]
-    return lengths[0] * lengths[1] * lengths[2]
-
-
 def main() -> None:
     args = script_args()
     spec_catalog = load_json(ROOT / "specs" / "assemblies.json")
@@ -57,7 +53,14 @@ def main() -> None:
     order = ["core", "blade", "assist", "gear", "tip"]
     roots = {obj.get("assembly_role"): obj for obj in bpy.data.objects if obj.get("assembly_id") == args.assembly}
     meshes_by_role = {
-        role: [child for child in roots[role].children_recursive if child.type == "MESH"]
+        role: [
+            child for child in roots[role].children_recursive
+            if child.type == "MESH" and not child.name.startswith("COLLIDER_")
+        ]
+        for role in order if role in roots
+    }
+    colliders_by_role = {
+        role: next((child for child in roots[role].children_recursive if child.name.startswith("COLLIDER_")), None)
         for role in order if role in roots
     }
     errors = []
@@ -100,17 +103,24 @@ def main() -> None:
     if maximum_phase_error_deg > interface["angular_tolerance_deg"]:
         errors.append("PHASE_MISALIGNED")
 
-    bounds = {role: world_bounds(objects) for role, objects in meshes_by_role.items() if objects}
     collisions = []
     for first_index, first_role in enumerate(order):
         for second_role in order[first_index + 1:]:
-            if first_role not in bounds or second_role not in bounds:
+            first = colliders_by_role.get(first_role)
+            second = colliders_by_role.get(second_role)
+            if first is None or second is None:
                 continue
-            volume_mm3 = overlap_volume(bounds[first_role], bounds[second_role]) * 1_000_000_000.0
-            if volume_mm3 > interface_catalog["collision_policy"]["max_unexpected_overlap_volume_mm3"]:
-                collisions.append({"parts": [first_role, second_role], "aabb_overlap_mm3": volume_mm3})
-    if collisions:
+            collision_result = staged_overlap(
+                first,
+                second,
+                interface_catalog["collision_policy"]["max_unexpected_overlap_volume_mm3"],
+            )
+            collision_result["parts"] = [first_role, second_role]
+            collisions.append(collision_result)
+    if any(item["result"] == "FAIL" for item in collisions):
         errors.append("UNEXPECTED_COLLISION")
+    if any(item["result"] == "CONTACT_REVIEW" for item in collisions):
+        errors.append("CONTACT_REVIEW_UNRESOLVED")
 
     all_meshes = [obj for objects in meshes_by_role.values() for obj in objects]
     overall_min, overall_max = world_bounds(all_meshes)
@@ -128,15 +138,19 @@ def main() -> None:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=str(glb_path))
     imported_mesh_count = sum(1 for obj in bpy.data.objects if obj.type == "MESH")
+    imported_collider_count = sum(1 for obj in bpy.data.objects if obj.name.startswith("COLLIDER_"))
     if imported_mesh_count == 0:
         errors.append("GLB_REIMPORT_FAILED")
+    if imported_collider_count:
+        errors.append("GLB_REIMPORT_CONTAINS_COLLIDER")
 
     result = "PASS" if not errors else "FAIL"
     report = {
         "assembly_id": args.assembly,
         "result": result,
         "errors": errors,
-        "collision_count": len(collisions),
+        "collision_count": sum(1 for item in collisions if item["result"] == "FAIL"),
+        "contact_review_count": sum(1 for item in collisions if item["result"] == "CONTACT_REVIEW"),
         "collisions": collisions,
         "axis_error_mm": maximum_axis_error_mm,
         "phase_error_deg": maximum_phase_error_deg,
@@ -145,6 +159,7 @@ def main() -> None:
         "triangle_count": triangle_count,
         "glb_file_size_bytes": glb_path.stat().st_size,
         "glb_reimport_mesh_count": imported_mesh_count,
+        "glb_reimport_collider_count": imported_collider_count,
         "connections": connections,
     }
     report_path = ROOT / "reports" / "validation" / f"assembly-{args.assembly.removeprefix('assembly_').replace('_', '-')}.json"
@@ -164,7 +179,7 @@ def main() -> None:
             "gear": spec["gear"], "tip": spec["tip"], "result": result,
             "error_code": "|".join(errors), "axis_error_mm": maximum_axis_error_mm,
             "phase_error_deg": maximum_phase_error_deg,
-            "unexpected_overlap_mm3": sum(item["aabb_overlap_mm3"] for item in collisions),
+            "unexpected_overlap_mm3": sum(item["overlap_volume_mm3"] for item in collisions),
             "total_height_mm": total_height_mm, "total_diameter_mm": total_diameter_mm,
         })
     print(f"NSS_ASSEMBLY_VALIDATION={result}")

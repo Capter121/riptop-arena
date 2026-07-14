@@ -11,6 +11,8 @@ def export_collection_glb(collection: bpy.types.Collection, output_path: Path) -
     output_path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.object.select_all(action="DESELECT")
     for obj in collection.all_objects:
+        if obj.name.startswith("COLLIDER_") or obj.get("export_exclude") is True:
+            continue
         obj.select_set(True)
         if obj.type == "MESH":
             bpy.context.view_layer.objects.active = obj

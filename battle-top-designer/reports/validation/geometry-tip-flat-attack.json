@@ -5,7 +5,7 @@
   "mesh_count": 2,
   "triangle_count": 960,
   "material_count": 2,
-  "glb_file_size_bytes": 47396,
+  "glb_file_size_bytes": 47404,
   "mounts_present": [
     "MOUNT_tip_flat_attack_BOTTOM",
     "MOUNT_tip_flat_attack_TOP"

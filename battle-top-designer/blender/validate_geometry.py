@@ -69,12 +69,16 @@ def main() -> None:
         raise FileNotFoundError(f"Missing generated input for {args.part}")
 
     bpy.ops.wm.open_mainfile(filepath=str(blend_path))
-    meshes = [inspect_mesh(obj) for obj in bpy.data.objects if obj.type == "MESH"]
+    render_objects = [
+        obj for obj in bpy.data.objects
+        if obj.type == "MESH" and not obj.name.startswith("COLLIDER_") and obj.get("export_exclude") is not True
+    ]
+    meshes = [inspect_mesh(obj) for obj in render_objects]
     mount_names = {obj.name for obj in bpy.data.objects if obj.type == "EMPTY"}
     required_mounts = {f"MOUNT_{args.part}_TOP", f"MOUNT_{args.part}_BOTTOM"}
     unique_materials = {
         material.name
-        for obj in bpy.data.objects if obj.type == "MESH"
+        for obj in render_objects
         for material in obj.data.materials if material is not None
     }
     triangle_count = sum(item["triangles"] for item in meshes)
@@ -82,6 +86,8 @@ def main() -> None:
     errors = []
     if not meshes:
         errors.append("MODEL_HAS_NO_MESH")
+    if any(not obj.name.startswith("GEO_") or not obj.data.name.startswith("GEO_") for obj in render_objects):
+        errors.append("RENDER_PREFIX_INVALID")
     if any(item["non_manifold_edges"] for item in meshes):
         errors.append("NON_MANIFOLD_EDGES")
     if any(item["duplicate_vertices"] for item in meshes):
@@ -113,6 +119,8 @@ def main() -> None:
         errors.append("GLB_REIMPORT_HAS_NO_MESH")
     if not required_mounts.issubset(imported_names):
         errors.append("GLB_REIMPORT_MOUNT_NOT_FOUND")
+    if any(name.startswith("COLLIDER_") for name in imported_names):
+        errors.append("GLB_REIMPORT_CONTAINS_COLLIDER")
 
     report = {
         "part_id": args.part,

@@ -62,7 +62,7 @@ def create_radial_blade(spec: dict, collection: bpy.types.Collection, materials:
         ])
         material_indices.extend([1 if len(materials) > 1 else 0, 0, 0, 2 if len(materials) > 2 else 0])
 
-    mesh = bpy.data.meshes.new(f"MESH_{spec['id']}_BODY")
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
     mesh.from_pydata(vertices, [], faces)
     mesh.materials.clear()
     for material in materials:
@@ -114,7 +114,7 @@ def create_profiled_annulus(spec: dict, collection: bpy.types.Collection, materi
         faces.extend([(ti, to, nto, nti), (bi, nbi, nbo, bo), (bo, nbo, nto, to), (bi, ti, nti, nbi)])
         material_indices.extend([1 if len(materials) > 1 else 0, 0, 0, 0])
 
-    mesh = bpy.data.meshes.new(f"MESH_{spec['id']}_BODY")
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
     mesh.from_pydata(vertices, [], faces)
     for material in materials:
         mesh.materials.append(material)
@@ -156,7 +156,7 @@ def create_revolved_tip(spec: dict, collection: bpy.types.Collection, materials:
         faces.append((bottom_center, nxt, index))
         faces.append((top_center, top_ring + index, top_ring + nxt))
 
-    mesh = bpy.data.meshes.new(f"MESH_{spec['id']}_BODY")
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
     mesh.from_pydata(vertices, [], faces)
     for material in materials:
         mesh.materials.append(material)
