@@ -1,0 +1,98 @@
+﻿{
+    "result":  "PASS",
+    "errors":  [
+
+               ],
+    "blender":  {
+                    "path":  "D:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe",
+                    "version":  "4.5.11 LTS"
+                },
+    "gltf_validator":  {
+                           "package":  "E:\\战斗陀螺项目\\battle-top-designer\\build\\tools\\gltf-validator\\node_modules\\gltf-validator\\package.json",
+                           "version":  "2.0.0-dev.3.10"
+                       },
+    "node":  {
+                 "executable":  "C:\\Program Files\\nodejs\\node.exe",
+                 "version":  "v22.20.0"
+             },
+    "python":  {
+                   "executable":  "C:\\Users\\Terla\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                   "version":  "Python 3.12.10"
+               },
+    "browser_test":  {
+                         "playwright_version":  "1.61.1",
+                         "three_version":  "0.185.1"
+                     },
+    "phase2b_gate":  {
+                         "phase2a_visual_review":  "APPROVED",
+                         "three_license":  "E:\\战斗陀螺项目\\battle-top-designer\\preview\\vendor\\three\\0.185.1\\LICENSE",
+                         "three_version_file":  "E:\\战斗陀螺项目\\battle-top-designer\\preview\\vendor\\three\\0.185.1\\VERSION",
+                         "baseline_artifacts":  [
+                                                    {
+                                                        "path":  "public/models/parts/core_solar_wolf.glb",
+                                                        "exists":  true,
+                                                        "size":  43888
+                                                    },
+                                                    {
+                                                        "path":  "public/models/parts/blade_storm_fang.glb",
+                                                        "exists":  true,
+                                                        "size":  52436
+                                                    },
+                                                    {
+                                                        "path":  "public/models/parts/blade_iron_bastion.glb",
+                                                        "exists":  true,
+                                                        "size":  84580
+                                                    },
+                                                    {
+                                                        "path":  "public/models/parts/blade_orbit_halo.glb",
+                                                        "exists":  true,
+                                                        "size":  100304
+                                                    },
+                                                    {
+                                                        "path":  "public/models/parts/blade_dual_comet.glb",
+                                                        "exists":  true,
+                                                        "size":  73228
+                                                    },
+                                                    {
+                                                        "path":  "public/models/parts/assist_heavy.glb",
+                                                        "exists":  true,
+                                                        "size":  47908
+                                                    },
+                                                    {
+                                                        "path":  "public/models/parts/gear_low.glb",
+                                                        "exists":  true,
+                                                        "size":  43812
+                                                    },
+                                                    {
+                                                        "path":  "public/models/parts/tip_flat_attack.glb",
+                                                        "exists":  true,
+                                                        "size":  47404
+                                                    },
+                                                    {
+                                                        "path":  "public/models/assemblies/assembly_phase2a_storm_fang.glb",
+                                                        "exists":  true,
+                                                        "size":  222632
+                                                    },
+                                                    {
+                                                        "path":  "public/models/assemblies/assembly_phase2a_iron_bastion.glb",
+                                                        "exists":  true,
+                                                        "size":  254804
+                                                    },
+                                                    {
+                                                        "path":  "public/models/assemblies/assembly_phase2a_orbit_halo.glb",
+                                                        "exists":  true,
+                                                        "size":  270540
+                                                    },
+                                                    {
+                                                        "path":  "public/models/assemblies/assembly_phase2a_dual_comet.glb",
+                                                        "exists":  true,
+                                                        "size":  243420
+                                                    },
+                                                    {
+                                                        "path":  "public/models/assemblies/assembly_storm_attack.glb",
+                                                        "exists":  true,
+                                                        "size":  222604
+                                                    }
+                                                ]
+                     }
+}
