@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BCore")]
+    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BCore", "Phase2BAssists")]
     [string]$Scope = "VerticalSlice"
 )
 
@@ -11,6 +11,8 @@ $Phase2AParts = @("core_solar_wolf", "blade_storm_fang", "blade_iron_bastion", "
 $Phase2AAssemblies = @("assembly_phase2a_storm_fang", "assembly_phase2a_iron_bastion", "assembly_phase2a_orbit_halo", "assembly_phase2a_dual_comet")
 $Phase2BCoreParts = @("core_void_falcon")
 $Phase2BCoreAssemblies = @("assembly_phase2b_core_void_falcon")
+$Phase2BAssistParts = @("assist_guard", "assist_air")
+$Phase2BAssistAssemblies = @("assembly_phase2b_assist_guard", "assembly_phase2b_assist_air")
 
 function Find-Blender {
     $candidates = @(
@@ -43,9 +45,9 @@ $Blender = Find-Blender
 Write-Host "NSS_BLENDER=$Blender"
 Push-Location $ProjectRoot
 try {
-    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreParts } else { $VerticalParts }
-    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreAssemblies } else { @("assembly_storm_attack") }
-    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BCore") { "phase2b" } else { "vertical_slice" }
+    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreParts } elseif ($Scope -eq "Phase2BAssists") { $Phase2BAssistParts } else { $VerticalParts }
+    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreAssemblies } elseif ($Scope -eq "Phase2BAssists") { $Phase2BAssistAssemblies } else { @("assembly_storm_attack") }
+    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -in @("Phase2BCore", "Phase2BAssists")) { "phase2b" } else { "vertical_slice" }
     Invoke-Logged "python" @("scripts\validate_specs.py", "--self-test") "test-spec-self-test.log"
     Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", $SpecScope) "test-specs.log"
     Invoke-Logged $Blender @("--background", "--python", "blender\test_collision.py") "test-collision.log"
@@ -115,6 +117,21 @@ try {
         Require-File "reports\validation\stage7-storm-regression-standalone.json"
         $StormRegression = Get-Content -Raw "reports\validation\stage7-storm-regression-standalone.json" | ConvertFrom-Json
         if ($StormRegression.result -ne "PASS") { throw "Storm Attack regression is not PASS" }
+    } elseif ($Scope -eq "Phase2BAssists") {
+        foreach ($assist in $Phase2BAssistParts) {
+            foreach ($view in @("top", "perspective_45", "side", "silhouette")) { Require-File "reports\renders\${assist}_${view}.png" }
+            Require-File "reports\renders\${assist}_contact_sheet.png"
+            Require-File "reports\renders\preview_${assist}.png"
+        }
+        Require-File "reports\renders\all_assists_comparison.png"
+        Require-File "reports\validation\assist-silhouette-overlap.json"
+        Require-File "preview\vendor\three\0.185.1\LICENSE"
+        Invoke-Logged "python" @("scripts\analyze_phase2b_visuals.py", "--family", "assist") "test-phase2b-assist-visuals.log"
+        Invoke-Logged "npm.cmd" @("--prefix", "preview", "test", "--", "phase2b-preview.spec.mjs") "test-browser-phase2b-assists.log"
+        Invoke-Logged "python" @("scripts\verify_phase2a_baseline.py", "--manifest", "docs\baselines\v0.2.0-phase2a-approved.json", "--blender", $Blender, "--glb-only", "--verify-only", "--report", "reports\validation\stage3-approved-baseline.json") "test-phase2b-approved-baseline.log"
+        Require-File "reports\validation\stage7-storm-regression-standalone.json"
+        $StormRegression = Get-Content -Raw "reports\validation\stage7-storm-regression-standalone.json" | ConvertFrom-Json
+        if ($StormRegression.result -ne "PASS") { throw "Storm Attack regression is not PASS" }
     } else {
         Require-File "build\blend\exploded_storm_attack.blend"
         Require-File "reports\renders\storm_fang_contact_sheet.png"
@@ -126,7 +143,7 @@ try {
     }
     $summary = [ordered]@{
         result = "PASS"
-        scope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BCore") { "phase2b_core" } else { "vertical_slice" }
+        scope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BCore") { "phase2b_core" } elseif ($Scope -eq "Phase2BAssists") { "phase2b_assists" } else { "vertical_slice" }
         parts_tested = $Parts.Count
         assemblies_tested = $Assemblies.Count
         fail_count = $failCount
@@ -137,11 +154,13 @@ try {
         gltf_validator_errors = 0
         gltf_validator_warnings = 0
         playwright_failures = 0
-        silhouette_pair_count = if ($Scope -eq "Phase2A") { 6 } else { 0 }
-        approved_baseline_result = if ($Scope -eq "Phase2BCore") { "PASS" } else { $null }
-        storm_attack_regression_result = if ($Scope -eq "Phase2BCore") { "PASS" } else { $null }
+        silhouette_pair_count = if ($Scope -eq "Phase2A") { 6 } elseif ($Scope -eq "Phase2BAssists") { 3 } else { 0 }
     }
-    $SummaryPath = if ($Scope -eq "Phase2A") { "reports\validation\phase2a-quality-gate.json" } elseif ($Scope -eq "Phase2BCore") { "reports\validation\stage2b-core-regression.json" } else { "reports\validation\vertical-slice-summary.json" }
+    if ($Scope -in @("Phase2BCore", "Phase2BAssists")) {
+        $summary["approved_baseline_result"] = "PASS"
+        $summary["storm_attack_regression_result"] = "PASS"
+    }
+    $SummaryPath = if ($Scope -eq "Phase2A") { "reports\validation\phase2a-quality-gate.json" } elseif ($Scope -eq "Phase2BCore") { "reports\validation\stage2b-core-regression.json" } elseif ($Scope -eq "Phase2BAssists") { "reports\validation\stage3-assist-regression.json" } else { "reports\validation\vertical-slice-summary.json" }
     $summary | ConvertTo-Json | Set-Content -Encoding utf8 $SummaryPath
     Write-Host "NSS_TEST=PASS"
     Write-Host "NSS_SUMMARY=$SummaryPath"

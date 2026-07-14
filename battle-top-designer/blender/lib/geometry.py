@@ -258,6 +258,94 @@ def create_void_falcon(spec: dict, collection: bpy.types.Collection, materials: 
     return objects
 
 
+def create_guard_assist(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    segments = geometry["segments"]
+    inner_radius = geometry["inner_radius_mm"] * MM
+    bearing_radius = geometry["inner_bearing_radius_mm"] * MM
+    outer_radius = geometry["outer_radius_mm"] * MM
+    amplitude = geometry["shoulder_amplitude_mm"] * MM
+    half_height = geometry["height_mm"] * MM * 0.5
+    vertices = []
+    for index in range(segments):
+        angle = math.tau * index / segments
+        shoulder = 0.5 - 0.5 * math.cos(geometry["shoulder_count"] * angle)
+        cushioned_radius = outer_radius - amplitude * shoulder
+        for radius in (inner_radius, bearing_radius, cushioned_radius):
+            vertices.extend([
+                (radius * math.cos(angle), radius * math.sin(angle), -half_height),
+                (radius * math.cos(angle), radius * math.sin(angle), half_height),
+            ])
+    faces = []
+    material_indices = []
+    ring_count = 3
+    for index in range(segments):
+        nxt = (index + 1) % segments
+        for ring in range(ring_count - 1):
+            lower = index * ring_count * 2 + ring * 2
+            upper = lower + 2
+            next_lower = nxt * ring_count * 2 + ring * 2
+            next_upper = next_lower + 2
+            faces.extend([
+                (lower + 1, upper + 1, next_upper + 1, next_lower + 1),
+                (lower, next_lower, next_upper, upper),
+            ])
+            material_indices.extend([1 if ring == 0 and len(materials) > 1 else 0, 0])
+        inner = index * ring_count * 2
+        next_inner = nxt * ring_count * 2
+        outer = inner + (ring_count - 1) * 2
+        next_outer = next_inner + (ring_count - 1) * 2
+        faces.extend([(inner, inner + 1, next_inner + 1, next_inner), (outer, next_outer, next_outer + 1, outer + 1)])
+        material_indices.extend([1 if len(materials) > 1 else 0, 0])
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
+    mesh.from_pydata(vertices, [], faces)
+    for material in materials:
+        mesh.materials.append(material)
+    for polygon, material_index in zip(mesh.polygons, material_indices):
+        polygon.material_index = material_index
+    mesh.validate(verbose=False)
+    mesh.update(calc_edges=True)
+    obj = bpy.data.objects.new(f"GEO_{spec['id']}_BODY", mesh)
+    collection.objects.link(obj)
+    obj["part_id"] = spec["id"]
+    obj["geometry_kind"] = geometry["kind"]
+    obj["profile_family"] = spec["profile_family"]
+    return [obj]
+
+
+def create_air_assist(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    count = geometry["window_count"]
+    inner_radius = geometry["inner_radius_mm"] * MM
+    window_inner = geometry["window_inner_radius_mm"] * MM
+    window_outer = geometry["window_outer_radius_mm"] * MM
+    outer_radius = geometry["outer_radius_mm"] * MM
+    half_height = geometry["height_mm"] * MM * 0.5
+    bridge_span = math.radians(min(geometry["bridge_width_deg"], 360.0 / count - geometry["window_width_deg"]))
+    spoke_half_angle = geometry["spoke_width_mm"] * MM * 0.5 / ((window_inner + window_outer) * 0.5)
+    objects = [_closed_annulus(
+        f"GEO_{spec['id']}_HUB", inner_radius, window_inner, -half_height, half_height,
+        geometry["segments"], collection, materials[1 if len(materials) > 1 else 0],
+    )]
+    for index in range(count):
+        center = math.tau * index / count
+        objects.append(_closed_sector(
+            f"GEO_{spec['id']}_BRIDGE_{index + 1}", window_outer, outer_radius, -half_height, half_height,
+            center - bridge_span * 0.5, center + bridge_span * 0.5,
+            max(4, geometry["segments"] // count), collection, materials[0],
+        ))
+        objects.append(_closed_sector(
+            f"GEO_{spec['id']}_SPOKE_{index + 1}", window_inner, window_outer, -half_height, half_height,
+            center - spoke_half_angle, center + spoke_half_angle, 2,
+            collection, materials[1 if len(materials) > 1 else 0],
+        ))
+    for obj in objects:
+        obj["part_id"] = spec["id"]
+        obj["geometry_kind"] = geometry["kind"]
+        obj["profile_family"] = spec["profile_family"]
+    return objects
+
+
 def create_orbit_halo(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     geometry = spec["geometry"]
     count = geometry["window_count"]
@@ -466,6 +554,10 @@ def create_part(spec: dict, collection: bpy.types.Collection, materials: list[bp
     kind = spec["geometry"]["kind"]
     if kind == "radial_core" and spec.get("profile_family") == "void_falcon_split_arc":
         return create_void_falcon(spec, collection, materials)
+    if kind == "annular_ring" and spec.get("profile_family") == "guard_cushion_ring":
+        return create_guard_assist(spec, collection, materials)
+    if kind == "annular_ring" and spec.get("profile_family") == "air_truss_windows":
+        return create_air_assist(spec, collection, materials)
     if kind == "radial_blade":
         if spec.get("profile_family") == "iron_bastion_damper":
             return create_iron_bastion(spec, collection, materials)

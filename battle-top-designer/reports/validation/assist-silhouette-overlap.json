@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "family": "assist",
+  "order": [
+    "assist_heavy",
+    "assist_guard",
+    "assist_air"
+  ],
+  "pair_count": 3,
+  "pairs": [
+    {
+      "first": "assist_heavy",
+      "second": "assist_guard",
+      "iou": 0.9347434828735981
+    },
+    {
+      "first": "assist_heavy",
+      "second": "assist_air",
+      "iou": 0.37286991893099153
+    },
+    {
+      "first": "assist_guard",
+      "second": "assist_air",
+      "iou": 0.39606809644977586
+    }
+  ],
+  "render_conditions": {
+    "camera": "render_catalog.py shared orthographic top",
+    "lighting": "render_catalog.py shared setup_scene",
+    "background": "render_catalog.py shared world",
+    "single_view_size": [
+      512,
+      512
+    ],
+    "comparison_size": [
+      2048,
+      1024
+    ]
+  },
+  "disclaimer": "Internal visual heuristic only; this is not legal proof of originality or non-infringement."
+}

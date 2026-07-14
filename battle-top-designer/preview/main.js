@@ -8,6 +8,8 @@ const models = {
   blade_orbit_halo: '../public/models/parts/blade_orbit_halo.glb',
   blade_dual_comet: '../public/models/parts/blade_dual_comet.glb',
   core_void_falcon: '../public/models/parts/core_void_falcon.glb',
+  assist_guard: '../public/models/parts/assist_guard.glb',
+  assist_air: '../public/models/parts/assist_air.glb',
 };
 const viewport = document.querySelector('#viewport');
 const select = document.querySelector('#model-select');

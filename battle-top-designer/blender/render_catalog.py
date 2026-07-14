@@ -35,7 +35,7 @@ def look_at(camera: bpy.types.Object, target: Vector) -> None:
     camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
 
 
-def setup_scene() -> tuple[bpy.types.Object, Vector, float]:
+def setup_scene(ortho_scale: float | None = None) -> tuple[bpy.types.Object, Vector, float]:
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE_NEXT"
     scene.render.resolution_x = 512
@@ -59,7 +59,7 @@ def setup_scene() -> tuple[bpy.types.Object, Vector, float]:
     scene.collection.objects.link(camera)
     scene.camera = camera
     camera.data.type = "ORTHO"
-    camera.data.ortho_scale = span * 1.35
+    camera.data.ortho_scale = ortho_scale if ortho_scale is not None else span * 1.35
     camera.data.lens = 55
 
     for index, (location, energy, size) in enumerate([
@@ -105,10 +105,16 @@ def apply_silhouette_material() -> None:
     background.inputs["Strength"].default_value = 1.0
 
 
-def render_file(target: str, blend_path: Path, views: list[tuple[str, tuple[float, float, float]]], silhouette: bool = False) -> None:
+def render_file(
+    target: str,
+    blend_path: Path,
+    views: list[tuple[str, tuple[float, float, float]]],
+    silhouette: bool = False,
+    ortho_scale: float | None = None,
+) -> None:
     bpy.ops.wm.open_mainfile(filepath=str(blend_path))
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    camera, center, span = setup_scene()
+    camera, center, span = setup_scene(ortho_scale)
     for name, direction in views:
         render_view(target, name, direction, camera, center, span)
     if silhouette:
@@ -123,6 +129,11 @@ def main() -> None:
         views = [("top", (0.0, 0.0, 1.0)), ("perspective_45", (1.0, -1.0, 0.8)), ("side", (1.0, 0.0, 0.12))]
         for blade in ("blade_storm_fang", "blade_iron_bastion", "blade_orbit_halo", "blade_dual_comet"):
             render_file(blade, ROOT / "build" / "blend" / f"{blade}.blend", views, silhouette=True)
+        return
+    if target == "phase2b_all_assists":
+        views = [("top", (0.0, 0.0, 1.0)), ("perspective_45", (1.0, -1.0, 0.8)), ("side", (1.0, 0.0, 0.12))]
+        for assist in ("assist_heavy", "assist_guard", "assist_air"):
+            render_file(assist, ROOT / "build" / "blend" / f"{assist}.blend", views, silhouette=True, ortho_scale=0.084)
         return
     blend_path = ROOT / "build" / "blend" / f"{target}.blend"
     if not blend_path.is_file():
