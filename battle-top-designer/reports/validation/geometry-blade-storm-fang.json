@@ -1,0 +1,42 @@
+{
+  "part_id": "blade_storm_fang",
+  "result": "PASS",
+  "errors": [],
+  "mesh_count": 2,
+  "triangle_count": 1056,
+  "material_count": 3,
+  "glb_file_size_bytes": 52432,
+  "mounts_present": [
+    "MOUNT_blade_storm_fang_BOTTOM",
+    "MOUNT_blade_storm_fang_TOP"
+  ],
+  "glb_reimport_mesh_count": 2,
+  "meshes": [
+    {
+      "object": "GEO_blade_storm_fang_BODY",
+      "vertices": 288,
+      "triangles": 576,
+      "materials": 3,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 1.436168813731058e-05,
+      "scale_applied": true,
+      "rotation_applied": true
+    },
+    {
+      "object": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+      "vertices": 240,
+      "triangles": 480,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 3.335582537664926e-07,
+      "scale_applied": true,
+      "rotation_applied": true
+    }
+  ]
+}

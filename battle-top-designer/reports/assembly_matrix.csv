@@ -1,0 +1,2 @@
+assembly_id,core,blade,assist,gear,tip,result,error_code,axis_error_mm,phase_error_deg,unexpected_overlap_mm3,total_height_mm,total_diameter_mm
+assembly_storm_attack,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0,23.940001847222447,66.86078011989594

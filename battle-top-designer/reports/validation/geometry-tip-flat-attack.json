@@ -1,0 +1,42 @@
+{
+  "part_id": "tip_flat_attack",
+  "result": "PASS",
+  "errors": [],
+  "mesh_count": 2,
+  "triangle_count": 960,
+  "material_count": 2,
+  "glb_file_size_bytes": 47396,
+  "mounts_present": [
+    "MOUNT_tip_flat_attack_BOTTOM",
+    "MOUNT_tip_flat_attack_TOP"
+  ],
+  "glb_reimport_mesh_count": 2,
+  "meshes": [
+    {
+      "object": "GEO_tip_flat_attack_BODY",
+      "vertices": 242,
+      "triangles": 480,
+      "materials": 2,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 5.923383132129327e-07,
+      "scale_applied": true,
+      "rotation_applied": true
+    },
+    {
+      "object": "GEO_tip_flat_attack_NSS_V1_COLLAR",
+      "vertices": 240,
+      "triangles": 480,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 3.335582537664926e-07,
+      "scale_applied": true,
+      "rotation_applied": true
+    }
+  ]
+}

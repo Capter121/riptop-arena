@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "units": "millimeter",
+  "interfaces": [
+    {
+      "id": "NSS-V1",
+      "status": "concept_only",
+      "mount_diameter_mm": 21.6,
+      "core_height_mm": 3.0,
+      "lug_count": 5,
+      "standard_lug_width_mm": 4.2,
+      "index_lug_width_mm": 5.0,
+      "lug_radial_depth_mm": 1.4,
+      "lug_axial_height_mm": 1.2,
+      "insertion_depth_mm": 1.6,
+      "twist_lock_angle_deg": 18.0,
+      "lock_direction": "clockwise",
+      "lug_fillet_radius_mm": 0.4,
+      "center_bore_mm": 8.0,
+      "datum_plane_z_mm": 0.0,
+      "digital_clearance_mm": 0.05,
+      "alignment_tolerance_mm": 0.02,
+      "angular_tolerance_deg": 0.1
+    }
+  ],
+  "allowed_connections": [
+    {
+      "from": "emblem_core.bottom",
+      "to": "main_blade.top"
+    },
+    {
+      "from": "main_blade.bottom",
+      "to": "assist_ring.top"
+    },
+    {
+      "from": "assist_ring.bottom",
+      "to": "height_gear.top"
+    },
+    {
+      "from": "height_gear.bottom",
+      "to": "performance_tip.top"
+    }
+  ],
+  "collision_policy": {
+    "allowed_contact_zones": [
+      "NSS_V1_INSERTION_ZONE",
+      "NSS_V1_LOCKING_LUG_ZONE",
+      "NSS_V1_DATUM_SURFACE"
+    ],
+    "max_unexpected_overlap_volume_mm3": 0.5
+  }
+}

@@ -1,0 +1,9 @@
+﻿{
+    "result":  "PASS",
+    "scope":  "vertical_slice",
+    "parts_tested":  5,
+    "assemblies_tested":  1,
+    "collision_count":  0,
+    "triangle_count":  4992,
+    "gltf_validator_errors":  0
+}

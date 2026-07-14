@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "assemblies": [
+    {
+      "id": "assembly_storm_attack",
+      "display_name": "Storm Attack",
+      "core": "core_solar_wolf",
+      "blade": "blade_storm_fang",
+      "assist": "assist_heavy",
+      "gear": "gear_low",
+      "tip": "tip_flat_attack"
+    }
+  ]
+}

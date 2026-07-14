@@ -1,0 +1,47 @@
+{
+  "baseline": "v0.1.0-vertical-slice",
+  "captured_on": "2026-07-14",
+  "status": "PASS",
+  "scope": {
+    "parts": 5,
+    "assemblies": 1,
+    "collision_count": 0,
+    "assembly_triangle_count": 4992,
+    "gltf_validator_errors": 0
+  },
+  "toolchain": {
+    "blender": {
+      "version": "4.5.11 LTS",
+      "build_hash": "4db51e9d1e1e"
+    },
+    "gltf_validator": "2.0.0-dev.3.10"
+  },
+  "verification": {
+    "build_command": "powershell -ExecutionPolicy Bypass -File scripts/build_all.ps1",
+    "build_result": "PASS",
+    "test_command": "powershell -ExecutionPolicy Bypass -File scripts/test_all.ps1",
+    "test_result": "PASS",
+    "summary_report": "reports/validation/vertical-slice-summary.json",
+    "assembly_report": "reports/validation/assembly-storm-attack.json"
+  },
+  "sha256": {
+    "public/models/assemblies/assembly_storm_attack.glb": "dcb2bc4c2c19252079e7bd95880a505f8c87afce4f2432e00bc065007fce9126",
+    "public/models/parts/assist_heavy.glb": "b6f1dbf006949c761af06735baacba34dd489c4aa9783feb111f8d73896f6367",
+    "public/models/parts/blade_storm_fang.glb": "80dd75d2bc173c02b1c31474babe555776394473d306dc7f802c36c3c499039f",
+    "public/models/parts/core_solar_wolf.glb": "c32b6708ee0b57cfabd11479adfa4a675e5153eea959c40727101b0de47bd78b",
+    "public/models/parts/gear_low.glb": "e6e33ff87fb0f8e8c121032447144fe847089095ac92dabd5af1c033a2ecf3a0",
+    "public/models/parts/tip_flat_attack.glb": "36c34593a2be0f25af8712e94742647a5c7fb90e37e20365ded31652d4f688ff",
+    "schemas/assembly.schema.json": "f571238c7930bf792c38c4226b19b68dd447823da2bf9c15c3753332050f841c",
+    "schemas/interface.schema.json": "b5d18076bfe316a995989d4fa6b437252ce96d6ffb1bf6cec1e74ab48973db82",
+    "schemas/material.schema.json": "ead757f865d2f667fee8883cd0adc4325c04187fa622fdf82d7fe3f5f5f590df",
+    "schemas/part.schema.json": "85123ba176c4339ba520475af79b96e46ef83bbe155cfc3f98174316f369ac35",
+    "specs/assemblies.json": "e5654730be807f1dc85ddda7e9fd51857e553fd3e6380b9f12d2f719ac25fa63",
+    "specs/interfaces.json": "5744cca158ed260cb4d5c46b57a5f4c306628ca5f932cb3f60347454caaa6e12",
+    "specs/materials.json": "61212730f1b1642af228b73870c500ca6d6e9b643924429eaad3a03d2c33e5d4",
+    "specs/parts/assist_heavy.json": "686b880c35395a48e8555a27af148c3c350280cb4ab2605482a0b31810f9727c",
+    "specs/parts/blade_storm_fang.json": "fbf20663de5efd503c304a1b060127e88951e42b26baaa72e9442e2c60d20e9a",
+    "specs/parts/core_solar_wolf.json": "9d0ca0e77090f2741f41773a9c95b67db96779dc7a933ad990c7394a0fb104ee",
+    "specs/parts/gear_low.json": "7b1966d08315afd51a500cc91e6d217b880b9f71dc64f55681aba682e3d199c2",
+    "specs/parts/tip_flat_attack.json": "4baa9d2e19a06ad89ea0c81665e3678501b5c046c41af1eae0aaa2774b435674"
+  }
+}

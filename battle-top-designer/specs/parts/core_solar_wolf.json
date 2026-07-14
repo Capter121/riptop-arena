@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "id": "core_solar_wolf",
+  "display_name": "Solar Wolf",
+  "part_type": "emblem_core",
+  "interface_id": "NSS-V1",
+  "spin_direction": "right",
+  "dimensions": {
+    "outer_radius_mm": 18.0,
+    "inner_radius_mm": 10.8,
+    "height_mm": 3.6
+  },
+  "geometry": {
+    "kind": "radial_core",
+    "segments": 60,
+    "outer_radius_mm": 18.0,
+    "inner_radius_mm": 10.8,
+    "height_mm": 3.6,
+    "node_count": 5,
+    "roundness": 0.72,
+    "phase_deg": 18.0
+  },
+  "mounts": {
+    "top": {
+      "position_mm": [0.0, 0.0, 1.8],
+      "rotation_deg": [0.0, 0.0, 0.0],
+      "datum_radius_mm": 10.8,
+      "interface_role": "terminal",
+      "orientation_key_deg": 0.0
+    },
+    "bottom": {
+      "position_mm": [0.0, 0.0, -1.8],
+      "rotation_deg": [0.0, 0.0, 0.0],
+      "datum_radius_mm": 10.8,
+      "interface_role": "male",
+      "orientation_key_deg": 0.0
+    }
+  },
+  "material_slots": ["solar_amber", "obsidian_polymer"],
+  "originality_rules": {
+    "no_existing_logo": true,
+    "no_existing_name": true,
+    "no_reference_outline_tracing": true,
+    "no_existing_interface_copy": true,
+    "minimum_primary_dimensions_changed": 3
+  },
+  "engineering_status": {
+    "status": "concept_only",
+    "mass_properties_validated": false,
+    "manufacturing_validated": false
+  },
+  "generation": {
+    "seed": 51018,
+    "generator_version": "0.1.0"
+  }
+}

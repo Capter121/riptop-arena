@@ -1,0 +1,30 @@
+{
+  "result": "PASS",
+  "cases": [
+    {
+      "name": "valid_fixture_passes",
+      "passed": true,
+      "detail": "errors=0"
+    },
+    {
+      "name": "unknown_property_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "wrong_type_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "missing_material_reference_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "wrong_assembly_part_type_fails",
+      "passed": true,
+      "detail": "errors=1"
+    }
+  ]
+}

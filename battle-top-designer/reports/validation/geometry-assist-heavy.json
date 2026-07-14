@@ -1,0 +1,42 @@
+{
+  "part_id": "assist_heavy",
+  "result": "PASS",
+  "errors": [],
+  "mesh_count": 2,
+  "triangle_count": 1056,
+  "material_count": 2,
+  "glb_file_size_bytes": 47900,
+  "mounts_present": [
+    "MOUNT_assist_heavy_BOTTOM",
+    "MOUNT_assist_heavy_TOP"
+  ],
+  "glb_reimport_mesh_count": 2,
+  "meshes": [
+    {
+      "object": "GEO_assist_heavy_BODY",
+      "vertices": 288,
+      "triangles": 576,
+      "materials": 2,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 8.678212028076818e-06,
+      "scale_applied": true,
+      "rotation_applied": true
+    },
+    {
+      "object": "GEO_assist_heavy_NSS_V1_COLLAR",
+      "vertices": 240,
+      "triangles": 480,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 3.335582537664926e-07,
+      "scale_applied": true,
+      "rotation_applied": true
+    }
+  ]
+}

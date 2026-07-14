@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "materials": [
+    {
+      "id": "gunmetal",
+      "display_name": "NSS Gunmetal",
+      "category": "metal",
+      "base_color": [0.12, 0.15, 0.18, 1.0],
+      "metallic": 0.92,
+      "roughness": 0.28,
+      "alpha_mode": "OPAQUE",
+      "double_sided": false
+    },
+    {
+      "id": "cobalt_blue_translucent",
+      "display_name": "Cobalt Translucent Polymer",
+      "category": "translucent_plastic",
+      "base_color": [0.02, 0.18, 0.72, 0.72],
+      "metallic": 0.0,
+      "roughness": 0.24,
+      "alpha_mode": "BLEND",
+      "double_sided": false
+    },
+    {
+      "id": "solar_amber",
+      "display_name": "Solar Amber Accent",
+      "category": "accent",
+      "base_color": [1.0, 0.38, 0.03, 1.0],
+      "metallic": 0.12,
+      "roughness": 0.3,
+      "alpha_mode": "OPAQUE",
+      "double_sided": false
+    },
+    {
+      "id": "obsidian_polymer",
+      "display_name": "Obsidian Structural Polymer",
+      "category": "structural_plastic",
+      "base_color": [0.025, 0.03, 0.045, 1.0],
+      "metallic": 0.0,
+      "roughness": 0.38,
+      "alpha_mode": "OPAQUE",
+      "double_sided": false
+    },
+    {
+      "id": "brushed_silver",
+      "display_name": "NSS Brushed Silver",
+      "category": "metal",
+      "base_color": [0.58, 0.62, 0.68, 1.0],
+      "metallic": 0.95,
+      "roughness": 0.32,
+      "alpha_mode": "OPAQUE",
+      "double_sided": false
+    }
+  ]
+}

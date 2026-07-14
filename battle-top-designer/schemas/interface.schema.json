@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "interface.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "interfaces", "allowed_connections", "collision_policy"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "units": { "const": "millimeter" },
+    "interfaces": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/interface" }
+    },
+    "allowed_connections": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/connection" }
+    },
+    "collision_policy": { "$ref": "#/$defs/collision" }
+  },
+  "$defs": {
+    "interface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "mount_diameter_mm",
+        "core_height_mm",
+        "lug_count",
+        "standard_lug_width_mm",
+        "index_lug_width_mm",
+        "lug_radial_depth_mm",
+        "lug_axial_height_mm",
+        "insertion_depth_mm",
+        "twist_lock_angle_deg",
+        "lock_direction",
+        "lug_fillet_radius_mm",
+        "center_bore_mm",
+        "datum_plane_z_mm",
+        "digital_clearance_mm",
+        "alignment_tolerance_mm",
+        "angular_tolerance_deg"
+      ],
+      "properties": {
+        "id": { "const": "NSS-V1" },
+        "status": { "const": "concept_only" },
+        "mount_diameter_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+        "core_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 },
+        "lug_count": { "const": 5 },
+        "standard_lug_width_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "index_lug_width_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "lug_radial_depth_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 },
+        "lug_axial_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 },
+        "insertion_depth_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+        "twist_lock_angle_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 45 },
+        "lock_direction": { "enum": ["clockwise", "counterclockwise"] },
+        "lug_fillet_radius_mm": { "type": "number", "minimum": 0, "maximum": 2 },
+        "center_bore_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 },
+        "datum_plane_z_mm": { "type": "number", "minimum": -10, "maximum": 10 },
+        "digital_clearance_mm": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "alignment_tolerance_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "angular_tolerance_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "enum": ["emblem_core.bottom", "main_blade.bottom", "assist_ring.bottom", "height_gear.bottom"]
+        },
+        "to": {
+          "enum": ["main_blade.top", "assist_ring.top", "height_gear.top", "performance_tip.top"]
+        }
+      }
+    },
+    "collision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_contact_zones", "max_unexpected_overlap_volume_mm3"],
+      "properties": {
+        "allowed_contact_zones": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["NSS_V1_INSERTION_ZONE", "NSS_V1_LOCKING_LUG_ZONE", "NSS_V1_DATUM_SURFACE"]
+          }
+        },
+        "max_unexpected_overlap_volume_mm3": { "type": "number", "minimum": 0, "maximum": 10 }
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "material.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "materials"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "materials": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/material" }
+    }
+  },
+  "$defs": {
+    "material": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "display_name",
+        "category",
+        "base_color",
+        "metallic",
+        "roughness",
+        "alpha_mode",
+        "double_sided"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "category": { "enum": ["metal", "structural_plastic", "translucent_plastic", "accent"] },
+        "base_color": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "metallic": { "type": "number", "minimum": 0, "maximum": 1 },
+        "roughness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "alpha_mode": { "enum": ["OPAQUE", "MASK", "BLEND"] },
+        "double_sided": { "type": "boolean" }
+      }
+    }
+  }
+}

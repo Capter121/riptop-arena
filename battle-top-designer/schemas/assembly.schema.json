@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "assembly.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "assemblies"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "assemblies": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/assembly" }
+    }
+  },
+  "$defs": {
+    "assembly": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "display_name", "core", "blade", "assist", "gear", "tip"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^assembly_[a-z0-9_]+$" },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "core": { "type": "string", "pattern": "^core_[a-z0-9_]+$" },
+        "blade": { "type": "string", "pattern": "^blade_[a-z0-9_]+$" },
+        "assist": { "type": "string", "pattern": "^assist_[a-z0-9_]+$" },
+        "gear": { "type": "string", "pattern": "^gear_[a-z0-9_]+$" },
+        "tip": { "type": "string", "pattern": "^tip_[a-z0-9_]+$" }
+      }
+    }
+  }
+}

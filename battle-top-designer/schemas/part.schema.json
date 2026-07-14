@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "part.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "display_name",
+    "part_type",
+    "interface_id",
+    "spin_direction",
+    "dimensions",
+    "geometry",
+    "mounts",
+    "material_slots",
+    "originality_rules",
+    "engineering_status",
+    "generation"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "part_type": {
+      "enum": ["emblem_core", "main_blade", "assist_ring", "height_gear", "performance_tip"]
+    },
+    "interface_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9-]*$" },
+    "spin_direction": { "enum": ["right", "left", "bidirectional"] },
+    "dimensions": { "$ref": "#/$defs/dimensions" },
+    "geometry": { "$ref": "#/$defs/geometry" },
+    "mounts": { "$ref": "#/$defs/mounts" },
+    "material_slots": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+    },
+    "originality_rules": { "$ref": "#/$defs/originality" },
+    "engineering_status": { "$ref": "#/$defs/engineering" },
+    "generation": { "$ref": "#/$defs/generation" }
+  },
+  "$defs": {
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outer_radius_mm", "height_mm"],
+      "properties": {
+        "outer_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+        "inner_radius_mm": { "type": "number", "minimum": 0, "maximum": 45 },
+        "height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "segments"],
+      "properties": {
+        "kind": {
+          "enum": ["radial_blade", "radial_core", "annular_ring", "radial_gear", "revolved_tip"]
+        },
+        "segments": { "type": "integer", "minimum": 3, "maximum": 256 },
+        "blade_count": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "base_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+        "outer_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+        "inner_radius_mm": { "type": "number", "minimum": 0, "maximum": 45 },
+        "height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+        "blade_angle_deg": { "type": "number", "minimum": -80, "maximum": 80 },
+        "sweep_deg": { "type": "number", "minimum": -80, "maximum": 80 },
+        "upper_rise_mm": { "type": "number", "minimum": 0, "maximum": 10 },
+        "roundness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tooth_count": { "type": "integer", "minimum": 3, "maximum": 64 },
+        "spoke_count": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "node_count": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "contact_profile": {
+          "enum": ["upper", "rounded_damper", "low_drag", "alternating", "flat", "ball", "needle", "taper"]
+        },
+        "profile_points_mm": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 32,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "number", "minimum": -30, "maximum": 50 }
+          }
+        },
+        "phase_deg": { "type": "number", "minimum": -360, "maximum": 360 }
+      }
+    },
+    "mount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position_mm",
+        "rotation_deg",
+        "datum_radius_mm",
+        "interface_role",
+        "orientation_key_deg"
+      ],
+      "properties": {
+        "position_mm": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number", "minimum": -50, "maximum": 50 }
+        },
+        "rotation_deg": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number", "minimum": -360, "maximum": 360 }
+        },
+        "datum_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+        "interface_role": { "enum": ["male", "female", "terminal"] },
+        "orientation_key_deg": { "type": "number", "minimum": -360, "maximum": 360 }
+      }
+    },
+    "mounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["top", "bottom"],
+      "properties": {
+        "top": { "$ref": "#/$defs/mount" },
+        "bottom": { "$ref": "#/$defs/mount" }
+      }
+    },
+    "originality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_existing_logo",
+        "no_existing_name",
+        "no_reference_outline_tracing",
+        "no_existing_interface_copy",
+        "minimum_primary_dimensions_changed"
+      ],
+      "properties": {
+        "no_existing_logo": { "const": true },
+        "no_existing_name": { "const": true },
+        "no_reference_outline_tracing": { "const": true },
+        "no_existing_interface_copy": { "const": true },
+        "minimum_primary_dimensions_changed": { "type": "integer", "minimum": 3, "maximum": 8 }
+      }
+    },
+    "engineering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "mass_properties_validated", "manufacturing_validated"],
+      "properties": {
+        "status": { "enum": ["concept_only", "prototype", "validated"] },
+        "mass_properties_validated": { "type": "boolean" },
+        "manufacturing_validated": { "type": "boolean" }
+      }
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seed", "generator_version"],
+      "properties": {
+        "seed": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+        "generator_version": { "const": "0.1.0" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "part_type": { "const": "main_blade" } } },
+      "then": {
+        "properties": {
+          "geometry": {
+            "required": ["kind", "segments", "blade_count", "base_radius_mm", "outer_radius_mm", "height_mm", "contact_profile"],
+            "properties": { "kind": { "const": "radial_blade" } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "part_type": { "const": "emblem_core" } } },
+      "then": { "properties": { "geometry": { "properties": { "kind": { "const": "radial_core" } } } } }
+    },
+    {
+      "if": { "properties": { "part_type": { "const": "assist_ring" } } },
+      "then": { "properties": { "geometry": { "properties": { "kind": { "const": "annular_ring" } } } } }
+    },
+    {
+      "if": { "properties": { "part_type": { "const": "height_gear" } } },
+      "then": { "properties": { "geometry": { "properties": { "kind": { "const": "radial_gear" } } } } }
+    },
+    {
+      "if": { "properties": { "part_type": { "const": "performance_tip" } } },
+      "then": { "properties": { "geometry": { "properties": { "kind": { "const": "revolved_tip" } } } } }
+    }
+  ]
+}
