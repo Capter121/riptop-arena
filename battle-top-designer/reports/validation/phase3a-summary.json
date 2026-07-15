@@ -1,0 +1,100 @@
+{
+  "status": "Phase 3A internal prototype PASS under provisional visual review",
+  "visual_review_status": "Phase 2B visual review deferred pending real reviewers",
+  "baseline": {
+    "id": "v0.2.0-rc1-technical-baseline",
+    "status": "PROVISIONAL_NOT_FINAL",
+    "verified": true
+  },
+  "governance": {
+    "waiver_sha256": "8512e6dda0fb9301e2d3912768dfe5c09d1ca66eceef0617d5a5f77a99ce6a06",
+    "expires_on": "2026-08-14",
+    "phase2c_status": "Phase 2C technical validation PASS under provisional waiver"
+  },
+  "scope": {
+    "part_count": 16,
+    "combination_count": 288,
+    "families": {
+      "core": 2,
+      "blade": 4,
+      "assist": 3,
+      "gear": 3,
+      "tip": 4
+    }
+  },
+  "automated_tests": {
+    "unit": {
+      "result": "PASS",
+      "files": 4,
+      "assertions": 12
+    },
+    "matrix": {
+      "result": "PASS",
+      "combinations": 288,
+      "duplicate_ids": 0,
+      "phase2c_id_mismatches": 0
+    },
+    "glb": {
+      "result": "PASS",
+      "source_count": 16,
+      "built_count": 16,
+      "hash_mismatches": 0,
+      "collider_exports": 0
+    },
+    "playwright": {
+      "result": "PASS",
+      "desktop": true,
+      "mobile": true,
+      "expected": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "runtime_errors": {
+      "console": 0,
+      "pageerror": 0,
+      "failed_request": 0,
+      "external_request": 0
+    },
+    "preview_regression": {
+      "result": "PASS",
+      "tests": 43
+    }
+  },
+  "build": {
+    "result": "PASS",
+    "dependencies": {
+      "@react-three/drei": "10.7.6",
+      "@react-three/fiber": "9.3.0",
+      "react": "19.1.1",
+      "react-dom": "19.1.1",
+      "three": "0.185.1",
+      "zustand": "5.0.8",
+      "@playwright/test": "1.61.1",
+      "@types/node": "24.3.0",
+      "@types/react": "19.1.10",
+      "@types/react-dom": "19.1.7",
+      "@types/three": "0.179.0",
+      "@vitejs/plugin-react": "5.0.4",
+      "jsdom": "26.1.0",
+      "typescript": "5.9.2",
+      "vite": "7.1.7",
+      "vitest": "3.2.4"
+    },
+    "largest_javascript_bytes": 1159143,
+    "source_glb_copies": 0
+  },
+  "protected_scope": {
+    "nss_v1_modified": false,
+    "visible_geometry_modified": false,
+    "provisional_baseline_modified": false,
+    "phase2c_result_modified": false,
+    "protected_diff": []
+  },
+  "blender_or_model_generation_run": false,
+  "public_release_allowed": false,
+  "human_visual_review_pending": true,
+  "notices": [
+    "Human visual review remains pending.",
+    "Development continued under a documented provisional internal-prototype decision."
+  ]
+}
