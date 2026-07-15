@@ -6,6 +6,9 @@ import {
 } from './domain';
 import { CustomizerScene } from './Scene';
 import { beginPartSwitch, markOnce } from './performance/marks';
+import { createShareLink } from './sharing/combinationUrl';
+import { QrCodeView } from './sharing/QrCodeView';
+import { copyShareLink } from './sharing/shareLink';
 import { currentSnapshot, useCustomizer } from './store';
 import './styles.css';
 
@@ -28,13 +31,19 @@ class SceneErrorBoundary extends Component<{ resetKey: string; children: ReactNo
 
 export default function App() {
   const state = useCustomizer();
-  const [notice, setNotice] = useState('');
+  const [notice, setNotice] = useState(state.startupNotice ?? '');
+  const [shareOpen, setShareOpen] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
   const focusTimer = useRef<number | null>(null);
   const id = combinationId(state.combination);
   const attributes = useMemo(() => conceptAttributes(state.combination), [state.combination]);
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
+  const share = useMemo(() => createShareLink(
+    state.combination,
+    new URL(window.location.href),
+    import.meta.env.VITE_SHARE_BASE_URL,
+  ), [state.combination]);
 
   useEffect(() => {
     markOnce('phase3b:shell-ready');
@@ -134,9 +143,31 @@ export default function App() {
               <button data-testid="restore-local" onClick={() => setNotice(state.restoreSaved() ? 'Saved combination restored.' : 'No valid saved combination.')}>Restore local</button>
               <button data-testid="export" onClick={exportJson}>Export JSON</button>
               <button data-testid="import" onClick={() => importRef.current?.click()}>Import JSON</button>
+              <button data-testid="share" onClick={() => setShareOpen(value => !value)}>Share</button>
             </div>
+            {shareOpen && (
+              <section className="share-panel" aria-label="Share current combination">
+                <input data-testid="share-link" aria-label="Combination share link" readOnly value={share.url} onFocus={event => event.currentTarget.select()} />
+                <button data-testid="copy-share-link" onClick={async () => {
+                  const copied = await copyShareLink(share.url);
+                  setNotice(copied ? 'Share link copied.' : 'Clipboard unavailable. Select and copy the link manually.');
+                }}>Copy link</button>
+                <QrCodeView content={share.url} />
+                {share.deviceOnly && <p data-testid="share-device-warning">This local link works only on this device. Configure VITE_SHARE_BASE_URL for a shareable host.</p>}
+              </section>
+            )}
             <input ref={importRef} data-testid="import-file" hidden type="file" accept="application/json,.json" onChange={event => importJson(event.target.files?.[0])} />
-            <p className="notice" role="status">{notice}</p>
+            <p className="notice" role="status">
+              {notice}
+              {state.startupNotice && notice && (
+                <button data-testid="clear-invalid-url" onClick={() => {
+                  const clean = new URL(window.location.href);
+                  clean.search = state.testMode ? '?test=1' : '';
+                  window.history.replaceState(null, '', clean);
+                  setNotice('Invalid URL parameters cleared.');
+                }}>Clear invalid parameters</button>
+              )}
+            </p>
           </section>
         </div>
       </section>

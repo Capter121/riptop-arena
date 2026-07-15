@@ -6,6 +6,8 @@ The prototype bundles only local npm dependencies. Exact versions are locked in 
 - Three.js — MIT
 - React Three Fiber and Drei — MIT
 - Zustand — MIT
+- node-qrcode 1.5.4 — MIT
+- jsQR 1.4.0 (test-only decoder) — Apache-2.0
 - Vite and plugin-react — MIT
 - TypeScript — Apache-2.0
 - Vitest — MIT

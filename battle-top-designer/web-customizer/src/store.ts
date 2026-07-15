@@ -4,8 +4,9 @@ import {
   type CameraPreset, type Combination, type Family, type FocusMode,
 } from './domain';
 import { sceneDiagnostics } from './diagnostics';
+import { resolveInitialCombination } from './sharing/combinationUrl';
 
-const storageKey = 'nova-spin:phase3a:combination:v1';
+export const combinationStorageKey = 'nova-spin:phase3a:combination:v1';
 
 interface CustomizerState {
   combination: Combination;
@@ -16,6 +17,9 @@ interface CustomizerState {
   debugAxis: boolean;
   loadState: 'loading' | 'ready' | 'error';
   error: string | null;
+  startupNotice: string | null;
+  testMode: boolean;
+  hydrate: (search: string, savedText?: string | null) => void;
   selectFamily: (family: Family) => void;
   selectPart: (id: string) => void;
   setCamera: (preset: CameraPreset) => void;
@@ -42,6 +46,18 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   debugAxis: false,
   loadState: 'loading',
   error: null,
+  startupNotice: null,
+  testMode: false,
+  hydrate: (search, savedText) => {
+    const resolution = resolveInitialCombination(search, savedText === undefined ? localStorage.getItem(combinationStorageKey) : savedText);
+    set({
+      combination: resolution.combination,
+      startupNotice: resolution.invalidUrl ? 'Invalid share link. Storm Attack was restored.' : null,
+      testMode: resolution.testMode,
+      loadState: 'loading',
+      error: null,
+    });
+  },
   selectFamily: selectedFamily => set({ selectedFamily }),
   selectPart: id => {
     const part = partById.get(id);
@@ -68,10 +84,10 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
     set({ combination, focus: null, exploded: false, cameraPreset: 'perspective', loadState: 'loading', error: null });
   },
   reset: () => set({ combination: stormAttack, focus: null, exploded: false, cameraPreset: 'perspective', loadState: 'loading', error: null }),
-  save: () => localStorage.setItem(storageKey, JSON.stringify({ schemaVersion: 1, combination: get().combination })),
+  save: () => localStorage.setItem(combinationStorageKey, JSON.stringify({ schemaVersion: 1, combination: get().combination })),
   restoreSaved: () => {
     try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
+      const saved = JSON.parse(localStorage.getItem(combinationStorageKey) ?? 'null');
       if (saved?.schemaVersion !== 1 || !isCombination(saved.combination)) return false;
       get().replaceCombination(saved.combination);
       return true;
@@ -91,6 +107,8 @@ export function currentSnapshot() {
     debugAxis: state.debugAxis,
     loadState: state.loadState,
     error: state.error,
+    startupNotice: state.startupNotice,
+    testMode: state.testMode,
     activeRoots: 5,
     presentationTargets: presentationOffsets(state.exploded, state.focus),
     ...sceneDiagnostics(),

@@ -63,6 +63,11 @@ button.primary { border: 0; border-radius: 999px; padding: 11px 18px; color: #17
 .attributes p { margin-top: 12px; }
 .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 13px; }
 .actions button:hover { border-color: #ffffff55; }
+.share-panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.share-panel input { min-width: 0; width: 100%; color: #d9e4ff; background: #080b12; border: 1px solid #30394e; border-radius: 7px; padding: 9px; font: 10px ui-monospace, monospace; }
+.share-panel p { grid-column: 1 / -1; color: #ffcf75; font-size: 10px; line-height: 1.45; }
+.share-qr { grid-column: 1 / -1; width: 132px; padding: 8px; border-radius: 8px; background: white; }
+.share-qr svg { display: block; width: 100%; height: auto; }
 .notice { min-height: 16px; margin-top: 10px; color: #ffd681; }
 footer { padding: 16px clamp(16px, 3vw, 42px) max(20px, env(safe-area-inset-bottom)); border-top: 1px solid #ffffff0f; }
 
