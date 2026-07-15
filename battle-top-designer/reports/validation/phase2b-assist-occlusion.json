@@ -1,0 +1,24 @@
+{
+  "result": "PASS",
+  "method": "fixed top-view pixel mask",
+  "parts": [
+    {
+      "part_id": "assist_heavy",
+      "standalone_pixels": 93223,
+      "visible_pixels": 5956,
+      "occluded_ratio": 0.9361
+    },
+    {
+      "part_id": "assist_guard",
+      "standalone_pixels": 87788,
+      "visible_pixels": 3656,
+      "occluded_ratio": 0.9584
+    },
+    {
+      "part_id": "assist_air",
+      "standalone_pixels": 36437,
+      "visible_pixels": 1953,
+      "occluded_ratio": 0.9464
+    }
+  ]
+}

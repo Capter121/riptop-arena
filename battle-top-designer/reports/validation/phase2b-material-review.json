@@ -1,0 +1,88 @@
+{
+  "result": "PASS",
+  "scope": "four Phase 2B representative assemblies",
+  "automatic_checks": [
+    "offline loading",
+    "console errors",
+    "page errors",
+    "failed requests",
+    "external requests",
+    "mesh normals present",
+    "material and transparent-material counts",
+    "WebGL draw calls"
+  ],
+  "human_review_required": [
+    "metal highlight quality",
+    "plastic hierarchy",
+    "transparent sorting",
+    "depth conflict",
+    "small-size material readability"
+  ],
+  "technical_issue_count": 0,
+  "assemblies": [
+    {
+      "model_id": "assembly_phase2b_attack_representative",
+      "diagnostics": {
+        "meshCount": 30,
+        "materialCount": 11,
+        "transparentMaterialCount": 3,
+        "missingNormalMeshes": 0,
+        "drawCalls": 73
+      },
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_defense_representative",
+      "diagnostics": {
+        "meshCount": 16,
+        "materialCount": 11,
+        "transparentMaterialCount": 0,
+        "missingNormalMeshes": 0,
+        "drawCalls": 17
+      },
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_stamina_representative",
+      "diagnostics": {
+        "meshCount": 33,
+        "materialCount": 11,
+        "transparentMaterialCount": 4,
+        "missingNormalMeshes": 0,
+        "drawCalls": 78
+      },
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_balance_representative",
+      "diagnostics": {
+        "meshCount": 19,
+        "materialCount": 11,
+        "transparentMaterialCount": 2,
+        "missingNormalMeshes": 0,
+        "drawCalls": 44
+      },
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    }
+  ]
+}

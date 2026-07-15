@@ -7,11 +7,15 @@ const models = {
   blade_iron_bastion: '../public/models/parts/blade_iron_bastion.glb',
   blade_orbit_halo: '../public/models/parts/blade_orbit_halo.glb',
   blade_dual_comet: '../public/models/parts/blade_dual_comet.glb',
+  core_solar_wolf: '../public/models/parts/core_solar_wolf.glb',
   core_void_falcon: '../public/models/parts/core_void_falcon.glb',
+  assist_heavy: '../public/models/parts/assist_heavy.glb',
   assist_guard: '../public/models/parts/assist_guard.glb',
   assist_air: '../public/models/parts/assist_air.glb',
+  gear_low: '../public/models/parts/gear_low.glb',
   gear_medium: '../public/models/parts/gear_medium.glb',
   gear_high: '../public/models/parts/gear_high.glb',
+  tip_flat_attack: '../public/models/parts/tip_flat_attack.glb',
   tip_ball_defense: '../public/models/parts/tip_ball_defense.glb',
   tip_needle_stamina: '../public/models/parts/tip_needle_stamina.glb',
   tip_taper_balance: '../public/models/parts/tip_taper_balance.glb',
@@ -46,6 +50,20 @@ const loader = new GLTFLoader();
 let currentModel = null;
 
 function snapshot() {
+  const materials = new Set();
+  let meshCount = 0;
+  let transparentMaterialCount = 0;
+  let missingNormalMeshes = 0;
+  currentModel?.traverse(object => {
+    if (!object.isMesh) return;
+    meshCount += 1;
+    if (!object.geometry.attributes.normal) missingNormalMeshes += 1;
+    for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+      if (!material || materials.has(material.uuid)) continue;
+      materials.add(material.uuid);
+      if (material.transparent || material.opacity < 1) transparentMaterialCount += 1;
+    }
+  });
   return {
     modelId: modelId.textContent,
     status: status.dataset.state,
@@ -53,6 +71,13 @@ function snapshot() {
     camera: camera.position.toArray(),
     target: controls.target.toArray(),
     distance: camera.position.distanceTo(controls.target),
+    diagnostics: {
+      meshCount,
+      materialCount: materials.size,
+      transparentMaterialCount,
+      missingNormalMeshes,
+      drawCalls: renderer.info.render.calls,
+    },
   };
 }
 
@@ -79,4 +104,11 @@ document.querySelector('#reset-camera').addEventListener('click', resetCamera);
 function showError(error) { status.textContent = error.message; status.dataset.state = 'error'; console.error(error); }
 window.__NSS_PREVIEW__ = { snapshot, resetCamera, loadModel };
 await loadModel(select.value).catch(showError);
+window.addEventListener('resize', () => {
+  const width = viewport.clientWidth;
+  const height = viewport.clientHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height, false);
+});
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });

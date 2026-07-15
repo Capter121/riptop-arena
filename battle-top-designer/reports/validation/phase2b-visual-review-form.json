@@ -1,0 +1,76 @@
+{
+  "phase": "Phase 2B",
+  "status": "awaiting visual review",
+  "allowed_results": [
+    "PASS",
+    "LOCAL_REVISION",
+    "REDESIGN",
+    "NOT_VISIBLE",
+    "NEEDS_COMPARISON"
+  ],
+  "reviewer": "",
+  "reviewed_at": "",
+  "items": [
+    {
+      "id": "core_family_distinction",
+      "label": "Core同族辨识度",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "assist_family_distinction",
+      "label": "Assist同族辨识度",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "gear_height_distinction",
+      "label": "Gear高度辨识度",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "tip_contact_distinction",
+      "label": "Tip接触面辨识度",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "assembly_distinction",
+      "label": "四套组合整体辨识度",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "browser_material_hierarchy",
+      "label": "浏览器材质层级",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "dual_comet_visual_symmetry",
+      "label": "Dual Comet视觉对称性",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "iron_bastion_dual_comet_outline",
+      "label": "Iron Bastion与Dual Comet轮廓区分",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "reference_product_visual_distance",
+      "label": "参考产品视觉距离",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    },
+    {
+      "id": "normal_viewing_distance",
+      "label": "正常观看距离表现",
+      "result": "NEEDS_COMPARISON",
+      "notes": ""
+    }
+  ],
+  "approval_statement": "This form records human visual review only and does not imply manufacturing or safety approval."
+}
