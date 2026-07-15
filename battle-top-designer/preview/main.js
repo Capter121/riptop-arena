@@ -10,6 +10,8 @@ const models = {
   core_void_falcon: '../public/models/parts/core_void_falcon.glb',
   assist_guard: '../public/models/parts/assist_guard.glb',
   assist_air: '../public/models/parts/assist_air.glb',
+  gear_medium: '../public/models/parts/gear_medium.glb',
+  gear_high: '../public/models/parts/gear_high.glb',
 };
 const viewport = document.querySelector('#viewport');
 const select = document.querySelector('#model-select');

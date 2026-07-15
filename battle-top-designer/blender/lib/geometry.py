@@ -346,6 +346,107 @@ def create_air_assist(spec: dict, collection: bpy.types.Collection, materials: l
     return objects
 
 
+def _create_axial_annulus(
+    spec: dict,
+    collection: bpy.types.Collection,
+    materials: list[bpy.types.Material],
+    z_levels: list[float],
+    radius_at,
+) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    segments = geometry["segments"]
+    inner_radius = geometry["inner_radius_mm"] * MM
+    vertices = []
+    for level, z in enumerate(z_levels):
+        for index in range(segments):
+            angle = math.tau * index / segments + math.radians(geometry.get("phase_deg", 0.0))
+            outer_radius = radius_at(level, angle) * MM
+            vertices.extend([
+                (inner_radius * math.cos(angle), inner_radius * math.sin(angle), z * MM),
+                (outer_radius * math.cos(angle), outer_radius * math.sin(angle), z * MM),
+            ])
+    faces = []
+    material_indices = []
+    for level in range(len(z_levels) - 1):
+        lower_offset = level * segments * 2
+        upper_offset = (level + 1) * segments * 2
+        for index in range(segments):
+            nxt = (index + 1) % segments
+            li, lo = lower_offset + index * 2, lower_offset + index * 2 + 1
+            lni, lno = lower_offset + nxt * 2, lower_offset + nxt * 2 + 1
+            ui, uo = upper_offset + index * 2, upper_offset + index * 2 + 1
+            uni, uno = upper_offset + nxt * 2, upper_offset + nxt * 2 + 1
+            faces.extend([(lo, lno, uno, uo), (li, ui, uni, lni)])
+            material_indices.extend([0, 1 if len(materials) > 1 else 0])
+    top_offset = (len(z_levels) - 1) * segments * 2
+    for index in range(segments):
+        nxt = (index + 1) % segments
+        bi, bo = index * 2, index * 2 + 1
+        bni, bno = nxt * 2, nxt * 2 + 1
+        ti, to = top_offset + index * 2, top_offset + index * 2 + 1
+        tni, tno = top_offset + nxt * 2, top_offset + nxt * 2 + 1
+        faces.extend([(bi, bni, bno, bo), (ti, to, tno, tni)])
+        material_indices.extend([0, 1 if len(materials) > 1 else 0])
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
+    mesh.from_pydata(vertices, [], faces)
+    for material in materials:
+        mesh.materials.append(material)
+    for polygon, material_index in zip(mesh.polygons, material_indices):
+        polygon.material_index = material_index
+    mesh.validate(verbose=False)
+    mesh.update(calc_edges=True)
+    obj = bpy.data.objects.new(f"GEO_{spec['id']}_BODY", mesh)
+    collection.objects.link(obj)
+    obj["part_id"] = spec["id"]
+    obj["geometry_kind"] = geometry["kind"]
+    obj["profile_family"] = spec["profile_family"]
+    return [obj]
+
+
+def create_medium_gear(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    half_height = geometry["height_mm"] * 0.5
+    waist_half = geometry["waist_height_mm"] * 0.5
+    z_levels = [-half_height, -geometry["shoulder_z_mm"], -waist_half, waist_half, geometry["shoulder_z_mm"], half_height]
+    base_radii = [
+        geometry["outer_radius_mm"] - geometry["rib_depth_mm"],
+        geometry["outer_radius_mm"], geometry["waist_radius_mm"], geometry["waist_radius_mm"],
+        geometry["outer_radius_mm"], geometry["outer_radius_mm"] - geometry["rib_depth_mm"],
+    ]
+
+    def radius_at(level: int, angle: float) -> float:
+        axial_phase = abs(z_levels[level]) / half_height * math.pi
+        rib = 0.5 + 0.5 * math.cos(geometry["chevron_count"] * angle + axial_phase)
+        return min(geometry["outer_radius_mm"], base_radii[level] + geometry["rib_depth_mm"] * rib)
+
+    return _create_axial_annulus(spec, collection, materials, z_levels, radius_at)
+
+
+def create_high_gear(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    half_height = geometry["height_mm"] * 0.5
+    waist_half = geometry["waist_height_mm"] * 0.5
+    cap_step = (half_height + geometry["shoulder_z_mm"]) * 0.5
+    z_levels = [
+        -half_height, -cap_step, -geometry["shoulder_z_mm"], -waist_half,
+        waist_half, geometry["shoulder_z_mm"], cap_step, half_height,
+    ]
+    base_radii = [
+        geometry["waist_radius_mm"], geometry["waist_radius_mm"] + geometry["buttress_depth_mm"] * 0.5,
+        geometry["outer_radius_mm"] - geometry["buttress_depth_mm"],
+        geometry["outer_radius_mm"] - geometry["buttress_depth_mm"],
+        geometry["outer_radius_mm"] - geometry["buttress_depth_mm"],
+        geometry["outer_radius_mm"] - geometry["buttress_depth_mm"],
+        geometry["waist_radius_mm"] + geometry["buttress_depth_mm"] * 0.5, geometry["waist_radius_mm"],
+    ]
+
+    def radius_at(level: int, angle: float) -> float:
+        buttress = 0.5 + 0.5 * math.cos(geometry["buttress_count"] * angle)
+        return min(geometry["outer_radius_mm"], base_radii[level] + geometry["buttress_depth_mm"] * buttress)
+
+    return _create_axial_annulus(spec, collection, materials, z_levels, radius_at)
+
+
 def create_orbit_halo(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     geometry = spec["geometry"]
     count = geometry["window_count"]
@@ -558,6 +659,10 @@ def create_part(spec: dict, collection: bpy.types.Collection, materials: list[bp
         return create_guard_assist(spec, collection, materials)
     if kind == "annular_ring" and spec.get("profile_family") == "air_truss_windows":
         return create_air_assist(spec, collection, materials)
+    if kind == "radial_gear" and spec.get("profile_family") == "medium_chevron_rib":
+        return create_medium_gear(spec, collection, materials)
+    if kind == "radial_gear" and spec.get("profile_family") == "high_tower_buttress":
+        return create_high_gear(spec, collection, materials)
     if kind == "radial_blade":
         if spec.get("profile_family") == "iron_bastion_damper":
             return create_iron_bastion(spec, collection, materials)

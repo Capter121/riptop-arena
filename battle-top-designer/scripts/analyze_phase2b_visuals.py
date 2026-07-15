@@ -14,7 +14,16 @@ ROOT = Path(__file__).resolve().parent.parent
 RENDERS = ROOT / "reports" / "renders"
 VALIDATION = ROOT / "reports" / "validation"
 FAMILIES = {
-    "assist": ("assist_heavy", "assist_guard", "assist_air"),
+    "assist": {
+        "targets": ("assist_heavy", "assist_guard", "assist_air"),
+        "material_view": "top",
+        "silhouette_view": "silhouette",
+    },
+    "gear": {
+        "targets": ("gear_low", "gear_medium", "gear_high"),
+        "material_view": "side",
+        "silhouette_view": "side_silhouette",
+    },
 }
 
 
@@ -22,9 +31,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--family", choices=sorted(FAMILIES), required=True)
     args = parser.parse_args()
-    targets = FAMILIES[args.family]
-    top_views = [Image.open(RENDERS / f"{target}_top.png").convert("RGB") for target in targets]
-    silhouettes = [Image.open(RENDERS / f"{target}_silhouette.png").convert("RGB") for target in targets]
+    family = FAMILIES[args.family]
+    targets = family["targets"]
+    top_views = [Image.open(RENDERS / f"{target}_{family['material_view']}.png").convert("RGB") for target in targets]
+    silhouettes = [Image.open(RENDERS / f"{target}_{family['silhouette_view']}.png").convert("RGB") for target in targets]
     if any(image.size != (512, 512) for image in top_views + silhouettes):
         raise ValueError("Phase 2B family source views must be 512x512")
 

@@ -6,7 +6,8 @@
   "geometry": {
     "kind": "radial_gear", "segments": 72, "outer_radius_mm": 17.2,
     "inner_radius_mm": 10.8, "height_mm": 6.0, "buttress_count": 8,
-    "shoulder_count": 2, "waist_radius_mm": 15.0, "roundness": 0.22, "phase_deg": 0.0
+    "shoulder_count": 2, "waist_radius_mm": 15.0, "waist_height_mm": 1.6,
+    "shoulder_z_mm": 2.1, "buttress_depth_mm": 0.9, "roundness": 0.22, "phase_deg": 0.0
   },
   "mounts": {
     "top": { "position_mm": [0.0, 0.0, 3.0], "rotation_deg": [0.0, 0.0, 0.0], "datum_radius_mm": 10.8, "interface_role": "female", "orientation_key_deg": 0.0 },

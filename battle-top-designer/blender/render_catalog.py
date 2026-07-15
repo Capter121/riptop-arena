@@ -111,6 +111,7 @@ def render_file(
     views: list[tuple[str, tuple[float, float, float]]],
     silhouette: bool = False,
     ortho_scale: float | None = None,
+    silhouette_view: tuple[str, tuple[float, float, float]] = ("silhouette", (0.0, 0.0, 1.0)),
 ) -> None:
     bpy.ops.wm.open_mainfile(filepath=str(blend_path))
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -119,7 +120,7 @@ def render_file(
         render_view(target, name, direction, camera, center, span)
     if silhouette:
         apply_silhouette_material()
-        render_view(target, "silhouette", (0.0, 0.0, 1.0), camera, center, span)
+        render_view(target, silhouette_view[0], silhouette_view[1], camera, center, span)
 
 
 def main() -> None:
@@ -134,6 +135,14 @@ def main() -> None:
         views = [("top", (0.0, 0.0, 1.0)), ("perspective_45", (1.0, -1.0, 0.8)), ("side", (1.0, 0.0, 0.12))]
         for assist in ("assist_heavy", "assist_guard", "assist_air"):
             render_file(assist, ROOT / "build" / "blend" / f"{assist}.blend", views, silhouette=True, ortho_scale=0.084)
+        return
+    if target == "phase2b_all_gears":
+        views = [("perspective_45", (1.0, -1.0, 0.8)), ("side", (1.0, 0.0, 0.0)), ("bottom", (0.0, 0.0, -1.0))]
+        for gear in ("gear_low", "gear_medium", "gear_high"):
+            render_file(
+                gear, ROOT / "build" / "blend" / f"{gear}.blend", views,
+                silhouette=True, ortho_scale=0.05, silhouette_view=("side_silhouette", (1.0, 0.0, 0.0)),
+            )
         return
     blend_path = ROOT / "build" / "blend" / f"{target}.blend"
     if not blend_path.is_file():

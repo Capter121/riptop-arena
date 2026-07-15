@@ -130,6 +130,10 @@
         "chevron_count": { "type": "integer", "minimum": 3, "maximum": 32 },
         "waist_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 45 },
         "buttress_count": { "type": "integer", "minimum": 3, "maximum": 32 },
+        "shoulder_z_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 15 },
+        "waist_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 15 },
+        "rib_depth_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 },
+        "buttress_depth_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 5 },
         "contact_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 }
       }
     },

@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "family": "gear",
+  "order": [
+    "gear_low",
+    "gear_medium",
+    "gear_high"
+  ],
+  "pair_count": 3,
+  "pairs": [
+    {
+      "first": "gear_low",
+      "second": "gear_medium",
+      "iou": 0.778914148793174
+    },
+    {
+      "first": "gear_low",
+      "second": "gear_high",
+      "iou": 0.6564299424184261
+    },
+    {
+      "first": "gear_medium",
+      "second": "gear_high",
+      "iou": 0.8041746641074856
+    }
+  ],
+  "render_conditions": {
+    "camera": "render_catalog.py shared orthographic top",
+    "lighting": "render_catalog.py shared setup_scene",
+    "background": "render_catalog.py shared world",
+    "single_view_size": [
+      512,
+      512
+    ],
+    "comparison_size": [
+      2048,
+      1024
+    ]
+  },
+  "disclaimer": "Internal visual heuristic only; this is not legal proof of originality or non-infringement."
+}

@@ -39,9 +39,12 @@ def main() -> None:
             contact_sheet(target, ["top", "perspective_45", "side", "silhouette"], f"{target}_contact_sheet.png")
         return
     if args.target:
+        names = ["top", "perspective_45", "side", "silhouette"]
+        if args.target.startswith("gear_"):
+            names = ["perspective_45", "side", "bottom", "side_silhouette"]
         contact_sheet(
             args.target,
-            ["top", "perspective_45", "side", "silhouette"],
+            names,
             f"{args.target}_contact_sheet.png",
         )
         return

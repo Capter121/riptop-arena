@@ -2,7 +2,7 @@ import playwrightTest from '../../preview/node_modules/@playwright/test/index.js
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const models = ['core_void_falcon', 'assist_guard', 'assist_air'];
+const models = ['core_void_falcon', 'assist_guard', 'assist_air', 'gear_medium', 'gear_high'];
 const { test, expect } = playwrightTest;
 const results = [];
 
