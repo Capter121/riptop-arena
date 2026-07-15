@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "phase": "Phase 2B-R1",
+  "source_commit": "bbf5bc11a9e2adf8eff472007e0fcc4f5e89c4b3",
+  "result": "INSUFFICIENT_REVIEWERS",
+  "thresholds": {
+    "minimum_reviewers": 3,
+    "maximum_reviewers": 5,
+    "item_pass_rate_minimum": 0.67
+  },
+  "reviewer_counts": {
+    "submitted": 0,
+    "complete": 0,
+    "partial": 0
+  },
+  "complete_reviewer_ids": [],
+  "partial_reviewer_ids": [],
+  "reviewers": [
+    {
+      "reviewer_id": "R01",
+      "submitted": false,
+      "answered_item_count": 0,
+      "required_item_count": 8,
+      "complete": false
+    },
+    {
+      "reviewer_id": "R02",
+      "submitted": false,
+      "answered_item_count": 0,
+      "required_item_count": 8,
+      "complete": false
+    },
+    {
+      "reviewer_id": "R03",
+      "submitted": false,
+      "answered_item_count": 0,
+      "required_item_count": 8,
+      "complete": false
+    },
+    {
+      "reviewer_id": "R04",
+      "submitted": false,
+      "answered_item_count": 0,
+      "required_item_count": 8,
+      "complete": false
+    },
+    {
+      "reviewer_id": "R05",
+      "submitted": false,
+      "answered_item_count": 0,
+      "required_item_count": 8,
+      "complete": false
+    }
+  ],
+  "anonymous_records": {},
+  "items": [
+    {
+      "item_id": "DC01",
+      "category": "dual_comet",
+      "prompt": "Dual Comet在正常观看距离下是否呈现稳定、均衡且无明显偏心的视觉重心？",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    },
+    {
+      "item_id": "DC02",
+      "category": "dual_comet",
+      "prompt": "Dual Comet的三组重复单元是否能被立即感知为清楚且一致的120度节奏？",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    },
+    {
+      "item_id": "DC03",
+      "category": "dual_comet",
+      "prompt": "短攻击坡面与长圆滑卸力面是否形成可辨识的双重接触节奏？",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    },
+    {
+      "item_id": "DC04",
+      "category": "dual_comet",
+      "prompt": "在无色剪影和128像素正常距离下，Dual Comet是否能与Iron Bastion明显区分？",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    },
+    {
+      "item_id": "AS01",
+      "category": "assist_matching",
+      "prompt": "仅观察同一Storm Fang夹具的无标签45度与侧视图，选择Heavy对应的列。",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    },
+    {
+      "item_id": "AS02",
+      "category": "assist_matching",
+      "prompt": "仅观察同一Storm Fang夹具的无标签45度与侧视图，选择Guard对应的列。",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    },
+    {
+      "item_id": "AS03",
+      "category": "assist_matching",
+      "prompt": "仅观察同一Storm Fang夹具的无标签45度与侧视图，选择Air对应的列。",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    },
+    {
+      "item_id": "UX01",
+      "category": "assist_focus",
+      "prompt": "Assist上移、Blade透明化、短暂高亮和恢复操作是否能清楚表达当前被选择的Assist？",
+      "pass_count": 0,
+      "non_pass_count": 0,
+      "eligible_reviewer_count": 0,
+      "pass_rate": 0.0,
+      "threshold": 0.67,
+      "result": "INSUFFICIENT_REVIEWERS"
+    }
+  ],
+  "validation_errors": [],
+  "human_decisions_recorded": false,
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data.",
+  "next_actions_require_explicit_confirmation": [
+    "approve_phase2b_visual_review",
+    "freeze_v0.2.0-modular-parts-baseline",
+    "write_phase2c_implementation_plan"
+  ],
+  "constraints": {
+    "models_modified": false,
+    "specs_modified": false,
+    "generator_modified": false,
+    "nss_v1_modified": false,
+    "full_288_matrix_executed": false
+  }
+}

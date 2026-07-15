@@ -1,0 +1,9 @@
+﻿item_id,category,pass_count,non_pass_count,eligible_reviewer_count,pass_rate,threshold,result,audit_note
+DC01,dual_comet,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+DC02,dual_comet,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+DC03,dual_comet,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+DC04,dual_comet,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+AS01,assist_matching,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+AS02,assist_matching,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+AS03,assist_matching,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+UX01,assist_focus,0,0,0,0.00%,67.00%,INSUFFICIENT_REVIEWERS,"Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."

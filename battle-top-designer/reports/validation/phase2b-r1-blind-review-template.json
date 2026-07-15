@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "phase": "Phase 2B-R1",
+  "source_commit": "bbf5bc11a9e2adf8eff472007e0fcc4f5e89c4b3",
+  "status_before_review": "Phase 2B-R1 awaiting visual re-review",
+  "reviewer_slots": ["R01", "R02", "R03", "R04", "R05"],
+  "reviewer_count": {
+    "minimum": 3,
+    "maximum": 5
+  },
+  "gate": {
+    "item_pass_rate_minimum": 0.67,
+    "pass_status": "PASS",
+    "non_pass_statuses": ["LOCAL_REVISION", "REDESIGN", "NOT_VISIBLE", "UX_COMPENSATION"],
+    "incomplete_statuses": ["", "NEEDS_COMPARISON"],
+    "final_results": ["PASS", "CHANGES_REQUESTED", "INSUFFICIENT_REVIEWERS"]
+  },
+  "response_statuses": [
+    "PASS",
+    "LOCAL_REVISION",
+    "REDESIGN",
+    "NOT_VISIBLE",
+    "NEEDS_COMPARISON",
+    "UX_COMPENSATION"
+  ],
+  "confidence_values": ["", "LOW", "MEDIUM", "HIGH"],
+  "items": [
+    {
+      "item_id": "DC01",
+      "category": "dual_comet",
+      "mode": "qualitative",
+      "prompt": "Dual Comet在正常观看距离下是否呈现稳定、均衡且无明显偏心的视觉重心？",
+      "evidence": [
+        "reports/renders/phase2b-r1/dual-comet/after/top_512.png",
+        "reports/renders/phase2b-r1/dual-comet/after/silhouette_512.png",
+        "reports/renders/phase2b-r1/dual-comet/after/thumbnail_128.png"
+      ]
+    },
+    {
+      "item_id": "DC02",
+      "category": "dual_comet",
+      "mode": "qualitative",
+      "prompt": "Dual Comet的三组重复单元是否能被立即感知为清楚且一致的120度节奏？",
+      "evidence": [
+        "reports/renders/phase2b-r1/dual-comet/after/top_512.png",
+        "reports/renders/phase2b-r1/dual-comet/metrics/dual_comet_rotation_120_overlay.png"
+      ]
+    },
+    {
+      "item_id": "DC03",
+      "category": "dual_comet",
+      "mode": "qualitative",
+      "prompt": "短攻击坡面与长圆滑卸力面是否形成可辨识的双重接触节奏？",
+      "evidence": [
+        "reports/renders/phase2b-r1/dual-comet/after/top_512.png",
+        "reports/renders/phase2b-r1/dual-comet/after/perspective_45_512.png",
+        "reports/renders/phase2b-r1/dual-comet/after/side_512.png"
+      ]
+    },
+    {
+      "item_id": "DC04",
+      "category": "dual_comet",
+      "mode": "qualitative",
+      "prompt": "在无色剪影和128像素正常距离下，Dual Comet是否能与Iron Bastion明显区分？",
+      "evidence": [
+        "reports/renders/human-review/blade-family/iron_bastion_vs_dual_comet_uncolored.png",
+        "reports/renders/human-review/blade-family/iron_bastion_vs_dual_comet_normal_distance_128.png"
+      ]
+    },
+    {
+      "item_id": "AS01",
+      "category": "assist_matching",
+      "mode": "matching",
+      "target": "Heavy",
+      "expected_selection": "A",
+      "prompt": "仅观察同一Storm Fang夹具的无标签45度与侧视图，选择Heavy对应的列。",
+      "evidence": [
+        "reports/renders/phase2b-r1/assists/comparisons/storm_fang_fixture_perspective_45_unlabeled.png",
+        "reports/renders/phase2b-r1/assists/comparisons/storm_fang_fixture_side_unlabeled.png"
+      ]
+    },
+    {
+      "item_id": "AS02",
+      "category": "assist_matching",
+      "mode": "matching",
+      "target": "Guard",
+      "expected_selection": "B",
+      "prompt": "仅观察同一Storm Fang夹具的无标签45度与侧视图，选择Guard对应的列。",
+      "evidence": [
+        "reports/renders/phase2b-r1/assists/comparisons/storm_fang_fixture_perspective_45_unlabeled.png",
+        "reports/renders/phase2b-r1/assists/comparisons/storm_fang_fixture_side_unlabeled.png"
+      ]
+    },
+    {
+      "item_id": "AS03",
+      "category": "assist_matching",
+      "mode": "matching",
+      "target": "Air",
+      "expected_selection": "C",
+      "prompt": "仅观察同一Storm Fang夹具的无标签45度与侧视图，选择Air对应的列。",
+      "evidence": [
+        "reports/renders/phase2b-r1/assists/comparisons/storm_fang_fixture_perspective_45_unlabeled.png",
+        "reports/renders/phase2b-r1/assists/comparisons/storm_fang_fixture_side_unlabeled.png"
+      ]
+    },
+    {
+      "item_id": "UX01",
+      "category": "assist_focus",
+      "mode": "qualitative",
+      "prompt": "Assist上移、Blade透明化、短暂高亮和恢复操作是否能清楚表达当前被选择的Assist？",
+      "evidence": [
+        "reports/renders/phase2b-r1/assist-focus/heavy_browser_highlight.png",
+        "reports/renders/phase2b-r1/assist-focus/guard_browser_highlight.png",
+        "reports/renders/phase2b-r1/assist-focus/air_browser_highlight.png",
+        "reports/renders/phase2b-r1/assist-focus/heavy_browser.png",
+        "reports/renders/phase2b-r1/assist-focus/guard_browser.png",
+        "reports/renders/phase2b-r1/assist-focus/air_browser.png"
+      ]
+    }
+  ],
+  "automatic_summary_does_not_replace_human_judgment": true,
+  "next_actions_require_explicit_confirmation": [
+    "approve_phase2b_visual_review",
+    "freeze_v0.2.0-modular-parts-baseline",
+    "write_phase2c_implementation_plan"
+  ]
+}

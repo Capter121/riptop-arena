@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "errors": [],
+  "waiver_path": "reports/validation/phase2b-r1-provisional-review-waiver.csv",
+  "waiver_sha256": "8512e6dda0fb9301e2d3912768dfe5c09d1ca66eceef0617d5a5f77a99ce6a06",
+  "expected_sha256": "8512e6dda0fb9301e2d3912768dfe5c09d1ca66eceef0617d5a5f77a99ce6a06",
+  "expires_on": "2026-08-14",
+  "visual_review_status": "Phase 2B visual review deferred pending real reviewers",
+  "technical_continuation_status": "AUTHORIZED_WITH_CONDITIONS",
+  "phase2c_allowed": true,
+  "baseline_status": "PROVISIONAL_NOT_FINAL",
+  "production_release_allowed": false,
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+}
