@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "parts": [
+    {
+      "id": "assist_air",
+      "displayName": "Air Assist",
+      "family": "assist",
+      "partType": "assist_ring",
+      "interfaceId": "NSS-V1",
+      "heightMm": 3,
+      "specSha256": "1b80222cb56f7d742d36d867a91d8b44994dfd859f2c2305165d999bfada3fa6"
+    },
+    {
+      "id": "assist_guard",
+      "displayName": "Guard Assist",
+      "family": "assist",
+      "partType": "assist_ring",
+      "interfaceId": "NSS-V1",
+      "heightMm": 3.2,
+      "specSha256": "6207d7332ddd625a533a7a6a1705360e92950ff7cb72b97a712c557324231253"
+    },
+    {
+      "id": "assist_heavy",
+      "displayName": "Heavy Assist",
+      "family": "assist",
+      "partType": "assist_ring",
+      "interfaceId": "NSS-V1",
+      "heightMm": 3.4,
+      "specSha256": "31e6211412e1336e6ff399e8ae5e1dad34da14f4e9cd670cf836967613c5188f"
+    },
+    {
+      "id": "blade_dual_comet",
+      "displayName": "Dual Comet",
+      "family": "blade",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "heightMm": 5.2,
+      "specSha256": "106c72f2c2d043daaeffb4e944b2c8ebea14c6cbf5ca5c0aca53e6b39496c263"
+    },
+    {
+      "id": "blade_iron_bastion",
+      "displayName": "Iron Bastion",
+      "family": "blade",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "heightMm": 4.8,
+      "specSha256": "c1ae7a4cab5807a01b1b77907f92f9d128acc8aae3f3fad3bb1673c3f0bee8be"
+    },
+    {
+      "id": "blade_orbit_halo",
+      "displayName": "Orbit Halo",
+      "family": "blade",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "heightMm": 4.2,
+      "specSha256": "cf2bcd18af892f51bb69466139fb2af5af9a56efb0dcbbb0a82a63796e074364"
+    },
+    {
+      "id": "blade_storm_fang",
+      "displayName": "Storm Fang",
+      "family": "blade",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "heightMm": 4.8,
+      "specSha256": "4040eed138552d80e94b72bb2175ae8f8e9cbfff3c207d10546bd09f5961d4d0"
+    },
+    {
+      "id": "core_solar_wolf",
+      "displayName": "Solar Wolf",
+      "family": "core",
+      "partType": "emblem_core",
+      "interfaceId": "NSS-V1",
+      "heightMm": 3.6,
+      "specSha256": "9d0ca0e77090f2741f41773a9c95b67db96779dc7a933ad990c7394a0fb104ee"
+    },
+    {
+      "id": "core_void_falcon",
+      "displayName": "Void Falcon",
+      "family": "core",
+      "partType": "emblem_core",
+      "interfaceId": "NSS-V1",
+      "heightMm": 3.6,
+      "specSha256": "a563c151cb813d745296380a51b26a3629efbb97d0e1e1f64c86714215422113"
+    },
+    {
+      "id": "gear_high",
+      "displayName": "High Height Gear",
+      "family": "gear",
+      "partType": "height_gear",
+      "interfaceId": "NSS-V1",
+      "heightMm": 6,
+      "specSha256": "4e644210db922c012d96ffabd6097569b34597cbe528bbaf74e705071e0f6159"
+    },
+    {
+      "id": "gear_low",
+      "displayName": "Low Height Gear",
+      "family": "gear",
+      "partType": "height_gear",
+      "interfaceId": "NSS-V1",
+      "heightMm": 4,
+      "specSha256": "7b1966d08315afd51a500cc91e6d217b880b9f71dc64f55681aba682e3d199c2"
+    },
+    {
+      "id": "gear_medium",
+      "displayName": "Medium Height Gear",
+      "family": "gear",
+      "partType": "height_gear",
+      "interfaceId": "NSS-V1",
+      "heightMm": 5,
+      "specSha256": "d11a1a4ace1f77fd7bfddc2ef12895b6a4ceca69e06878c89032e5cd35a54202"
+    },
+    {
+      "id": "tip_ball_defense",
+      "displayName": "Ball Defense Tip",
+      "family": "tip",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "heightMm": 8.2,
+      "specSha256": "c9158b065e3ceab5a3a96393069cd9b06aaed40893ce4ad96294afa99014d76f"
+    },
+    {
+      "id": "tip_flat_attack",
+      "displayName": "Flat Attack Tip",
+      "family": "tip",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "heightMm": 8,
+      "specSha256": "4baa9d2e19a06ad89ea0c81665e3678501b5c046c41af1eae0aaa2774b435674"
+    },
+    {
+      "id": "tip_needle_stamina",
+      "displayName": "Needle Stamina Tip",
+      "family": "tip",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "heightMm": 9,
+      "specSha256": "6e25d689c5d0e2a726f6846d2e09057c24b3a08b50b4fcb0942c568000bc5058"
+    },
+    {
+      "id": "tip_taper_balance",
+      "displayName": "Taper Balance Tip",
+      "family": "tip",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "heightMm": 8.5,
+      "specSha256": "2ef8d927558f3fd1280db2fdf5eaadcee419ff809e81c8ee7eaf78e6a88366fc"
+    }
+  ]
+}

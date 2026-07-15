@@ -1,0 +1,18 @@
+{
+  "core_solar_wolf": [62, 44, 52, 58, 45, 42],
+  "core_void_falcon": [48, 58, 64, 61, 43, 42],
+  "blade_storm_fang": [92, 34, 42, 48, 69, 52],
+  "blade_iron_bastion": [38, 93, 55, 62, 78, 50],
+  "blade_orbit_halo": [40, 55, 94, 66, 57, 45],
+  "blade_dual_comet": [72, 66, 63, 88, 67, 49],
+  "assist_heavy": [47, 78, 62, 66, 92, 48],
+  "assist_guard": [38, 91, 57, 64, 72, 48],
+  "assist_air": [58, 45, 88, 68, 34, 44],
+  "gear_low": [74, 62, 48, 63, 55, 24],
+  "gear_medium": [61, 65, 65, 78, 59, 55],
+  "gear_high": [48, 58, 82, 67, 63, 88],
+  "tip_flat_attack": [94, 34, 37, 43, 42, 44],
+  "tip_ball_defense": [42, 93, 48, 59, 48, 55],
+  "tip_needle_stamina": [30, 42, 96, 58, 39, 73],
+  "tip_taper_balance": [66, 64, 68, 91, 44, 64]
+}

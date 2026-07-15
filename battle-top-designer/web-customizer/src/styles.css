@@ -1,0 +1,87 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f5f7fb;
+  background: #070910;
+  font-synthesis: none;
+  --panel: #111521;
+  --line: #293044;
+  --muted: #929cb2;
+  --amber: #ffbd35;
+  --cyan: #59d6ff;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; margin: 0; }
+body { min-width: 320px; background: radial-gradient(circle at 50% 0, #172139 0, #070910 42rem); }
+button { color: inherit; font: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+.app-shell { width: min(100%, 1440px); margin: auto; min-height: 100vh; }
+.topbar { height: 76px; padding: 14px clamp(16px, 3vw, 42px); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff14; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(18px, 3vw, 25px); letter-spacing: .01em; }
+.eyebrow { display: block; color: var(--amber); font-size: 10px; font-weight: 800; letter-spacing: .18em; margin-bottom: 4px; }
+.prototype-badge { font-size: 10px; letter-spacing: .12em; color: #ffc84f; border: 1px solid #ffc84f66; padding: 7px 9px; border-radius: 999px; }
+
+.viewer { height: min(55vh, 600px); min-height: 360px; position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.viewer canvas { touch-action: none; }
+.viewer::after { content: ""; pointer-events: none; position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 20%, #05070d55 100%); }
+.load-status { position: absolute; z-index: 2; top: 14px; left: 16px; padding: 7px 10px; border-radius: 7px; font-size: 11px; background: #090c14cc; border: 1px solid #ffffff1c; }
+.load-status.ready { color: #80e6b1; }
+.load-status.error, .scene-error { color: #ff8d96; }
+.scene-error { position: absolute; inset: 35% 10%; z-index: 5; text-align: center; padding: 24px; background: #250d16e8; border: 1px solid #ff6375; border-radius: 12px; }
+.viewer-tools { position: absolute; z-index: 3; right: 14px; top: 14px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 340px; }
+.viewer-tools button, .actions button { border: 1px solid #ffffff1f; background: #101521d9; border-radius: 7px; padding: 8px 10px; font-size: 11px; text-transform: capitalize; }
+.viewer-tools button.active { border-color: var(--cyan); color: var(--cyan); }
+.focus-readout { position: absolute; z-index: 3; left: 50%; bottom: 18px; transform: translateX(-50%); white-space: nowrap; padding: 8px 12px; border: 1px solid #ffbd3577; border-radius: 999px; color: #ffe3a4; background: #111018e8; font-size: 11px; }
+
+.control-deck { padding: 20px clamp(16px, 3vw, 42px) 34px; background: linear-gradient(#0b0f18, #080a11); }
+.identity-row { display: flex; gap: 18px; align-items: center; justify-content: space-between; }
+.identity-row h2 { max-width: 820px; font-size: clamp(16px, 2.2vw, 23px); line-height: 1.25; }
+.identity-row code { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; }
+button.primary { border: 0; border-radius: 999px; padding: 11px 18px; color: #171007; font-weight: 850; background: linear-gradient(135deg, #ffd467, #ff9d25); }
+
+.family-tabs { display: flex; overflow-x: auto; gap: 4px; margin-top: 22px; scrollbar-width: thin; }
+.family-tabs button { flex: 1 0 auto; min-height: 42px; padding: 8px 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); }
+.family-tabs button.active { color: white; border-color: var(--amber); }
+.part-strip { display: flex; overflow-x: auto; gap: 10px; padding: 14px 2px 18px; scrollbar-width: thin; }
+.part-strip button { flex: 0 0 142px; min-height: 72px; display: flex; align-items: center; gap: 10px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 10px; font-size: 12px; }
+.part-strip button.selected { border-color: var(--amber); box-shadow: inset 0 0 0 1px #ffbd3566; }
+.part-icon { flex: 0 0 37px; height: 37px; display: grid; place-items: center; border-radius: 50%; color: #0b0c10; font-size: 11px; font-weight: 900; background: linear-gradient(135deg, #f7f9ff, #7b88a8); }
+.part-strip button.selected .part-icon { background: linear-gradient(135deg, #ffe790, #ff9a27); }
+
+.lower-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, .7fr); gap: 18px; }
+.attributes, .actions { background: #0e121c; border: 1px solid #20283a; border-radius: 13px; padding: 16px; }
+.section-heading { display: flex; justify-content: space-between; color: var(--muted); margin-bottom: 11px; }
+.section-heading h3, .actions h3 { color: #f5f7fb; font-size: 14px; }
+.section-heading span { font-size: 10px; }
+.attribute { display: grid; grid-template-columns: 66px 1fr 28px; align-items: center; gap: 8px; margin: 8px 0; font-size: 10px; text-transform: uppercase; color: var(--muted); }
+.attribute > div { height: 5px; border-radius: 9px; background: #252b39; overflow: hidden; }
+.attribute i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--amber)); }
+.attribute strong { text-align: right; color: white; }
+.attributes p, footer, .notice { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.attributes p { margin-top: 12px; }
+.action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 13px; }
+.actions button:hover { border-color: #ffffff55; }
+.notice { min-height: 16px; margin-top: 10px; color: #ffd681; }
+footer { padding: 16px clamp(16px, 3vw, 42px) max(20px, env(safe-area-inset-bottom)); border-top: 1px solid #ffffff0f; }
+
+@media (max-width: 700px) {
+  .topbar { height: 64px; }
+  .prototype-badge { max-width: 118px; text-align: center; padding: 5px 7px; }
+  .viewer { height: 48vh; min-height: 330px; }
+  .viewer-tools { top: auto; bottom: 12px; left: 12px; right: 12px; justify-content: center; max-width: none; }
+  .focus-readout { bottom: 58px; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; }
+  .viewer-tools button { padding: 7px 9px; }
+  .control-deck { padding-top: 16px; }
+  .identity-row { align-items: flex-start; }
+  .identity-row h2 { font-size: 15px; }
+  button.primary { flex: 0 0 auto; padding: 9px 13px; }
+  .family-tabs button { font-size: 11px; padding-inline: 10px; }
+  .part-strip button { flex-basis: 126px; min-height: 64px; }
+  .lower-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

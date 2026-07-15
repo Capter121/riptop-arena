@@ -1,0 +1,38 @@
+{
+  "name": "nova-spin-web-customizer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "catalog:build": "node scripts/build-product-catalog.mjs",
+    "catalog:check": "node scripts/build-product-catalog.mjs --check",
+    "check:governance": "node scripts/check-governance.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "build": "npm run catalog:check && tsc --noEmit && vite build",
+    "test:unit": "vitest run tests/unit",
+    "test:matrix": "vitest run tests/unit/combination.test.ts",
+    "test:e2e": "playwright test",
+    "report": "node scripts/report-phase3a.mjs",
+    "test:all": "npm run check:governance && npm run test:unit && npm run build && npm run test:e2e && npm run report"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.6",
+    "@react-three/fiber": "9.3.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "three": "0.185.1",
+    "zustand": "5.0.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.10",
+    "@types/react-dom": "19.1.7",
+    "@types/three": "0.179.0",
+    "@vitejs/plugin-react": "5.0.4",
+    "jsdom": "26.1.0",
+    "typescript": "5.9.2",
+    "vite": "7.1.7",
+    "vitest": "3.2.4"
+  }
+}
