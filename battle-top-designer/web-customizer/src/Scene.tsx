@@ -5,6 +5,7 @@ import { Color, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { assembleMatrices } from './assembly';
 import { updateCamera, updatePermanentMatrices } from './diagnostics';
+import { endPartSwitch, markOnce } from './performance/marks';
 import { families, presentationOffsets, type Combination, type Family } from './domain';
 import { useCustomizer } from './store';
 
@@ -15,6 +16,7 @@ const cameraPositions = {
   bottom: new Vector3(0.075, -0.12, 0.075),
 };
 const target = new Vector3(0, -0.012, 0);
+markOnce('phase3b:scene-runtime-loaded');
 
 function CameraRig() {
   const preset = useCustomizer(state => state.cameraPreset);
@@ -147,7 +149,12 @@ function LoadingSignal() {
 }
 
 export function CustomizerScene({ combination }: { combination: Combination }) {
-  const ready = useCallback(() => useCustomizer.getState().setLoadState('ready'), []);
+  const ready = useCallback(() => {
+    useCustomizer.getState().setLoadState('ready');
+    markOnce('phase3b:first-model-ready');
+    requestAnimationFrame(() => markOnce('phase3b:interaction-ready'));
+    endPartSwitch();
+  }, []);
   return (
     <Canvas camera={{ fov: 34, near: 0.001, far: 10, position: cameraPositions.perspective.toArray() }} dpr={[1, 2]} gl={{ antialias: true, alpha: false }}>
       <color attach="background" args={['#080b12']} />

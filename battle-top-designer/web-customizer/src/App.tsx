@@ -5,6 +5,7 @@ import {
   randomCombination, serializeCombination, type Family,
 } from './domain';
 import { CustomizerScene } from './Scene';
+import { beginPartSwitch, markOnce } from './performance/marks';
 import { currentSnapshot, useCustomizer } from './store';
 import './styles.css';
 
@@ -36,16 +37,23 @@ export default function App() {
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
 
   useEffect(() => {
+    markOnce('phase3b:shell-ready');
     (window as any).__NSS_CUSTOMIZER__ = {
       snapshot: currentSnapshot,
       restore: () => useCustomizer.getState().restorePresentation(),
       enumerateIds: () => enumerateCombinations().map(combinationId),
+      selectBladeForDiagnostics: (partId: string) => {
+        beginPartSwitch();
+        useCustomizer.getState().selectFamily('blade');
+        useCustomizer.getState().selectPart(partId);
+      },
     };
     return () => { if (focusTimer.current !== null) window.clearTimeout(focusTimer.current); };
   }, []);
 
   const choosePart = (partId: string) => {
     if (focusTimer.current !== null) window.clearTimeout(focusTimer.current);
+    beginPartSwitch();
     state.selectPart(partId);
     const family = state.selectedFamily;
     if (family === 'assist' || family === 'gear' || family === 'tip') {

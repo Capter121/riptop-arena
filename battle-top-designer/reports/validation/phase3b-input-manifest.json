@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-07-15T10:25:47.389Z",
+  "source_commit": "03ae01e1a285543efe2045481ff883c656eb67f6",
+  "phase3a_implementation_commit": "e4ec258b3b51bf68298634446fccc0abad1e55bf",
+  "phase3a_validation_commit": "d5b4db9e486065170aebb65635a20716cfa8d0b5",
+  "baseline_id": "v0.2.0-rc1-technical-baseline",
+  "baseline_commit": "4a7a6895d5d3bb6608a4178d8f9d8373f8e3a07f",
+  "baseline_status": "PROVISIONAL_NOT_FINAL",
+  "visual_review_status": "Phase 2B visual review deferred pending real reviewers",
+  "interface_id": "NSS-V1",
+  "interface_sha256": "5744cca158ed260cb4d5c46b57a5f4c306628ca5f932cb3f60347454caaa6e12",
+  "part_count": 16,
+  "parts": [
+    {
+      "id": "assist_air",
+      "file": "public/models/parts/assist_air.glb",
+      "sha256": "5d932424d3ebe1f597c96f77a63343075bcef48903064c00661b360b3ed2017d"
+    },
+    {
+      "id": "assist_guard",
+      "file": "public/models/parts/assist_guard.glb",
+      "sha256": "68c526f7b27c0ed599a5a45a65fa8027b138e0003f18fa46ede878abbaaf307f"
+    },
+    {
+      "id": "assist_heavy",
+      "file": "public/models/parts/assist_heavy.glb",
+      "sha256": "2825f5a0aece767364eabf59d61695312e8808a5c5060ff48d8428ff6b08f293"
+    },
+    {
+      "id": "blade_dual_comet",
+      "file": "public/models/parts/blade_dual_comet.glb",
+      "sha256": "26da5bbaebde1dfc5c0dd1ee95b8023e05ad5fafd5799872173d1fc4e5dc498e"
+    },
+    {
+      "id": "blade_iron_bastion",
+      "file": "public/models/parts/blade_iron_bastion.glb",
+      "sha256": "339a70425692b8ff1acc185b580fb8a63a420965c6afb75ec2280ee83e546f57"
+    },
+    {
+      "id": "blade_orbit_halo",
+      "file": "public/models/parts/blade_orbit_halo.glb",
+      "sha256": "6283ea0689a3eebd46f3e9817fc67fe05e79e6ae54d116dc58ee7a8ae122908f"
+    },
+    {
+      "id": "blade_storm_fang",
+      "file": "public/models/parts/blade_storm_fang.glb",
+      "sha256": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac"
+    },
+    {
+      "id": "core_solar_wolf",
+      "file": "public/models/parts/core_solar_wolf.glb",
+      "sha256": "78407099c4a962a7d30f6a7a62009ca7f04c5e91487aa17899089143d8bd102c"
+    },
+    {
+      "id": "core_void_falcon",
+      "file": "public/models/parts/core_void_falcon.glb",
+      "sha256": "e2cf565e197dbb76ffb0f891a05ffb5120a3b7279022374f7cbc08dfa4921e1e"
+    },
+    {
+      "id": "gear_high",
+      "file": "public/models/parts/gear_high.glb",
+      "sha256": "704589efa2f82e723389ed427de25ac6df4ab9101f45f8fbe0900356796554f5"
+    },
+    {
+      "id": "gear_low",
+      "file": "public/models/parts/gear_low.glb",
+      "sha256": "c772a6bbcb4907f4c7805e3571fb3bdaa6a1b7b1ff45d3beddace6632e076b8a"
+    },
+    {
+      "id": "gear_medium",
+      "file": "public/models/parts/gear_medium.glb",
+      "sha256": "947e5c49e87cf9d403dad970f26fa29893d6cded332ccb77a55132db4f900d3f"
+    },
+    {
+      "id": "tip_ball_defense",
+      "file": "public/models/parts/tip_ball_defense.glb",
+      "sha256": "2aff6daee04a2a8c84a8765a1b82bdeaa697250d506d96dd3330b3b5a36bc1e7"
+    },
+    {
+      "id": "tip_flat_attack",
+      "file": "public/models/parts/tip_flat_attack.glb",
+      "sha256": "56bd25f90f6898dc3148cc5eb4c8c14741bd8b7ed71e77f6ffae64606b517629"
+    },
+    {
+      "id": "tip_needle_stamina",
+      "file": "public/models/parts/tip_needle_stamina.glb",
+      "sha256": "4a559c080f821587f197c1266db2d3b617b74eb34db5a462c43e3fe6e22223b2"
+    },
+    {
+      "id": "tip_taper_balance",
+      "file": "public/models/parts/tip_taper_balance.glb",
+      "sha256": "d2af25543415598e611deb826f766a217fd65954f3fe5fa7c5b7ca4359eb04b0"
+    }
+  ],
+  "combination_count": 288,
+  "phase2c_digest": "2bebf2dcc52efe75304a79b1cba68e9d635d4d290a64a67826b5092467ff7eba",
+  "phase2c_evidence_commit": "9590780e04c0141ea57109a2feb865ebafed07dd",
+  "phase2c_final_gate_sha256": "7887a62f74df180ce8235dc47b7f075c270f185ca8db3b9b13f4093036e7b8f2",
+  "phase2c_matrix_sha256": "ad1bf0235f9b65c31c3aae1bc158b8a368004a5520e225658d745c64458f38c9",
+  "assembly_matrix_sha256": "392fb4cabfe8e598018df89937adc079a44f14f8f9608508e6c3b5eeaa9e129e",
+  "package_lock_sha256": "4cdf46ee862db8b36f477a33cba5d6b8322adfc9d74f49ba43f5595caab4107d",
+  "waiver_path": "reports/validation/phase2b-r1-provisional-review-waiver.csv",
+  "waiver_sha256": "8512e6dda0fb9301e2d3912768dfe5c09d1ca66eceef0617d5a5f77a99ce6a06",
+  "notices": [
+    "Human visual review remains pending.",
+    "Development continued under a documented provisional internal-prototype decision."
+  ]
+}
