@@ -1,0 +1,57 @@
+{
+  "result": "PASS",
+  "family": "tip",
+  "order": [
+    "tip_flat_attack",
+    "tip_ball_defense",
+    "tip_needle_stamina",
+    "tip_taper_balance"
+  ],
+  "pair_count": 6,
+  "pairs": [
+    {
+      "first": "tip_flat_attack",
+      "second": "tip_ball_defense",
+      "iou": 0.6700301171711842
+    },
+    {
+      "first": "tip_flat_attack",
+      "second": "tip_needle_stamina",
+      "iou": 0.5762664099011297
+    },
+    {
+      "first": "tip_flat_attack",
+      "second": "tip_taper_balance",
+      "iou": 0.6906295144585098
+    },
+    {
+      "first": "tip_ball_defense",
+      "second": "tip_needle_stamina",
+      "iou": 0.6246893469498569
+    },
+    {
+      "first": "tip_ball_defense",
+      "second": "tip_taper_balance",
+      "iou": 0.7436463846725865
+    },
+    {
+      "first": "tip_needle_stamina",
+      "second": "tip_taper_balance",
+      "iou": 0.7902899868647065
+    }
+  ],
+  "render_conditions": {
+    "camera": "render_catalog.py shared orthographic top",
+    "lighting": "render_catalog.py shared setup_scene",
+    "background": "render_catalog.py shared world",
+    "single_view_size": [
+      512,
+      512
+    ],
+    "comparison_size": [
+      2048,
+      1024
+    ]
+  },
+  "disclaimer": "Internal visual heuristic only; this is not legal proof of originality or non-infringement."
+}

@@ -37,6 +37,21 @@
       "detail": "errors=1"
     },
     {
+      "name": "zero_radius_tip_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "reversed_tip_profile_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
+      "name": "duplicate_tip_profile_point_fails",
+      "passed": true,
+      "detail": "errors=1"
+    },
+    {
       "name": "missing_material_reference_fails",
       "passed": true,
       "detail": "errors=1"

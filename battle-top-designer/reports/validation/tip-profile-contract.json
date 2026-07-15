@@ -1,0 +1,34 @@
+{
+  "result": "PASS",
+  "profiles": {
+    "tip_ball_defense": {
+      "contact_profile": "ball",
+      "terminal_radius_mm": 3.2,
+      "point_count": 6,
+      "z_strictly_increasing": true,
+      "minimum_radius_mm": 3.2
+    },
+    "tip_flat_attack": {
+      "contact_profile": "flat",
+      "terminal_radius_mm": 2.8,
+      "point_count": 5,
+      "z_strictly_increasing": true,
+      "minimum_radius_mm": 2.8
+    },
+    "tip_needle_stamina": {
+      "contact_profile": "needle",
+      "terminal_radius_mm": 0.6,
+      "point_count": 7,
+      "z_strictly_increasing": true,
+      "minimum_radius_mm": 0.6
+    },
+    "tip_taper_balance": {
+      "contact_profile": "taper",
+      "terminal_radius_mm": 1.6,
+      "point_count": 7,
+      "z_strictly_increasing": true,
+      "minimum_radius_mm": 1.6
+    }
+  },
+  "errors": []
+}

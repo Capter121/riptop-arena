@@ -1,0 +1,42 @@
+{
+  "part_id": "tip_taper_balance",
+  "result": "PASS",
+  "errors": [],
+  "mesh_count": 2,
+  "triangle_count": 1376,
+  "material_count": 2,
+  "glb_file_size_bytes": 69124,
+  "mounts_present": [
+    "MOUNT_tip_taper_balance_BOTTOM",
+    "MOUNT_tip_taper_balance_TOP"
+  ],
+  "glb_reimport_mesh_count": 2,
+  "meshes": [
+    {
+      "object": "GEO_tip_taper_balance_BODY",
+      "vertices": 450,
+      "triangles": 896,
+      "materials": 2,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 6.609069687918375e-07,
+      "scale_applied": true,
+      "rotation_applied": true
+    },
+    {
+      "object": "GEO_tip_taper_balance_NSS_V1_COLLAR",
+      "vertices": 240,
+      "triangles": 480,
+      "materials": 1,
+      "non_manifold_edges": 0,
+      "duplicate_vertices": 0,
+      "loose_vertices": 0,
+      "zero_area_faces": 0,
+      "signed_volume_m3": 3.335582537664926e-07,
+      "scale_applied": true,
+      "rotation_applied": true
+    }
+  ]
+}

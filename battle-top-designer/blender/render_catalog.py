@@ -59,6 +59,7 @@ def setup_scene(ortho_scale: float | None = None) -> tuple[bpy.types.Object, Vec
     scene.collection.objects.link(camera)
     scene.camera = camera
     camera.data.type = "ORTHO"
+    camera.data.clip_start = 0.001
     camera.data.ortho_scale = ortho_scale if ortho_scale is not None else span * 1.35
     camera.data.lens = 55
 
@@ -142,6 +143,14 @@ def main() -> None:
             render_file(
                 gear, ROOT / "build" / "blend" / f"{gear}.blend", views,
                 silhouette=True, ortho_scale=0.05, silhouette_view=("side_silhouette", (1.0, 0.0, 0.0)),
+            )
+        return
+    if target == "phase2b_all_tips":
+        views = [("perspective_45", (1.0, -1.0, 0.8)), ("side", (1.0, 0.0, 0.0)), ("bottom", (0.0, 0.0, -1.0))]
+        for tip in ("tip_flat_attack", "tip_ball_defense", "tip_needle_stamina", "tip_taper_balance"):
+            render_file(
+                tip, ROOT / "build" / "blend" / f"{tip}.blend", views,
+                silhouette=True, ortho_scale=0.026, silhouette_view=("side_silhouette", (1.0, 0.0, 0.0)),
             )
         return
     blend_path = ROOT / "build" / "blend" / f"{target}.blend"

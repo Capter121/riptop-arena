@@ -64,6 +64,11 @@ PHASE2B_REPRESENTATIVES = {
         "gear": "gear_medium", "tip": "tip_taper_balance",
     },
 }
+TIP_CONTACT_RADII_MM = {
+    "tip_ball_defense": 3.2,
+    "tip_needle_stamina": 0.6,
+    "tip_taper_balance": 1.6,
+}
 
 
 def load_json(path: Path) -> object:
@@ -84,6 +89,66 @@ def schema_errors(validator: Draft202012Validator, data: object, source: str) ->
         }
         for error in sorted(validator.iter_errors(data), key=lambda item: list(item.absolute_path))
     ]
+
+
+def tip_profile_contract(parts: list[object]) -> tuple[list[dict[str, str]], dict[str, dict]]:
+    errors: list[dict[str, str]] = []
+    profiles: dict[str, dict] = {}
+    terminal_radii: dict[str, float] = {}
+
+    def add(source: str, path: str, message: str) -> None:
+        errors.append({"source": source, "path": path, "message": message})
+
+    for part in parts:
+        if part.get("part_type") != "performance_tip" or part.get("geometry", {}).get("kind") != "revolved_tip":
+            continue
+        source = part.get("_source", part.get("id", "performance_tip"))
+        part_id = part.get("id")
+        geometry = part.get("geometry", {})
+        points = geometry.get("profile_points_mm", [])
+        if len(points) < 2:
+            add(source, "$.geometry.profile_points_mm", "revolved tip requires at least two profile points")
+            continue
+        radii = [point[0] for point in points]
+        z_values = [point[1] for point in points]
+        if any(radius <= 0 for radius in radii):
+            add(source, "$.geometry.profile_points_mm", "profile radii must be positive; mathematical tip points are forbidden")
+        if any(right <= left for left, right in zip(z_values, z_values[1:])):
+            add(source, "$.geometry.profile_points_mm", "profile Z values must be strictly increasing without duplicates")
+
+        terminal_radius = radii[0]
+        terminal_radii[part_id] = terminal_radius
+        contact_radius = geometry.get("contact_radius_mm")
+        if contact_radius is not None and abs(contact_radius - terminal_radius) > 1e-6:
+            add(source, "$.geometry.contact_radius_mm", "must match the first profile point radius")
+        expected_radius = TIP_CONTACT_RADII_MM.get(part_id)
+        if expected_radius is not None and abs(terminal_radius - expected_radius) > 1e-6:
+            add(source, "$.geometry.profile_points_mm[0][0]", f"{part_id} terminal radius must be {expected_radius} mm")
+
+        slopes = []
+        if all(right > left for left, right in zip(z_values, z_values[1:])):
+            slopes = [
+                (radii[index + 1] - radii[index]) / (z_values[index + 1] - z_values[index])
+                for index in range(len(points) - 1)
+            ]
+        if part_id == "tip_ball_defense" and any(
+            right > left + 1e-6 for left, right in zip(slopes, slopes[1:])
+        ):
+            add(source, "$.geometry.profile_points_mm", "ball crown radial slope must decrease monotonically")
+        profiles[part_id] = {
+            "contact_profile": geometry.get("contact_profile"),
+            "terminal_radius_mm": terminal_radius,
+            "point_count": len(points),
+            "z_strictly_increasing": all(right > left for left, right in zip(z_values, z_values[1:])),
+            "minimum_radius_mm": min(radii),
+        }
+
+    ordered_ids = ("tip_needle_stamina", "tip_taper_balance", "tip_flat_attack")
+    if all(part_id in terminal_radii for part_id in ordered_ids):
+        ordered = [terminal_radii[part_id] for part_id in ordered_ids]
+        if not ordered[0] < ordered[1] < ordered[2]:
+            add("specs/parts", "$.performance_tip", "contact radii must satisfy Needle < Taper < Flat")
+    return errors, profiles
 
 
 def semantic_errors(
@@ -249,6 +314,8 @@ def semantic_errors(
                 for field, value in metadata.items():
                     if assembly.get(field) != value:
                         add("assemblies.json", "$.assemblies", f"{assembly_id} requires {field}={value}")
+    contract_errors, _ = tip_profile_contract(parts)
+    errors.extend(contract_errors)
     return errors
 
 
@@ -345,6 +412,12 @@ def valid_fixtures() -> tuple[dict, dict, list[dict], dict]:
             part.pop("profile_family", None)
             for key in ("blade_count", "base_radius_mm", "outer_radius_mm", "height_mm", "blade_angle_deg", "contact_profile"):
                 part["geometry"].pop(key, None)
+        if part_type == "performance_tip":
+            part["geometry"].update({
+                "segments": 32,
+                "contact_profile": "flat",
+                "profile_points_mm": [[2.8, -6.5], [5.6, -3.2], [8.0, -0.65]],
+            })
         parts.append(part)
     assemblies = {
         "schema_version": "1.0",
@@ -399,6 +472,21 @@ def run_self_test(all_validators: dict[str, Draft202012Validator]) -> tuple[bool
     unknown_tip_profile["geometry"]["contact_profile"] = "sharp_point"
     errors = schema_errors(all_validators["part"], unknown_tip_profile, "fixture")
     record("unknown_tip_contact_profile_fails", bool(errors), f"errors={len(errors)}")
+
+    zero_tip = copy.deepcopy(parts[4])
+    zero_tip["geometry"]["profile_points_mm"][0][0] = 0
+    errors, _ = tip_profile_contract([zero_tip])
+    record("zero_radius_tip_fails", bool(errors), f"errors={len(errors)}")
+
+    reversed_tip = copy.deepcopy(parts[4])
+    reversed_tip["geometry"]["profile_points_mm"][1][1] = -7.0
+    errors, _ = tip_profile_contract([reversed_tip])
+    record("reversed_tip_profile_fails", bool(errors), f"errors={len(errors)}")
+
+    duplicate_tip = copy.deepcopy(parts[4])
+    duplicate_tip["geometry"]["profile_points_mm"][1] = duplicate_tip["geometry"]["profile_points_mm"][0]
+    errors, _ = tip_profile_contract([duplicate_tip])
+    record("duplicate_tip_profile_point_fails", bool(errors), f"errors={len(errors)}")
 
     missing_material = copy.deepcopy(parts)
     missing_material[1]["material_slots"] = ["missing_material"]
@@ -489,8 +577,14 @@ def main() -> int:
         else:
             passed, details = validate_project(all_validators)
             slug = re.sub(r"[^a-z0-9]+", "-", args.scope.lower()).strip("-") or "all"
-            report_path = REPORT_DIR / f"spec-{slug}.json"
-            report = {"result": "PASS" if passed else "FAIL", "errors": details}
+            if slug == "phase2b-tips":
+                _, _, parts, _, _ = load_project_specs()
+                _, profiles = tip_profile_contract(parts)
+                report_path = REPORT_DIR / "tip-profile-contract.json"
+                report = {"result": "PASS" if passed else "FAIL", "profiles": profiles, "errors": details}
+            else:
+                report_path = REPORT_DIR / f"spec-{slug}.json"
+                report = {"result": "PASS" if passed else "FAIL", "errors": details}
     except (OSError, json.JSONDecodeError, ValueError) as error:
         passed = False
         report_path = REPORT_DIR / "spec-validator-error.json"

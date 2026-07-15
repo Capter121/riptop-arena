@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BCore", "Phase2BAssists", "Phase2BGears")]
+    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BCore", "Phase2BAssists", "Phase2BGears", "Phase2BTips")]
     [string]$Scope = "VerticalSlice"
 )
 
@@ -15,6 +15,8 @@ $Phase2BAssistParts = @("assist_guard", "assist_air")
 $Phase2BAssistAssemblies = @("assembly_phase2b_assist_guard", "assembly_phase2b_assist_air")
 $Phase2BGearParts = @("gear_medium", "gear_high")
 $Phase2BGearAssemblies = @("assembly_phase2b_gear_medium", "assembly_phase2b_gear_high")
+$Phase2BTipParts = @("tip_ball_defense", "tip_needle_stamina", "tip_taper_balance")
+$Phase2BTipAssemblies = @("assembly_phase2b_tip_ball_defense", "assembly_phase2b_tip_needle_stamina", "assembly_phase2b_tip_taper_balance")
 
 function Find-Blender {
     $candidates = @(
@@ -47,9 +49,9 @@ $Blender = Find-Blender
 Write-Host "NSS_BLENDER=$Blender"
 Push-Location $ProjectRoot
 try {
-    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreParts } elseif ($Scope -eq "Phase2BAssists") { $Phase2BAssistParts } elseif ($Scope -eq "Phase2BGears") { $Phase2BGearParts } else { $VerticalParts }
-    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreAssemblies } elseif ($Scope -eq "Phase2BAssists") { $Phase2BAssistAssemblies } elseif ($Scope -eq "Phase2BGears") { $Phase2BGearAssemblies } else { @("assembly_storm_attack") }
-    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -in @("Phase2BCore", "Phase2BAssists", "Phase2BGears")) { "phase2b" } else { "vertical_slice" }
+    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreParts } elseif ($Scope -eq "Phase2BAssists") { $Phase2BAssistParts } elseif ($Scope -eq "Phase2BGears") { $Phase2BGearParts } elseif ($Scope -eq "Phase2BTips") { $Phase2BTipParts } else { $VerticalParts }
+    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BCore") { $Phase2BCoreAssemblies } elseif ($Scope -eq "Phase2BAssists") { $Phase2BAssistAssemblies } elseif ($Scope -eq "Phase2BGears") { $Phase2BGearAssemblies } elseif ($Scope -eq "Phase2BTips") { $Phase2BTipAssemblies } else { @("assembly_storm_attack") }
+    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BTips") { "phase2b_tips" } elseif ($Scope -in @("Phase2BCore", "Phase2BAssists", "Phase2BGears")) { "phase2b" } else { "vertical_slice" }
     Invoke-Logged "python" @("scripts\validate_specs.py", "--self-test") "test-spec-self-test.log"
     Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", $SpecScope) "test-specs.log"
     Invoke-Logged $Blender @("--background", "--python", "blender\test_collision.py") "test-collision.log"
@@ -149,6 +151,22 @@ try {
         Require-File "reports\validation\stage7-storm-regression-standalone.json"
         $StormRegression = Get-Content -Raw "reports\validation\stage7-storm-regression-standalone.json" | ConvertFrom-Json
         if ($StormRegression.result -ne "PASS") { throw "Storm Attack regression is not PASS" }
+    } elseif ($Scope -eq "Phase2BTips") {
+        foreach ($tip in $Phase2BTipParts) {
+            foreach ($view in @("perspective_45", "side", "bottom", "side_silhouette")) { Require-File "reports\renders\${tip}_${view}.png" }
+            Require-File "reports\renders\${tip}_contact_sheet.png"
+            Require-File "reports\renders\preview_${tip}.png"
+        }
+        Require-File "reports\validation\tip-profile-contract.json"
+        Require-File "reports\renders\all_tips_comparison.png"
+        Require-File "reports\validation\tip-silhouette-overlap.json"
+        Require-File "preview\vendor\three\0.185.1\LICENSE"
+        Invoke-Logged "python" @("scripts\analyze_phase2b_visuals.py", "--family", "tip") "test-phase2b-tip-visuals.log"
+        Invoke-Logged "npm.cmd" @("--prefix", "preview", "test", "--", "phase2b-preview.spec.mjs") "test-browser-phase2b-tips.log"
+        Invoke-Logged "python" @("scripts\verify_phase2a_baseline.py", "--manifest", "docs\baselines\v0.2.0-phase2a-approved.json", "--blender", $Blender, "--glb-only", "--verify-only", "--report", "reports\validation\stage5-approved-baseline.json") "test-phase2b-approved-baseline.log"
+        Require-File "reports\validation\stage7-storm-regression-standalone.json"
+        $StormRegression = Get-Content -Raw "reports\validation\stage7-storm-regression-standalone.json" | ConvertFrom-Json
+        if ($StormRegression.result -ne "PASS") { throw "Storm Attack regression is not PASS" }
     } else {
         Require-File "build\blend\exploded_storm_attack.blend"
         Require-File "reports\renders\storm_fang_contact_sheet.png"
@@ -160,7 +178,7 @@ try {
     }
     $summary = [ordered]@{
         result = "PASS"
-        scope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BCore") { "phase2b_core" } elseif ($Scope -eq "Phase2BAssists") { "phase2b_assists" } elseif ($Scope -eq "Phase2BGears") { "phase2b_gears" } else { "vertical_slice" }
+        scope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BCore") { "phase2b_core" } elseif ($Scope -eq "Phase2BAssists") { "phase2b_assists" } elseif ($Scope -eq "Phase2BGears") { "phase2b_gears" } elseif ($Scope -eq "Phase2BTips") { "phase2b_tips" } else { "vertical_slice" }
         parts_tested = $Parts.Count
         assemblies_tested = $Assemblies.Count
         fail_count = $failCount
@@ -171,13 +189,13 @@ try {
         gltf_validator_errors = 0
         gltf_validator_warnings = 0
         playwright_failures = 0
-        silhouette_pair_count = if ($Scope -eq "Phase2A") { 6 } elseif ($Scope -in @("Phase2BAssists", "Phase2BGears")) { 3 } else { 0 }
+        silhouette_pair_count = if ($Scope -eq "Phase2A") { 6 } elseif ($Scope -in @("Phase2BAssists", "Phase2BGears")) { 3 } elseif ($Scope -eq "Phase2BTips") { 6 } else { 0 }
     }
-    if ($Scope -in @("Phase2BCore", "Phase2BAssists", "Phase2BGears")) {
+    if ($Scope -in @("Phase2BCore", "Phase2BAssists", "Phase2BGears", "Phase2BTips")) {
         $summary["approved_baseline_result"] = "PASS"
         $summary["storm_attack_regression_result"] = "PASS"
     }
-    $SummaryPath = if ($Scope -eq "Phase2A") { "reports\validation\phase2a-quality-gate.json" } elseif ($Scope -eq "Phase2BCore") { "reports\validation\stage2b-core-regression.json" } elseif ($Scope -eq "Phase2BAssists") { "reports\validation\stage3-assist-regression.json" } elseif ($Scope -eq "Phase2BGears") { "reports\validation\stage4-gear-regression.json" } else { "reports\validation\vertical-slice-summary.json" }
+    $SummaryPath = if ($Scope -eq "Phase2A") { "reports\validation\phase2a-quality-gate.json" } elseif ($Scope -eq "Phase2BCore") { "reports\validation\stage2b-core-regression.json" } elseif ($Scope -eq "Phase2BAssists") { "reports\validation\stage3-assist-regression.json" } elseif ($Scope -eq "Phase2BGears") { "reports\validation\stage4-gear-regression.json" } elseif ($Scope -eq "Phase2BTips") { "reports\validation\stage5-tip-regression.json" } else { "reports\validation\vertical-slice-summary.json" }
     $summary | ConvertTo-Json | Set-Content -Encoding utf8 $SummaryPath
     Write-Host "NSS_TEST=PASS"
     Write-Host "NSS_SUMMARY=$SummaryPath"

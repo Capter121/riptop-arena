@@ -8,4 +8,7 @@ assembly_phase2b_assist_guard,core_solar_wolf,blade_storm_fang,assist_guard,gear
 assembly_phase2b_core_void_falcon,core_void_falcon,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,66.86078011989594
 assembly_phase2b_gear_high,core_solar_wolf,blade_storm_fang,assist_heavy,gear_high,tip_flat_attack,PASS,,9.313225746154785e-07,0.0,0.0,25.940000312402844,66.86078011989594
 assembly_phase2b_gear_medium,core_solar_wolf,blade_storm_fang,assist_heavy,gear_medium,tip_flat_attack,PASS,,9.313225746154785e-07,0.0,0.0,24.94000014849007,66.86078011989594
+assembly_phase2b_tip_ball_defense,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_ball_defense,PASS,,4.6566128730773926e-07,0.0,0.0,25.10000136680901,66.86078011989594
+assembly_phase2b_tip_needle_stamina,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_needle_stamina,PASS,,4.6566128730773926e-07,0.0,0.0,25.90000187046826,66.86078011989594
+assembly_phase2b_tip_taper_balance,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_taper_balance,PASS,,4.6566128730773926e-07,0.0,0.0,25.400000857189298,66.86078011989594
 assembly_storm_attack,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,66.86078011989594

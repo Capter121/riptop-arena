@@ -40,7 +40,7 @@ def main() -> None:
         return
     if args.target:
         names = ["top", "perspective_45", "side", "silhouette"]
-        if args.target.startswith("gear_"):
+        if args.target.startswith(("gear_", "tip_")):
             names = ["perspective_45", "side", "bottom", "side_silhouette"]
         contact_sheet(
             args.target,

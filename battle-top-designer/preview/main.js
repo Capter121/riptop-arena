@@ -12,6 +12,9 @@ const models = {
   assist_air: '../public/models/parts/assist_air.glb',
   gear_medium: '../public/models/parts/gear_medium.glb',
   gear_high: '../public/models/parts/gear_high.glb',
+  tip_ball_defense: '../public/models/parts/tip_ball_defense.glb',
+  tip_needle_stamina: '../public/models/parts/tip_needle_stamina.glb',
+  tip_taper_balance: '../public/models/parts/tip_taper_balance.glb',
 };
 const viewport = document.querySelector('#viewport');
 const select = document.querySelector('#model-select');

@@ -24,6 +24,11 @@ FAMILIES = {
         "material_view": "side",
         "silhouette_view": "side_silhouette",
     },
+    "tip": {
+        "targets": ("tip_flat_attack", "tip_ball_defense", "tip_needle_stamina", "tip_taper_balance"),
+        "material_view": "side",
+        "silhouette_view": "side_silhouette",
+    },
 }
 
 
