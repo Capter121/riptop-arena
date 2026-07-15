@@ -73,6 +73,20 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return;
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+      const current = useCustomizer.getState();
+      if (current.loadState !== 'ready' || (event.shiftKey ? !current.canRedo : !current.canUndo)) return;
+      event.preventDefault();
+      beginPartSwitch();
+      if (event.shiftKey) current.redo(); else current.undo();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  useEffect(() => {
     if (state.loadState !== 'ready' || lastRecentId.current === id) return;
     lastRecentId.current = id;
     setLibrary(current => {
@@ -201,6 +215,8 @@ export default function App() {
               <button data-testid="share" onClick={() => setShareOpen(value => !value)}>Share</button>
               <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? 'Rendering card…' : 'Export PNG card'}</button>
               <button data-testid="library" onClick={() => setLibraryOpen(value => !value)}>Library</button>
+              <button data-testid="undo" disabled={!state.canUndo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.undo(); }}>Undo</button>
+              <button data-testid="redo" disabled={!state.canRedo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.redo(); }}>Redo</button>
             </div>
             {shareOpen && (
               <section className="share-panel" aria-label="Share current combination">

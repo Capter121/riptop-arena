@@ -17,6 +17,12 @@ interface CustomizerState {
   debugAxis: boolean;
   loadState: 'loading' | 'ready' | 'error';
   error: string | null;
+  canUndo: boolean;
+  canRedo: boolean;
+  historyDepth: number;
+  historyPast: Combination[];
+  historyFuture: Combination[];
+  pendingPrevious: Combination | null;
   startupNotice: string | null;
   testMode: boolean;
   hydrate: (search: string, savedText?: string | null) => void;
@@ -31,6 +37,8 @@ interface CustomizerState {
   reset: () => void;
   save: () => void;
   restoreSaved: () => boolean;
+  undo: () => void;
+  redo: () => void;
 }
 
 function focusFor(family: Family): FocusMode {
@@ -46,6 +54,12 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   debugAxis: false,
   loadState: 'loading',
   error: null,
+  canUndo: false,
+  canRedo: false,
+  historyDepth: 0,
+  historyPast: [],
+  historyFuture: [],
+  pendingPrevious: null,
   startupNotice: null,
   testMode: false,
   hydrate: (search, savedText) => {
@@ -56,6 +70,12 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
       testMode: resolution.testMode,
       loadState: 'loading',
       error: null,
+      canUndo: false,
+      canRedo: false,
+      historyDepth: 0,
+      historyPast: [],
+      historyFuture: [],
+      pendingPrevious: null,
     });
   },
   selectFamily: selectedFamily => set({ selectedFamily }),
@@ -72,18 +92,36 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
       exploded: false,
       loadState: 'loading',
       error: null,
+      pendingPrevious: state.pendingPrevious ?? state.combination,
     }));
   },
   setCamera: cameraPreset => set({ cameraPreset, focus: null }),
   setExploded: exploded => set({ exploded, focus: null }),
   restorePresentation: () => set({ focus: null, exploded: false, cameraPreset: 'perspective' }),
   setDebugAxis: debugAxis => set({ debugAxis }),
-  setLoadState: (loadState, error) => set({ loadState, error: error ?? null }),
+  setLoadState: (loadState, error) => set(state => {
+    if (loadState === 'ready' && state.pendingPrevious) {
+      const changed = combinationId(state.pendingPrevious) !== combinationId(state.combination);
+      const historyPast = changed ? [...state.historyPast, state.pendingPrevious].slice(-50) : state.historyPast;
+      const historyFuture = changed ? [] : state.historyFuture;
+      return {
+        loadState,
+        error: null,
+        pendingPrevious: null,
+        historyPast,
+        historyFuture,
+        historyDepth: historyPast.length,
+        canUndo: historyPast.length > 0,
+        canRedo: historyFuture.length > 0,
+      };
+    }
+    return { loadState, error: error ?? null, pendingPrevious: loadState === 'error' ? null : state.pendingPrevious };
+  }),
   replaceCombination: combination => {
     if (!isCombination(combination)) return set({ loadState: 'error', error: 'Illegal combination.' });
-    set({ combination, focus: null, exploded: false, cameraPreset: 'perspective', loadState: 'loading', error: null });
+    set(state => ({ combination, focus: null, exploded: false, cameraPreset: 'perspective', loadState: 'loading', error: null, pendingPrevious: state.pendingPrevious ?? state.combination }));
   },
-  reset: () => set({ combination: stormAttack, focus: null, exploded: false, cameraPreset: 'perspective', loadState: 'loading', error: null }),
+  reset: () => set(state => ({ combination: stormAttack, focus: null, exploded: false, cameraPreset: 'perspective', loadState: 'loading', error: null, pendingPrevious: state.pendingPrevious ?? state.combination })),
   save: () => localStorage.setItem(combinationStorageKey, JSON.stringify({ schemaVersion: 1, combination: get().combination })),
   restoreSaved: () => {
     try {
@@ -93,6 +131,20 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
       return true;
     } catch { return false; }
   },
+  undo: () => set(state => {
+    if (!state.historyPast.length || state.pendingPrevious) return state;
+    const combination = state.historyPast.at(-1)!;
+    const historyPast = state.historyPast.slice(0, -1);
+    const historyFuture = [...state.historyFuture, state.combination];
+    return { combination, historyPast, historyFuture, historyDepth: historyPast.length, canUndo: historyPast.length > 0, canRedo: true, loadState: 'loading', error: null, focus: null, exploded: false, cameraPreset: 'perspective' };
+  }),
+  redo: () => set(state => {
+    if (!state.historyFuture.length || state.pendingPrevious) return state;
+    const combination = state.historyFuture.at(-1)!;
+    const historyFuture = state.historyFuture.slice(0, -1);
+    const historyPast = [...state.historyPast, state.combination].slice(-50);
+    return { combination, historyPast, historyFuture, historyDepth: historyPast.length, canUndo: true, canRedo: historyFuture.length > 0, loadState: 'loading', error: null, focus: null, exploded: false, cameraPreset: 'perspective' };
+  }),
 }));
 
 export function currentSnapshot() {
@@ -107,6 +159,9 @@ export function currentSnapshot() {
     debugAxis: state.debugAxis,
     loadState: state.loadState,
     error: state.error,
+    canUndo: state.canUndo,
+    canRedo: state.canRedo,
+    historyDepth: state.historyDepth,
     startupNotice: state.startupNotice,
     testMode: state.testMode,
     activeRoots: 5,
