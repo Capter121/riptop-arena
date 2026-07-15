@@ -1,0 +1,497 @@
+{
+  "baseline_id": "v0.2.0-rc1-technical-baseline",
+  "baseline_status": "PROVISIONAL_NOT_FINAL",
+  "purpose": "Freeze digital geometry only for Phase 2C reproducibility",
+  "created_on": "2026-07-15",
+  "expires_on": "2026-08-14",
+  "source_model_commit": "bbf5bc11a9e2adf8eff472007e0fcc4f5e89c4b3",
+  "capture_commit": "9f5bc8864a59af0e11a7f87bc4d111783f76da9b",
+  "visual_review_status": "Phase 2B visual review deferred pending real reviewers",
+  "human_review_result": "INSUFFICIENT_REVIEWERS",
+  "waiver": {
+    "path": "reports/validation/phase2b-r1-provisional-review-waiver.csv",
+    "sha256": "8512e6dda0fb9301e2d3912768dfe5c09d1ca66eceef0617d5a5f77a99ce6a06",
+    "validation_report": "reports/validation/phase2c-waiver-validation.json",
+    "technical_continuation_status": "AUTHORIZED_WITH_CONDITIONS"
+  },
+  "interface": {
+    "id": "NSS-V1",
+    "status": "concept_only",
+    "path": "specs/interfaces.json",
+    "sha256": "5744cca158ed260cb4d5c46b57a5f4c306628ca5f932cb3f60347454caaa6e12"
+  },
+  "part_count": 16,
+  "parts": [
+    {
+      "part_id": "core_solar_wolf",
+      "part_type": "emblem_core",
+      "glb_path": "public/models/parts/core_solar_wolf.glb",
+      "spec_path": "specs/parts/core_solar_wolf.json",
+      "raw_sha256": "78407099c4a962a7d30f6a7a62009ca7f04c5e91487aa17899089143d8bd102c",
+      "semantic_fingerprint": "52e06b727ec452cb54853096b7cbf5dbd5ed5b75b8cb90bad118ad3e2ddfd6d5",
+      "spec_sha256": "9d0ca0e77090f2741f41773a9c95b67db96779dc7a933ad990c7394a0fb104ee",
+      "triangle_count": 960,
+      "material_count": 2,
+      "dimensions_mm": [
+        35.391056061,
+        35.172000885,
+        3.599999905
+      ],
+      "glb_size_bytes": 43888,
+      "mounts_present": [
+        "MOUNT_core_solar_wolf_BOTTOM",
+        "MOUNT_core_solar_wolf_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "core_void_falcon",
+      "part_type": "emblem_core",
+      "glb_path": "public/models/parts/core_void_falcon.glb",
+      "spec_path": "specs/parts/core_void_falcon.json",
+      "raw_sha256": "e2cf565e197dbb76ffb0f891a05ffb5120a3b7279022374f7cbc08dfa4921e1e",
+      "semantic_fingerprint": "4c1f3a390617c5dca52c5e011d8b0086c1815c9de246621a73ab0443f2696284",
+      "spec_sha256": "a563c151cb813d745296380a51b26a3629efbb97d0e1e1f64c86714215422113",
+      "triangle_count": 1648,
+      "material_count": 2,
+      "dimensions_mm": [
+        33.286975861,
+        24.700000763,
+        3.599999905
+      ],
+      "glb_size_bytes": 76528,
+      "mounts_present": [
+        "MOUNT_core_void_falcon_BOTTOM",
+        "MOUNT_core_void_falcon_TOP"
+      ],
+      "glb_reimport_mesh_count": 6,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "blade_storm_fang",
+      "part_type": "main_blade",
+      "glb_path": "public/models/parts/blade_storm_fang.glb",
+      "spec_path": "specs/parts/blade_storm_fang.json",
+      "raw_sha256": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac",
+      "semantic_fingerprint": "476eaf1adbf65244ffaaef4e571b9d26f3217e73923d20c8d81b2ec2b4469df1",
+      "spec_sha256": "4040eed138552d80e94b72bb2175ae8f8e9cbfff3c207d10546bd09f5961d4d0",
+      "triangle_count": 1056,
+      "material_count": 3,
+      "dimensions_mm": [
+        64.731658936,
+        66.860778809,
+        5.89943409
+      ],
+      "glb_size_bytes": 52436,
+      "mounts_present": [
+        "MOUNT_blade_storm_fang_BOTTOM",
+        "MOUNT_blade_storm_fang_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "blade_iron_bastion",
+      "part_type": "main_blade",
+      "glb_path": "public/models/parts/blade_iron_bastion.glb",
+      "spec_path": "specs/parts/blade_iron_bastion.json",
+      "raw_sha256": "339a70425692b8ff1acc185b580fb8a63a420965c6afb75ec2280ee83e546f57",
+      "semantic_fingerprint": "4e4043f994f124c03e689e8c9994312a1769b3163f196e582c015cb3138817cf",
+      "spec_sha256": "c1ae7a4cab5807a01b1b77907f92f9d128acc8aae3f3fad3bb1673c3f0bee8be",
+      "triangle_count": 2016,
+      "material_count": 3,
+      "dimensions_mm": [
+        70.0,
+        70.0,
+        5.400000095
+      ],
+      "glb_size_bytes": 84580,
+      "mounts_present": [
+        "MOUNT_blade_iron_bastion_BOTTOM",
+        "MOUNT_blade_iron_bastion_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "blade_orbit_halo",
+      "part_type": "main_blade",
+      "glb_path": "public/models/parts/blade_orbit_halo.glb",
+      "spec_path": "specs/parts/blade_orbit_halo.json",
+      "raw_sha256": "6283ea0689a3eebd46f3e9817fc67fe05e79e6ae54d116dc58ee7a8ae122908f",
+      "semantic_fingerprint": "2eb218ba71b0ced283dfea153d0eb867b96795ed20f9a75fa9b2e5cda70d2e39",
+      "spec_sha256": "cf2bcd18af892f51bb69466139fb2af5af9a56efb0dcbbb0a82a63796e074364",
+      "triangle_count": 2112,
+      "material_count": 3,
+      "dimensions_mm": [
+        70.623703003,
+        70.623703003,
+        4.400000095
+      ],
+      "glb_size_bytes": 100304,
+      "mounts_present": [
+        "MOUNT_blade_orbit_halo_BOTTOM",
+        "MOUNT_blade_orbit_halo_TOP"
+      ],
+      "glb_reimport_mesh_count": 10,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "blade_dual_comet",
+      "part_type": "main_blade",
+      "glb_path": "public/models/parts/blade_dual_comet.glb",
+      "spec_path": "specs/parts/blade_dual_comet.json",
+      "raw_sha256": "26da5bbaebde1dfc5c0dd1ee95b8023e05ad5fafd5799872173d1fc4e5dc498e",
+      "semantic_fingerprint": "dd78d04403755b22174a6325d0bd52d5bc747795a03ba766d85e7fce3211a2c9",
+      "spec_sha256": "106c72f2c2d043daaeffb4e944b2c8ebea14c6cbf5ca5c0aca53e6b39496c263",
+      "triangle_count": 1632,
+      "material_count": 3,
+      "dimensions_mm": [
+        64.535972595,
+        67.76109314,
+        5.185400486
+      ],
+      "glb_size_bytes": 72800,
+      "mounts_present": [
+        "MOUNT_blade_dual_comet_BOTTOM",
+        "MOUNT_blade_dual_comet_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "assist_heavy",
+      "part_type": "assist_ring",
+      "glb_path": "public/models/parts/assist_heavy.glb",
+      "spec_path": "specs/parts/assist_heavy.json",
+      "raw_sha256": "2825f5a0aece767364eabf59d61695312e8808a5c5060ff48d8428ff6b08f293",
+      "semantic_fingerprint": "91afc82fd9662adc3ba5679ea3c3f9d8f875a826a03843acafaf51ae3d4eebba",
+      "spec_sha256": "31e6211412e1336e6ff399e8ae5e1dad34da14f4e9cd670cf836967613c5188f",
+      "triangle_count": 1632,
+      "material_count": 2,
+      "dimensions_mm": [
+        68.400001526,
+        68.400001526,
+        3.400000095
+      ],
+      "glb_size_bytes": 68696,
+      "mounts_present": [
+        "MOUNT_assist_heavy_BOTTOM",
+        "MOUNT_assist_heavy_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "assist_guard",
+      "part_type": "assist_ring",
+      "glb_path": "public/models/parts/assist_guard.glb",
+      "spec_path": "specs/parts/assist_guard.json",
+      "raw_sha256": "68c526f7b27c0ed599a5a45a65fa8027b138e0003f18fa46ede878abbaaf307f",
+      "semantic_fingerprint": "ac123370014f3b658c864a94f750d0842dc3fe203cc078e904e99a60fe8d4c44",
+      "spec_sha256": "6207d7332ddd625a533a7a6a1705360e92950ff7cb72b97a712c557324231253",
+      "triangle_count": 1632,
+      "material_count": 2,
+      "dimensions_mm": [
+        68.0,
+        68.0,
+        3.199999809
+      ],
+      "glb_size_bytes": 65232,
+      "mounts_present": [
+        "MOUNT_assist_guard_BOTTOM",
+        "MOUNT_assist_guard_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "assist_air",
+      "part_type": "assist_ring",
+      "glb_path": "public/models/parts/assist_air.glb",
+      "spec_path": "specs/parts/assist_air.json",
+      "raw_sha256": "5d932424d3ebe1f597c96f77a63343075bcef48903064c00661b360b3ed2017d",
+      "semantic_fingerprint": "250363afd912900523fb524f82ecaa698831ceac4975f6c0921b473a68a0f5d5",
+      "spec_sha256": "1b80222cb56f7d742d36d867a91d8b44994dfd859f2c2305165d999bfada3fa6",
+      "triangle_count": 2160,
+      "material_count": 2,
+      "dimensions_mm": [
+        58.600002289,
+        55.081245422,
+        3.0
+      ],
+      "glb_size_bytes": 105784,
+      "mounts_present": [
+        "MOUNT_assist_air_BOTTOM",
+        "MOUNT_assist_air_TOP"
+      ],
+      "glb_reimport_mesh_count": 14,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "gear_low",
+      "part_type": "height_gear",
+      "glb_path": "public/models/parts/gear_low.glb",
+      "spec_path": "specs/parts/gear_low.json",
+      "raw_sha256": "c772a6bbcb4907f4c7805e3571fb3bdaa6a1b7b1ff45d3beddace6632e076b8a",
+      "semantic_fingerprint": "a9f397571c350d95600a48a1461d5f2aa8d1ed52d3d8be3858365e2496d25abe",
+      "spec_sha256": "7b1966d08315afd51a500cc91e6d217b880b9f71dc64f55681aba682e3d199c2",
+      "triangle_count": 960,
+      "material_count": 2,
+      "dimensions_mm": [
+        33.581401825,
+        33.581401825,
+        4.0
+      ],
+      "glb_size_bytes": 43812,
+      "mounts_present": [
+        "MOUNT_gear_low_BOTTOM",
+        "MOUNT_gear_low_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "gear_medium",
+      "part_type": "height_gear",
+      "glb_path": "public/models/parts/gear_medium.glb",
+      "spec_path": "specs/parts/gear_medium.json",
+      "raw_sha256": "947e5c49e87cf9d403dad970f26fa29893d6cded332ccb77a55132db4f900d3f",
+      "semantic_fingerprint": "0c09b65873d216e1007666be617f876e0703128e41449d1c0eec44b1d5834aa3",
+      "spec_sha256": "d11a1a4ace1f77fd7bfddc2ef12895b6a4ceca69e06878c89032e5cd35a54202",
+      "triangle_count": 2208,
+      "material_count": 2,
+      "dimensions_mm": [
+        33.967639923,
+        33.967639923,
+        5.0
+      ],
+      "glb_size_bytes": 96316,
+      "mounts_present": [
+        "MOUNT_gear_medium_BOTTOM",
+        "MOUNT_gear_medium_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "gear_high",
+      "part_type": "height_gear",
+      "glb_path": "public/models/parts/gear_high.glb",
+      "spec_path": "specs/parts/gear_high.json",
+      "raw_sha256": "704589efa2f82e723389ed427de25ac6df4ab9101f45f8fbe0900356796554f5",
+      "semantic_fingerprint": "b68002a2712f7b78254ec4a745481d706481b8fd3d4b1ca3d708cdaca06ca4fb",
+      "spec_sha256": "4e644210db922c012d96ffabd6097569b34597cbe528bbaf74e705071e0f6159",
+      "triangle_count": 2784,
+      "material_count": 2,
+      "dimensions_mm": [
+        34.400001526,
+        34.400001526,
+        6.0
+      ],
+      "glb_size_bytes": 113760,
+      "mounts_present": [
+        "MOUNT_gear_high_BOTTOM",
+        "MOUNT_gear_high_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "tip_flat_attack",
+      "part_type": "performance_tip",
+      "glb_path": "public/models/parts/tip_flat_attack.glb",
+      "spec_path": "specs/parts/tip_flat_attack.json",
+      "raw_sha256": "56bd25f90f6898dc3148cc5eb4c8c14741bd8b7ed71e77f6ffae64606b517629",
+      "semantic_fingerprint": "98974a705457d521ccde061b11d4ac17c3cb8b8ed51547cb173ac71125e0cce7",
+      "spec_sha256": "4baa9d2e19a06ad89ea0c81665e3678501b5c046c41af1eae0aaa2774b435674",
+      "triangle_count": 960,
+      "material_count": 2,
+      "dimensions_mm": [
+        21.400001526,
+        21.400001526,
+        7.039999962
+      ],
+      "glb_size_bytes": 47404,
+      "mounts_present": [
+        "MOUNT_tip_flat_attack_BOTTOM",
+        "MOUNT_tip_flat_attack_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "tip_ball_defense",
+      "part_type": "performance_tip",
+      "glb_path": "public/models/parts/tip_ball_defense.glb",
+      "spec_path": "specs/parts/tip_ball_defense.json",
+      "raw_sha256": "2aff6daee04a2a8c84a8765a1b82bdeaa697250d506d96dd3330b3b5a36bc1e7",
+      "semantic_fingerprint": "2bc43c3f0f677b4ea30cfaab50234f4a26a03e4dbd79101fa8a427f2baea7f80",
+      "spec_sha256": "c9158b065e3ceab5a3a96393069cd9b06aaed40893ce4ad96294afa99014d76f",
+      "triangle_count": 1248,
+      "material_count": 2,
+      "dimensions_mm": [
+        21.400001526,
+        21.400001526,
+        8.199999809
+      ],
+      "glb_size_bytes": 62220,
+      "mounts_present": [
+        "MOUNT_tip_ball_defense_BOTTOM",
+        "MOUNT_tip_ball_defense_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "tip_needle_stamina",
+      "part_type": "performance_tip",
+      "glb_path": "public/models/parts/tip_needle_stamina.glb",
+      "spec_path": "specs/parts/tip_needle_stamina.json",
+      "raw_sha256": "4a559c080f821587f197c1266db2d3b617b74eb34db5a462c43e3fe6e22223b2",
+      "semantic_fingerprint": "8c54a0c623968aaf3470fef8a27cb80f6dfe87de8d0e15c492317ab744ef6ccd",
+      "spec_sha256": "6e25d689c5d0e2a726f6846d2e09057c24b3a08b50b4fcb0942c568000bc5058",
+      "triangle_count": 1376,
+      "material_count": 2,
+      "dimensions_mm": [
+        21.400001526,
+        21.400001526,
+        9.000000954
+      ],
+      "glb_size_bytes": 69332,
+      "mounts_present": [
+        "MOUNT_tip_needle_stamina_BOTTOM",
+        "MOUNT_tip_needle_stamina_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    },
+    {
+      "part_id": "tip_taper_balance",
+      "part_type": "performance_tip",
+      "glb_path": "public/models/parts/tip_taper_balance.glb",
+      "spec_path": "specs/parts/tip_taper_balance.json",
+      "raw_sha256": "d2af25543415598e611deb826f766a217fd65954f3fe5fa7c5b7ca4359eb04b0",
+      "semantic_fingerprint": "e04d32d1af1a778862e4a4317bd6efea9192fff5e921b25110181b3d30b61760",
+      "spec_sha256": "2ef8d927558f3fd1280db2fdf5eaadcee419ff809e81c8ee7eaf78e6a88366fc",
+      "triangle_count": 1376,
+      "material_count": 2,
+      "dimensions_mm": [
+        21.400001526,
+        21.400001526,
+        8.5
+      ],
+      "glb_size_bytes": 69124,
+      "mounts_present": [
+        "MOUNT_tip_taper_balance_BOTTOM",
+        "MOUNT_tip_taper_balance_TOP"
+      ],
+      "glb_reimport_mesh_count": 2,
+      "collider_result": "PASS",
+      "collider_count": 1,
+      "gltf_validator_errors": 0,
+      "gltf_validator_warnings": 0
+    }
+  ],
+  "environment": {
+    "blender": {
+      "path": "D:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe",
+      "version": "4.5.11 LTS"
+    },
+    "gltf_validator_version": "2.0.0-dev.3.10",
+    "node_version": "v22.20.0",
+    "three_version": "0.185.1",
+    "playwright_version": "1.61.1"
+  },
+  "automatic_gates": {
+    "phase2a": {
+      "report": "reports/validation/phase2a-quality-gate.json",
+      "result": "PASS"
+    },
+    "phase2b": {
+      "report": "reports/validation/phase2b-quality-gate.json",
+      "result": "PASS"
+    },
+    "phase2b_r1": {
+      "report": "reports/validation/phase2b-r1-summary.json",
+      "result": "PASS"
+    },
+    "phase2b_r1_regression": {
+      "report": "reports/validation/phase2b-r1-regression.json",
+      "result": "PASS"
+    }
+  },
+  "unresolved_contact_review_count": 0,
+  "unconfirmed_binary_drift_count": 0,
+  "semantic_regression_count": 0,
+  "accepted_ux_compensation": [
+    "Assist selection uses light exploded separation",
+    "Blade becomes temporarily translucent during Assist focus",
+    "Selected Assist receives a temporary highlight",
+    "Gear selection uses a side-view focus",
+    "Tip selection uses a bottom or low camera view",
+    "The production preview hides coordinate axes by default"
+  ],
+  "freeze_rules": [
+    "Phase 2C must not modify visible part geometry",
+    "Phase 2C must not modify NSS-V1",
+    "Phase 2C must not silently update part specifications",
+    "Any baseline drift stops the combination matrix",
+    "Any geometry change requires a new visual-revision process",
+    "Phase 2C changes are limited to matrix, validators, reports, and test infrastructure"
+  ],
+  "claims": {
+    "production_release_allowed": false,
+    "manufacturing_approved": false,
+    "high_speed_battle_safety_approved": false,
+    "materials_certified": false,
+    "legal_originality_proven": false
+  },
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+}
