@@ -1,0 +1,218 @@
+{
+  "combination_count": 1,
+  "visual_review_status": "Phase 2B visual review deferred pending real reviewers",
+  "result": {
+    "combination_id": "nss-p2c-0001",
+    "core": "core_solar_wolf",
+    "blade": "blade_dual_comet",
+    "assist": "assist_air",
+    "gear": "gear_high",
+    "tip": "tip_ball_defense",
+    "result": "PASS",
+    "error_code": "",
+    "axis_error_mm": 0.0,
+    "datum_error_mm": 4.6566128730773926e-07,
+    "phase_error_deg": 0.0,
+    "unexpected_overlap_mm3": 0.0,
+    "total_height_mm": 26.80000034160912,
+    "total_diameter_mm": 67.76109710335732,
+    "triangle_count": 8784,
+    "material_count": 5,
+    "validation_duration_ms": 2.1035000099800527,
+    "connections": [
+      {
+        "from": "MOUNT_core_solar_wolf_BOTTOM",
+        "to": "MOUNT_blade_dual_comet_TOP",
+        "allowed_connection": [
+          "emblem_core.bottom",
+          "main_blade.top"
+        ],
+        "roles": [
+          "male",
+          "female"
+        ],
+        "axis_error_mm": 0.0,
+        "datum_error_mm": 2.3283064365386963e-07,
+        "phase_error_deg": 0.0
+      },
+      {
+        "from": "MOUNT_blade_dual_comet_BOTTOM",
+        "to": "MOUNT_assist_air_TOP",
+        "allowed_connection": [
+          "main_blade.bottom",
+          "assist_ring.top"
+        ],
+        "roles": [
+          "male",
+          "female"
+        ],
+        "axis_error_mm": 0.0,
+        "datum_error_mm": 4.6566128730773926e-07,
+        "phase_error_deg": 0.0
+      },
+      {
+        "from": "MOUNT_assist_air_BOTTOM",
+        "to": "MOUNT_gear_high_TOP",
+        "allowed_connection": [
+          "assist_ring.bottom",
+          "height_gear.top"
+        ],
+        "roles": [
+          "male",
+          "female"
+        ],
+        "axis_error_mm": 0.0,
+        "datum_error_mm": 0.0,
+        "phase_error_deg": 0.0
+      },
+      {
+        "from": "MOUNT_gear_high_BOTTOM",
+        "to": "MOUNT_tip_ball_defense_TOP",
+        "allowed_connection": [
+          "height_gear.bottom",
+          "performance_tip.top"
+        ],
+        "roles": [
+          "male",
+          "female"
+        ],
+        "axis_error_mm": 0.0,
+        "datum_error_mm": 0.0,
+        "phase_error_deg": 0.0
+      }
+    ],
+    "collisions": [
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "core",
+          "blade"
+        ],
+        "parts": [
+          "core_solar_wolf",
+          "blade_dual_comet"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "core",
+          "assist"
+        ],
+        "parts": [
+          "core_solar_wolf",
+          "assist_air"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "core",
+          "gear"
+        ],
+        "parts": [
+          "core_solar_wolf",
+          "gear_high"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "core",
+          "tip"
+        ],
+        "parts": [
+          "core_solar_wolf",
+          "tip_ball_defense"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "blade",
+          "assist"
+        ],
+        "parts": [
+          "blade_dual_comet",
+          "assist_air"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "blade",
+          "gear"
+        ],
+        "parts": [
+          "blade_dual_comet",
+          "gear_high"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "blade",
+          "tip"
+        ],
+        "parts": [
+          "blade_dual_comet",
+          "tip_ball_defense"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "assist",
+          "gear"
+        ],
+        "parts": [
+          "assist_air",
+          "gear_high"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "assist",
+          "tip"
+        ],
+        "parts": [
+          "assist_air",
+          "tip_ball_defense"
+        ]
+      },
+      {
+        "result": "PASS",
+        "stage": "AABB",
+        "overlap_volume_mm3": 0.0,
+        "roles": [
+          "gear",
+          "tip"
+        ],
+        "parts": [
+          "gear_high",
+          "tip_ball_defense"
+        ]
+      }
+    ]
+  },
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+}
