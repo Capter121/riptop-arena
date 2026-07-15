@@ -4,6 +4,9 @@ import {
   combinationId, combinationName, enumerateCombinations, families, familyParts, parseCombinationJson,
   randomCombination, serializeCombination, type Family,
 } from './domain';
+import {
+  addRecent, readLibrary, removeFavorite, setNickname as setLibraryNickname, toggleFavorite, writeLibrary,
+} from './library/localLibrary';
 import { CustomizerScene } from './Scene';
 import { captureScene } from './diagnostics';
 import { beginPartSwitch, markOnce } from './performance/marks';
@@ -36,8 +39,12 @@ export default function App() {
   const [notice, setNotice] = useState(state.startupNotice ?? '');
   const [shareOpen, setShareOpen] = useState(false);
   const [cardExporting, setCardExporting] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [library, setLibrary] = useState(readLibrary);
+  const [nickname, setNickname] = useState('');
   const importRef = useRef<HTMLInputElement>(null);
   const focusTimer = useRef<number | null>(null);
+  const lastRecentId = useRef<string | null>(null);
   const id = combinationId(state.combination);
   const attributes = useMemo(() => conceptAttributes(state.combination), [state.combination]);
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
@@ -47,6 +54,8 @@ export default function App() {
     new URL(window.location.href),
     import.meta.env.VITE_SHARE_BASE_URL,
   ), [state.combination]);
+  const currentLibraryEntry = [...library.favorites, ...library.recent].find(entry => entry.id === id);
+  const automaticName = combinationName(state.combination);
 
   useEffect(() => {
     markOnce('phase3b:shell-ready');
@@ -62,6 +71,23 @@ export default function App() {
     };
     return () => { if (focusTimer.current !== null) window.clearTimeout(focusTimer.current); };
   }, []);
+
+  useEffect(() => {
+    if (state.loadState !== 'ready' || lastRecentId.current === id) return;
+    lastRecentId.current = id;
+    setLibrary(current => {
+      const next = addRecent(current, state.combination);
+      if (!writeLibrary(next)) setNotice('Recent combinations could not be saved on this device.');
+      return next;
+    });
+  }, [id, state.combination, state.loadState]);
+
+  useEffect(() => { setNickname(currentLibraryEntry?.nickname ?? ''); }, [id, currentLibraryEntry?.nickname]);
+
+  const persistLibrary = (next: typeof library, success: string) => {
+    setLibrary(next);
+    setNotice(writeLibrary(next) ? success : 'Local library storage is unavailable. Your current combination is unchanged.');
+  };
 
   const choosePart = (partId: string) => {
     if (focusTimer.current !== null) window.clearTimeout(focusTimer.current);
@@ -142,7 +168,7 @@ export default function App() {
 
       <section className="control-deck">
         <div className="identity-row">
-          <div><span className="eyebrow">CURRENT COMBINATION</span><h2>{combinationName(state.combination)}</h2><code data-testid="combination-id">{id}</code></div>
+          <div><span className="eyebrow">CURRENT COMBINATION</span><h2>{currentLibraryEntry?.nickname ?? automaticName}</h2>{currentLibraryEntry?.nickname && <span className="automatic-name">{automaticName}</span>}<code data-testid="combination-id">{id}</code></div>
           <button className="primary" data-testid="explode" onClick={() => state.setExploded(!state.exploded)}>{state.exploded ? 'Assemble' : 'Explode'}</button>
         </div>
 
@@ -174,6 +200,7 @@ export default function App() {
               <button data-testid="import" onClick={() => importRef.current?.click()}>Import JSON</button>
               <button data-testid="share" onClick={() => setShareOpen(value => !value)}>Share</button>
               <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? 'Rendering card…' : 'Export PNG card'}</button>
+              <button data-testid="library" onClick={() => setLibraryOpen(value => !value)}>Library</button>
             </div>
             {shareOpen && (
               <section className="share-panel" aria-label="Share current combination">
@@ -184,6 +211,24 @@ export default function App() {
                 }}>Copy link</button>
                 <QrCodeView content={share.url} />
                 {share.deviceOnly && <p data-testid="share-device-warning">This local link works only on this device. Configure VITE_SHARE_BASE_URL for a shareable host.</p>}
+              </section>
+            )}
+            {libraryOpen && (
+              <section className="library-panel" aria-label="Local combination library">
+                <div className="library-editor">
+                  <input data-testid="nickname-input" aria-label="Combination nickname" maxLength={60} value={nickname} onChange={event => setNickname(event.target.value)} placeholder="Optional local nickname" />
+                  <button data-testid="save-nickname" onClick={() => persistLibrary(setLibraryNickname(library, id, nickname), 'Nickname saved locally.')}>Save nickname</button>
+                  <button data-testid="favorite-current" onClick={() => persistLibrary(toggleFavorite(library, state.combination), library.favorites.some(entry => entry.id === id) ? 'Favorite removed.' : 'Favorite saved locally.')}>{library.favorites.some(entry => entry.id === id) ? 'Unfavorite current' : 'Favorite current'}</button>
+                </div>
+                <h4>Favorites</h4>
+                <div className="library-list">
+                  {library.favorites.map(entry => <div key={entry.id}><button data-testid={`favorite-${entry.id}`} onClick={() => state.replaceCombination(entry.combination)}>{entry.nickname ?? combinationName(entry.combination)} <code>{entry.id}</code></button><button data-testid={`remove-favorite-${entry.id}`} aria-label={`Remove ${entry.id} favorite`} onClick={() => persistLibrary(removeFavorite(library, entry.id), 'Favorite removed.')}>×</button></div>)}
+                  {library.favorites.length === 0 && <p>No favorites yet.</p>}
+                </div>
+                <h4>Recent</h4>
+                <div className="library-list">
+                  {library.recent.map(entry => <div key={entry.id}><button data-testid={`recent-${entry.id}`} onClick={() => state.replaceCombination(entry.combination)}>{entry.nickname ?? combinationName(entry.combination)} <code>{entry.id}</code></button></div>)}
+                </div>
               </section>
             )}
             <input ref={importRef} data-testid="import-file" hidden type="file" accept="application/json,.json" onChange={event => importJson(event.target.files?.[0])} />
