@@ -258,19 +258,89 @@ def create_void_falcon(spec: dict, collection: bpy.types.Collection, materials: 
     return objects
 
 
+def create_heavy_assist(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
+    geometry = spec["geometry"]
+    segments = geometry["segments"]
+    bottom = -geometry["height_mm"] * MM * 0.5
+    top = geometry["height_mm"] * MM * 0.5
+    step_top = bottom + geometry["inner_step_height_mm"] * MM
+    shoulder_top = (step_top + top) * 0.5
+    rings = (
+        (geometry["inner_radius_mm"] * MM, step_top),
+        (geometry["inner_bearing_radius_mm"] * MM, step_top),
+        (geometry["band_inner_radius_mm"] * MM, shoulder_top),
+        (geometry["outer_radius_mm"] * MM, top),
+    )
+    vertices = []
+    for index in range(segments):
+        angle = math.tau * index / segments
+        for radius, ring_top in rings:
+            vertices.extend([
+                (radius * math.cos(angle), radius * math.sin(angle), bottom),
+                (radius * math.cos(angle), radius * math.sin(angle), ring_top),
+            ])
+    faces = []
+    material_indices = []
+    ring_count = len(rings)
+    for index in range(segments):
+        nxt = (index + 1) % segments
+        for ring in range(ring_count - 1):
+            lower = index * ring_count * 2 + ring * 2
+            upper = lower + 2
+            next_lower = nxt * ring_count * 2 + ring * 2
+            next_upper = next_lower + 2
+            faces.extend([
+                (lower + 1, upper + 1, next_upper + 1, next_lower + 1),
+                (lower, next_lower, next_upper, upper),
+            ])
+            material_indices.extend([0 if ring >= 2 else (1 if len(materials) > 1 else 0), 0])
+        inner = index * ring_count * 2
+        next_inner = nxt * ring_count * 2
+        outer = inner + (ring_count - 1) * 2
+        next_outer = next_inner + (ring_count - 1) * 2
+        faces.extend([(inner, inner + 1, next_inner + 1, next_inner), (outer, next_outer, next_outer + 1, outer + 1)])
+        material_indices.extend([1 if len(materials) > 1 else 0, 0])
+    mesh = bpy.data.meshes.new(f"GEO_{spec['id']}_BODY")
+    mesh.from_pydata(vertices, [], faces)
+    for material in materials:
+        mesh.materials.append(material)
+    for polygon, material_index in zip(mesh.polygons, material_indices):
+        polygon.material_index = material_index
+    mesh.validate(verbose=False)
+    mesh.update(calc_edges=True)
+    obj = bpy.data.objects.new(f"GEO_{spec['id']}_BODY", mesh)
+    collection.objects.link(obj)
+    obj["part_id"] = spec["id"]
+    obj["geometry_kind"] = geometry["kind"]
+    obj["profile_family"] = spec["profile_family"]
+    return [obj]
+
+
 def create_guard_assist(spec: dict, collection: bpy.types.Collection, materials: list[bpy.types.Material]) -> list[bpy.types.Object]:
     geometry = spec["geometry"]
     segments = geometry["segments"]
     inner_radius = geometry["inner_radius_mm"] * MM
     bearing_radius = geometry["inner_bearing_radius_mm"] * MM
     outer_radius = geometry["outer_radius_mm"] * MM
-    amplitude = geometry["shoulder_amplitude_mm"] * MM
+    recess_radius = geometry["recess_radius_mm"] * MM
     half_height = geometry["height_mm"] * MM * 0.5
+    cushion_count = geometry["cushion_count"]
+    unit_span = math.tau / cushion_count
+    groove_half = math.radians(geometry["groove_width_deg"]) * 0.5
+    transition_span = (unit_span * 0.5 - groove_half) * (1.0 - geometry["corner_roundness"]) + math.radians(2.0)
     vertices = []
     for index in range(segments):
         angle = math.tau * index / segments
-        shoulder = 0.5 - 0.5 * math.cos(geometry["shoulder_count"] * angle)
-        cushioned_radius = outer_radius - amplitude * shoulder
+        centered = (angle + unit_span * 0.5) % unit_span - unit_span * 0.5
+        distance_to_groove = unit_span * 0.5 - abs(centered)
+        if distance_to_groove <= groove_half:
+            cushioned_radius = recess_radius
+        elif distance_to_groove < groove_half + transition_span:
+            progress = (distance_to_groove - groove_half) / transition_span
+            smooth = progress * progress * (3.0 - 2.0 * progress)
+            cushioned_radius = recess_radius + (outer_radius - recess_radius) * smooth
+        else:
+            cushioned_radius = outer_radius
         for radius in (inner_radius, bearing_radius, cushioned_radius):
             vertices.extend([
                 (radius * math.cos(angle), radius * math.sin(angle), -half_height),
@@ -492,26 +562,54 @@ def create_dual_comet(spec: dict, collection: bpy.types.Collection, materials: l
     base_radius = geometry["base_radius_mm"] * MM
     attack_radius = geometry["attack_radius_mm"] * MM
     damper_radius = geometry["damper_radius_mm"] * MM
-    bottom = -geometry["height_mm"] * MM * 0.5
+    outer_floor = base_radius + 0.15 * MM
+    bottom = spec["mounts"]["bottom"]["position_mm"][2] * MM
+    attack_span = geometry["attack_span_deg"]
+    transition_span = geometry["transition_span_deg"] * 0.5
+    damper_span = geometry["damper_span_deg"]
+    unit_span = 360.0 / units
+
+    def local_contact(local_angle_deg: float) -> tuple[float, float, str]:
+        if local_angle_deg < attack_span:
+            progress = local_angle_deg / attack_span
+            smooth = progress * progress * (3.0 - 2.0 * progress)
+            return (
+                outer_floor + (attack_radius - outer_floor) * smooth,
+                bottom + (geometry["damper_height_mm"] +
+                          (geometry["attack_height_mm"] - geometry["damper_height_mm"]) * smooth) * MM,
+                "attack",
+            )
+        local_angle_deg -= attack_span
+        if local_angle_deg < transition_span:
+            progress = local_angle_deg / transition_span
+            smooth = progress * progress * (3.0 - 2.0 * progress)
+            return (
+                attack_radius + (outer_floor - attack_radius) * smooth,
+                bottom + (geometry["attack_height_mm"] +
+                          (geometry["damper_height_mm"] - geometry["attack_height_mm"]) * smooth) * MM,
+                "attack",
+            )
+        local_angle_deg -= transition_span
+        if local_angle_deg < damper_span:
+            progress = local_angle_deg / damper_span
+            rounded_arc = math.sin(math.pi * progress) ** 0.65
+            return (
+                outer_floor + (damper_radius - outer_floor) * rounded_arc,
+                bottom + geometry["damper_height_mm"] * MM,
+                "damper",
+            )
+        return outer_floor, bottom + geometry["damper_height_mm"] * MM, "damper"
 
     vertices = []
     contact_types = []
     for index in range(segments):
         angle = math.tau * index / segments + phase
-        unit_phase = ((angle - phase) / math.tau * units) % 1.0
-        if unit_phase < 0.42:
-            contact_phase = unit_phase / 0.42
-            attack = math.sin(math.pi * contact_phase) ** 1.35
-            radius = base_radius + 0.15 * MM + (attack_radius - base_radius - 0.15 * MM) * attack
-            top = (geometry["attack_height_mm"] * 0.5 + 0.35 * contact_phase) * MM
-            contact_types.append("attack")
-        else:
-            contact_phase = (unit_phase - 0.42) / 0.58
-            damper = math.sin(math.pi * contact_phase) ** 2
-            radius = base_radius + 0.15 * MM + (damper_radius - base_radius - 0.15 * MM) * damper
-            top = geometry["damper_height_mm"] * MM * 0.5
-            contact_types.append("damper")
-        for ring_radius, ring_top in ((inner_radius, top + 0.15 * MM), (base_radius, top), (radius, top)):
+        local_angle = (index * 360.0 / segments) % unit_span
+        radius, contact_top, contact_type = local_contact(local_angle)
+        contact_types.append(contact_type)
+        inner_top = bottom + geometry["inner_cap_height_mm"] * MM
+        base_top = bottom + geometry["damper_height_mm"] * MM
+        for ring_radius, ring_top in ((inner_radius, inner_top), (base_radius, base_top), (radius, contact_top)):
             vertices.extend([
                 (ring_radius * math.cos(angle), ring_radius * math.sin(angle), bottom),
                 (ring_radius * math.cos(angle), ring_radius * math.sin(angle), ring_top),
@@ -657,6 +755,8 @@ def create_part(spec: dict, collection: bpy.types.Collection, materials: list[bp
         return create_void_falcon(spec, collection, materials)
     if kind == "annular_ring" and spec.get("profile_family") == "guard_cushion_ring":
         return create_guard_assist(spec, collection, materials)
+    if kind == "annular_ring" and spec.get("profile_family") == "heavy_continuous_mass_band":
+        return create_heavy_assist(spec, collection, materials)
     if kind == "annular_ring" and spec.get("profile_family") == "air_truss_windows":
         return create_air_assist(spec, collection, materials)
     if kind == "radial_gear" and spec.get("profile_family") == "medium_chevron_rib":

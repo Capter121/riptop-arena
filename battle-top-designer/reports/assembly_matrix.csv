@@ -1,10 +1,10 @@
 assembly_id,core,blade,assist,gear,tip,result,error_code,axis_error_mm,phase_error_deg,unexpected_overlap_mm3,total_height_mm,total_diameter_mm
-assembly_phase2a_dual_comet,core_solar_wolf,blade_dual_comet,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,24.04000167734921,68.81877034902573
+assembly_phase2a_dual_comet,core_solar_wolf,blade_dual_comet,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,24.04000167734921,70.0293481349945
 assembly_phase2a_iron_bastion,core_solar_wolf,blade_iron_bastion,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,70.00000029802322
 assembly_phase2a_orbit_halo,core_solar_wolf,blade_orbit_halo,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.64000235684216,70.62370330095291
-assembly_phase2a_storm_fang,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,66.86078011989594
+assembly_phase2a_storm_fang,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,69.5539154112339
 assembly_phase2b_assist_air,core_solar_wolf,blade_storm_fang,assist_air,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.54000066407025,66.86078011989594
-assembly_phase2b_assist_guard,core_solar_wolf,blade_storm_fang,assist_guard,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.740000324323773,66.86078011989594
+assembly_phase2b_assist_guard,core_solar_wolf,blade_storm_fang,assist_guard,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.740000324323773,69.35391575098038
 assembly_phase2b_attack_representative,core_void_falcon,blade_storm_fang,assist_air,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.54000066407025,66.86078011989594
 assembly_phase2b_balance_representative,core_void_falcon,blade_dual_comet,assist_heavy,gear_medium,tip_taper_balance,PASS,,9.313225746154785e-07,0.0,0.0,26.500000851228833,68.81877034902573
 assembly_phase2b_core_void_falcon,core_void_falcon,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,66.86078011989594
@@ -15,4 +15,4 @@ assembly_phase2b_stamina_representative,core_solar_wolf,blade_orbit_halo,assist_
 assembly_phase2b_tip_ball_defense,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_ball_defense,PASS,,4.6566128730773926e-07,0.0,0.0,25.10000136680901,66.86078011989594
 assembly_phase2b_tip_needle_stamina,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_needle_stamina,PASS,,4.6566128730773926e-07,0.0,0.0,25.90000187046826,66.86078011989594
 assembly_phase2b_tip_taper_balance,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_taper_balance,PASS,,4.6566128730773926e-07,0.0,0.0,25.400000857189298,66.86078011989594
-assembly_storm_attack,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,66.86078011989594
+assembly_storm_attack,core_solar_wolf,blade_storm_fang,assist_heavy,gear_low,tip_flat_attack,PASS,,4.6566128730773926e-07,0.0,0.0,23.940001847222447,69.5539154112339

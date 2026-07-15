@@ -100,8 +100,8 @@
   "phase_error_deg": 0.0,
   "total_height_mm": 23.64000235684216,
   "total_diameter_mm": 70.62370330095291,
-  "triangle_count": 6048,
-  "glb_file_size_bytes": 270540,
+  "triangle_count": 6624,
+  "glb_file_size_bytes": 291324,
   "glb_reimport_mesh_count": 18,
   "glb_reimport_collider_count": 0,
   "connections": [

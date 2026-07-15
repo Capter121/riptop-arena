@@ -34,6 +34,7 @@
         "orbit_halo_streamline",
         "dual_comet_alternating",
         "void_falcon_split_arc",
+        "heavy_continuous_mass_band",
         "guard_cushion_ring",
         "air_truss_windows",
         "medium_chevron_rib",
@@ -117,6 +118,10 @@
         "damper_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
         "attack_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
         "damper_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+        "inner_cap_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+        "attack_span_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 },
+        "damper_span_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 },
+        "transition_span_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 },
         "attack_slope_deg": { "type": "number", "minimum": -80, "maximum": 80 },
         "damper_arc_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 },
         "arc_count": { "type": "integer", "minimum": 2, "maximum": 16 },
@@ -125,7 +130,13 @@
         "phase_offset_deg": { "type": "number", "minimum": -180, "maximum": 180 },
         "shoulder_count": { "type": "integer", "minimum": 2, "maximum": 32 },
         "shoulder_amplitude_mm": { "type": "number", "minimum": 0, "maximum": 5 },
+        "cushion_count": { "type": "integer", "minimum": 6, "maximum": 8 },
+        "recess_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 50 },
+        "groove_width_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
+        "corner_roundness": { "type": "number", "minimum": 0, "maximum": 1 },
         "inner_bearing_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 45 },
+        "band_inner_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 45 },
+        "inner_step_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 30 },
         "bridge_width_deg": { "type": "number", "exclusiveMinimum": 0, "maximum": 120 },
         "chevron_count": { "type": "integer", "minimum": 3, "maximum": 32 },
         "waist_radius_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 45 },
@@ -250,7 +261,27 @@
       "then": {
         "properties": {
           "geometry": {
-            "required": ["unit_count", "attack_radius_mm", "damper_radius_mm", "attack_height_mm", "damper_height_mm", "attack_slope_deg", "damper_arc_deg"]
+            "required": ["unit_count", "attack_radius_mm", "damper_radius_mm", "attack_height_mm", "damper_height_mm", "inner_cap_height_mm", "attack_span_deg", "damper_span_deg", "transition_span_deg"]
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "profile_family": { "const": "guard_cushion_ring" } }, "required": ["profile_family"] },
+      "then": {
+        "properties": {
+          "geometry": {
+            "required": ["cushion_count", "recess_radius_mm", "groove_width_deg", "corner_roundness", "inner_bearing_radius_mm"]
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "profile_family": { "const": "heavy_continuous_mass_band" } }, "required": ["profile_family"] },
+      "then": {
+        "properties": {
+          "geometry": {
+            "required": ["inner_bearing_radius_mm", "band_inner_radius_mm", "inner_step_height_mm"]
           }
         }
       }

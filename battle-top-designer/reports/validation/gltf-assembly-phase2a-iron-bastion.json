@@ -2,7 +2,7 @@
   "uri": "assembly_phase2a_iron_bastion.glb",
   "mimeType": "model/gltf-binary",
   "validatorVersion": "2.0.0-dev.3.10",
-  "validatedAt": "2026-07-14T15:59:18.256Z",
+  "validatedAt": "2026-07-15T03:04:33.129Z",
   "issues": {
     "numErrors": 0,
     "numWarnings": 0,
@@ -19,7 +19,7 @@
         "pointer": "/buffers/0",
         "mimeType": "application/gltf-buffer",
         "storage": "glb",
-        "byteLength": 236640
+        "byteLength": 257376
       }
     ],
     "animationCount": 0,
@@ -29,8 +29,8 @@
     "hasTextures": false,
     "hasDefaultScene": true,
     "drawCallCount": 16,
-    "totalVertexCount": 8882,
-    "totalTriangleCount": 5952,
+    "totalVertexCount": 9602,
+    "totalTriangleCount": 6528,
     "maxUVs": 0,
     "maxInfluences": 0,
     "maxAttributes": 2

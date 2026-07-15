@@ -28,6 +28,7 @@ PHASE2A_FIXTURES = {
 }
 PHASE2B_PARTS = {
     "core_void_falcon": "void_falcon_split_arc",
+    "assist_heavy": "heavy_continuous_mass_band",
     "assist_guard": "guard_cushion_ring",
     "assist_air": "air_truss_windows",
     "gear_medium": "medium_chevron_rib",
@@ -214,6 +215,16 @@ def semantic_errors(
                     add(source, "$.geometry.blade_count", "must equal unit_count * 2")
                 if geometry.get("attack_radius_mm", 0) <= geometry.get("damper_radius_mm", 0):
                     add(source, "$.geometry", "attack radius must be greater than damper radius")
+                if geometry.get("attack_height_mm", 0) <= geometry.get("damper_height_mm", 0):
+                    add(source, "$.geometry", "attack height must be greater than damper height")
+                if geometry.get("damper_height_mm", 0) <= geometry.get("inner_cap_height_mm", 0):
+                    add(source, "$.geometry", "damper height must be greater than inner cap height")
+                span = sum(geometry.get(key, 0) for key in ("attack_span_deg", "damper_span_deg", "transition_span_deg"))
+                expected_span = 360.0 / geometry.get("unit_count", 1)
+                if abs(span - expected_span) > 1e-6:
+                    add(source, "$.geometry", "contact spans must fill exactly one repeated unit")
+                if geometry.get("segments", 0) % geometry.get("unit_count", 1) != 0:
+                    add(source, "$.geometry.segments", "must be divisible by unit_count")
 
         if part_id in PHASE2B_PARTS:
             expected_profile = PHASE2B_PARTS[part_id]
@@ -222,6 +233,18 @@ def semantic_errors(
                 add(source, "$.profile_family", f"{part_id} requires {expected_profile}")
             if part.get("interface_id") != "NSS-V1":
                 add(source, "$.interface_id", "Phase 2B parts must use NSS-V1")
+            if part_id == "assist_heavy":
+                geometry = part.get("geometry", {})
+                if not geometry.get("inner_radius_mm", 0) < geometry.get("inner_bearing_radius_mm", 0) < geometry.get("band_inner_radius_mm", 0) < geometry.get("outer_radius_mm", 0):
+                    add(source, "$.geometry", "Heavy Assist radii must increase from interface bore to mass band")
+                if geometry.get("inner_step_height_mm", 0) >= geometry.get("height_mm", 0):
+                    add(source, "$.geometry.inner_step_height_mm", "must be lower than the full sidewall height")
+            if part_id == "assist_guard":
+                geometry = part.get("geometry", {})
+                if geometry.get("cushion_count") not in (6, 8):
+                    add(source, "$.geometry.cushion_count", "Guard Assist requires 6 or 8 cushions")
+                if geometry.get("recess_radius_mm", 0) >= geometry.get("outer_radius_mm", 0):
+                    add(source, "$.geometry.recess_radius_mm", "must be smaller than outer_radius_mm")
 
     expected_types = {
         "core": "emblem_core",

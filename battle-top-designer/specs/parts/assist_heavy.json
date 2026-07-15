@@ -5,19 +5,21 @@
   "part_type": "assist_ring",
   "interface_id": "NSS-V1",
   "spin_direction": "right",
+  "profile_family": "heavy_continuous_mass_band",
   "dimensions": {
-    "outer_radius_mm": 31.0,
+    "outer_radius_mm": 34.2,
     "inner_radius_mm": 10.8,
     "height_mm": 3.4
   },
   "geometry": {
     "kind": "annular_ring",
     "segments": 72,
-    "outer_radius_mm": 31.0,
+    "outer_radius_mm": 34.2,
     "inner_radius_mm": 10.8,
     "height_mm": 3.4,
-    "node_count": 6,
-    "roundness": 0.9,
+    "inner_bearing_radius_mm": 20.0,
+    "band_inner_radius_mm": 29.0,
+    "inner_step_height_mm": 2.4,
     "phase_deg": 0.0
   },
   "mounts": {

@@ -2,7 +2,7 @@
   "uri": "assist_heavy.glb",
   "mimeType": "model/gltf-binary",
   "validatorVersion": "2.0.0-dev.3.10",
-  "validatedAt": "2026-07-14T16:01:34.749Z",
+  "validatedAt": "2026-07-15T03:04:17.716Z",
   "issues": {
     "numErrors": 0,
     "numWarnings": 0,
@@ -19,7 +19,7 @@
         "pointer": "/buffers/0",
         "mimeType": "application/gltf-buffer",
         "storage": "glb",
-        "byteLength": 44352
+        "byteLength": 65088
       }
     ],
     "animationCount": 0,
@@ -29,8 +29,8 @@
     "hasTextures": false,
     "hasDefaultScene": true,
     "drawCallCount": 3,
-    "totalVertexCount": 1584,
-    "totalTriangleCount": 1056,
+    "totalVertexCount": 2304,
+    "totalTriangleCount": 1632,
     "maxUVs": 0,
     "maxInfluences": 0,
     "maxAttributes": 2

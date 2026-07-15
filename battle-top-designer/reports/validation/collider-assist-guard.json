@@ -11,7 +11,7 @@
       "boundary_edges": 0,
       "zero_area_faces": 0,
       "duplicate_vertices": 0,
-      "signed_volume_m3": 1.7843974431075056e-05,
+      "signed_volume_m3": 2.2218245186292435e-05,
       "normals_outward": true,
       "export_exclude": true,
       "hidden_render": true,

@@ -1,0 +1,58 @@
+{
+  "status": "Phase 2B-R1 awaiting visual re-review",
+  "reviewer_count_required": {
+    "minimum": 3,
+    "maximum": 5
+  },
+  "allowed_results": [
+    "PASS",
+    "LOCAL_REVISION",
+    "REDESIGN",
+    "NOT_VISIBLE",
+    "NEEDS_COMPARISON",
+    "UX_COMPENSATION"
+  ],
+  "items": [
+    {
+      "item": "Dual Comet三组双重节奏是否清楚",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    },
+    {
+      "item": "Dual Comet正常观看距离的视觉对称性",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    },
+    {
+      "item": "Heavy连续质量带在装配后是否足够可见",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    },
+    {
+      "item": "Guard分段缓冲块与Heavy是否立即可区分",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    },
+    {
+      "item": "Air未修改后的同族辨识度是否保持",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    },
+    {
+      "item": "Assist聚焦模式是否足以补偿装配遮挡",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    },
+    {
+      "item": "Iron Bastion与Dual Comet轮廓区分",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    },
+    {
+      "item": "参考产品视觉距离与原创性人工判断",
+      "result": "NEEDS_COMPARISON",
+      "reviewer_notes": []
+    }
+  ],
+  "automatic_checks_do_not_replace_human_aesthetic_review": true
+}

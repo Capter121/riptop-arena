@@ -9,24 +9,26 @@
   "dimensions": {
     "outer_radius_mm": 36.0,
     "inner_radius_mm": 10.8,
-    "height_mm": 5.0
+    "height_mm": 5.2
   },
   "geometry": {
     "kind": "radial_blade",
     "segments": 96,
     "blade_count": 6,
-    "base_radius_mm": 28.0,
+    "base_radius_mm": 27.5,
     "outer_radius_mm": 36.0,
     "inner_radius_mm": 10.8,
-    "height_mm": 5.0,
+    "height_mm": 5.2,
     "contact_profile": "alternating",
     "unit_count": 3,
     "attack_radius_mm": 36.0,
-    "damper_radius_mm": 33.0,
-    "attack_height_mm": 5.0,
-    "damper_height_mm": 4.4,
-    "attack_slope_deg": 24.0,
-    "damper_arc_deg": 38.0,
+    "damper_radius_mm": 32.5,
+    "attack_height_mm": 5.2,
+    "damper_height_mm": 3.9,
+    "inner_cap_height_mm": 3.2,
+    "attack_span_deg": 28.0,
+    "damper_span_deg": 62.0,
+    "transition_span_deg": 30.0,
     "phase_deg": 0.0
   },
   "mounts": {

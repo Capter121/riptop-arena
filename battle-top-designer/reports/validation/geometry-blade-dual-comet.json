@@ -5,7 +5,7 @@
   "mesh_count": 2,
   "triangle_count": 1632,
   "material_count": 3,
-  "glb_file_size_bytes": 73228,
+  "glb_file_size_bytes": 72800,
   "mounts_present": [
     "MOUNT_blade_dual_comet_BOTTOM",
     "MOUNT_blade_dual_comet_TOP"
@@ -21,7 +21,7 @@
       "duplicate_vertices": 0,
       "loose_vertices": 0,
       "zero_area_faces": 0,
-      "signed_volume_m3": 1.3704601737774766e-05,
+      "signed_volume_m3": 9.897526886937705e-06,
       "scale_applied": true,
       "rotation_applied": true
     },

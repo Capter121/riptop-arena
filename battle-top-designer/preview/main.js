@@ -23,6 +23,9 @@ const models = {
   assembly_phase2b_defense_representative: '../public/models/assemblies/assembly_phase2b_defense_representative.glb',
   assembly_phase2b_stamina_representative: '../public/models/assemblies/assembly_phase2b_stamina_representative.glb',
   assembly_phase2b_balance_representative: '../public/models/assemblies/assembly_phase2b_balance_representative.glb',
+  assembly_phase2b_r1_assist_heavy: '../public/models/assemblies/assembly_storm_attack.glb',
+  assembly_phase2b_r1_assist_guard: '../public/models/assemblies/assembly_phase2b_assist_guard.glb',
+  assembly_phase2b_r1_assist_air: '../public/models/assemblies/assembly_phase2b_assist_air.glb',
 };
 const viewport = document.querySelector('#viewport');
 const select = document.querySelector('#model-select');
@@ -44,10 +47,23 @@ controls.enableDamping = false;
 controls.target.set(0, 0, 0);
 controls.saveState();
 scene.add(new THREE.HemisphereLight(0xcfe2ff, 0x172033, 2.2));
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 const key = new THREE.DirectionalLight(0xffffff, 3.2); key.position.set(0.08, -0.1, 0.12); scene.add(key);
-scene.add(new THREE.AxesHelper(0.045));
+const fill = new THREE.DirectionalLight(0xbfd7ff, 1.1); fill.position.set(-0.08, 0.06, 0.08); scene.add(fill);
 const loader = new GLTFLoader();
 let currentModel = null;
+let focusState = null;
+let highlightTimer = null;
+let lastRestoreError = 0;
+
+function partMeshes(prefix) {
+  const meshes = [];
+  currentModel?.traverse(object => {
+    const partId = object.userData?.part_id || object.name;
+    if (object.isMesh && String(partId).includes(prefix)) meshes.push(object);
+  });
+  return meshes;
+}
 
 function snapshot() {
   const materials = new Set();
@@ -78,6 +94,15 @@ function snapshot() {
       missingNormalMeshes,
       drawCalls: renderer.info.render.calls,
     },
+    focus: focusState ? {
+      state: focusState.active ? 'focused' : 'assembled',
+      assistOffsetMm: focusState.assistMeshes.map((mesh, index) => (mesh.position.y - focusState.assistPositions[index].y) * 1000),
+      bladeOpacity: focusState.bladeMeshes.flatMap(mesh => (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map(material => material.opacity)),
+      bladeDepthWrite: focusState.bladeMeshes.flatMap(mesh => (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map(material => material.depthWrite)),
+      highlightActive: focusState.highlightActive,
+      lastRestoreError,
+    } : null,
+    axesHelperCount: scene.children.filter(object => object.type === 'AxesHelper').length,
   };
 }
 
@@ -87,8 +112,74 @@ function resetCamera() {
   controls.update();
 }
 
+function restoreAssembly() {
+  if (!focusState) return;
+  if (highlightTimer) clearTimeout(highlightTimer);
+  focusState.assistMeshes.forEach((mesh, index) => {
+    mesh.position.copy(focusState.assistPositions[index]);
+    mesh.material = focusState.assistMaterials[index];
+  });
+  focusState.bladeMeshes.forEach((mesh, index) => { mesh.material = focusState.bladeMaterials[index]; });
+  lastRestoreError = Math.max(0, ...focusState.assistMeshes.map((mesh, index) => mesh.position.distanceTo(focusState.assistPositions[index])));
+  focusState.active = false;
+  focusState.highlightActive = false;
+  resetCamera();
+}
+
+function focusAssist() {
+  if (focusState?.active) restoreAssembly();
+  const assistMeshes = partMeshes('assist_');
+  const bladeMeshes = partMeshes('blade_');
+  if (!assistMeshes.length || !bladeMeshes.length) throw new Error('Assist focus requires an assembled fixture');
+  focusState = {
+    active: true,
+    highlightActive: true,
+    assistMeshes,
+    bladeMeshes,
+    assistPositions: assistMeshes.map(mesh => mesh.position.clone()),
+    assistMaterials: assistMeshes.map(mesh => mesh.material),
+    bladeMaterials: bladeMeshes.map(mesh => mesh.material),
+  };
+  assistMeshes.forEach(mesh => {
+    mesh.position.y += 0.006;
+    const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    const focused = source.map(material => {
+      const clone = material.clone();
+      clone.emissive?.set(0xffa62b);
+      clone.emissiveIntensity = 1.3;
+      return clone;
+    });
+    mesh.material = Array.isArray(mesh.material) ? focused : focused[0];
+  });
+  bladeMeshes.forEach(mesh => {
+    const source = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    const faded = source.map(material => {
+      const clone = material.clone();
+      clone.transparent = true;
+      clone.opacity = 0.22;
+      clone.depthWrite = false;
+      return clone;
+    });
+    mesh.material = Array.isArray(mesh.material) ? faded : faded[0];
+  });
+  camera.position.set(0.085, 0.085, 0.07);
+  controls.target.set(0, 0, 0);
+  controls.update();
+  highlightTimer = setTimeout(() => {
+    assistMeshes.forEach(mesh => {
+      for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+        material.emissive?.set(0x000000);
+        material.emissiveIntensity = 0;
+      }
+    });
+    focusState.highlightActive = false;
+  }, 800);
+}
+
 async function loadModel(id) {
   status.textContent = 'Loading'; status.dataset.state = 'loading';
+  if (highlightTimer) clearTimeout(highlightTimer);
+  focusState = null;
   if (currentModel) scene.remove(currentModel);
   const gltf = await loader.loadAsync(models[id]);
   currentModel = gltf.scene;
@@ -97,12 +188,15 @@ async function loadModel(id) {
   scene.add(currentModel);
   modelId.textContent = id;
   status.textContent = 'Ready'; status.dataset.state = 'ready';
+  if (id.startsWith('assembly_phase2b_r1_assist_')) focusAssist();
 }
 
 select.addEventListener('change', () => loadModel(select.value).catch(showError));
 document.querySelector('#reset-camera').addEventListener('click', resetCamera);
+document.querySelector('#focus-assist').addEventListener('click', () => { try { focusAssist(); } catch (error) { showError(error); } });
+document.querySelector('#restore-assembly').addEventListener('click', restoreAssembly);
 function showError(error) { status.textContent = error.message; status.dataset.state = 'error'; console.error(error); }
-window.__NSS_PREVIEW__ = { snapshot, resetCamera, loadModel };
+window.__NSS_PREVIEW__ = { snapshot, resetCamera, loadModel, focusAssist, restoreAssembly };
 await loadModel(select.value).catch(showError);
 window.addEventListener('resize', () => {
   const width = viewport.clientWidth;

@@ -1,0 +1,202 @@
+{
+  "result": "PASS",
+  "three_version": "0.185.1",
+  "fixtures": [
+    {
+      "model_id": "assembly_phase2b_r1_assist_heavy",
+      "result": "PASS",
+      "focused": {
+        "state": "focused",
+        "assistOffsetMm": [
+          6,
+          6,
+          6
+        ],
+        "bladeOpacity": [
+          0.22,
+          0.22,
+          0.22,
+          0.22
+        ],
+        "bladeDepthWrite": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "highlightActive": true,
+        "lastRestoreError": 0
+      },
+      "restored": {
+        "state": "assembled",
+        "assistOffsetMm": [
+          0,
+          0,
+          0
+        ],
+        "bladeOpacity": [
+          1,
+          0.7200000286102295,
+          1,
+          1
+        ],
+        "bladeDepthWrite": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "highlightActive": false,
+        "lastRestoreError": 0
+      },
+      "canvas": {
+        "width": 670,
+        "height": 638
+      },
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_r1_assist_guard",
+      "result": "PASS",
+      "focused": {
+        "state": "focused",
+        "assistOffsetMm": [
+          6,
+          6,
+          6
+        ],
+        "bladeOpacity": [
+          0.22,
+          0.22,
+          0.22,
+          0.22
+        ],
+        "bladeDepthWrite": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "highlightActive": true,
+        "lastRestoreError": 0
+      },
+      "restored": {
+        "state": "assembled",
+        "assistOffsetMm": [
+          0,
+          0,
+          0
+        ],
+        "bladeOpacity": [
+          1,
+          0.7200000286102295,
+          1,
+          1
+        ],
+        "bladeDepthWrite": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "highlightActive": false,
+        "lastRestoreError": 0
+      },
+      "canvas": {
+        "width": 670,
+        "height": 638
+      },
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_r1_assist_air",
+      "result": "PASS",
+      "focused": {
+        "state": "focused",
+        "assistOffsetMm": [
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6
+        ],
+        "bladeOpacity": [
+          0.22,
+          0.22,
+          0.22,
+          0.22
+        ],
+        "bladeDepthWrite": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "highlightActive": true,
+        "lastRestoreError": 0
+      },
+      "restored": {
+        "state": "assembled",
+        "assistOffsetMm": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "bladeOpacity": [
+          1,
+          0.7200000286102295,
+          1,
+          1
+        ],
+        "bladeDepthWrite": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "highlightActive": false,
+        "lastRestoreError": 0
+      },
+      "canvas": {
+        "width": 670,
+        "height": 638
+      },
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    }
+  ]
+}

@@ -5,7 +5,7 @@
   "mesh_count": 2,
   "triangle_count": 1632,
   "material_count": 2,
-  "glb_file_size_bytes": 65236,
+  "glb_file_size_bytes": 65232,
   "mounts_present": [
     "MOUNT_assist_guard_BOTTOM",
     "MOUNT_assist_guard_TOP"
@@ -21,7 +21,7 @@
       "duplicate_vertices": 0,
       "loose_vertices": 0,
       "zero_area_faces": 0,
-      "signed_volume_m3": 7.632954368902719e-06,
+      "signed_volume_m3": 9.737326518962652e-06,
       "scale_applied": true,
       "rotation_applied": true
     },

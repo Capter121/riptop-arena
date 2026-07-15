@@ -1,0 +1,16 @@
+{
+  "result": "PASS",
+  "source": "reports/renders/phase2b-r1/dual-comet/metrics/dual_comet_symmetry_2048_silhouette.png",
+  "resolution": [
+    2048,
+    2048
+  ],
+  "ortho_scale_mm": 84.0,
+  "silhouette_centroid_offset_mm": 8.3e-05,
+  "rotational_similarity_120_deg": 0.995781,
+  "rotational_similarity_240_deg": 0.995767,
+  "thresholds": {
+    "centroid_offset_max_mm": 0.25,
+    "rotational_similarity_min": 0.97
+  }
+}
