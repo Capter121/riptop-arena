@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "combination_count": 288,
+  "pair_check_count": 2880,
+  "fail_count": 0,
+  "contact_review_count": 0,
+  "maximum_overlap_mm3": 0.0,
+  "affected_combinations": [],
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+}

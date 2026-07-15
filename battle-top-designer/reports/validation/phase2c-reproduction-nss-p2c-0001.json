@@ -18,7 +18,7 @@
     "total_diameter_mm": 67.76109710335732,
     "triangle_count": 8784,
     "material_count": 5,
-    "validation_duration_ms": 2.1035000099800527,
+    "validation_duration_ms": 3.4238999942317605,
     "connections": [
       {
         "from": "MOUNT_core_solar_wolf_BOTTOM",

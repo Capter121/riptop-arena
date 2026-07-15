@@ -6,8 +6,15 @@ $Tag = "v0.2.0-rc1-technical-baseline"
 $AuditNote = "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
 
 function Invoke-Logged([string]$Executable, [string[]]$Arguments, [string]$Name) {
-    & $Executable @Arguments 2>&1 | Tee-Object -FilePath (Join-Path $LogDir $Name)
-    if ($LASTEXITCODE -ne 0) { throw "$Name failed with exit code $LASTEXITCODE" }
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $Executable @Arguments 2>&1 | Tee-Object -FilePath (Join-Path $LogDir $Name)
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    if ($exitCode -ne 0) { throw "$Name failed with exit code $exitCode" }
 }
 
 if (-not (Test-Path -LiteralPath $Blender -PathType Leaf)) { throw "Blender 4.5.11 was not found: $Blender" }

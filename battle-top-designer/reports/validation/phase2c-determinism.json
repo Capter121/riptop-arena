@@ -1,0 +1,7 @@
+{
+  "result": "PASS",
+  "expected_digest": "2bebf2dcc52efe75304a79b1cba68e9d635d4d290a64a67826b5092467ff7eba",
+  "actual_digest": "2bebf2dcc52efe75304a79b1cba68e9d635d4d290a64a67826b5092467ff7eba",
+  "combination_count": 288,
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+}

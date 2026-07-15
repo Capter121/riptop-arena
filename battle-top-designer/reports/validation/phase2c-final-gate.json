@@ -1,0 +1,29 @@
+{
+  "result": "PASS",
+  "technical_status": "Phase 2C technical validation PASS under provisional waiver",
+  "visual_review_status": "Phase 2B visual review deferred pending real reviewers",
+  "baseline_id": "v0.2.0-rc1-technical-baseline",
+  "baseline_status": "PROVISIONAL_NOT_FINAL",
+  "errors": [],
+  "combination_count": 288,
+  "pass_count": 288,
+  "contact_review_count": 0,
+  "fail_count": 0,
+  "metrics": {
+    "maximum_axis_error_mm": 0.0,
+    "maximum_datum_error_mm": 9.313225746154785e-07,
+    "maximum_phase_error_deg": 0.0,
+    "maximum_overlap_mm3": 0.0,
+    "minimum_height_mm": 23.24000117368996,
+    "maximum_height_mm": 28.00000016577542,
+    "minimum_diameter_mm": 66.86078011989594,
+    "maximum_diameter_mm": 70.62370330095291,
+    "maximum_triangle_count": 10080,
+    "maximum_material_count": 5,
+    "total_validation_duration_ms": 734.2940996168181
+  },
+  "normalized_digest": "2bebf2dcc52efe75304a79b1cba68e9d635d4d290a64a67826b5092467ff7eba",
+  "human_visual_review_pending": true,
+  "production_release_allowed": false,
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+}
