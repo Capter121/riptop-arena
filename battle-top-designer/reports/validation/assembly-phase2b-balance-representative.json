@@ -1,0 +1,153 @@
+{
+  "assembly_id": "assembly_phase2b_balance_representative",
+  "result": "PASS",
+  "errors": [],
+  "collision_count": 0,
+  "contact_review_count": 0,
+  "collisions": [
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "core",
+        "blade"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "core",
+        "assist"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "core",
+        "gear"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "core",
+        "tip"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "blade",
+        "assist"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "blade",
+        "gear"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "blade",
+        "tip"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "assist",
+        "gear"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "assist",
+        "tip"
+      ]
+    },
+    {
+      "result": "PASS",
+      "stage": "AABB",
+      "overlap_volume_mm3": 0.0,
+      "parts": [
+        "gear",
+        "tip"
+      ]
+    }
+  ],
+  "axis_error_mm": 9.313225746154785e-07,
+  "phase_error_deg": 0.0,
+  "total_height_mm": 26.500000851228833,
+  "total_diameter_mm": 68.81877034902573,
+  "triangle_count": 7920,
+  "glb_file_size_bytes": 351184,
+  "glb_reimport_mesh_count": 14,
+  "glb_reimport_collider_count": 0,
+  "connections": [
+    {
+      "from": "MOUNT_core_void_falcon_BOTTOM",
+      "to": "MOUNT_blade_dual_comet_TOP",
+      "axis_error_mm": 0.0,
+      "datum_error_mm": 2.3283064365386963e-07,
+      "phase_error_deg": 0.0,
+      "roles": [
+        "male",
+        "female"
+      ]
+    },
+    {
+      "from": "MOUNT_blade_dual_comet_BOTTOM",
+      "to": "MOUNT_assist_heavy_TOP",
+      "axis_error_mm": 0.0,
+      "datum_error_mm": 4.6566128730773926e-07,
+      "phase_error_deg": 0.0,
+      "roles": [
+        "male",
+        "female"
+      ]
+    },
+    {
+      "from": "MOUNT_assist_heavy_BOTTOM",
+      "to": "MOUNT_gear_medium_TOP",
+      "axis_error_mm": 0.0,
+      "datum_error_mm": 9.313225746154785e-07,
+      "phase_error_deg": 0.0,
+      "roles": [
+        "male",
+        "female"
+      ]
+    },
+    {
+      "from": "MOUNT_gear_medium_BOTTOM",
+      "to": "MOUNT_tip_taper_balance_TOP",
+      "axis_error_mm": 0.0,
+      "datum_error_mm": 0.0,
+      "phase_error_deg": 0.0,
+      "roles": [
+        "male",
+        "female"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "baseline": "v0.2.0-phase2a-approved",
+  "binary_drifts": [],
+  "disposition": null,
+  "errors": [],
+  "glb_unchanged": true,
+  "raw_sha256": {
+    "public/models/assemblies/assembly_phase2a_dual_comet.glb": "f41761ab0653df522ce163de7cb3e50fba8d1cf86bd72dd73b99654308bb4437",
+    "public/models/assemblies/assembly_phase2a_iron_bastion.glb": "a37466f341ab450d232fe452a2bd2b178b3abffeabb20ab00d0fb4134cd74ba4",
+    "public/models/assemblies/assembly_phase2a_orbit_halo.glb": "35e94f11e3d1603c8a5fbc68cd8e1c5a99f81b2971fa95fa4759b937f4f742d3",
+    "public/models/assemblies/assembly_phase2a_storm_fang.glb": "254f77c95ffa69f54c065e1017c1fdccc8dc558bcb0d5a73ee62da6e9a10b06f",
+    "public/models/assemblies/assembly_storm_attack.glb": "52357cb7847dd12c919446fcbd9b57d125e2b99e5adf184f061e4948c0d821b7",
+    "public/models/parts/assist_heavy.glb": "44949136aeb7c1e1e219575c6798595d2fb0b584b346eb116b4ce33e12b8be70",
+    "public/models/parts/blade_dual_comet.glb": "5f48110aeec076f552a4f11d6800e7a369ef170f13555a6a27cd82a744f07e20",
+    "public/models/parts/blade_iron_bastion.glb": "339a70425692b8ff1acc185b580fb8a63a420965c6afb75ec2280ee83e546f57",
+    "public/models/parts/blade_orbit_halo.glb": "6283ea0689a3eebd46f3e9817fc67fe05e79e6ae54d116dc58ee7a8ae122908f",
+    "public/models/parts/blade_storm_fang.glb": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac",
+    "public/models/parts/core_solar_wolf.glb": "78407099c4a962a7d30f6a7a62009ca7f04c5e91487aa17899089143d8bd102c",
+    "public/models/parts/gear_low.glb": "c772a6bbcb4907f4c7805e3571fb3bdaa6a1b7b1ff45d3beddace6632e076b8a",
+    "public/models/parts/tip_flat_attack.glb": "56bd25f90f6898dc3148cc5eb4c8c14741bd8b7ed71e77f6ffae64606b517629"
+  },
+  "result": "PASS",
+  "semantic_fingerprint": {
+    "public/models/assemblies/assembly_phase2a_dual_comet.glb": "e9af6f78769d666556a21e8faa75bf29ed088497867f500e14036079a60c6e71",
+    "public/models/assemblies/assembly_phase2a_iron_bastion.glb": "098bee109f0de7ee4555925067899fffcdc3e8abd9590b2288e6449fd1f90d50",
+    "public/models/assemblies/assembly_phase2a_orbit_halo.glb": "f7b2cf18d0713f95f9e8b48b9b37bae213710953d49fbe64448a3a1f9676a3f4",
+    "public/models/assemblies/assembly_phase2a_storm_fang.glb": "db4d2f55d3556f0c99ecbca5ef2dfa7a4125dc9d57d326a357c37c8dd3f97fc7",
+    "public/models/assemblies/assembly_storm_attack.glb": "dc54d195ff6628585591e3fab8327b08d4a32c6d0d841f4560fd7028397c3d68",
+    "public/models/parts/assist_heavy.glb": "ad9876a939375dbd2f8f57d4c59a08280400e6f30305e7aa76389d8aa1c53e5f",
+    "public/models/parts/blade_dual_comet.glb": "a05b93d88efeb4b22a6ed8f3423bce236061533e48e9587852c9b703d21620f2",
+    "public/models/parts/blade_iron_bastion.glb": "4e4043f994f124c03e689e8c9994312a1769b3163f196e582c015cb3138817cf",
+    "public/models/parts/blade_orbit_halo.glb": "2eb218ba71b0ced283dfea153d0eb867b96795ed20f9a75fa9b2e5cda70d2e39",
+    "public/models/parts/blade_storm_fang.glb": "476eaf1adbf65244ffaaef4e571b9d26f3217e73923d20c8d81b2ec2b4469df1",
+    "public/models/parts/core_solar_wolf.glb": "52e06b727ec452cb54853096b7cbf5dbd5ed5b75b8cb90bad118ad3e2ddfd6d5",
+    "public/models/parts/gear_low.glb": "a9f397571c350d95600a48a1461d5f2aa8d1ed52d3d8be3858365e2496d25abe",
+    "public/models/parts/tip_flat_attack.glb": "98974a705457d521ccde061b11d4ac17c3cb8b8ed51547cb173ac71125e0cce7"
+  },
+  "source_commit": "c8e73436906edb85c07b44b6adfc433172a1b9c2"
+}

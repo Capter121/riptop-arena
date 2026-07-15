@@ -3,8 +3,11 @@ import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const models = [
+  'blade_storm_fang', 'blade_iron_bastion', 'blade_orbit_halo', 'blade_dual_comet',
   'core_void_falcon', 'assist_guard', 'assist_air', 'gear_medium', 'gear_high',
   'tip_ball_defense', 'tip_needle_stamina', 'tip_taper_balance',
+  'assembly_phase2b_attack_representative', 'assembly_phase2b_defense_representative',
+  'assembly_phase2b_stamina_representative', 'assembly_phase2b_balance_representative',
 ];
 const { test, expect } = playwrightTest;
 const results = [];
@@ -16,10 +19,14 @@ test.afterAll(async () => {
 
 for (const model of models) {
   test(`${model} offline preview controls`, async ({ page }) => {
-    const errors = { console: [], page: [], requests: [] };
+    const errors = { console: [], page: [], requests: [], external: [] };
     page.on('console', message => { if (message.type() === 'error') errors.console.push(message.text()); });
     page.on('pageerror', error => errors.page.push(error.message));
     page.on('requestfailed', request => errors.requests.push(request.url()));
+    page.on('request', request => {
+      const url = new URL(request.url());
+      if (!['127.0.0.1', 'localhost'].includes(url.hostname)) errors.external.push(request.url());
+    });
     await page.goto('/preview/');
     await page.selectOption('#model-select', model);
     await page.waitForFunction(() => document.querySelector('#load-status')?.dataset.state === 'ready');
@@ -43,7 +50,7 @@ for (const model of models) {
     const reset = await page.evaluate(() => window.__NSS_PREVIEW__.snapshot());
     const resetError = Math.hypot(reset.camera[0] - 0.09, reset.camera[1] + 0.09, reset.camera[2] - 0.075, ...reset.target);
     expect(resetError).toBeLessThan(1e-6);
-    expect(errors).toEqual({ console: [], page: [], requests: [] });
+    expect(errors).toEqual({ console: [], page: [], requests: [], external: [] });
     await page.screenshot({ path: resolve(`../reports/renders/preview_${model}.png`), fullPage: true });
     results.push({ model_id: model, canvas: reset.canvas, rotation_changed: true, zoom_changed: true, reset_error: resetError, errors });
   });

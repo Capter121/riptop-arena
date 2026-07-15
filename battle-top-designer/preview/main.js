@@ -15,6 +15,10 @@ const models = {
   tip_ball_defense: '../public/models/parts/tip_ball_defense.glb',
   tip_needle_stamina: '../public/models/parts/tip_needle_stamina.glb',
   tip_taper_balance: '../public/models/parts/tip_taper_balance.glb',
+  assembly_phase2b_attack_representative: '../public/models/assemblies/assembly_phase2b_attack_representative.glb',
+  assembly_phase2b_defense_representative: '../public/models/assemblies/assembly_phase2b_defense_representative.glb',
+  assembly_phase2b_stamina_representative: '../public/models/assemblies/assembly_phase2b_stamina_representative.glb',
+  assembly_phase2b_balance_representative: '../public/models/assemblies/assembly_phase2b_balance_representative.glb',
 };
 const viewport = document.querySelector('#viewport');
 const select = document.querySelector('#model-select');

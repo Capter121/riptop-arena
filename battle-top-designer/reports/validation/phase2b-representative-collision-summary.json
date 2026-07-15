@@ -1,0 +1,37 @@
+﻿{
+    "result":  "PASS",
+    "fixture_count":  4,
+    "fail_count":  0,
+    "collision_count":  0,
+    "unresolved_contact_review_count":  0,
+    "fixtures":  [
+                     {
+                         "assembly_id":  "assembly_phase2b_attack_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_defense_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_stamina_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_balance_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     }
+                 ]
+}

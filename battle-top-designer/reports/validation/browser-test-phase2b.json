@@ -2,6 +2,70 @@
   "result": "PASS",
   "models": [
     {
+      "model_id": "blade_storm_fang",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "blade_iron_bastion",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "blade_orbit_halo",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "blade_dual_comet",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
       "model_id": "core_void_falcon",
       "canvas": {
         "width": 1118,
@@ -13,7 +77,8 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
       }
     },
     {
@@ -28,7 +93,8 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
       }
     },
     {
@@ -43,7 +109,8 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
       }
     },
     {
@@ -58,7 +125,8 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
       }
     },
     {
@@ -73,7 +141,8 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
       }
     },
     {
@@ -88,7 +157,8 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
       }
     },
     {
@@ -103,7 +173,8 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
       }
     },
     {
@@ -118,7 +189,72 @@
       "errors": {
         "console": [],
         "page": [],
-        "requests": []
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_attack_representative",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_defense_representative",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_stamina_representative",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
+      }
+    },
+    {
+      "model_id": "assembly_phase2b_balance_representative",
+      "canvas": {
+        "width": 1118,
+        "height": 638
+      },
+      "rotation_changed": true,
+      "zoom_changed": true,
+      "reset_error": 1.3877787807814457e-17,
+      "errors": {
+        "console": [],
+        "page": [],
+        "requests": [],
+        "external": []
       }
     }
   ]

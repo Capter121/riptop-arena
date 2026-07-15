@@ -1,0 +1,17 @@
+﻿{
+    "result":  "PASS",
+    "scope":  "phase2b_representatives",
+    "parts_tested":  0,
+    "assemblies_tested":  4,
+    "fail_count":  0,
+    "unresolved_contact_review_count":  0,
+    "collision_count":  0,
+    "unconfirmed_binary_drift_count":  0,
+    "semantic_regression_count":  0,
+    "gltf_validator_errors":  0,
+    "gltf_validator_warnings":  0,
+    "playwright_failures":  0,
+    "silhouette_pair_count":  0,
+    "approved_baseline_result":  "PASS",
+    "storm_attack_regression_result":  "PASS"
+}

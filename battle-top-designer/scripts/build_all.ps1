@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression")]
+    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BRepresentative")]
     [string]$Scope = "VerticalSlice"
 )
 
@@ -9,6 +9,12 @@ $LogDir = Join-Path $ProjectRoot "build\logs"
 $VerticalParts = @("core_solar_wolf", "blade_storm_fang", "assist_heavy", "gear_low", "tip_flat_attack")
 $Phase2AParts = @("core_solar_wolf", "blade_storm_fang", "blade_iron_bastion", "blade_orbit_halo", "blade_dual_comet", "assist_heavy", "gear_low", "tip_flat_attack")
 $Phase2AAssemblies = @("assembly_phase2a_storm_fang", "assembly_phase2a_iron_bastion", "assembly_phase2a_orbit_halo", "assembly_phase2a_dual_comet")
+$Phase2BRepresentativeAssemblies = @(
+    "assembly_phase2b_attack_representative",
+    "assembly_phase2b_defense_representative",
+    "assembly_phase2b_stamina_representative",
+    "assembly_phase2b_balance_representative"
+)
 
 function Find-Blender {
     $candidates = @(
@@ -36,9 +42,9 @@ $Blender = Find-Blender
 Write-Host "NSS_BLENDER=$Blender"
 Push-Location $ProjectRoot
 try {
-    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } else { $VerticalParts }
-    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } else { @("assembly_storm_attack") }
-    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } else { "vertical_slice" }
+    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BRepresentative") { @() } else { $VerticalParts }
+    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BRepresentative") { $Phase2BRepresentativeAssemblies } else { @("assembly_storm_attack") }
+    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BRepresentative") { "phase2b" } else { "vertical_slice" }
     Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", $SpecScope) "build-specs.log"
     foreach ($part in $Parts) {
         Invoke-Logged $Blender @("--background", "--python", "blender\generate_parts.py", "--", "--part", $part) "generate-$part.log"

@@ -12,22 +12,32 @@
 <body>
   <main>
     <header>
-      <div><span class="eyebrow">NSS-V1 / PHASE 2A</span><h1>Main Blade Preview</h1></div>
+      <div><span class="eyebrow">NSS-V1 / PHASE 2B</span><h1>Quality Gate Preview</h1></div>
       <div class="controls">
-        <label for="model-select">Blade</label>
+        <label for="model-select">Model</label>
         <select id="model-select">
-          <option value="blade_storm_fang">Storm Fang</option>
-          <option value="blade_iron_bastion">Iron Bastion</option>
-          <option value="blade_orbit_halo">Orbit Halo</option>
-          <option value="blade_dual_comet">Dual Comet</option>
-          <option value="core_void_falcon">Void Falcon Core</option>
-          <option value="assist_guard">Guard Assist</option>
-          <option value="assist_air">Air Assist</option>
-          <option value="gear_medium">Medium Gear</option>
-          <option value="gear_high">High Gear</option>
-          <option value="tip_ball_defense">Ball Defense Tip</option>
-          <option value="tip_needle_stamina">Needle Stamina Tip</option>
-          <option value="tip_taper_balance">Taper Balance Tip</option>
+          <optgroup label="Main Blades">
+            <option value="blade_storm_fang">Storm Fang</option>
+            <option value="blade_iron_bastion">Iron Bastion</option>
+            <option value="blade_orbit_halo">Orbit Halo</option>
+            <option value="blade_dual_comet">Dual Comet</option>
+          </optgroup>
+          <optgroup label="Phase 2B Parts">
+            <option value="core_void_falcon">Void Falcon Core</option>
+            <option value="assist_guard">Guard Assist</option>
+            <option value="assist_air">Air Assist</option>
+            <option value="gear_medium">Medium Gear</option>
+            <option value="gear_high">High Gear</option>
+            <option value="tip_ball_defense">Ball Defense Tip</option>
+            <option value="tip_needle_stamina">Needle Stamina Tip</option>
+            <option value="tip_taper_balance">Taper Balance Tip</option>
+          </optgroup>
+          <optgroup label="Representative Assemblies">
+            <option value="assembly_phase2b_attack_representative">Attack Representative</option>
+            <option value="assembly_phase2b_defense_representative">Defense Representative</option>
+            <option value="assembly_phase2b_stamina_representative">Stamina Representative</option>
+            <option value="assembly_phase2b_balance_representative">Balance Representative</option>
+          </optgroup>
         </select>
         <button id="reset-camera" type="button">Reset</button>
       </div>
