@@ -5,8 +5,10 @@ import {
   randomCombination, serializeCombination, type Family,
 } from './domain';
 import { CustomizerScene } from './Scene';
+import { captureScene } from './diagnostics';
 import { beginPartSwitch, markOnce } from './performance/marks';
 import { createShareLink } from './sharing/combinationUrl';
+import { renderCombinationCard } from './sharing/cardRenderer';
 import { QrCodeView } from './sharing/QrCodeView';
 import { copyShareLink } from './sharing/shareLink';
 import { currentSnapshot, useCustomizer } from './store';
@@ -33,6 +35,7 @@ export default function App() {
   const state = useCustomizer();
   const [notice, setNotice] = useState(state.startupNotice ?? '');
   const [shareOpen, setShareOpen] = useState(false);
+  const [cardExporting, setCardExporting] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
   const focusTimer = useRef<number | null>(null);
   const id = combinationId(state.combination);
@@ -85,6 +88,32 @@ export default function App() {
     if (!file) return;
     try { state.replaceCombination(parseCombinationJson(await file.text())); setNotice('Combination imported.'); }
     catch (error) { setNotice(error instanceof Error ? error.message : 'Import failed.'); }
+  };
+
+  const exportCard = async () => {
+    if (cardExporting) return;
+    setCardExporting(true);
+    try {
+      const capture = await captureScene(720, 630);
+      const blob = await renderCombinationCard({
+        combination: state.combination,
+        shareUrl: share.url,
+        sceneWidth: capture.width,
+        sceneHeight: capture.height,
+        pixels: capture.pixels,
+      });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${id}.png`;
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      setNotice('Combination card exported.');
+    } catch (error) {
+      setNotice(error instanceof Error ? `Card export failed: ${error.message} Retry when the model is ready.` : 'Card export failed. Retry when the model is ready.');
+    } finally {
+      setCardExporting(false);
+    }
   };
 
   return (
@@ -144,6 +173,7 @@ export default function App() {
               <button data-testid="export" onClick={exportJson}>Export JSON</button>
               <button data-testid="import" onClick={() => importRef.current?.click()}>Import JSON</button>
               <button data-testid="share" onClick={() => setShareOpen(value => !value)}>Share</button>
+              <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? 'Rendering card…' : 'Export PNG card'}</button>
             </div>
             {shareOpen && (
               <section className="share-panel" aria-label="Share current combination">

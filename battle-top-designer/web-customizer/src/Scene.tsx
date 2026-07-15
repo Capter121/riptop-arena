@@ -1,10 +1,10 @@
 import { OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Color, Group, Matrix4, Mesh, Object3D, Vector3 } from 'three';
+import { Color, Group, Matrix4, Mesh, Object3D, PerspectiveCamera, Vector3, WebGLRenderTarget } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { assembleMatrices } from './assembly';
-import { updateCamera, updatePermanentMatrices } from './diagnostics';
+import { registerSceneCapture, updateCamera, updatePermanentMatrices } from './diagnostics';
 import { endPartSwitch, markOnce } from './performance/marks';
 import { families, presentationOffsets, type Combination, type Family } from './domain';
 import { useCustomizer } from './store';
@@ -17,6 +17,38 @@ const cameraPositions = {
 };
 const target = new Vector3(0, -0.012, 0);
 markOnce('phase3b:scene-runtime-loaded');
+
+function CaptureBridge() {
+  const { camera, gl, scene } = useThree();
+  useEffect(() => {
+    registerSceneCapture(async (width, height) => {
+      const target = new WebGLRenderTarget(width, height, { depthBuffer: true });
+      const previousTarget = gl.getRenderTarget();
+      const perspective = camera instanceof PerspectiveCamera ? camera : null;
+      const previousAspect = perspective?.aspect;
+      try {
+        if (perspective) {
+          perspective.aspect = width / height;
+          perspective.updateProjectionMatrix();
+        }
+        gl.setRenderTarget(target);
+        gl.render(scene, camera);
+        const pixels = new Uint8Array(width * height * 4);
+        gl.readRenderTargetPixels(target, 0, 0, width, height, pixels);
+        return { width, height, pixels };
+      } finally {
+        gl.setRenderTarget(previousTarget);
+        if (perspective && previousAspect !== undefined) {
+          perspective.aspect = previousAspect;
+          perspective.updateProjectionMatrix();
+        }
+        target.dispose();
+      }
+    });
+    return () => registerSceneCapture(null);
+  }, [camera, gl, scene]);
+  return null;
+}
 
 function CameraRig() {
   const preset = useCustomizer(state => state.cameraPreset);
@@ -165,6 +197,7 @@ export function CustomizerScene({ combination }: { combination: Combination }) {
       <Suspense fallback={<LoadingSignal />}>
         <Assembly combination={combination} onReady={ready} />
       </Suspense>
+      <CaptureBridge />
       <CameraRig />
     </Canvas>
   );
