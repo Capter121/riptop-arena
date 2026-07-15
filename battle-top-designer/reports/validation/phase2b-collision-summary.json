@@ -1,0 +1,96 @@
+﻿{
+    "result":  "PASS",
+    "unique_proxy_part_count":  16,
+    "single_variable_fixture_count":  8,
+    "representative_fixture_count":  4,
+    "fixture_count":  12,
+    "fail_count":  0,
+    "collision_count":  0,
+    "unresolved_contact_review_count":  0,
+    "fixtures":  [
+                     {
+                         "assembly_id":  "assembly_phase2b_core_void_falcon",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_assist_guard",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_assist_air",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_gear_medium",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_gear_high",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_tip_ball_defense",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_tip_needle_stamina",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_tip_taper_balance",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_attack_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_defense_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_stamina_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     },
+                     {
+                         "assembly_id":  "assembly_phase2b_balance_representative",
+                         "result":  "PASS",
+                         "collision_count":  0,
+                         "contact_review_count":  0,
+                         "unexpected_overlap_mm3":  0
+                     }
+                 ]
+}

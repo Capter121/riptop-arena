@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "status": "Phase 2B awaiting visual review",
+  "phase2b_start": "06ef7d7880de1e6b1845995856082b375714c722",
+  "nss_v1_and_blade_spec_diff": [],
+  "new_part_glb_count": 8,
+  "phase2b_assembly_glb_count": 12,
+  "cartesian_product_executed": false,
+  "full_288_matrix_executed": false,
+  "three_js_license_present": true,
+  "forbidden_claim_hits": [],
+  "summary_status_matches": true
+}

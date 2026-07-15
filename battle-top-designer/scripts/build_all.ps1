@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BRepresentative")]
+    [ValidateSet("VerticalSlice", "Phase2A", "StormAttackRegression", "Phase2BRepresentative", "Phase2B")]
     [string]$Scope = "VerticalSlice"
 )
 
@@ -14,6 +14,15 @@ $Phase2BRepresentativeAssemblies = @(
     "assembly_phase2b_defense_representative",
     "assembly_phase2b_stamina_representative",
     "assembly_phase2b_balance_representative"
+)
+$Phase2BParts = @(
+    "core_void_falcon", "assist_guard", "assist_air", "gear_medium", "gear_high",
+    "tip_ball_defense", "tip_needle_stamina", "tip_taper_balance"
+)
+$Phase2BSingleAssemblies = @(
+    "assembly_phase2b_core_void_falcon", "assembly_phase2b_assist_guard", "assembly_phase2b_assist_air",
+    "assembly_phase2b_gear_medium", "assembly_phase2b_gear_high", "assembly_phase2b_tip_ball_defense",
+    "assembly_phase2b_tip_needle_stamina", "assembly_phase2b_tip_taper_balance"
 )
 
 function Find-Blender {
@@ -42,9 +51,9 @@ $Blender = Find-Blender
 Write-Host "NSS_BLENDER=$Blender"
 Push-Location $ProjectRoot
 try {
-    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BRepresentative") { @() } else { $VerticalParts }
-    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BRepresentative") { $Phase2BRepresentativeAssemblies } else { @("assembly_storm_attack") }
-    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -eq "Phase2BRepresentative") { "phase2b" } else { "vertical_slice" }
+    $Parts = if ($Scope -eq "Phase2A") { $Phase2AParts } elseif ($Scope -eq "Phase2BRepresentative") { @() } elseif ($Scope -eq "Phase2B") { $Phase2BParts } else { $VerticalParts }
+    $Assemblies = if ($Scope -eq "Phase2A") { $Phase2AAssemblies } elseif ($Scope -eq "Phase2BRepresentative") { $Phase2BRepresentativeAssemblies } elseif ($Scope -eq "Phase2B") { $Phase2BSingleAssemblies + $Phase2BRepresentativeAssemblies } else { @("assembly_storm_attack") }
+    $SpecScope = if ($Scope -eq "Phase2A") { "phase2a" } elseif ($Scope -in @("Phase2BRepresentative", "Phase2B")) { "phase2b" } else { "vertical_slice" }
     Invoke-Logged "python" @("scripts\validate_specs.py", "--scope", $SpecScope) "build-specs.log"
     foreach ($part in $Parts) {
         Invoke-Logged $Blender @("--background", "--python", "blender\generate_parts.py", "--", "--part", $part) "generate-$part.log"
@@ -56,6 +65,17 @@ try {
         Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "phase2a_all_blades") "render-phase2a-all-blades.log"
         Invoke-Logged "python" @("scripts\make_contact_sheets.py", "--scope", "phase2a") "build-contact-sheets.log"
         Invoke-Logged "python" @("scripts\analyze_silhouettes.py", "--input", "reports\renders", "--output", "reports\validation\blade-silhouette-overlap.json") "analyze-silhouettes.log"
+    } elseif ($Scope -eq "Phase2B") {
+        Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "core_void_falcon") "render-phase2b-core.log"
+        Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "phase2b_all_assists") "render-phase2b-assists.log"
+        Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "phase2b_all_gears") "render-phase2b-gears.log"
+        Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "phase2b_all_tips") "render-phase2b-tips.log"
+        foreach ($part in $Phase2BParts) {
+            Invoke-Logged "python" @("scripts\make_contact_sheets.py", "--target", $part) "contact-$part.log"
+        }
+        Invoke-Logged "python" @("scripts\analyze_phase2b_visuals.py", "--family", "assist") "analyze-assists.log"
+        Invoke-Logged "python" @("scripts\analyze_phase2b_visuals.py", "--family", "gear") "analyze-gears.log"
+        Invoke-Logged "python" @("scripts\analyze_phase2b_visuals.py", "--family", "tip") "analyze-tips.log"
     } elseif ($Scope -eq "VerticalSlice") {
         Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "blade_storm_fang") "render-blade_storm_fang.log"
         Invoke-Logged $Blender @("--background", "--python", "blender\render_catalog.py", "--", "--target", "assembly_storm_attack") "render-assembly_storm_attack.log"

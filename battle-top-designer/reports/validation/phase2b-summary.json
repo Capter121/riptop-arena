@@ -1,0 +1,294 @@
+{
+  "status": "Phase 2B awaiting visual review",
+  "interface_id": "NSS-V1",
+  "quality_gate": {
+    "result": "PASS",
+    "scope": "phase2b",
+    "parts_tested": 16,
+    "assemblies_tested": 12,
+    "fail_count": 0,
+    "unresolved_contact_review_count": 0,
+    "collision_count": 0,
+    "unconfirmed_binary_drift_count": 0,
+    "semantic_regression_count": 0,
+    "gltf_validator_errors": 0,
+    "gltf_validator_warnings": 0,
+    "playwright_failures": 0,
+    "silhouette_pair_count": 18,
+    "approved_baseline_result": "PASS",
+    "storm_attack_regression_result": "PASS"
+  },
+  "counts": {
+    "new_parts": 8,
+    "assemblies": 12,
+    "approved_baseline_glbs": 13,
+    "preview_targets": 16,
+    "unique_collision_proxies": 16
+  },
+  "new_parts": [
+    {
+      "id": "core_void_falcon",
+      "dimensions_mm": {
+        "diameter": 35.0,
+        "height": 3.6
+      },
+      "triangle_count": 1648,
+      "material_count": 2,
+      "glb_file_size_bytes": 76528,
+      "raw_sha256": "e2cf565e197dbb76ffb0f891a05ffb5120a3b7279022374f7cbc08dfa4921e1e"
+    },
+    {
+      "id": "assist_guard",
+      "dimensions_mm": {
+        "diameter": 61.0,
+        "height": 3.2
+      },
+      "triangle_count": 1632,
+      "material_count": 2,
+      "glb_file_size_bytes": 65236,
+      "raw_sha256": "342bacfab0753031b46fe4896d9d3fb24cbdef1fd83f432e71dea2c9405a94ff"
+    },
+    {
+      "id": "assist_air",
+      "dimensions_mm": {
+        "diameter": 59.0,
+        "height": 3.0
+      },
+      "triangle_count": 2160,
+      "material_count": 2,
+      "glb_file_size_bytes": 105784,
+      "raw_sha256": "5d932424d3ebe1f597c96f77a63343075bcef48903064c00661b360b3ed2017d"
+    },
+    {
+      "id": "gear_medium",
+      "dimensions_mm": {
+        "diameter": 34.0,
+        "height": 5.0
+      },
+      "triangle_count": 2208,
+      "material_count": 2,
+      "glb_file_size_bytes": 96316,
+      "raw_sha256": "947e5c49e87cf9d403dad970f26fa29893d6cded332ccb77a55132db4f900d3f"
+    },
+    {
+      "id": "gear_high",
+      "dimensions_mm": {
+        "diameter": 34.4,
+        "height": 6.0
+      },
+      "triangle_count": 2784,
+      "material_count": 2,
+      "glb_file_size_bytes": 113760,
+      "raw_sha256": "704589efa2f82e723389ed427de25ac6df4ab9101f45f8fbe0900356796554f5"
+    },
+    {
+      "id": "tip_ball_defense",
+      "dimensions_mm": {
+        "diameter": 16.0,
+        "height": 8.2
+      },
+      "triangle_count": 1248,
+      "material_count": 2,
+      "glb_file_size_bytes": 62220,
+      "raw_sha256": "2aff6daee04a2a8c84a8765a1b82bdeaa697250d506d96dd3330b3b5a36bc1e7"
+    },
+    {
+      "id": "tip_needle_stamina",
+      "dimensions_mm": {
+        "diameter": 16.0,
+        "height": 9.0
+      },
+      "triangle_count": 1376,
+      "material_count": 2,
+      "glb_file_size_bytes": 69332,
+      "raw_sha256": "4a559c080f821587f197c1266db2d3b617b74eb34db5a462c43e3fe6e22223b2"
+    },
+    {
+      "id": "tip_taper_balance",
+      "dimensions_mm": {
+        "diameter": 16.0,
+        "height": 8.5
+      },
+      "triangle_count": 1376,
+      "material_count": 2,
+      "glb_file_size_bytes": 69124,
+      "raw_sha256": "d2af25543415598e611deb826f766a217fd65954f3fe5fa7c5b7ca4359eb04b0"
+    }
+  ],
+  "assemblies": [
+    {
+      "id": "assembly_phase2b_core_void_falcon",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 23.940001847222447,
+      "triangle_count": 5680,
+      "glb_file_size_bytes": 256128
+    },
+    {
+      "id": "assembly_phase2b_assist_guard",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 23.740000324323773,
+      "triangle_count": 5568,
+      "glb_file_size_bytes": 239968
+    },
+    {
+      "id": "assembly_phase2b_assist_air",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 23.54000066407025,
+      "triangle_count": 6096,
+      "glb_file_size_bytes": 280508
+    },
+    {
+      "id": "assembly_phase2b_gear_medium",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 24.94000014849007,
+      "triangle_count": 6240,
+      "glb_file_size_bytes": 275996
+    },
+    {
+      "id": "assembly_phase2b_gear_high",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 25.940000312402844,
+      "triangle_count": 6816,
+      "glb_file_size_bytes": 293384
+    },
+    {
+      "id": "assembly_phase2b_tip_ball_defense",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 25.10000136680901,
+      "triangle_count": 5280,
+      "glb_file_size_bytes": 237484
+    },
+    {
+      "id": "assembly_phase2b_tip_needle_stamina",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 25.90000187046826,
+      "triangle_count": 5408,
+      "glb_file_size_bytes": 244560
+    },
+    {
+      "id": "assembly_phase2b_tip_taper_balance",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 25.400000857189298,
+      "triangle_count": 5408,
+      "glb_file_size_bytes": 244396
+    },
+    {
+      "id": "assembly_phase2b_attack_representative",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 66.86078011989594,
+      "height_mm": 23.54000066407025,
+      "triangle_count": 6784,
+      "glb_file_size_bytes": 314032
+    },
+    {
+      "id": "assembly_phase2b_defense_representative",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 70.00000029802322,
+      "height_mm": 25.89999814517796,
+      "triangle_count": 8064,
+      "glb_file_size_bytes": 340356
+    },
+    {
+      "id": "assembly_phase2b_stamina_representative",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 70.62370330095291,
+      "height_mm": 27.19999966211617,
+      "triangle_count": 9392,
+      "glb_file_size_bytes": 415868
+    },
+    {
+      "id": "assembly_phase2b_balance_representative",
+      "result": "PASS",
+      "collision_count": 0,
+      "contact_review_count": 0,
+      "diameter_mm": 68.81877034902573,
+      "height_mm": 26.500000851228833,
+      "triangle_count": 7920,
+      "glb_file_size_bytes": 351184
+    }
+  ],
+  "approved_baseline": {
+    "result": "PASS",
+    "glb_count": 13,
+    "binary_drifts": 0,
+    "semantic_regressions": 0
+  },
+  "storm_attack_regression": {
+    "baseline": "v0.1.0-vertical-slice",
+    "binary_drifts": [],
+    "disposition": null,
+    "errors": [],
+    "glb_unchanged": true,
+    "raw_sha256": {
+      "public/models/assemblies/assembly_storm_attack.glb": "52357cb7847dd12c919446fcbd9b57d125e2b99e5adf184f061e4948c0d821b7",
+      "public/models/parts/assist_heavy.glb": "44949136aeb7c1e1e219575c6798595d2fb0b584b346eb116b4ce33e12b8be70",
+      "public/models/parts/blade_storm_fang.glb": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac",
+      "public/models/parts/core_solar_wolf.glb": "78407099c4a962a7d30f6a7a62009ca7f04c5e91487aa17899089143d8bd102c",
+      "public/models/parts/gear_low.glb": "c772a6bbcb4907f4c7805e3571fb3bdaa6a1b7b1ff45d3beddace6632e076b8a",
+      "public/models/parts/tip_flat_attack.glb": "56bd25f90f6898dc3148cc5eb4c8c14741bd8b7ed71e77f6ffae64606b517629"
+    },
+    "result": "PASS",
+    "semantic_fingerprint": {
+      "public/models/assemblies/assembly_storm_attack.glb": "dc54d195ff6628585591e3fab8327b08d4a32c6d0d841f4560fd7028397c3d68",
+      "public/models/parts/assist_heavy.glb": "ad9876a939375dbd2f8f57d4c59a08280400e6f30305e7aa76389d8aa1c53e5f",
+      "public/models/parts/blade_storm_fang.glb": "476eaf1adbf65244ffaaef4e571b9d26f3217e73923d20c8d81b2ec2b4469df1",
+      "public/models/parts/core_solar_wolf.glb": "52e06b727ec452cb54853096b7cbf5dbd5ed5b75b8cb90bad118ad3e2ddfd6d5",
+      "public/models/parts/gear_low.glb": "a9f397571c350d95600a48a1461d5f2aa8d1ed52d3d8be3858365e2496d25abe",
+      "public/models/parts/tip_flat_attack.glb": "98974a705457d521ccde061b11d4ac17c3cb8b8ed51547cb173ac71125e0cce7"
+    },
+    "source_commit": "f55e260"
+  },
+  "browser": {
+    "result": "PASS",
+    "model_count": 16,
+    "console_errors": 0,
+    "page_errors": 0,
+    "failed_requests": 0,
+    "external_requests": 0
+  },
+  "visual_files": [
+    "reports/renders/all_blades_comparison.png",
+    "reports/renders/all_assists_comparison.png",
+    "reports/renders/all_gears_comparison.png",
+    "reports/renders/all_tips_comparison.png"
+  ],
+  "automated_blockers": {
+    "fail": 0,
+    "unresolved_contact_review": 0,
+    "unconfirmed_binary_drift": 0,
+    "semantic_regression": 0,
+    "validator_errors": 0,
+    "validator_warnings": 0,
+    "playwright_failures": 0
+  }
+}
