@@ -7,6 +7,7 @@
     "catalog:build": "node scripts/build-product-catalog.mjs",
     "catalog:check": "node scripts/build-product-catalog.mjs --check",
     "check:governance": "node scripts/check-governance.mjs",
+    "check:phase2c-evidence-freeze": "node scripts/check-phase2c-evidence-freeze.mjs",
     "phase3b:baseline:capture": "node scripts/capture-phase3b-baseline.mjs",
     "analyze:bundle": "node scripts/analyze-bundle.mjs",
     "dev": "vite --host 127.0.0.1",

@@ -1,0 +1,31 @@
+{
+  "result": "PASS",
+  "errors": [],
+  "provisional_baseline_tag": "v0.2.0-rc1-technical-baseline",
+  "provisional_baseline_tag_object": "4a7a6895d5d3bb6608a4178d8f9d8373f8e3a07f",
+  "provisional_baseline_commit": "5951ecab40eb4d58ef502fded23b13fa04292429",
+  "phase2c_evidence_commit": "9590780e04c0141ea57109a2feb865ebafed07dd",
+  "current_head": "85e3dc9cf649c232a19eb84ad8a83ad735eeb6eb",
+  "evidence_commit_is_head_ancestor": true,
+  "reports_unchanged_since_evidence_commit": true,
+  "reports_clean_in_worktree": true,
+  "reports_clean_in_index": true,
+  "baseline_status": "PROVISIONAL_NOT_FINAL",
+  "visual_review_status": "Phase 2B visual review deferred pending real reviewers",
+  "reports": [
+    {
+      "path": "reports/validation/phase2c-final-gate.json",
+      "sha256": "7887a62f74df180ce8235dc47b7f075c270f185ca8db3b9b13f4093036e7b8f2"
+    },
+    {
+      "path": "reports/validation/phase2c-combination-matrix.json",
+      "sha256": "ad1bf0235f9b65c31c3aae1bc158b8a368004a5520e225658d745c64458f38c9"
+    }
+  ],
+  "gates": {
+    "provisional_baseline_assets": "PASS",
+    "phase2c_evidence": "PASS",
+    "protected_worktree": "PASS"
+  },
+  "audit_note": "Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data."
+}
