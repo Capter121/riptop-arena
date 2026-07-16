@@ -2,12 +2,14 @@ export interface SceneDiagnostics {
   cameraPosition: number[];
   cameraDistance: number;
   permanentMatrices: Record<string, number[]>;
+  webglResources: { geometries: number; textures: number; programs: number };
 }
 
 const diagnostics: SceneDiagnostics = {
   cameraPosition: [],
   cameraDistance: 0,
   permanentMatrices: {},
+  webglResources: { geometries: 0, textures: 0, programs: 0 },
 };
 
 export interface SceneCapture {
@@ -25,6 +27,10 @@ export function updateCamera(position: number[], distance: number) {
 
 export function updatePermanentMatrices(matrices: Record<string, number[]>) {
   diagnostics.permanentMatrices = matrices;
+}
+
+export function updateWebglResources(geometries: number, textures: number, programs: number) {
+  diagnostics.webglResources = { geometries, textures, programs };
 }
 
 export function sceneDiagnostics(): SceneDiagnostics {

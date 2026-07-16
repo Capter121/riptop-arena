@@ -1,25 +1,33 @@
-import { Component, type ErrorInfo, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, lazy, Suspense, type ErrorInfo, type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { conceptAttributes, attributeNames } from './attributes';
 import {
   combinationId, combinationName, enumerateCombinations, families, familyParts, parseCombinationJson,
-  randomCombination, serializeCombination, type Family,
+  partById, randomCombination, serializeCombination, type Family,
 } from './domain';
 import {
   addRecent, readLibrary, removeFavorite, setNickname as setLibraryNickname, toggleFavorite, writeLibrary,
 } from './library/localLibrary';
-import { CustomizerScene } from './Scene';
 import { captureScene } from './diagnostics';
 import { beginPartSwitch, markOnce } from './performance/marks';
+import {
+  cachedSwitchSamples, clearCachedSwitchDiagnostics, enableCachedSwitchDiagnostics,
+  markCachedSwitch, wasPartPrepared,
+} from './performance/cachedSwitchDiagnostics';
+import { focusReadoutTarget, scheduleFocusPulseEnd } from './focusLifecycle';
+import { FocusReadout } from './focusPresentationController';
+import { clearFocusDiagnostics, focusDiagnosticEvents, recordFocusDiagnostic, setFocusDiagnostics } from './focusDiagnostics';
 import { createShareLink } from './sharing/combinationUrl';
-import { renderCombinationCard } from './sharing/cardRenderer';
-import { QrCodeView } from './sharing/QrCodeView';
 import { copyShareLink } from './sharing/shareLink';
 import { currentSnapshot, useCustomizer } from './store';
 import './styles.css';
 
+const CustomizerScene = lazy(() => import('./Scene').then(module => ({ default: module.CustomizerScene })));
+const QrCodeView = lazy(() => import('./sharing/QrCodeView').then(module => ({ default: module.QrCodeView })));
+
 const familyLabels: Record<Family, string> = {
   core: 'Core', blade: 'Main Blade', assist: 'Assist Ring', gear: 'Height Gear', tip: 'Performance Tip',
 };
+const attributeLabels = { attack: 'attack', defense: 'defense', stamina: 'stamina', balance: 'balance', weight: '重量倾向', height: '高度倾向' } as const;
 
 class SceneErrorBoundary extends Component<{ resetKey: string; children: ReactNode }, { error: string | null }> {
   state = { error: null as string | null };
@@ -43,10 +51,12 @@ export default function App() {
   const [library, setLibrary] = useState(readLibrary);
   const [nickname, setNickname] = useState('');
   const importRef = useRef<HTMLInputElement>(null);
-  const focusTimer = useRef<number | null>(null);
   const lastRecentId = useRef<string | null>(null);
+  const appRenderSequence = useRef(0);
+  appRenderSequence.current += 1;
   const id = combinationId(state.combination);
   const attributes = useMemo(() => conceptAttributes(state.combination), [state.combination]);
+  const selectedAssist = familyParts.assist.find(part => part.id === state.combination.assist)!;
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
   const share = useMemo(() => createShareLink(
@@ -56,21 +66,92 @@ export default function App() {
   ), [state.combination]);
   const currentLibraryEntry = [...library.favorites, ...library.recent].find(entry => entry.id === id);
   const automaticName = combinationName(state.combination);
+  const focusSessionId = useCustomizer(current => current.focusState.sessionId);
+  const focusRevision = useCustomizer(current => current.focusState.revision);
+  const focusTarget = useCustomizer(current => current.focusState.target);
+  const focusPhase = useCustomizer(current => current.focusState.phase);
+  const focusPartId = useCustomizer(current => current.focusState.partId);
+  const focusModelReady = useCustomizer(current => current.focusState.modelReady);
+  const focusPulseActive = useCustomizer(current => current.focusState.pulseActive);
+  const focusReadoutCommitted = useCustomizer(current => current.focusState.readoutCommitted);
+  const focusActiveFramePainted = useCustomizer(current => current.focusState.activeFramePainted);
+  const focusPresentationComplete = useCustomizer(current => current.focusState.presentationCompleteRequested);
+  const focusState = useMemo(() => ({
+    sessionId: focusSessionId,
+    revision: focusRevision,
+    target: focusTarget,
+    phase: focusPhase,
+    partId: focusPartId,
+    modelReady: focusModelReady,
+    pulseActive: focusPulseActive,
+    readoutCommitted: focusReadoutCommitted,
+    activeFramePainted: focusActiveFramePainted,
+    presentationCompleteRequested: focusPresentationComplete,
+  }), [focusActiveFramePainted, focusModelReady, focusPartId, focusPhase, focusPresentationComplete, focusPulseActive, focusReadoutCommitted, focusRevision, focusSessionId, focusTarget]);
+  const readoutTarget = focusReadoutTarget(focusState);
+
+  useLayoutEffect(() => {
+    const readoutMounted = readoutTarget
+      ? Boolean(document.querySelector(`[data-testid="${readoutTarget === 'gear' ? 'gear-height' : readoutTarget === 'tip' ? 'tip-contact' : 'assist-focus'}-readout"]`))
+      : false;
+    recordFocusDiagnostic({
+      type: 'app-readout-commit',
+      sessionId: focusState.sessionId,
+      target: focusState.target,
+      phase: focusState.phase,
+      details: {
+        revision: focusState.revision,
+        appRenderSequence: appRenderSequence.current,
+        readoutPredicate: readoutTarget !== null,
+        readoutMounted,
+        selectedPartId: focusState.partId,
+        activeCombinationId: id,
+      },
+    });
+    if (focusState.phase !== 'idle' && readoutMounted) {
+      useCustomizer.getState().markFocusReadoutCommitted(focusState.sessionId);
+    }
+  }, [focusState, readoutTarget]);
 
   useEffect(() => {
     markOnce('phase3b:shell-ready');
+    const selectPartForDiagnostics = (partId: string) => {
+      const current = useCustomizer.getState();
+      const part = partById.get(partId);
+      if (!part) return current.selectPart(partId);
+      const nextCombination = { ...current.combination, [part.family]: partId };
+      beginPartSwitch({
+        family: part.family,
+        previousPartId: current.combination[part.family],
+        nextPartId: partId,
+        combinationId: combinationId(nextCombination),
+        focusState: current.focusState.phase,
+        cacheHit: wasPartPrepared(partId),
+      });
+      markCachedSwitch('cached-switch:store-start');
+      current.selectPart(partId);
+    };
     (window as any).__NSS_CUSTOMIZER__ = {
       snapshot: currentSnapshot,
       restore: () => useCustomizer.getState().restorePresentation(),
       enumerateIds: () => enumerateCombinations().map(combinationId),
       selectBladeForDiagnostics: (partId: string) => {
-        beginPartSwitch();
         useCustomizer.getState().selectFamily('blade');
-        useCustomizer.getState().selectPart(partId);
+        selectPartForDiagnostics(partId);
       },
+      setCachedSwitchDiagnostics: (enabled: boolean) => enableCachedSwitchDiagnostics(enabled),
+      clearCachedSwitchDiagnostics,
+      cachedSwitchSamples,
+      setFocusDiagnostics,
+      clearFocusDiagnostics,
+      focusDiagnosticEvents,
     };
-    return () => { if (focusTimer.current !== null) window.clearTimeout(focusTimer.current); };
   }, []);
+
+  useEffect(() => {
+    if (focusState.phase !== 'active' || !focusState.pulseActive) return;
+    return scheduleFocusPulseEnd(focusState.sessionId, session => useCustomizer.getState().endFocusPulse(session));
+  }, [focusState.phase, focusState.pulseActive, focusState.sessionId]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -104,16 +185,31 @@ export default function App() {
   };
 
   const choosePart = (partId: string) => {
-    if (focusTimer.current !== null) window.clearTimeout(focusTimer.current);
-    beginPartSwitch();
+    const part = partById.get(partId);
+    if (!part) return state.selectPart(partId);
+    const nextCombination = { ...state.combination, [part.family]: partId };
+    beginPartSwitch({
+      family: part.family,
+      previousPartId: state.combination[part.family],
+      nextPartId: partId,
+      combinationId: combinationId(nextCombination),
+      focusState: state.focusState.phase,
+      cacheHit: wasPartPrepared(partId),
+    });
+    markCachedSwitch('cached-switch:store-start');
     state.selectPart(partId);
-    const family = state.selectedFamily;
-    if (family === 'assist' || family === 'gear' || family === 'tip') {
-      focusTimer.current = window.setTimeout(() => {
-        useCustomizer.getState().restorePresentation();
-        focusTimer.current = null;
-      }, 900);
-    }
+  };
+
+  const completeFocusPresentation = (session: number) => {
+    const current = useCustomizer.getState().focusState;
+    recordFocusDiagnostic({
+      type: 'focus-presentation-animation-complete',
+      sessionId: session,
+      target: current.target,
+      phase: current.phase,
+      details: { revision: current.revision, partId: current.partId, activeFramePainted: current.activeFramePainted },
+    });
+    useCustomizer.getState().completeFocusPresentation(session);
   };
 
   const exportJson = () => {
@@ -135,6 +231,7 @@ export default function App() {
     setCardExporting(true);
     try {
       const capture = await captureScene(720, 630);
+      const { renderCombinationCard } = await import('./sharing/cardRenderer');
       const blob = await renderCombinationCard({
         combination: state.combination,
         shareUrl: share.url,
@@ -164,9 +261,9 @@ export default function App() {
       </header>
 
       <section className="viewer" aria-label="3D customizer viewport">
-        <SceneErrorBoundary resetKey={id}><CustomizerScene combination={state.combination} /></SceneErrorBoundary>
+        <SceneErrorBoundary resetKey={id}><Suspense fallback={<div className="scene-runtime-loading">Loading local 3D runtime…</div>}><CustomizerScene combination={state.combination} /></Suspense></SceneErrorBoundary>
         <div className={`load-status ${state.loadState}`} data-testid="load-status" data-state={state.loadState}>
-          {state.loadState === 'loading' ? 'Loading local GLB…' : state.loadState === 'error' ? state.error : 'Offline model ready'}
+          {state.loadState === 'loading' ? `Loading local assets… ${state.loadProgress}%` : state.loadState === 'error' ? state.error : 'Offline model ready'}
         </div>
         <div className="viewer-tools" aria-label="Camera controls">
           {(['top', 'perspective', 'side', 'bottom'] as const).map(preset => (
@@ -174,10 +271,11 @@ export default function App() {
           ))}
           <button data-testid="reset-view" onClick={state.restorePresentation}>Reset</button>
           <button data-testid="debug-axis" aria-pressed={state.debugAxis} onClick={() => state.setDebugAxis(!state.debugAxis)}>Axis</button>
+          <button data-testid="low-performance" aria-pressed={state.lowPerformance} onClick={() => state.setLowPerformance(!state.lowPerformance)}>Low performance</button>
         </div>
-        {state.focus === 'gear' && <div className="focus-readout" data-testid="gear-height-readout">Gear {selectedGear.heightMm.toFixed(1)} mm · total height Δ {(selectedGear.heightMm - lowGearHeight).toFixed(1)} mm vs Low</div>}
-        {state.focus === 'tip' && <div className="focus-readout" data-testid="tip-contact-readout">Contact focus · {familyParts.tip.find(part => part.id === state.combination.tip)!.displayName}</div>}
-        {state.focus === 'assist' && <div className="focus-readout" data-testid="assist-focus-readout">Assist isolated · Blade transparency reduced</div>}
+        {readoutTarget === 'gear' && <FocusReadout testId="gear-height-readout" phase={focusState.phase} sessionId={focusState.sessionId} activeFramePainted={focusState.activeFramePainted} onPresentationComplete={completeFocusPresentation}>Gear {selectedGear.heightMm.toFixed(1)} mm · total height Δ {(selectedGear.heightMm - lowGearHeight).toFixed(1)} mm vs Low</FocusReadout>}
+        {readoutTarget === 'tip' && <FocusReadout testId="tip-contact-readout" phase={focusState.phase} sessionId={focusState.sessionId} activeFramePainted={focusState.activeFramePainted} onPresentationComplete={completeFocusPresentation}>Contact focus · {familyParts.tip.find(part => part.id === state.combination.tip)!.displayName}</FocusReadout>}
+        {readoutTarget === 'assist' && <FocusReadout testId="assist-focus-readout" phase={focusState.phase} sessionId={focusState.sessionId} activeFramePainted={focusState.activeFramePainted} onPresentationComplete={completeFocusPresentation}>{selectedAssist.displayName} isolated · Blade transparency reduced</FocusReadout>}
       </section>
 
       <section className="control-deck">
@@ -200,7 +298,7 @@ export default function App() {
         <div className="lower-grid">
           <section className="attributes">
             <div className="section-heading"><h3>Concept attributes</h3><span>0—100</span></div>
-            {attributeNames.map(name => <div className="attribute" key={name}><span>{name}</span><div><i style={{ width: `${attributes[name]}%` }} /></div><strong>{attributes[name]}</strong></div>)}
+            {attributeNames.map(name => <div className="attribute" key={name}><span>{attributeLabels[name]}</span><div><i style={{ width: `${attributes[name]}%` }} /></div><strong>{attributes[name]}</strong></div>)}
             <p data-testid="attribute-disclaimer">Concept attributes for prototype use only.</p>
           </section>
           <section className="actions">
@@ -225,7 +323,7 @@ export default function App() {
                   const copied = await copyShareLink(share.url);
                   setNotice(copied ? 'Share link copied.' : 'Clipboard unavailable. Select and copy the link manually.');
                 }}>Copy link</button>
-                <QrCodeView content={share.url} />
+                <Suspense fallback={<p>Preparing local QR code…</p>}><QrCodeView content={share.url} /></Suspense>
                 {share.deviceOnly && <p data-testid="share-device-warning">This local link works only on this device. Configure VITE_SHARE_BASE_URL for a shareable host.</p>}
               </section>
             )}

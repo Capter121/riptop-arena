@@ -1,0 +1,33 @@
+{
+  "batchId": "runner-smoke-b-20260716",
+  "iteration": 1,
+  "status": "PASS",
+  "startedAt": "2026-07-16T06:40:09.552Z",
+  "codeCommit": "6660a50240322df6aa94d1bc18b7b50b7976dfff",
+  "workspaceDigest": "a28cbd48a81ebfd94d6ab09cd6b72b125144dbd234d686ad41b8d8fd1241aca9",
+  "playwrightExitCode": 0,
+  "durationMs": 32995,
+  "testCount": 1,
+  "errorCounts": {
+    "console": 0,
+    "pageerror": 0,
+    "failedRequest": 0,
+    "externalRequest": 0
+  },
+  "tracePath": null,
+  "artifactPaths": [],
+  "sessionDiagnosticSummary": {
+    "eventCount": 122,
+    "sessionCount": 6,
+    "lastEvent": {
+      "type": "app-readout-commit",
+      "sessionId": 7,
+      "target": null,
+      "phase": "idle",
+      "revision": 42,
+      "partId": null
+    }
+  },
+  "finishedAt": "2026-07-16T06:40:42.550Z",
+  "failureRepeat": null
+}

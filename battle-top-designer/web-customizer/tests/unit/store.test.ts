@@ -12,7 +12,7 @@ describe('customizer store and local persistence', () => {
   it('updates the correct family and focus state', () => {
     useCustomizer.getState().selectPart('gear_high');
     expect(useCustomizer.getState().combination.gear).toBe('gear_high');
-    expect(useCustomizer.getState().focus).toBe('gear');
+    expect(useCustomizer.getState().focusState.target).toBe('gear');
     expect(useCustomizer.getState().cameraPreset).toBe('side');
   });
 
@@ -37,5 +37,18 @@ describe('customizer store and local persistence', () => {
     expect(useCustomizer.getState()).toMatchObject({ combination: stormAttack, startupNotice: null, testMode: true });
     useCustomizer.getState().hydrate('?combo=INVALID');
     expect(useCustomizer.getState()).toMatchObject({ combination: stormAttack, startupNotice: 'Invalid share link. Storm Attack was restored.', testMode: false });
+  });
+
+  it('tracks monotonic loading progress and persists low-performance mode', () => {
+    useCustomizer.getState().hydrate('', null);
+    useCustomizer.getState().setLoadProgress(40);
+    useCustomizer.getState().setLoadProgress(25);
+    expect(useCustomizer.getState().loadProgress).toBe(40);
+    useCustomizer.getState().selectPart('blade_orbit_halo');
+    expect(useCustomizer.getState().loadProgress).toBe(10);
+    useCustomizer.getState().setLoadState('ready');
+    expect(useCustomizer.getState().loadProgress).toBe(100);
+    useCustomizer.getState().setLowPerformance(true);
+    expect(localStorage.getItem('nova-spin:phase3b:low-performance:v1')).toBe('true');
   });
 });

@@ -30,10 +30,18 @@ h1 { font-size: clamp(18px, 3vw, 25px); letter-spacing: .01em; }
 .load-status.ready { color: #80e6b1; }
 .load-status.error, .scene-error { color: #ff8d96; }
 .scene-error { position: absolute; inset: 35% 10%; z-index: 5; text-align: center; padding: 24px; background: #250d16e8; border: 1px solid #ff6375; border-radius: 12px; }
+.scene-runtime-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 12px; }
 .viewer-tools { position: absolute; z-index: 3; right: 14px; top: 14px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 340px; }
 .viewer-tools button, .actions button { border: 1px solid #ffffff1f; background: #101521d9; border-radius: 7px; padding: 8px 10px; font-size: 11px; text-transform: capitalize; }
 .viewer-tools button.active { border-color: var(--cyan); color: var(--cyan); }
 .focus-readout { position: absolute; z-index: 3; left: 50%; bottom: 18px; transform: translateX(-50%); white-space: nowrap; padding: 8px 12px; border: 1px solid #ffbd3577; border-radius: 999px; color: #ffe3a4; background: #111018e8; font-size: 11px; }
+.focus-readout.presentation-active { animation: focus-presentation-cycle 1200ms ease-out both; }
+
+@keyframes focus-presentation-cycle {
+  0% { box-shadow: 0 0 0 0 #ffbd3500; }
+  30% { box-shadow: 0 0 0 4px #ffbd3540; }
+  100% { box-shadow: 0 0 0 0 #ffbd3500; }
+}
 
 .control-deck { padding: 20px clamp(16px, 3vw, 42px) 34px; background: linear-gradient(#0b0f18, #080a11); }
 .identity-row { display: flex; gap: 18px; align-items: center; justify-content: space-between; }

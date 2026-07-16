@@ -51,25 +51,25 @@ test('complete offline customizer flow', async ({ page }, testInfo) => {
 
   await page.getByTestId('tab-assist').click();
   await page.getByTestId('part-assist_guard').click();
+  await expect(page.getByTestId('assist-focus-readout')).toContainText('Guard Assist');
   snapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
   expect(snapshot.focus).toBe('assist');
   expect(snapshot.cameraPreset).toBe('perspective');
   expect(snapshot.presentationTargets.assist).toBeGreaterThan(0);
-  await expect(page.getByTestId('assist-focus-readout')).toBeVisible();
 
   await page.getByTestId('tab-gear').click();
   await page.getByTestId('part-gear_high').click();
+  await expect(page.getByTestId('gear-height-readout')).toContainText('6.0 mm');
   snapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
   expect(snapshot.focus).toBe('gear');
   expect(snapshot.cameraPreset).toBe('side');
-  await expect(page.getByTestId('gear-height-readout')).toContainText('total height');
 
   await page.getByTestId('tab-tip').click();
   await page.getByTestId('part-tip_needle_stamina').click();
+  await expect(page.getByTestId('tip-contact-readout')).toContainText('Needle');
   snapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
   expect(snapshot.focus).toBe('tip');
   expect(snapshot.cameraPreset).toBe('bottom');
-  await expect(page.getByTestId('tip-contact-readout')).toContainText('Needle');
   await expect(page.getByTestId('attribute-disclaimer')).toHaveText('Concept attributes for prototype use only.');
 
   await expect.poll(async () => (await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot())).focus).toBeNull();

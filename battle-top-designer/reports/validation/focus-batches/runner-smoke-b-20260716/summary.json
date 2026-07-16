@@ -1,0 +1,23 @@
+{
+  "batchId": "runner-smoke-b-20260716",
+  "status": "PASS",
+  "result": "PASS 1/1",
+  "count": 1,
+  "project": "mobile",
+  "test": "tests/e2e/mobile-focus-readout-race.spec.ts",
+  "codeCommit": "6660a50240322df6aa94d1bc18b7b50b7976dfff",
+  "workspaceDigest": "a28cbd48a81ebfd94d6ab09cd6b72b125144dbd234d686ad41b8d8fd1241aca9",
+  "counts": {
+    "PASS": 1,
+    "FAIL": 0,
+    "ABORTED": 0,
+    "RUNNING": 0,
+    "NOT_RUN": 0
+  },
+  "records": [
+    {
+      "iteration": 1,
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "status": "ROOT_CAUSE_CONFIRMED_REPAIR_VERIFICATION_IN_PROGRESS",
+  "project_status": "Phase 3B changes requested",
+  "baseline_head": "6660a50240322df6aa94d1bc18b7b50b7976dfff",
+  "primary_evidence": "mobile-repeat16",
+  "timeline": [
+    { "trace_time": 686955, "event": "navigation_start" },
+    { "trace_time": 695401, "event": "guard_click_complete" },
+    { "trace_time": 696762, "event": "guard_readout_assertion_pass" },
+    { "trace_time": 699496, "event": "air_click_complete" },
+    { "trace_time": 703037.981, "event": "heavy_click_complete" },
+    { "trace_time_start": 703041.143, "trace_time_end": 703777.637, "event": "snapshot_evaluation", "focus": "assist", "part_id": "assist_heavy", "dom_readout_observed": true },
+    { "trace_time": 703783.706, "event": "heavy_readout_assertion_start" },
+    { "trace_time": 704013.652, "event": "first_recorded_locator_wait", "focus_phase": "idle" },
+    { "trace_time": 709035.960, "event": "heavy_readout_assertion_fail" }
+  ],
+  "session_4_diagnostics_ms": {
+    "entering": 15209.7,
+    "active": 15503.9,
+    "exiting": 16575.1,
+    "scene_exit_complete": 17046.6,
+    "store_idle": 17046.6,
+    "app_idle_commit": 17055.8
+  },
+  "findings": {
+    "in_place_mutation_found": false,
+    "zustand_notification_missing": false,
+    "react_readout_rendered": true,
+    "legacy_fields_independently_writable": false,
+    "direct_failure_cause": "The required locator began observing after an asynchronous snapshot, after the already-rendered readout had reached idle and unmounted.",
+    "lifecycle_defect": "The 800 ms pulse callback also changed phase from active to exiting."
+  },
+  "state_access": {
+    "app_before": "whole Zustand store subscription",
+    "app_after": ["sessionId", "revision", "target", "phase", "partId", "modelReady", "pulseActive"],
+    "scene": "immutable focusState selector",
+    "snapshot_legacy_fields": "read-only projections from focusState"
+  },
+  "repair": {
+    "immutable_transitions": true,
+    "monotonic_revision": true,
+    "development_test_object_freeze": true,
+    "pulse_phase_decoupled": true,
+    "painted_frame_scope": "exiting_to_idle_only",
+    "readout_assertion_weakened": false,
+    "readout_duration_extended": false,
+    "fixed_sleep_added": false
+  },
+  "verification": {
+    "focus_unit_and_component_tests": { "passed": 33, "failed": 0 },
+    "typescript": "PASS",
+    "mobile_repeat_gates": "PENDING",
+    "full_regression": "PENDING"
+  },
+  "protected_scope_modified": false
+}

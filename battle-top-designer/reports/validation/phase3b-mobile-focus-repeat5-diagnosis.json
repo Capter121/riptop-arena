@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "status": "ROOT_CAUSE_CONFIRMED",
+  "source": {
+    "trace": "web-customizer/test-results/customizer-complete-offline-customizer-flow-mobile-repeat5/trace.zip",
+    "screenshot": "web-customizer/test-results/customizer-complete-offline-customizer-flow-mobile-repeat5/test-failed-1.png",
+    "error_context": "web-customizer/test-results/customizer-complete-offline-customizer-flow-mobile-repeat5/error-context.md",
+    "trace_clock_unit": "milliseconds",
+    "relative_origin": "Playwright performing click action at 363410.500"
+  },
+  "timeline": [
+    { "step": 1, "event": "Assist click", "trace_time": 363410.500, "relative_ms": 0, "evidence": "call@57 performing click action" },
+    { "step": 2, "event": "store action", "trace_time_range": [363410.500, 363796.975], "relative_ms_range": [0, 386.475], "evidence": "React click handler runs inside the successful call@57 click interval; trace has no application mark" },
+    { "step": 3, "event": "focusSession created", "trace_time_range": [363410.500, 364097.784], "relative_ms_range": [0, 687.284], "evidence": "first post-click DOM snapshot and later store snapshot identify session 4" },
+    { "step": 4, "event": "phase entering", "trace_time_range": [363410.500, 364097.784], "relative_ms_range": [0, 687.284], "evidence": "selectPart atomically creates entering; no entering snapshot was captured" },
+    { "step": 5, "event": "target updated to assist", "trace_time_range": [363410.500, 363796.975], "relative_ms_range": [0, 386.475], "evidence": "selectPart is the click handler's only focus-target write" },
+    { "step": 6, "event": "App subscription received focus", "trace_time_max": 364097.784, "relative_ms_max": 687.284, "evidence": "after@call@57 DOM contains the assist readout" },
+    { "step": 7, "event": "App rendered", "trace_time_max": 364097.784, "relative_ms_max": 687.284, "evidence": "after@call@57 frame snapshot" },
+    { "step": 8, "event": "readout predicate true", "trace_time": 364097.784, "relative_ms": 687.284, "evidence": "target assist and non-idle phase rendered active readout" },
+    { "step": 9, "event": "readout mount/unmount", "mount_time_max": 364097.784, "unmount_time_range": [364863.172, 370050.499], "relative_mount_ms_max": 687.284, "relative_unmount_ms_range": [1452.672, 6639.999], "evidence": "active readout at after@call@57, exiting readout at before@call@61, absent at after@call@61" },
+    { "step": 10, "event": "Scene received focus", "trace_time_max": 364097.784, "relative_ms_max": 687.284, "evidence": "Scene and App consume the same store update; trace does not expose the exact R3F commit" },
+    { "step": 11, "event": "Assist presentation target applied", "trace_time": 364471.971, "relative_ms": 1061.471, "evidence": "snapshot reports desired assist target 0.021; this is a store-derived target, not an actual Group-position measurement" },
+    { "step": 12, "event": "camera focus applied", "trace_time_max": 364471.971, "relative_ms_max": 1061.471, "evidence": "session 4 snapshot reports perspective preset and focused camera position" },
+    { "step": 13, "event": "model ready", "trace_time_max": 364097.784, "relative_ms_max": 687.284, "evidence": "active phase requires setLoadState ready; UI is ready in post-click snapshot" },
+    { "step": 14, "event": "phase active", "trace_time_max": 364097.784, "relative_ms_max": 687.284, "evidence": "DOM active readout and session 4 store snapshot" },
+    { "step": 15, "event": "phase exiting", "trace_time": 364863.172, "relative_ms": 1452.672, "evidence": "before@call@61 DOM contains data-focus-phase exiting" },
+    { "step": 16, "event": "old-session callback", "observed": false, "evidence": "no session other than 4 appears in the failing interval; store callbacks reject non-current session IDs" },
+    { "step": 17, "event": "phase idle", "trace_time_range": [364863.172, 370050.499], "relative_ms_range": [1452.672, 6639.999], "evidence": "exiting readout is present at the expect-before snapshot and absent at the expect-after snapshot; trace lacks a store event mark for the exact instant" }
+  ],
+  "findings": {
+    "app_and_scene_same_fields": true,
+    "app_and_scene_same_session": true,
+    "readout_independent_boolean": false,
+    "old_session_only_closes_readout": false,
+    "local_and_zustand_double_source": false,
+    "effect_cleanup_after_new_session": "No harmful cleanup found; active timer cleanup only clears its own timeout and callbacks validate the session ID.",
+    "strict_mode_or_suspense_cleanup_reentry": false,
+    "unstable_selector_object": false,
+    "missing_memo_dependency": false,
+    "batched_update_skipped_intermediate_state": false,
+    "illegal_target_with_idle_observed": false,
+    "readout_was_never_mounted": false,
+    "presentation_target_is_actual_transform": false
+  },
+  "confirmed_direct_cause": "The readout was mounted in active and exiting. The same session advanced to idle and unmounted it between the store snapshot and Playwright's effective visibility observation.",
+  "root_cause_hypothesis": "A long mobile render frame allows the exiting PresentationPart to snap to its zero target because the interpolation factor is capped at 1. completeFocusExit then clears session 4 in that same frame, making exiting unobservable to the locator even though the trace-before snapshot still captured it.",
+  "hypothesis_evidence_needed": [
+    "actual PresentationPart Y before and after the exiting frame",
+    "frame delta and interpolation factor",
+    "session and phase at completeFocusExit",
+    "a renderer-frame acknowledgement before idle"
+  ],
+  "instrumentation_confirmation": {
+    "source": "mobile-focus-readout-race pre-fix diagnostic run",
+    "session_5": { "target": "tip", "delta_ms": 217.8, "interpolation": 1, "before_y": -0.027, "after_y": 0, "complete_exit_and_idle_same_timestamp": true },
+    "session_7": { "target": "tip", "delta_ms": 163.4, "interpolation": 1, "before_y": -0.027, "after_y": 0, "complete_exit_and_idle_same_timestamp": true },
+    "conclusion": "Scene cleared the authoritative focus session in the same useFrame callback that first restored the numeric position. No restored frame with the exiting readout was guaranteed to paint before App unmounted it."
+  },
+  "notices": [
+    "Human visual review remains pending.",
+    "Development continued under a documented provisional internal-prototype decision."
+  ]
+}
