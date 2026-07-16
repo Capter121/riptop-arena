@@ -8,6 +8,7 @@
     "catalog:check": "node scripts/build-product-catalog.mjs --check",
     "check:governance": "node scripts/check-governance.mjs",
     "phase3b:baseline:capture": "node scripts/capture-phase3b-baseline.mjs",
+    "analyze:bundle": "node scripts/analyze-bundle.mjs",
     "dev": "vite --host 127.0.0.1",
     "serve:dist": "vite preview --host 127.0.0.1 --port 4175",
     "build": "npm run catalog:check && tsc --noEmit && vite build",
@@ -15,6 +16,9 @@
     "test:matrix": "vitest run tests/unit/combination.test.ts",
     "test:e2e": "playwright test",
     "perf:baseline": "npm run build && playwright test --config playwright.performance.config.ts",
+    "perf:current": "npm run build && node scripts/run-phase3b-performance.mjs phase3b-performance-current.json",
+    "perf:check": "npm run build && node scripts/run-phase3b-performance.mjs phase3b-performance-current.json",
+    "perf:diagnose:cached": "npm run build && playwright test cached-switch-diagnostic.spec.ts --config playwright.performance.config.ts --project=desktop",
     "report": "node scripts/report-phase3a.mjs",
     "test:all": "npm run check:governance && npm run test:unit && npm run build && npm run test:e2e && npm run report"
   },

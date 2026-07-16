@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-16T01:38:52.873Z",
+  "browser": {
+    "name": "chromium",
+    "version": "149.0.7827.55"
+  },
+  "sampling": {
+    "runs": 3,
+    "cpuThrottling": "none",
+    "networkThrottling": "none",
+    "server": "local Vite preview"
+  },
+  "marks": [
+    "phase3b:shell-ready",
+    "phase3b:scene-runtime-loaded",
+    "phase3b:first-model-ready",
+    "phase3b:interaction-ready",
+    "phase3b:part-switch-start",
+    "phase3b:part-switch-end"
+  ],
+  "bundle": {
+    "chunks": [
+      {
+        "file": "assets/QrCodeView-Bhzh4eus.js",
+        "rawBytes": 314,
+        "gzipBytes": 262
+      },
+      {
+        "file": "assets/Scene-zjj3d5mP.js",
+        "rawBytes": 957592,
+        "gzipBytes": 260553
+      },
+      {
+        "file": "assets/cardRenderer-8LqdISym.js",
+        "rawBytes": 3002,
+        "gzipBytes": 1469
+      },
+      {
+        "file": "assets/index-HIEbiHjz.js",
+        "rawBytes": 221987,
+        "gzipBytes": 70766
+      },
+      {
+        "file": "assets/qrCode-DerYHgyw.js",
+        "rawBytes": 26014,
+        "gzipBytes": 10177
+      }
+    ],
+    "totalRawBytes": 1208909,
+    "totalGzipBytes": 343227
+  },
+  "profiles": {
+    "desktop": {
+      "project": "desktop",
+      "samplesPerCondition": 3,
+      "coldCache": {
+        "shellReadyMs": {
+          "median": 121.5,
+          "p95": 123.60000000149012,
+          "samples": [
+            112.19999999925494,
+            121.5,
+            123.60000000149012
+          ]
+        },
+        "sceneRuntimeLoadedMs": {
+          "median": 151.60000000149012,
+          "p95": 164.10000000149012,
+          "samples": [
+            149.90000000223517,
+            151.60000000149012,
+            164.10000000149012
+          ]
+        },
+        "firstModelReadyMs": {
+          "median": 510.5,
+          "p95": 552.6000000014901,
+          "samples": [
+            501.9000000022352,
+            510.5,
+            552.6000000014901
+          ]
+        },
+        "interactionReadyMs": {
+          "median": 612.5,
+          "p95": 716.3000000007451,
+          "samples": [
+            602.1000000014901,
+            612.5,
+            716.3000000007451
+          ]
+        }
+      },
+      "hotCache": {
+        "shellReadyMs": {
+          "median": 77.70000000298023,
+          "p95": 80.60000000149012,
+          "samples": [
+            75.30000000074506,
+            77.70000000298023,
+            80.60000000149012
+          ]
+        },
+        "sceneRuntimeLoadedMs": {
+          "median": 108.19999999925494,
+          "p95": 111.60000000149012,
+          "samples": [
+            107.90000000223517,
+            108.19999999925494,
+            111.60000000149012
+          ]
+        },
+        "firstModelReadyMs": {
+          "median": 486.5,
+          "p95": 493.70000000298023,
+          "samples": [
+            486.19999999925494,
+            486.5,
+            493.70000000298023
+          ]
+        },
+        "interactionReadyMs": {
+          "median": 592.3000000007451,
+          "p95": 606.7000000029802,
+          "samples": [
+            587.6999999992549,
+            592.3000000007451,
+            606.7000000029802
+          ]
+        }
+      },
+      "coldSwitchMs": {
+        "median": 160.79999999701977,
+        "p95": 170.19999999925494,
+        "samples": [
+          153.5,
+          160.79999999701977,
+          170.19999999925494
+        ]
+      },
+      "cachedSwitchMs": {
+        "median": 154.30000000074506,
+        "p95": 160.60000000149012,
+        "samples": [
+          139.5,
+          154.30000000074506,
+          160.60000000149012
+        ]
+      },
+      "memory": {
+        "status": "MEASURED",
+        "beforeBytes": 10015622,
+        "afterBytes": 9829794,
+        "deltaBytes": -185828,
+        "switchCount": 100,
+        "resourcesBefore": {
+          "geometries": 20,
+          "textures": 2,
+          "programs": 5
+        },
+        "resourcesAfter": {
+          "geometries": 20,
+          "textures": 2,
+          "programs": 5
+        }
+      },
+      "errors": {
+        "console": 0,
+        "pageerror": 0,
+        "failedRequest": 0,
+        "externalRequest": 0
+      }
+    },
+    "mobile": {
+      "project": "mobile",
+      "samplesPerCondition": 3,
+      "coldCache": {
+        "shellReadyMs": {
+          "median": 127.60000000149012,
+          "p95": 127.90000000223517,
+          "samples": [
+            108.10000000149012,
+            127.60000000149012,
+            127.90000000223517
+          ]
+        },
+        "sceneRuntimeLoadedMs": {
+          "median": 156.30000000074506,
+          "p95": 156.90000000223517,
+          "samples": [
+            139.5,
+            156.30000000074506,
+            156.90000000223517
+          ]
+        },
+        "firstModelReadyMs": {
+          "median": 513.2000000029802,
+          "p95": 542.6999999992549,
+          "samples": [
+            504.4000000022352,
+            513.2000000029802,
+            542.6999999992549
+          ]
+        },
+        "interactionReadyMs": {
+          "median": 613.7000000029802,
+          "p95": 645.3000000007451,
+          "samples": [
+            611.6999999992549,
+            613.7000000029802,
+            645.3000000007451
+          ]
+        }
+      },
+      "hotCache": {
+        "shellReadyMs": {
+          "median": 84.59999999776483,
+          "p95": 90.69999999925494,
+          "samples": [
+            77.10000000149012,
+            84.59999999776483,
+            90.69999999925494
+          ]
+        },
+        "sceneRuntimeLoadedMs": {
+          "median": 111.90000000223517,
+          "p95": 119.19999999925494,
+          "samples": [
+            111.69999999925494,
+            111.90000000223517,
+            119.19999999925494
+          ]
+        },
+        "firstModelReadyMs": {
+          "median": 493.69999999925494,
+          "p95": 497.3999999985099,
+          "samples": [
+            490.70000000298023,
+            493.69999999925494,
+            497.3999999985099
+          ]
+        },
+        "interactionReadyMs": {
+          "median": 588.5,
+          "p95": 607,
+          "samples": [
+            588.4000000022352,
+            588.5,
+            607
+          ]
+        }
+      },
+      "coldSwitchMs": {
+        "median": 156.10000000149012,
+        "p95": 158.19999999925494,
+        "samples": [
+          150.69999999925494,
+          156.10000000149012,
+          158.19999999925494
+        ]
+      },
+      "cachedSwitchMs": {
+        "median": 142.19999999925494,
+        "p95": 152.80000000074506,
+        "samples": [
+          136.80000000074506,
+          142.19999999925494,
+          152.80000000074506
+        ]
+      },
+      "memory": {
+        "status": "MEASURED",
+        "beforeBytes": 10062331,
+        "afterBytes": 9877323,
+        "deltaBytes": -185008,
+        "switchCount": 100,
+        "resourcesBefore": {
+          "geometries": 20,
+          "textures": 2,
+          "programs": 5
+        },
+        "resourcesAfter": {
+          "geometries": 20,
+          "textures": 2,
+          "programs": 5
+        }
+      },
+      "errors": {
+        "console": 0,
+        "pageerror": 0,
+        "failedRequest": 0,
+        "externalRequest": 0
+      }
+    }
+  },
+  "notices": [
+    "Human visual review remains pending.",
+    "Development continued under a documented provisional internal-prototype decision."
+  ]
+}

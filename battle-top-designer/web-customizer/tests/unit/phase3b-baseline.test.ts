@@ -4,6 +4,7 @@ import {
   beginPartSwitch,
   endPartSwitch,
   markOnce,
+  pendingPartSwitchCombinationId,
 } from '../../src/performance/marks';
 
 class FakePerformance {
@@ -39,5 +40,13 @@ describe('Phase 3B stable performance markers', () => {
     beginPartSwitch(performance as unknown as Performance);
     expect(endPartSwitch(performance as unknown as Performance)).toBe(true);
     expect(performance.measures).toEqual(['phase3b:part-switch-duration']);
+  });
+
+  it('tracks the pending displayed combination even when detailed diagnostics are disabled', () => {
+    const performance = new FakePerformance();
+    beginPartSwitch({ family: 'blade', previousPartId: 'a', nextPartId: 'b', combinationId: 'nss-p2c-0002', focusState: 'idle', cacheHit: true }, performance as unknown as Performance);
+    expect(pendingPartSwitchCombinationId()).toBe('nss-p2c-0002');
+    endPartSwitch(performance as unknown as Performance);
+    expect(pendingPartSwitchCombinationId()).toBeNull();
   });
 });

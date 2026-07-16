@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "budgets": {
+    "shellGzipBytes": 120000,
+    "totalGzipBytes": 360000
+  },
+  "metrics": {
+    "shellGzipBytes": 68663,
+    "totalGzipBytes": 340137
+  },
+  "chunks": [
+    {
+      "file": "assets/QrCodeView-HJn5Vsrv.js",
+      "role": "async",
+      "rawBytes": 314,
+      "gzipBytes": 265
+    },
+    {
+      "file": "assets/Scene-DEA5xB02.js",
+      "role": "async",
+      "rawBytes": 954719,
+      "gzipBytes": 259563
+    },
+    {
+      "file": "assets/cardRenderer-sffrwedN.js",
+      "role": "async",
+      "rawBytes": 3002,
+      "gzipBytes": 1469
+    },
+    {
+      "file": "assets/index-BE7ZD_e3.js",
+      "role": "shell",
+      "rawBytes": 215235,
+      "gzipBytes": 68663
+    },
+    {
+      "file": "assets/qrCode-Bq51_kh0.js",
+      "role": "async",
+      "rawBytes": 26014,
+      "gzipBytes": 10177
+    }
+  ],
+  "status": "PASS",
+  "errors": [],
+  "notices": [
+    "Human visual review remains pending.",
+    "Development continued under a documented provisional internal-prototype decision."
+  ]
+}

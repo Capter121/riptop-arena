@@ -3,7 +3,7 @@ import { gzipSync } from 'node:zlib';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const output = resolve(process.cwd(), '../reports/validation/phase3b-performance-baseline.json');
+const output = resolve(process.cwd(), '../reports/validation', process.env.PHASE3B_PERF_REPORT ?? 'phase3b-performance-baseline.json');
 const notices = [
   'Human visual review remains pending.',
   'Development continued under a documented provisional internal-prototype decision.',
@@ -89,6 +89,7 @@ async function collectProfile(browser: Browser, projectName: string, contextOpti
       if (measurable) {
         await first.page.evaluate(() => (window as any).gc());
         const before = await first.page.evaluate(() => (performance as any).memory.usedJSHeapSize as number);
+        const resourcesBefore = await first.page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot().webglResources);
         await first.page.evaluate(async () => {
           for (let turn = 0; turn < 100; turn += 1) {
             const beforeCount = performance.getEntriesByName('phase3b:part-switch-duration').length;
@@ -106,7 +107,8 @@ async function collectProfile(browser: Browser, projectName: string, contextOpti
         });
         await first.page.evaluate(() => (window as any).gc());
         const after = await first.page.evaluate(() => (performance as any).memory.usedJSHeapSize as number);
-        memory = { status: 'MEASURED', beforeBytes: before, afterBytes: after, deltaBytes: after - before, switchCount: 100 };
+        const resourcesAfter = await first.page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot().webglResources);
+        memory = { status: 'MEASURED', beforeBytes: before, afterBytes: after, deltaBytes: after - before, switchCount: 100, resourcesBefore, resourcesAfter };
       }
     }
     await first.page.close();
