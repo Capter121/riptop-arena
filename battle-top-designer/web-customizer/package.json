@@ -16,6 +16,7 @@
     "test:unit": "vitest run tests/unit",
     "test:matrix": "vitest run tests/unit/combination.test.ts",
     "test:e2e": "playwright test",
+    "test:stage7": "playwright test --config playwright.stage7.config.ts",
     "perf:baseline": "npm run build && playwright test --config playwright.performance.config.ts",
     "perf:current": "npm run build && node scripts/run-phase3b-performance.mjs phase3b-performance-current.json",
     "perf:check": "npm run build && node scripts/run-phase3b-performance.mjs phase3b-performance-current.json",
