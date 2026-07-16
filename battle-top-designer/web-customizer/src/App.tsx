@@ -19,10 +19,12 @@ import { clearFocusDiagnostics, focusDiagnosticEvents, recordFocusDiagnostic, se
 import { createShareLink } from './sharing/combinationUrl';
 import { copyShareLink } from './sharing/shareLink';
 import { currentSnapshot, useCustomizer } from './store';
+import { emitUsabilityAction } from './usability/events';
 import './styles.css';
 
 const CustomizerScene = lazy(() => import('./Scene').then(module => ({ default: module.CustomizerScene })));
 const QrCodeView = lazy(() => import('./sharing/QrCodeView').then(module => ({ default: module.QrCodeView })));
+const TestModePanel = lazy(() => import('./usability/TestModePanel'));
 
 const familyLabels: Record<Family, string> = {
   core: 'Core', blade: 'Main Blade', assist: 'Assist Ring', gear: 'Height Gear', tip: 'Performance Tip',
@@ -34,6 +36,7 @@ class SceneErrorBoundary extends Component<{ resetKey: string; children: ReactNo
   static getDerivedStateFromError(error: Error) { return { error: error.message }; }
   componentDidCatch(error: Error, info: ErrorInfo) {
     useCustomizer.getState().setLoadState('error', error.message);
+    if (useCustomizer.getState().testMode) emitUsabilityAction({ type: 'SYSTEM_ERROR', code: 'GLB_LOAD_FAILED' });
     console.error('GLB_LOAD_ERROR', error, info.componentStack);
   }
   componentDidUpdate(previous: { resetKey: string }) {
@@ -52,6 +55,7 @@ export default function App() {
   const [nickname, setNickname] = useState('');
   const importRef = useRef<HTMLInputElement>(null);
   const lastRecentId = useRef<string | null>(null);
+  const pendingFavoriteRestore = useRef<string | null>(null);
   const appRenderSequence = useRef(0);
   appRenderSequence.current += 1;
   const id = combinationId(state.combination);
@@ -179,9 +183,18 @@ export default function App() {
 
   useEffect(() => { setNickname(currentLibraryEntry?.nickname ?? ''); }, [id, currentLibraryEntry?.nickname]);
 
+  useEffect(() => {
+    if (!state.testMode || state.loadState !== 'ready' || pendingFavoriteRestore.current !== id) return;
+    emitUsabilityAction({ type: 'FAVORITE_RESTORED', combinationId: id });
+    pendingFavoriteRestore.current = null;
+  }, [id, state.loadState, state.testMode]);
+
   const persistLibrary = (next: typeof library, success: string) => {
     setLibrary(next);
-    setNotice(writeLibrary(next) ? success : 'Local library storage is unavailable. Your current combination is unchanged.');
+    const saved = writeLibrary(next);
+    setNotice(saved ? success : 'Local library storage is unavailable. Your current combination is unchanged.');
+    if (!saved && state.testMode) emitUsabilityAction({ type: 'SYSTEM_ERROR', code: 'STORAGE_FAILED' });
+    return saved;
   };
 
   const choosePart = (partId: string) => {
@@ -197,7 +210,20 @@ export default function App() {
       cacheHit: wasPartPrepared(partId),
     });
     markCachedSwitch('cached-switch:store-start');
+    if (state.testMode) emitUsabilityAction({ type: 'PART_SELECTED', partId, combinationId: combinationId(nextCombination) });
     state.selectPart(partId);
+  };
+
+  const toggleCurrentFavorite = () => {
+    const alreadyFavorite = library.favorites.some(entry => entry.id === id);
+    if (persistLibrary(toggleFavorite(library, state.combination), alreadyFavorite ? 'Favorite removed.' : 'Favorite saved locally.') && state.testMode && !alreadyFavorite) {
+      emitUsabilityAction({ type: 'FAVORITE_SAVED', combinationId: id });
+    }
+  };
+
+  const restoreFavorite = (entry: (typeof library.favorites)[number]) => {
+    if (state.testMode) pendingFavoriteRestore.current = entry.id;
+    state.replaceCombination(entry.combination);
   };
 
   const completeFocusPresentation = (session: number) => {
@@ -246,19 +272,23 @@ export default function App() {
       anchor.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 0);
       setNotice('Combination card exported.');
+      if (state.testMode) emitUsabilityAction({ type: 'SHARE_SUCCEEDED', method: 'png' });
     } catch (error) {
       setNotice(error instanceof Error ? `Card export failed: ${error.message} Retry when the model is ready.` : 'Card export failed. Retry when the model is ready.');
+      if (state.testMode) emitUsabilityAction({ type: 'SYSTEM_ERROR', code: 'SHARE_FAILED' });
     } finally {
       setCardExporting(false);
     }
   };
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${state.testMode ? 'test-mode-enabled' : ''}`}>
       <header className="topbar">
         <div><span className="eyebrow">NOVA SPIN SYSTEM</span><h1>Internal Customizer</h1></div>
         <span className="prototype-badge">PROVISIONAL PROTOTYPE</span>
       </header>
+
+      {state.testMode && <Suspense fallback={<p className="test-panel-loading">Loading anonymous test guide…</p>}><TestModePanel /></Suspense>}
 
       <section className="viewer" aria-label="3D customizer viewport">
         <SceneErrorBoundary resetKey={id}><Suspense fallback={<div className="scene-runtime-loading">Loading local 3D runtime…</div>}><CustomizerScene combination={state.combination} /></Suspense></SceneErrorBoundary>
@@ -322,8 +352,9 @@ export default function App() {
                 <button data-testid="copy-share-link" onClick={async () => {
                   const copied = await copyShareLink(share.url);
                   setNotice(copied ? 'Share link copied.' : 'Clipboard unavailable. Select and copy the link manually.');
+                  if (state.testMode) emitUsabilityAction(copied ? { type: 'SHARE_SUCCEEDED', method: 'link' } : { type: 'SYSTEM_ERROR', code: 'SHARE_FAILED' });
                 }}>Copy link</button>
-                <Suspense fallback={<p>Preparing local QR code…</p>}><QrCodeView content={share.url} /></Suspense>
+                <Suspense fallback={<p>Preparing local QR code…</p>}><QrCodeView content={share.url} onReady={state.testMode ? () => emitUsabilityAction({ type: 'SHARE_SUCCEEDED', method: 'qr' }) : undefined} /></Suspense>
                 {share.deviceOnly && <p data-testid="share-device-warning">This local link works only on this device. Configure VITE_SHARE_BASE_URL for a shareable host.</p>}
               </section>
             )}
@@ -332,11 +363,11 @@ export default function App() {
                 <div className="library-editor">
                   <input data-testid="nickname-input" aria-label="Combination nickname" maxLength={60} value={nickname} onChange={event => setNickname(event.target.value)} placeholder="Optional local nickname" />
                   <button data-testid="save-nickname" onClick={() => persistLibrary(setLibraryNickname(library, id, nickname), 'Nickname saved locally.')}>Save nickname</button>
-                  <button data-testid="favorite-current" onClick={() => persistLibrary(toggleFavorite(library, state.combination), library.favorites.some(entry => entry.id === id) ? 'Favorite removed.' : 'Favorite saved locally.')}>{library.favorites.some(entry => entry.id === id) ? 'Unfavorite current' : 'Favorite current'}</button>
+                  <button data-testid="favorite-current" onClick={toggleCurrentFavorite}>{library.favorites.some(entry => entry.id === id) ? 'Unfavorite current' : 'Favorite current'}</button>
                 </div>
                 <h4>Favorites</h4>
                 <div className="library-list">
-                  {library.favorites.map(entry => <div key={entry.id}><button data-testid={`favorite-${entry.id}`} onClick={() => state.replaceCombination(entry.combination)}>{entry.nickname ?? combinationName(entry.combination)} <code>{entry.id}</code></button><button data-testid={`remove-favorite-${entry.id}`} aria-label={`Remove ${entry.id} favorite`} onClick={() => persistLibrary(removeFavorite(library, entry.id), 'Favorite removed.')}>×</button></div>)}
+                  {library.favorites.map(entry => <div key={entry.id}><button data-testid={`favorite-${entry.id}`} onClick={() => restoreFavorite(entry)}>{entry.nickname ?? combinationName(entry.combination)} <code>{entry.id}</code></button><button data-testid={`remove-favorite-${entry.id}`} aria-label={`Remove ${entry.id} favorite`} onClick={() => persistLibrary(removeFavorite(library, entry.id), 'Favorite removed.')}>×</button></div>)}
                   {library.favorites.length === 0 && <p>No favorites yet.</p>}
                 </div>
                 <h4>Recent</h4>
