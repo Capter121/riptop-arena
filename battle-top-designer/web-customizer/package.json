@@ -20,8 +20,11 @@
     "perf:current": "npm run build && node scripts/run-phase3b-performance.mjs phase3b-performance-current.json",
     "perf:check": "npm run build && node scripts/run-phase3b-performance.mjs phase3b-performance-current.json",
     "perf:diagnose:cached": "npm run build && playwright test cached-switch-diagnostic.spec.ts --config playwright.performance.config.ts --project=desktop",
-    "report": "node scripts/report-phase3a.mjs",
-    "test:all": "npm run check:governance && npm run test:unit && npm run build && npm run test:e2e && npm run report"
+    "report": "npm run report:phase3b",
+    "report:phase3a": "node scripts/report-phase3a.mjs --browser-report tests/fixtures/reporting/phase3a-browser-test.json --validate-only",
+    "report:phase3b": "node scripts/report-phase3b.mjs",
+    "test:report": "vitest run tests/unit/reportPhaseValidation.test.mjs",
+    "test:all": "npm run check:governance && npm run test:unit && npm run build && npm run test:e2e && npm run report:phase3b"
   },
   "dependencies": {
     "@react-three/drei": "10.7.6",

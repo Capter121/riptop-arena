@@ -1,7 +1,7 @@
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { readJson, validateBrowserReport, validateProtectedEnvironment } from './report-phase-validation.mjs';
 
 const project = resolve(import.meta.dirname, '../..');
 const app = resolve(project, 'web-customizer');
@@ -10,62 +10,76 @@ const notice = [
   'Human visual review remains pending.',
   'Development continued under a documented provisional internal-prototype decision.',
 ];
-const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
-const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
 
-const catalog = await readJson(resolve(app, 'src/generated/parts.catalog.json'));
-const browser = await readJson(resolve(app, 'test-results/phase3a-browser-test.json'));
-const waiver = await readJson(resolve(validationDir, 'phase2c-waiver-validation.json'));
-const baseline = await readJson(resolve(validationDir, 'phase2c-baseline-verification.json'));
-const phase2c = await readJson(resolve(validationDir, 'phase2c-final-gate.json'));
-const packageJson = await readJson(resolve(app, 'package.json'));
-const distFiles = (await readdir(resolve(app, 'dist'))).filter(name => name.endsWith('.glb')).sort();
-const expectedFiles = catalog.parts.map(part => `${part.id}.glb`).sort();
-const assetErrors = [];
-if (JSON.stringify(distFiles) !== JSON.stringify(expectedFiles)) assetErrors.push('dist GLB set is not the exact 16-part catalog');
-for (const name of expectedFiles) {
-  const source = await readFile(resolve(project, 'public/models/parts', name));
-  const built = await readFile(resolve(app, 'dist', name));
-  if (sha256(source) !== sha256(built)) assetErrors.push(`${name} differs from the protected source`);
-}
-const sourceGlbs = (await readdir(resolve(app, 'src'), { recursive: true })).filter(name => name.endsWith('.glb'));
-if (sourceGlbs.length) assetErrors.push('source GLB copies found');
-const protectedPaths = ['specs', 'public/models', 'reports/validation/phase2c-final-gate.json', 'reports/validation/phase2c-combination-matrix.json'];
-const protectedDiff = execFileSync('git', ['diff', '--name-only', 'HEAD', '--', ...protectedPaths], { cwd: project, encoding: 'utf8' }).trim().split(/\r?\n/).filter(Boolean);
-const browserPassed = browser.stats?.expected === 2 && browser.stats?.unexpected === 0 && browser.stats?.flaky === 0;
-const pass = browserPassed && !assetErrors.length && !protectedDiff.length
-  && waiver.result === 'PASS' && baseline.result === 'PASS' && phase2c.result === 'PASS';
-if (!pass) throw new Error(`Phase 3A report gate failed: ${JSON.stringify({ browserPassed, assetErrors, protectedDiff })}`);
+export const createPhase3aBrowserSection = validation => ({
+  result: validation.browserPassed ? 'PASS' : 'FAIL',
+  desktop: validation.browserPassed,
+  mobile: validation.browserPassed,
+  expected: validation.expectedTests,
+  unexpected: validation.unexpectedTests,
+  flaky: validation.flakyTests,
+});
 
-const summary = {
-  status: 'Phase 3A internal prototype PASS under provisional visual review',
-  visual_review_status: 'Phase 2B visual review deferred pending real reviewers',
-  baseline: { id: 'v0.2.0-rc1-technical-baseline', status: 'PROVISIONAL_NOT_FINAL', verified: true },
-  governance: { waiver_sha256: waiver.waiver_sha256, expires_on: waiver.expires_on, phase2c_status: phase2c.technical_status },
-  scope: { part_count: 16, combination_count: 288, families: { core: 2, blade: 4, assist: 3, gear: 3, tip: 4 } },
-  automated_tests: {
-    unit: { result: 'PASS', files: 4, assertions: 12 },
-    matrix: { result: 'PASS', combinations: 288, duplicate_ids: 0, phase2c_id_mismatches: 0 },
-    glb: { result: 'PASS', source_count: 16, built_count: distFiles.length, hash_mismatches: 0, collider_exports: 0 },
-    playwright: { result: 'PASS', desktop: true, mobile: true, expected: browser.stats.expected, unexpected: browser.stats.unexpected, flaky: browser.stats.flaky },
-    runtime_errors: { console: 0, pageerror: 0, failed_request: 0, external_request: 0 },
-    preview_regression: { result: 'PASS', tests: 43 },
-  },
-  build: {
-    result: 'PASS',
-    dependencies: { ...packageJson.dependencies, ...packageJson.devDependencies },
-    largest_javascript_bytes: Math.max(...await Promise.all((await readdir(resolve(app, 'dist/assets'))).filter(name => name.endsWith('.js')).map(async name => (await stat(resolve(app, 'dist/assets', name))).size))),
-    source_glb_copies: sourceGlbs.length,
-  },
-  protected_scope: { nss_v1_modified: false, visible_geometry_modified: false, provisional_baseline_modified: false, phase2c_result_modified: false, protected_diff: protectedDiff },
-  blender_or_model_generation_run: false,
-  public_release_allowed: false,
-  human_visual_review_pending: true,
-  notices: notice,
+const argumentValue = flag => {
+  const index = process.argv.indexOf(flag);
+  return index === -1 ? undefined : process.argv[index + 1];
 };
-await writeFile(resolve(validationDir, 'phase3a-summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
 
-const markdown = `# Phase 3A validation summary
+export const main = async () => {
+  const reportArgument = argumentValue('--browser-report');
+  const browserPath = reportArgument ? resolve(app, reportArgument) : resolve(app, 'test-results/phase3a-browser-test.json');
+  const manifest = await readJson(resolve(app, 'validation-manifests/phase3a-browser-suite.json'));
+  const browser = await readJson(browserPath);
+  const browserValidation = validateBrowserReport({ manifest, report: browser, phase: 'phase3a' });
+  const environment = await validateProtectedEnvironment({ project, app, validationDir });
+  const pass = browserValidation.browserPassed && environment.overallPassed;
+  if (!pass) {
+    throw new Error(`Phase 3A report gate failed: ${JSON.stringify({ browserValidation, assetErrors: environment.assetErrors, protectedDiff: environment.protectedDiff })}`);
+  }
+  if (process.argv.includes('--validate-only')) {
+    console.log(JSON.stringify({ result: 'PASS', phase: 'phase3a', browser: createPhase3aBrowserSection(browserValidation) }, null, 2));
+    return;
+  }
+
+  const summary = {
+    status: 'Phase 3A internal prototype PASS under provisional visual review',
+    visual_review_status: 'Phase 2B visual review deferred pending real reviewers',
+    baseline: { id: 'v0.2.0-rc1-technical-baseline', status: 'PROVISIONAL_NOT_FINAL', verified: true },
+    governance: {
+      waiver_sha256: environment.waiver.waiver_sha256,
+      expires_on: environment.waiver.expires_on,
+      phase2c_status: environment.phase2c.technical_status,
+    },
+    scope: { part_count: 16, combination_count: 288, families: { core: 2, blade: 4, assist: 3, gear: 3, tip: 4 } },
+    automated_tests: {
+      unit: { result: 'PASS', files: 4, assertions: 12 },
+      matrix: { result: 'PASS', combinations: 288, duplicate_ids: 0, phase2c_id_mismatches: 0 },
+      glb: { result: 'PASS', source_count: 16, built_count: environment.distFiles.length, hash_mismatches: 0, collider_exports: 0 },
+      playwright: createPhase3aBrowserSection(browserValidation),
+      runtime_errors: { console: 0, pageerror: 0, failed_request: 0, external_request: 0 },
+      preview_regression: { result: 'PASS', tests: 43 },
+    },
+    build: {
+      result: 'PASS',
+      dependencies: { ...environment.packageJson.dependencies, ...environment.packageJson.devDependencies },
+      largest_javascript_bytes: environment.largestJavascriptBytes,
+      source_glb_copies: environment.sourceGlbs.length,
+    },
+    protected_scope: {
+      nss_v1_modified: false,
+      visible_geometry_modified: false,
+      provisional_baseline_modified: false,
+      phase2c_result_modified: false,
+      protected_diff: environment.protectedDiff,
+    },
+    blender_or_model_generation_run: false,
+    public_release_allowed: false,
+    human_visual_review_pending: true,
+    notices: notice,
+  };
+  await writeFile(resolve(validationDir, 'phase3a-summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
+
+  const markdown = `# Phase 3A validation summary
 
 Status: **${summary.status}**
 
@@ -98,5 +112,9 @@ Status: **${summary.status}**
 
 The provisional baseline is unchanged and remains non-final. This internal prototype does not close human visual review and does not establish public-release, manufacturing, high-speed battle, safety, physical-performance, or legal-originality approval.
 `;
-await writeFile(resolve(project, 'reports/phase3a-validation-summary.md'), markdown);
-console.log(JSON.stringify({ result: 'PASS', outputs: ['reports/phase3a-validation-summary.md', 'reports/validation/phase3a-summary.json'] }, null, 2));
+  await writeFile(resolve(project, 'reports/phase3a-validation-summary.md'), markdown);
+  console.log(JSON.stringify({ result: 'PASS', outputs: ['reports/phase3a-validation-summary.md', 'reports/validation/phase3a-summary.json'] }, null, 2));
+};
+
+const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) await main();

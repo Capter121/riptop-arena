@@ -1,0 +1,18 @@
+{
+  "phase": "phase3a",
+  "manifestVersion": 1,
+  "tests": [
+    {
+      "project": "desktop",
+      "file": "tests/e2e/customizer.spec.ts",
+      "fullTitle": "complete offline customizer flow",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/customizer.spec.ts",
+      "fullTitle": "complete offline customizer flow",
+      "critical": true
+    }
+  ]
+}

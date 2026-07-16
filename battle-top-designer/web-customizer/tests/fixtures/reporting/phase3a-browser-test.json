@@ -1,0 +1,64 @@
+{
+  "config": {},
+  "suites": [
+    {
+      "title": "customizer.spec.ts",
+      "file": "customizer.spec.ts",
+      "specs": [
+        {
+          "title": "complete offline customizer flow",
+          "ok": true,
+          "tests": [
+            {
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "status": "passed",
+                  "attachments": [
+                    {
+                      "name": "technical-errors",
+                      "contentType": "application/json",
+                      "body": "eyJjb25zb2xlIjpbXSwicGFnZSI6W10sImZhaWxlZCI6W10sImV4dGVybmFsIjpbXX0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "projectId": "mobile",
+              "projectName": "mobile",
+              "results": [
+                {
+                  "status": "passed",
+                  "attachments": [
+                    {
+                      "name": "technical-errors",
+                      "contentType": "application/json",
+                      "body": "eyJjb25zb2xlIjpbXSwicGFnZSI6W10sImZhaWxlZCI6W10sImV4dGVybmFsIjpbXX0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "phase3a-historical-fixture",
+          "file": "customizer.spec.ts",
+          "line": 3,
+          "column": 1
+        }
+      ],
+      "suites": []
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0,
+    "passed": 2
+  }
+}

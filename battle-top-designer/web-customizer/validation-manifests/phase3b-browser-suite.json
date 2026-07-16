@@ -1,0 +1,114 @@
+{
+  "phase": "phase3b",
+  "manifestVersion": 1,
+  "tests": [
+    {
+      "project": "desktop",
+      "file": "tests/e2e/customizer.spec.ts",
+      "fullTitle": "complete offline customizer flow",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/focus-lifecycle.spec.ts",
+      "fullTitle": "keeps only the latest focus readout through rapid replacements",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/focus-lifecycle.spec.ts",
+      "fullTitle": "preserves focus consistency with reduced motion and low-performance mode",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/history.spec.ts",
+      "fullTitle": "undoes and redoes only successfully loaded combinations",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/library.spec.ts",
+      "fullTitle": "persists recent combinations, favorites, and local nicknames",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/mobile-focus-readout-race.spec.ts",
+      "fullTitle": "keeps mobile focus readouts consistent through rapid part changes",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/performance-ui.spec.ts",
+      "fullTitle": "loads runtime and optional tools lazily with persistent low-performance mode",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/png-card.spec.ts",
+      "fullTitle": "exports a local 1200x630 PNG card without changing assembly state",
+      "critical": true
+    },
+    {
+      "project": "desktop",
+      "file": "tests/e2e/sharing.spec.ts",
+      "fullTitle": "restores, shares, and safely clears combination URLs offline",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/customizer.spec.ts",
+      "fullTitle": "complete offline customizer flow",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/focus-lifecycle.spec.ts",
+      "fullTitle": "keeps only the latest focus readout through rapid replacements",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/focus-lifecycle.spec.ts",
+      "fullTitle": "preserves focus consistency with reduced motion and low-performance mode",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/history.spec.ts",
+      "fullTitle": "undoes and redoes only successfully loaded combinations",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/library.spec.ts",
+      "fullTitle": "persists recent combinations, favorites, and local nicknames",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/mobile-focus-readout-race.spec.ts",
+      "fullTitle": "keeps mobile focus readouts consistent through rapid part changes",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/performance-ui.spec.ts",
+      "fullTitle": "loads runtime and optional tools lazily with persistent low-performance mode",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/png-card.spec.ts",
+      "fullTitle": "exports a local 1200x630 PNG card without changing assembly state",
+      "critical": true
+    },
+    {
+      "project": "mobile",
+      "file": "tests/e2e/sharing.spec.ts",
+      "fullTitle": "restores, shares, and safely clears combination URLs offline",
+      "critical": true
+    }
+  ]
+}
