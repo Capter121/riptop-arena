@@ -1,7 +1,23 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
+import { observeFocusReadoutDuringSelection } from './helpers/focusReadout';
 
 const sessionKey = 'nova-spin:phase3b:test-session:v1';
+type FocusFamily = 'assist' | 'gear' | 'tip';
+type ProductCombination = Record<'core' | 'blade' | FocusFamily, string>;
+type ProductSnapshot = { combination: ProductCombination; combinationId: string };
+const readoutText: Record<string, string> = {
+  assist_heavy: 'Heavy Assist isolated · Blade transparency reduced',
+  assist_guard: 'Guard Assist isolated · Blade transparency reduced',
+  assist_air: 'Air Assist isolated · Blade transparency reduced',
+  gear_low: 'Gear 4.0 mm · total height Δ 0.0 mm vs Low',
+  gear_medium: 'Gear 5.0 mm · total height Δ 1.0 mm vs Low',
+  gear_high: 'Gear 6.0 mm · total height Δ 2.0 mm vs Low',
+  tip_flat_attack: 'Contact focus · Flat Attack Tip',
+  tip_ball_defense: 'Contact focus · Ball Defense Tip',
+  tip_needle_stamina: 'Contact focus · Needle Stamina Tip',
+  tip_taper_balance: 'Contact focus · Taper Balance Tip',
+};
 
 function auditPage(page: Page) {
   const errors = { console: [] as string[], page: [] as string[], failed: [] as string[], external: [] as string[] };
@@ -19,11 +35,22 @@ async function waitReady(page: Page) {
   await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
 }
 
-async function selectFocusedPart(page: Page, family: 'assist' | 'gear' | 'tip', partId: string, readout: string) {
+async function selectFocusedPart(page: Page, family: FocusFamily, partId: string, count: number, total: number) {
   await page.getByTestId(`tab-${family}`).click();
-  await page.getByTestId(`part-${partId}`).click();
-  await waitReady(page);
-  await expect(page.getByTestId(readout)).toBeVisible();
+  const current = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot()) as ProductSnapshot;
+  const expectedCombination = { ...current.combination, [family]: partId };
+  await observeFocusReadoutDuringSelection({
+    page,
+    option: page.getByTestId(`part-${partId}`),
+    readoutTestId: `${family === 'gear' ? 'gear-height' : family === 'tip' ? 'tip-contact' : 'assist-focus'}-readout`,
+    expectedText: readoutText[partId],
+    readyPredicate: () => waitReady(page),
+    taskProgress: page.getByTestId('test-viewed-progress'),
+    expectedTaskProgress: `${count}/${total}`,
+    combinationId: page.getByTestId('combination-id'),
+    expectedCombination,
+    productSnapshot: () => page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot()),
+  });
 }
 
 test('normal mode remains isolated and does not load the test panel chunk', async ({ page }) => {
@@ -69,23 +96,20 @@ test('completes all six tasks from real product actions and exports a whiteliste
   await page.getByTestId('test-complete-task').click();
 
   for (const [part, count] of [['assist_heavy', 1], ['assist_guard', 2], ['assist_air', 3]] as const) {
-    await selectFocusedPart(page, 'assist', part, 'assist-focus-readout');
-    await expect(page.getByTestId('test-viewed-progress')).toContainText(`${count}/3`);
+    await selectFocusedPart(page, 'assist', part, count, 3);
   }
   await page.locator('input[name="assist-feedback"][value="ALL_EASY"]').check();
   await expect(page.getByTestId('test-complete-task')).toBeEnabled();
   await page.getByTestId('test-complete-task').click();
 
   for (const [part, count] of [['gear_low', 1], ['gear_medium', 2], ['gear_high', 3]] as const) {
-    await selectFocusedPart(page, 'gear', part, 'gear-height-readout');
-    await expect(page.getByTestId('test-viewed-progress')).toContainText(`${count}/3`);
+    await selectFocusedPart(page, 'gear', part, count, 3);
   }
   await expect(page.getByTestId('test-complete-task')).toBeEnabled();
   await page.getByTestId('test-complete-task').click();
 
   for (const [part, count] of [['tip_flat_attack', 1], ['tip_ball_defense', 2], ['tip_needle_stamina', 3], ['tip_taper_balance', 4]] as const) {
-    await selectFocusedPart(page, 'tip', part, 'tip-contact-readout');
-    await expect(page.getByTestId('test-viewed-progress')).toContainText(`${count}/4`);
+    await selectFocusedPart(page, 'tip', part, count, 4);
   }
   await expect(page.getByTestId('test-complete-task')).toBeEnabled();
   await page.getByTestId('test-complete-task').click();

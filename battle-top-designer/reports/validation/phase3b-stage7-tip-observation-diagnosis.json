@@ -1,0 +1,47 @@
+{
+  "schema_version": "NSS-PHASE3B-STAGE7-OBSERVATION-DIAGNOSIS-V1",
+  "status": "OBSERVATION_ORDERING_RACE_CONFIRMED",
+  "source_trace": "web-customizer/test-results/anonymous-test-mode-comple-d5b2c-xports-a-whitelisted-result-stage7-mobile/trace.zip",
+  "source_trace_sha256": "d27fb0bdce9750b9b8f5b4c14f990f33000358942fef3994ddef752d20363e65",
+  "clock": "playwright_trace_monotonic_milliseconds",
+  "timeline": {
+    "click_command_start_ms": 282903.499,
+    "physical_click_start_ms": 285269.772,
+    "physical_click_complete_ms": 285768.727,
+    "browser_click_call_complete_ms": 286095.262,
+    "readout_first_captured_in_dom_ms": 286398.595,
+    "readout_first_captured_wall_time_unix_ms": 1784206602222,
+    "readout_text": "Contact focus · Flat Attack Tip",
+    "task_progress_first_captured": "1/4",
+    "task_progress_first_captured_ms": 286398.595,
+    "click_step_complete_ms": 286399.067,
+    "model_ready_assertion_start_ms": 286401.007,
+    "model_ready_browser_confirmation_ms": 286975.797,
+    "readout_last_captured_ms": 287280.029,
+    "readout_last_captured_phase": "exiting",
+    "readout_last_captured_wall_time_unix_ms": 1784206603103,
+    "model_ready_assertion_complete_ms": 287280.43,
+    "readout_assertion_scheduled_ms": 287281.9,
+    "readout_browser_call_start_ms": 287283.131,
+    "readout_first_captured_absent_ms": 287595.433,
+    "readout_first_captured_absent_wall_time_unix_ms": 1784206603419,
+    "readout_locator_poll_start_ms": 287595.985,
+    "readout_browser_wait_end_ms": 292610.293,
+    "readout_assertion_timeout_ms": 292770.136
+  },
+  "bounds": {
+    "readout_dom_entry": "285768.727 < entry <= 286398.595",
+    "readout_dom_exit": "287280.029 < exit <= 287595.433",
+    "poll_started_after_first_captured_absence_ms": 0.552
+  },
+  "findings": {
+    "readout_really_appeared": true,
+    "locator_polled_after_readout_disappeared": true,
+    "readout_content_correct": true,
+    "task_progress_consistent_with_readout_commit": true,
+    "product_runtime_failure_evidence": false,
+    "root_cause": "Sequential test observation started browser polling only after the transient readout had exited the DOM."
+  },
+  "approved_repair": "Start exact readout visibility and text observation before the option click, await the click and observation together, then verify ready state, final selection, task progress, and combination ID.",
+  "prohibited_changes_required": false
+}
