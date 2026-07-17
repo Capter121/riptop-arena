@@ -2,6 +2,11 @@ export interface EvidenceFreezeFacts {
   baselineTagResolved: boolean;
   baselineTagMatchesAnchor: boolean;
   baselineAssetsValid: boolean;
+  baselineAssetErrorCode?: string | null;
+  baselineAssetRuntime?: {
+    spawnErrorCode?: string | null;
+    spawnStatus?: number | null;
+  };
   evidenceCommitResolved: boolean;
   evidenceCommitIsAncestor: boolean;
   reportsPresent: boolean;

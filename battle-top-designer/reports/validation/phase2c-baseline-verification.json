@@ -1,5 +1,12 @@
 {
   "result": "PASS",
+  "errorCode": null,
+  "assetCount": 50,
+  "matched": 50,
+  "drifted": 0,
+  "missing": 0,
+  "extra": 0,
+  "failedAssets": [],
   "baseline_id": "v0.2.0-rc1-technical-baseline",
   "part_count": 16,
   "errors": [],

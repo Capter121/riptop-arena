@@ -243,6 +243,59 @@ def compare(expected: dict, actual: dict) -> list[str]:
     return errors
 
 
+def failed_assets(expected: dict, actual: dict, errors: list[str]) -> list[dict]:
+    expected_parts = {part["part_id"]: part for part in expected["parts"]}
+    actual_parts = {part["part_id"]: part for part in actual["parts"]}
+    failures = []
+    for error in errors:
+        if error == "WAIVER_SHA256_MISMATCH":
+            failures.append({
+                "relativePath": expected["waiver"]["path"],
+                "assetCategory": "OTHER_PROTECTED_ASSET",
+                "expectedSha256": expected["waiver"]["sha256"],
+                "actualSha256": actual["waiver"]["sha256"],
+                "reason": error,
+            })
+        elif error == "NSS_V1_DRIFT":
+            failures.append({
+                "relativePath": expected["interface"]["path"],
+                "assetCategory": "NSS_V1",
+                "expectedSha256": expected["interface"]["sha256"],
+                "actualSha256": actual["interface"]["sha256"],
+                "reason": error,
+            })
+        elif ":" in error:
+            reason, part_id = error.split(":", 1)
+            if part_id not in expected_parts or part_id not in actual_parts:
+                continue
+            before, after = expected_parts[part_id], actual_parts[part_id]
+            if reason == "BINARY_DRIFT":
+                path = before["glb_path"]
+                category = "GLB"
+                expected_hash = before["raw_sha256"]
+                actual_hash = after["raw_sha256"]
+            elif reason == "SPEC_DRIFT":
+                path = before["spec_path"]
+                category = "OTHER_PROTECTED_ASSET"
+                expected_hash = before["spec_sha256"]
+                actual_hash = after["spec_sha256"]
+            elif reason == "SEMANTIC_REGRESSION":
+                path = f"build/fingerprint-work/phase2c-baseline/{part_id}.json"
+                category = "MOUNT"
+                expected_hash = before["semantic_fingerprint"]
+                actual_hash = after["semantic_fingerprint"]
+            else:
+                continue
+            failures.append({
+                "relativePath": path,
+                "assetCategory": category,
+                "expectedSha256": expected_hash,
+                "actualSha256": actual_hash,
+                "reason": reason,
+            })
+    return failures
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("capture", "verify"))
@@ -257,8 +310,17 @@ def main() -> int:
         return 0
     expected = load_json(require(BASELINE_JSON))
     errors = compare(expected, actual)
+    failures = failed_assets(expected, actual, errors)
+    asset_count = 2 + len(actual["parts"]) * 3
     report = {
         "result": "PASS" if not errors else "FAIL",
+        "errorCode": None if not errors else "PROVISIONAL_BASELINE_ASSET_DRIFT",
+        "assetCount": asset_count,
+        "matched": asset_count - len(failures),
+        "drifted": len(failures),
+        "missing": 0,
+        "extra": 0,
+        "failedAssets": failures,
         "baseline_id": expected["baseline_id"],
         "part_count": len(actual["parts"]),
         "errors": errors,
@@ -266,8 +328,7 @@ def main() -> int:
         "audit_note": AUDIT_NOTE,
     }
     VERIFY_REPORT.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"NSS_PHASE2C_BASELINE_VERIFY={report['result']}")
-    print(f"NSS_PHASE2C_BASELINE_VERIFY_REPORT={VERIFY_REPORT}")
+    print(json.dumps(report, ensure_ascii=False))
     return 0 if not errors else 1
 
 

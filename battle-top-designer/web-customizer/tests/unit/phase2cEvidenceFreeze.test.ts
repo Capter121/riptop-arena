@@ -14,6 +14,18 @@ const PASSING_INPUT = {
 };
 
 describe('Phase 2C three-gate evidence freeze', () => {
+  it('does not classify an EPERM verifier launch failure as asset drift', () => {
+    const result = evaluateEvidenceFreeze({
+      ...PASSING_INPUT,
+      baselineAssetsValid: false,
+      baselineAssetErrorCode: 'PYTHON_RUNTIME_LAUNCH_FAILED',
+      baselineAssetRuntime: { spawnErrorCode: 'EPERM', spawnStatus: null },
+    });
+
+    expect(result.errors).toContain('PYTHON_RUNTIME_LAUNCH_FAILED');
+    expect(result.errors).not.toContain('PROVISIONAL_BASELINE_ASSET_DRIFT');
+  });
+
   it('fails when a provisional-baseline asset changes', () => {
     expect(evaluateEvidenceFreeze({ ...PASSING_INPUT, baselineAssetsValid: false }).result).toBe('FAIL');
   });

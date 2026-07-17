@@ -3,6 +3,11 @@ import { createHash } from 'node:crypto';
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  resolvePythonRuntime,
+  runPythonVerifier,
+  runtimeReport,
+} from './python-runtime.mjs';
 
 export const PROVISIONAL_BASELINE_TAG = 'v0.2.0-rc1-technical-baseline';
 export const PROVISIONAL_BASELINE_TAG_OBJECT = '4a7a6895d5d3bb6608a4178d8f9d8373f8e3a07f';
@@ -24,7 +29,9 @@ export function evaluateEvidenceFreeze(input) {
   const errors = [];
   if (!input.baselineTagResolved) errors.push('PROVISIONAL_BASELINE_TAG_UNRESOLVED');
   if (input.baselineTagResolved && !input.baselineTagMatchesAnchor) errors.push('PROVISIONAL_BASELINE_TAG_MOVED');
-  if (!input.baselineAssetsValid) errors.push('PROVISIONAL_BASELINE_ASSET_DRIFT');
+  if (!input.baselineAssetsValid) {
+    errors.push(input.baselineAssetErrorCode ?? 'PROVISIONAL_BASELINE_ASSET_DRIFT');
+  }
   if (!input.evidenceCommitResolved) errors.push('PHASE2C_EVIDENCE_COMMIT_UNRESOLVED');
   if (input.evidenceCommitResolved && !input.evidenceCommitIsAncestor) errors.push('PHASE2C_EVIDENCE_COMMIT_NOT_ANCESTOR');
   if (!input.reportsPresent) errors.push('PHASE2C_EVIDENCE_REPORT_MISSING');
@@ -57,13 +64,30 @@ function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
 }
 
-export function inspectEvidenceFreeze(projectRoot) {
+export function inspectEvidenceFreeze(projectRoot, options = {}) {
   const baselineTagObject = git(['rev-parse', '--verify', PROVISIONAL_BASELINE_TAG], projectRoot);
   const baselineTagObjectId = baselineTagObject.status === 0 ? baselineTagObject.stdout.trim() : null;
   const baselineCommit = resolvedCommit(PROVISIONAL_BASELINE_TAG, projectRoot);
   const evidenceCommit = resolvedCommit(PHASE2C_EVIDENCE_COMMIT, projectRoot);
   const head = resolvedCommit('HEAD', projectRoot);
-  const baselineVerify = run('python', ['scripts/manage_phase2c_provisional_baseline.py', 'verify'], projectRoot);
+  const runtimeResolution = resolvePythonRuntime({
+    env: options.env ?? process.env,
+    platform: options.platform ?? process.platform,
+    spawn: options.spawn,
+  });
+  const baselineVerify = runtimeResolution.result === 'PASS'
+    ? runPythonVerifier(runtimeResolution.runtime, projectRoot, { spawn: options.spawn })
+    : {
+        result: 'FAIL',
+        errorCode: runtimeResolution.errorCode,
+        assetCount: 50,
+        matched: null,
+        drifted: 0,
+        missing: 0,
+        extra: 0,
+        failedAssets: [],
+        process: null,
+      };
   const evidenceAncestor = evidenceCommit
     ? git(['merge-base', '--is-ancestor', PHASE2C_EVIDENCE_COMMIT, 'HEAD'], projectRoot).status === 0
     : false;
@@ -79,7 +103,8 @@ export function inspectEvidenceFreeze(projectRoot) {
     baselineTagResolved: baselineTagObjectId !== null && baselineCommit !== null,
     baselineTagMatchesAnchor: baselineTagObjectId === PROVISIONAL_BASELINE_TAG_OBJECT
       && baselineCommit === PROVISIONAL_BASELINE_COMMIT,
-    baselineAssetsValid: baselineVerify.status === 0,
+    baselineAssetsValid: baselineVerify.result === 'PASS',
+    baselineAssetErrorCode: baselineVerify.errorCode,
     evidenceCommitResolved: evidenceCommit !== null,
     evidenceCommitIsAncestor: evidenceAncestor,
     reportsPresent,
@@ -93,6 +118,7 @@ export function inspectEvidenceFreeze(projectRoot) {
   const evaluation = evaluateEvidenceFreeze(facts);
   return {
     ...evaluation,
+    error: evaluation.errors[0] ?? null,
     provisional_baseline_tag: PROVISIONAL_BASELINE_TAG,
     provisional_baseline_tag_object: baselineTagObjectId,
     provisional_baseline_commit: baselineCommit,
@@ -104,16 +130,21 @@ export function inspectEvidenceFreeze(projectRoot) {
     reports_clean_in_index: facts.reportsCleanInIndex,
     baseline_status: 'PROVISIONAL_NOT_FINAL',
     visual_review_status: 'Phase 2B visual review deferred pending real reviewers',
+    runtime: runtimeReport(runtimeResolution, baselineVerify),
     reports: PHASE2C_REPORTS.map((path, index) => ({
       path,
       sha256: reportsPresent ? sha256(reportPaths[index]) : null,
     })),
     gates: {
-      provisional_baseline_assets: facts.baselineAssetsValid ? 'PASS' : 'FAIL',
-      phase2c_evidence: facts.evidenceCommitResolved && facts.evidenceCommitIsAncestor
-        && facts.reportsPresent && facts.reportsMatchEvidenceCommit ? 'PASS' : 'FAIL',
-      protected_worktree: facts.reportsCleanInWorktree && facts.reportsCleanInIndex
-        && facts.baselineProtectedPathsCleanInWorktree && facts.baselineProtectedPathsCleanInIndex ? 'PASS' : 'FAIL',
+      provisional_baseline_assets: baselineVerify,
+      phase2c_evidence: {
+        result: facts.evidenceCommitResolved && facts.evidenceCommitIsAncestor
+          && facts.reportsPresent && facts.reportsMatchEvidenceCommit ? 'PASS' : 'FAIL',
+      },
+      protected_worktree: {
+        result: facts.reportsCleanInWorktree && facts.reportsCleanInIndex
+          && facts.baselineProtectedPathsCleanInWorktree && facts.baselineProtectedPathsCleanInIndex ? 'PASS' : 'FAIL',
+      },
     },
     audit_note: 'Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data.',
   };
