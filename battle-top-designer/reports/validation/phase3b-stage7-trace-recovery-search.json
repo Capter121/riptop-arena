@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "NSS-STAGE7-TRACE-RECOVERY-SEARCH-V1",
+  "method": "READ_ONLY_BOUNDED_SEARCH",
+  "searchCategories": [
+    "PROJECT_PLAYWRIGHT_OUTPUTS",
+    "CODEX_ATTACHMENTS",
+    "USER_BACKUP_LOCATIONS",
+    "WINDOWS_RECYCLE_BIN_VISIBLE_ITEMS",
+    "KNOWN_TEMP_DIRECTORIES",
+    "GIT_WORKTREES"
+  ],
+  "expectedSha256": "d27fb0bdce9750b9b8f5b4c14f990f33000358942fef3994ddef752d20363e65",
+  "candidateCount": 0,
+  "exactMatchCount": 0,
+  "originalTraceRecovered": false,
+  "fullDiskRecoveryPerformed": false,
+  "substituteTraceCreated": false,
+  "filesModifiedDuringSearch": false,
+  "productTestsRunDuringSearch": false,
+  "commitsCreatedDuringSearch": false,
+  "result": "NOT_RECOVERED"
+}

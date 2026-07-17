@@ -1,0 +1,236 @@
+{
+  "schemaVersion": "NSS-STAGE7-EXISTING-EVIDENCE-FREEZE-V1",
+  "capturedAt": "2026-07-17T05:16:00Z",
+  "status": "PASS_WITH_DOCUMENTED_HISTORICAL_GAPS",
+  "entries": [
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-playwright.json",
+      "exists": true,
+      "sha256": "69631e615837580df5809fc146698df341c52f3c967d68c56fe1fac810de5e37",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Original failed Playwright JSON preserved",
+      "limitation": "The associated original trace.zip is unavailable."
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-tip-observation-diagnosis.md",
+      "exists": true,
+      "sha256": "4a26d1b9ed577fe0280c61dcfda66c7ea84054c17dd29abd0c26706d5663a3a1",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Readout diagnosis Markdown",
+      "limitation": "Extracted diagnosis, not a complete trace substitute."
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-tip-observation-diagnosis.json",
+      "exists": true,
+      "sha256": "d83a5efd94bba2290ae78bb2c9f6e0fffbc4c158d0ee2b6d56ab7053cd3ac138",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Readout diagnosis timeline JSON",
+      "limitation": "Extracted diagnosis, not a complete trace substitute."
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-collection-boundary-diagnosis.md",
+      "exists": true,
+      "sha256": "b7a112df10ab179135ec4e4994883a4aacaef07d4633e4b7d22f5f79a7916f37",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Collection-boundary diagnosis",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-single-v2.json",
+      "exists": true,
+      "sha256": "52c1bec425de00ab0c323428f318fd6e93fdf17e91a9ca05805861dc1e40c879",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile single 1/1 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-target-25-v2.json",
+      "exists": true,
+      "sha256": "be4ff35f90d4c98ce9def9053dabf5a9702ddfdad139abdcca14ad74c816e4dc",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile target 25/25 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-01-v2.json",
+      "exists": true,
+      "sha256": "f0a4f9e789e152f9470084e32717271fbc44e5461633151d19c8100076af4050",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 01, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-02-v2.json",
+      "exists": true,
+      "sha256": "ce7476b7c110bbb664c457ad442042bb323f3c2a3c0a3e8ca32ff60361c018a0",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 02, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-03-v2.json",
+      "exists": true,
+      "sha256": "edd59c17a81f6a45cfe492cdd1e1612fea103d92264805a742f4193f5f036a8a",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 03, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-04-v2.json",
+      "exists": true,
+      "sha256": "443ed9a1db22c3b954a0d0b7f943f3f4a4dad628c39559a1f3acd58b66ec0f4d",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 04, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-05-v2.json",
+      "exists": true,
+      "sha256": "d0ffbbd753ebf6974aef25f218e0a13f74adc2b4695acb6499d2ec3c94fee39d",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 05, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-06-v2.json",
+      "exists": true,
+      "sha256": "1a9df10aaf6a1c73fbb39e035b7b8e6348d37779f05c747d186f6610979f7161",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 06, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-07-v2.json",
+      "exists": true,
+      "sha256": "32d29b7894a8cd15588cc33858b2c911c156436d9bbbdc1f0528902050d4f6c1",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 07, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-08-v2.json",
+      "exists": true,
+      "sha256": "2071c36f846ed246827f3c76df8993afdb9a3c3845e103103832cc69f026e217",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 08, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-09-v2.json",
+      "exists": true,
+      "sha256": "d65460a35cce36a1bbfd1a9abcfdfaf025393736141714e0b439f90cbbcfdeb1",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 09, 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-mobile-full-10-v2.json",
+      "exists": true,
+      "sha256": "3575dc51752f377375a6d027d5f88f47f71a8a081f3536bcff4903596ece8661",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Mobile full batch 10, 4/4 PASS; ten batches total 40/40",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-desktop-full-v2.json",
+      "exists": true,
+      "sha256": "438e908b2f8d267805c23bbf7264108efbdec7448bd47cb9b274d7bb6809bd87",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Desktop full 4/4 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-stage7-playwright-repaired-v2.json",
+      "exists": true,
+      "sha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Stage 7 combined 8/8 PASS",
+      "limitation": null
+    },
+    {
+      "category": "PRESERVED_HISTORICAL_ARTIFACT",
+      "path": "reports/validation/phase3b-browser-validation.json",
+      "exists": true,
+      "sha256": "dc3a50b6f0ee975bdb1f2302c5e45721dd17068dc4281f10d074bfddd904284e",
+      "evidenceStatus": "PRESERVED_AND_HASHED",
+      "resultSummary": "Legacy Playwright 18/18 PASS",
+      "limitation": null
+    },
+    {
+      "category": "HISTORICAL_ARTIFACT_UNAVAILABLE",
+      "path": null,
+      "exists": false,
+      "sha256": null,
+      "evidenceStatus": "ACCEPTED_MISSING_HISTORICAL_ANCHOR",
+      "resultSummary": "Historical unit-test artifact unavailable; prior claim was 159/159 PASS",
+      "limitation": "No historical file exists for byte-level verification; unchanged is not asserted."
+    },
+    {
+      "category": "HISTORICAL_ARTIFACT_UNAVAILABLE",
+      "path": null,
+      "exists": false,
+      "sha256": null,
+      "evidenceStatus": "ACCEPTED_MISSING_HISTORICAL_ANCHOR",
+      "resultSummary": "Historical TypeScript artifact unavailable; prior claim was PASS",
+      "limitation": "No historical file exists for byte-level verification; unchanged is not asserted."
+    },
+    {
+      "category": "HISTORICAL_ARTIFACT_UNAVAILABLE",
+      "path": null,
+      "exists": false,
+      "sha256": null,
+      "evidenceStatus": "ACCEPTED_MISSING_HISTORICAL_ANCHOR",
+      "resultSummary": "Historical production-build artifact unavailable; prior claim was PASS",
+      "limitation": "No historical file exists for byte-level verification; unchanged is not asserted."
+    },
+    {
+      "category": "CURRENT_REVALIDATION_EVIDENCE",
+      "path": "web-customizer/test-artifacts/stage7-quality-anchor-20260717T051500Z-72eca1e/unit-test-result.json",
+      "exists": true,
+      "sha256": "ba82c8e60928714d72eaf92c124f7d04965bc92bbed0898b8cec21a4be058a91",
+      "evidenceStatus": "CURRENT_PASS",
+      "resultSummary": "Current unit tests 171/171 PASS",
+      "limitation": "Current revalidation only; not recovered historical evidence."
+    },
+    {
+      "category": "CURRENT_REVALIDATION_EVIDENCE",
+      "path": "web-customizer/test-artifacts/stage7-quality-anchor-20260717T051500Z-72eca1e/typecheck-result.json",
+      "exists": true,
+      "sha256": "e88e4685b76397d9321ec0669fe7f0a6edf8eb655dd7578a48af324ba7355ed2",
+      "evidenceStatus": "CURRENT_PASS",
+      "resultSummary": "Current TypeScript PASS",
+      "limitation": "Current revalidation only; not recovered historical evidence."
+    },
+    {
+      "category": "CURRENT_REVALIDATION_EVIDENCE",
+      "path": "web-customizer/test-artifacts/stage7-quality-anchor-20260717T051500Z-72eca1e/build-result.json",
+      "exists": true,
+      "sha256": "d080d1b3c2bf44deaff2efb5614894b404d4e6da8b60f1a0e156b4a1d675e3ef",
+      "evidenceStatus": "CURRENT_PASS",
+      "resultSummary": "Current production build PASS",
+      "limitation": "Current revalidation only; not recovered historical evidence."
+    }
+  ],
+  "incidents": [
+    "STAGE7-TRACE-LOSS-001",
+    "STAGE7-MISSING-QUALITY-ANCHORS-001"
+  ]
+}

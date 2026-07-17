@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "NSS-STAGE7-MISSING-QUALITY-ANCHORS-INCIDENT-V1",
+  "incidentId": "STAGE7-MISSING-QUALITY-ANCHORS-001",
+  "status": "ACCEPTED_WITH_DOCUMENTED_MISSING_HISTORICAL_QUALITY_ANCHORS",
+  "missingHistoricalArtifacts": [
+    {
+      "kind": "UNIT_TEST_RESULT_ARTIFACT",
+      "path": null,
+      "exists": false,
+      "sha256": null,
+      "knownUnverifiableClaim": "159/159 PASS"
+    },
+    {
+      "kind": "TYPESCRIPT_RESULT_ARTIFACT",
+      "path": null,
+      "exists": false,
+      "sha256": null,
+      "knownUnverifiableClaim": "PASS"
+    },
+    {
+      "kind": "PRODUCTION_BUILD_RESULT_ARTIFACT",
+      "path": null,
+      "exists": false,
+      "sha256": null,
+      "knownUnverifiableClaim": "PASS"
+    }
+  ],
+  "searchConclusion": {
+    "verifiableHistoricalResultFilesFound": false,
+    "historicalFileSha256Available": false
+  },
+  "limitations": [
+    "Historical output files cannot be verified for byte-level integrity.",
+    "New results cannot be backdated or described as historical results.",
+    "Missing historical files cannot be assigned replacement hashes."
+  ],
+  "remediation": [
+    "Run the current complete unit-test gate.",
+    "Run the current TypeScript gate.",
+    "Run the current production-build gate.",
+    "Create CURRENT_REVALIDATION_EVIDENCE with actual current counts and timestamps.",
+    "Repeat the final quality gate after commits.",
+    "Preserve subsequent formal quality commands in unique artifact runs."
+  ],
+  "historicalEvidenceRecovered": false,
+  "acceptedBy": "PROJECT_OWNER",
+  "acceptedAt": "2026-07-17T05:12:10Z"
+}

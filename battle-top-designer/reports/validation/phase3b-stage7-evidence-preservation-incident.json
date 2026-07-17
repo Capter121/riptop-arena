@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "NSS-STAGE7-EVIDENCE-INCIDENT-V1",
+  "incidentId": "STAGE7-TRACE-LOSS-001",
+  "status": "ACCEPTED_WITH_DOCUMENTED_EVIDENCE_LOSS",
+  "artifactAvailability": "UNAVAILABLE_AFTER_PLAYWRIGHT_OUTPUT_CLEANUP",
+  "cause": "Subsequent Playwright runs reused the shared default test-results outputDir, whose startup cleanup removed the unversioned historical failure trace.zip.",
+  "lostEvidence": [
+    {
+      "name": "original-failure-trace.zip",
+      "expectedSha256": "d27fb0bdce9750b9b8f5b4c14f990f33000358942fef3994ddef752d20363e65",
+      "availability": "UNAVAILABLE"
+    }
+  ],
+  "preservedEvidence": [
+    "original failure JSON and SHA-256",
+    "historical trace SHA-256 record",
+    "readout diagnosis Markdown",
+    "readout diagnosis JSON",
+    "collection-boundary diagnosis",
+    "extracted exact event timeline",
+    "post-repair formal test results",
+    "governance and freeze results",
+    "Git commit and workspace history"
+  ],
+  "cannotReprove": [
+    "byte-level integrity of the original trace archive",
+    "independent rereading of resources inside the original trace archive"
+  ],
+  "diagnosisIsCompleteTraceSubstitute": false,
+  "acceptanceDecision": "ACCEPTED_WITH_DOCUMENTED_EVIDENCE_LOSS",
+  "acceptedBy": "PROJECT_OWNER",
+  "acceptedAt": "2026-07-17T04:57:11Z",
+  "scope": "STAGE_7_HISTORICAL_TRANSIENT_READOUT_FAILURE_ONLY"
+}

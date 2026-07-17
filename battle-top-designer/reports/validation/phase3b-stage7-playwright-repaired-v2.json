@@ -1,0 +1,383 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/stage7/anonymous-test-mode.spec.ts",
+      "--config",
+      "playwright.stage7.config.ts",
+      "--workers=1",
+      "--retries=0"
+    ],
+    "configFile": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\playwright.stage7.config.ts",
+    "rootDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage7-desktop",
+        "name": "stage7-desktop",
+        "testDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage7-mobile",
+        "name": "stage7-mobile",
+        "testDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../reports/validation/phase3b-stage7-playwright-repaired-v2.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev -- --port 4176",
+      "port": 4176,
+      "reuseExistingServer": false,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "anonymous-test-mode.spec.ts",
+      "file": "anonymous-test-mode.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "normal mode remains isolated and does not load the test panel chunk",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5716,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:29:41.555Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-abe5958140ea0327cfa7",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "combo and test parameters coexist without leaking test mode into the share URL",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9728,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:29:47.443Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-4598990a53ed990baaf4",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 68,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 180525,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:29:57.209Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-d76876fe405500928cf3",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "persists an unfinished session, supports skip, collapse, clear, and explicit restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 24028,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:32:57.757Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-fb7125570c18e51711f7",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 158,
+          "column": 1
+        },
+        {
+          "title": "normal mode remains isolated and does not load the test panel chunk",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4284,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:33:22.700Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-b45c8b54e54d74dd61d5",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "combo and test parameters coexist without leaking test mode into the share URL",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10305,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:33:27.129Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-d00cb6a7c0d55b51e8a4",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 68,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 173060,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:33:37.465Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-8cc21bc6ddd64437f6b2",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "persists an unfinished session, supports skip, collapse, clear, and explicit restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16672,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T15:36:30.550Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-ecc0ab519b6374652c0f",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 158,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-16T15:29:39.814Z",
+    "duration": 427859.58999999997,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

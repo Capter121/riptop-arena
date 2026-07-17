@@ -1,0 +1,965 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/stage7/anonymous-test-mode.spec.ts",
+      "--config",
+      "playwright.stage7.config.ts",
+      "--project=stage7-mobile",
+      "--grep",
+      "completes all six tasks from real product actions and exports a whitelisted result",
+      "--repeat-each=25",
+      "--workers=1",
+      "--retries=0"
+    ],
+    "configFile": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\playwright.stage7.config.ts",
+    "rootDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage7-desktop",
+        "name": "stage7-desktop",
+        "testDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/test-results",
+        "repeatEach": 25,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage7-mobile",
+        "name": "stage7-mobile",
+        "testDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../reports/validation/phase3b-stage7-mobile-target-25-v2.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev -- --port 4176",
+      "port": 4176,
+      "reuseExistingServer": false,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "anonymous-test-mode.spec.ts",
+      "file": "anonymous-test-mode.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 186485,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:31:06.140Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-8cc21bc6ddd64437f6b2",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 165847,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:34:13.663Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-977b30e255723e4c22fb",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 201005,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:37:00.462Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-59c2f3e7df4f83aadb61",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 205980,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:40:22.634Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-28f01220ae13c19e1d3c",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 180065,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:43:49.707Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-3e19f3b18d27a2dbbc3e",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 200354,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:46:50.787Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-116185140db94cdd96a7",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 183294,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:50:12.258Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-9362a96e265e9e416d40",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 195059,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:53:16.555Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-700f5e132facbe25107f",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 188428,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:56:32.525Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-40c5389ecd932a3e9b29",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 9,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 189231,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T13:59:41.873Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-050b1fb74dedb1335015",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 10,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 187011,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:02:52.043Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-dbfd4b8790161958c2fc",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 11,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 190095,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:06:00.032Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-14be87bb4299da7bd957",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 197247,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:09:11.018Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-4bf073bfae5fc9be6efa",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 13,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 160766,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:12:29.180Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-7caf2b7052c9ee88c123",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 159681,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:15:10.881Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-13aa247ca6587739d422",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 15,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 186495,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:17:51.528Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-6f21297bfc3a9c7207fb",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 16,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 186261,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:20:59.048Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-3817d9c84627e1d2c0e6",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 17,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 179185,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:24:06.367Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-a42ee477b8244b1614e6",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 18,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 179085,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:27:06.500Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-cce5b99e4edf035ef3c1",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 19,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 178495,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:30:06.510Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-74762515395943b92b37",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 20,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 186616,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:33:05.940Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-76e0fed8ef42cadf7011",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 21,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 187233,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:36:13.500Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-f6b61dff2cc6c66cf8ad",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 22,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 187243,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:39:21.676Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-0e5de184ec4cbdf92d81",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 23,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 189940,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:42:29.836Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-21ae5634718b73f877a5",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 24,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 190016,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T14:45:40.642Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-73c57bd4efef9ab77e17",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 80,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-16T13:31:04.535Z",
+    "duration": 4666694.137,
+    "expected": 25,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

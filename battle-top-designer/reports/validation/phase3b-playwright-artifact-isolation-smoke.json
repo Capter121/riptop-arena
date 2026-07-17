@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "NSS-PLAYWRIGHT-ARTIFACT-ISOLATION-SMOKE-V1",
+  "status": "PASS",
+  "artifactIsolationUnitTests": {
+    "passed": 9,
+    "total": 9,
+    "status": "PASS"
+  },
+  "runA": {
+    "runId": "stage7-smoke-20260717T050500Z-a-72eca1e",
+    "result": "1/1 PASS",
+    "artifactHashesAfterRunA": {
+      "manifest.json": "5bed4cadfb4e37638a89d75f7668180c4b11a79d7301446546abcf89fe2a22df",
+      "playwright-report/index.html": "4594041762470ad9738989bb33ffad11fe13e387dce52fe5bb1c1eb3532bb92b",
+      "reporter.json": "50bf7fdc87b0978f8b8d03054946896448daea18cd9863ce3172a05b93444507",
+      "test-results/.last-run.json": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    "artifactHashesAfterRunB": {
+      "manifest.json": "5bed4cadfb4e37638a89d75f7668180c4b11a79d7301446546abcf89fe2a22df",
+      "playwright-report/index.html": "4594041762470ad9738989bb33ffad11fe13e387dce52fe5bb1c1eb3532bb92b",
+      "reporter.json": "50bf7fdc87b0978f8b8d03054946896448daea18cd9863ce3172a05b93444507",
+      "test-results/.last-run.json": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    "unchangedAfterRunB": true
+  },
+  "runB": {
+    "runId": "stage7-smoke-20260717T050500Z-b-72eca1e",
+    "result": "1/1 PASS",
+    "artifactHashes": {
+      "manifest.json": "1e81a87f1ced82e2a03083882abdb5f18bb0f15c800b55249cb8e240794179d8",
+      "playwright-report/index.html": "1e7d7178bc3773561029f2a5f7539c30073185fbb4ff08bdbcfcb48be81c83fc",
+      "reporter.json": "1d660c0d26fa0005a9ccd31c53a939a396b92fa6a686e4c8c19b5d65bd3dd0d6",
+      "test-results/.last-run.json": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    }
+  },
+  "differentRunDirectories": true,
+  "runAExistsAfterRunB": true,
+  "sharedDefaultTestResultsChanged": false,
+  "productLongGateRun": false
+}

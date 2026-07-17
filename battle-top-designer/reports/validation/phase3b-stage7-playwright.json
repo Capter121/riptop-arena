@@ -1,0 +1,420 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      "playwright.stage7.config.ts"
+    ],
+    "configFile": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\playwright.stage7.config.ts",
+    "rootDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage7-desktop",
+        "name": "stage7-desktop",
+        "testDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "stage7-mobile",
+        "name": "stage7-mobile",
+        "testDir": "E:/战斗陀螺项目/battle-top-designer/web-customizer/tests/stage7",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../reports/validation/phase3b-stage7-playwright.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev -- --port 4176",
+      "port": 4176,
+      "reuseExistingServer": false,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "anonymous-test-mode.spec.ts",
+      "file": "anonymous-test-mode.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "normal mode remains isolated and does not load the test panel chunk",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5190,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:51:58.134Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-abe5958140ea0327cfa7",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 29,
+          "column": 1
+        },
+        {
+          "title": "combo and test parameters coexist without leaking test mode into the share URL",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9660,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:52:03.463Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-4598990a53ed990baaf4",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 154901,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:52:13.150Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-d76876fe405500928cf3",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "persists an unfinished session, supports skip, collapse, clear, and explicit restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-desktop",
+              "projectName": "stage7-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 23622,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:54:48.074Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-fb7125570c18e51711f7",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 134,
+          "column": 1
+        },
+        {
+          "title": "normal mode remains isolated and does not load the test panel chunk",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3952,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:55:12.605Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-b45c8b54e54d74dd61d5",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 29,
+          "column": 1
+        },
+        {
+          "title": "combo and test parameters coexist without leaking test mode into the share URL",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9868,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:55:16.689Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-d00cb6a7c0d55b51e8a4",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "completes all six tasks from real product actions and exports a whitelisted result",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 86497,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('tip-contact-readout')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('tip-contact-readout')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('tip-contact-readout')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('tip-contact-readout')\u001b[22m\n\n    at selectFocusedPart (E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\tests\\stage7\\anonymous-test-mode.spec.ts:26:43)\n    at E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\tests\\stage7\\anonymous-test-mode.spec.ts:87:5",
+                    "location": {
+                      "file": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\tests\\stage7\\anonymous-test-mode.spec.ts",
+                      "column": 43,
+                      "line": 26
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 24 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m`part-${partId}`\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 25 |\u001b[39m   \u001b[36mawait\u001b[39m waitReady(page)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByTestId(readout))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27 |\u001b[39m }\n \u001b[90m 28 |\u001b[39m\n \u001b[90m 29 |\u001b[39m test(\u001b[32m'normal mode remains isolated and does not load the test panel chunk'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\tests\\stage7\\anonymous-test-mode.spec.ts",
+                        "column": 43,
+                        "line": 26
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('tip-contact-readout')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('tip-contact-readout')\u001b[22m\n\n\n  24 |   await page.getByTestId(`part-${partId}`).click();\n  25 |   await waitReady(page);\n> 26 |   await expect(page.getByTestId(readout)).toBeVisible();\n     |                                           ^\n  27 | }\n  28 |\n  29 | test('normal mode remains isolated and does not load the test panel chunk', async ({ page }) => {\n    at selectFocusedPart (E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\tests\\stage7\\anonymous-test-mode.spec.ts:26:43)\n    at E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\tests\\stage7\\anonymous-test-mode.spec.ts:87:5"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:55:26.585Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\test-results\\anonymous-test-mode-comple-d5b2c-xports-a-whitelisted-result-stage7-mobile\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\test-results\\anonymous-test-mode-comple-d5b2c-xports-a-whitelisted-result-stage7-mobile\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\test-results\\anonymous-test-mode-comple-d5b2c-xports-a-whitelisted-result-stage7-mobile\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "E:\\战斗陀螺项目\\battle-top-designer\\web-customizer\\tests\\stage7\\anonymous-test-mode.spec.ts",
+                    "column": 43,
+                    "line": 26
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-8cc21bc6ddd64437f6b2",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "persists an unfinished session, supports skip, collapse, clear, and explicit restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "stage7-mobile",
+              "projectName": "stage7-mobile",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 24474,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-16T12:56:55.656Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bdab1a9a4a38baf8e4bc-ecc0ab519b6374652c0f",
+          "file": "anonymous-test-mode.spec.ts",
+          "line": 134,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-16T12:51:56.535Z",
+    "duration": 324043.92,
+    "expected": 7,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
