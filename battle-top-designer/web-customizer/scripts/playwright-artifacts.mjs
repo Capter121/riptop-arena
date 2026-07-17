@@ -26,32 +26,34 @@ export function hashFile(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
 }
 
-export function buildArtifactPaths(artifactRoot, runId) {
+export function buildArtifactPaths(artifactRoot, runId, evidenceType = 'FORMAL_TEST_EXECUTION') {
   assertRunId(runId);
   const runDir = resolve(artifactRoot, runId);
+  const reporterName = evidenceType === 'COLLECTION_ONLY' ? 'collection-report.json' : 'reporter.json';
   return {
     runId,
     runDir,
     manifestPath: join(runDir, 'manifest.json'),
     outputDir: join(runDir, 'test-results'),
-    reporterPath: join(runDir, 'reporter.json'),
+    reporterPath: join(runDir, reporterName),
     htmlReportDir: join(runDir, 'playwright-report'),
   };
 }
 
 export function beginArtifactRun({ artifactRoot, runId, gateName, commit, workspaceDigest,
-  retry, workers, timeoutPolicy, testSelection, incidentEvidenceProtected = false }) {
-  const paths = buildArtifactPaths(artifactRoot, runId);
+  retry, workers, timeoutPolicy, testSelection, incidentEvidenceProtected = false,
+  evidenceType = 'FORMAL_TEST_EXECUTION' }) {
+  const paths = buildArtifactPaths(artifactRoot, runId, evidenceType);
   mkdirSync(resolve(artifactRoot), { recursive: true });
   if (existsSync(paths.runDir)) throw new Error(`Artifact run already exists: ${runId}`);
   mkdirSync(paths.runDir);
   mkdirSync(paths.outputDir);
   const relativeRun = posix.join('test-artifacts', runId);
   const manifest = {
-    schemaVersion: 'NSS-PLAYWRIGHT-ARTIFACT-RUN-V1', runId, gateName, commit, workspaceDigest,
+    schemaVersion: 'NSS-PLAYWRIGHT-ARTIFACT-RUN-V1', runId, gateName, evidenceType, commit, workspaceDigest,
     startedAt: new Date().toISOString(), completedAt: null, status: 'RUNNING',
     outputDir: posix.join(relativeRun, 'test-results'),
-    reporterPath: posix.join(relativeRun, 'reporter.json'),
+    reporterPath: posix.join(relativeRun, evidenceType === 'COLLECTION_ONLY' ? 'collection-report.json' : 'reporter.json'),
     htmlReportDir: posix.join(relativeRun, 'playwright-report'),
     retry, workers, timeoutPolicy, testSelection, incidentEvidenceProtected, artifactHashes: {},
   };

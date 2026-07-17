@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "NSS-STAGE7-FORMAL-REPORT-RECOVERY-V1",
+  "evidenceType": "PRESERVED_HISTORICAL_ARTIFACT",
+  "reportPath": "reports/validation/phase3b-stage7-playwright-repaired-v2.json",
+  "sha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc",
+  "recoveredFrom": "GIT_OBJECT",
+  "sourceCommit": "5770180a0422d977519de6d536577a6d5c8a1d40",
+  "sourceBlob": "9371800c1ff08a9117d8b2b4d1d97e42d1c56ba2",
+  "historicalRunReexecuted": false,
+  "formalGate": "STAGE7_COMBINED",
+  "statistics": {
+    "expected": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "unexpected": 0
+  },
+  "collectionOnly": false,
+  "overwriteIncident": "STAGE7-PLAYWRIGHT-REPORT-OVERWRITE-001",
+  "approvedBy": "PROJECT_OWNER"
+}

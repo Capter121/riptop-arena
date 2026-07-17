@@ -17,6 +17,8 @@
     "test:matrix": "vitest run tests/unit/combination.test.ts",
     "test:e2e": "playwright test",
     "test:stage7": "playwright test --config playwright.stage7.config.ts",
+    "collect:stage7": "node scripts/run-playwright-collection.mjs",
+    "restore:stage7-formal-report": "node scripts/restore-stage7-formal-report.mjs",
     "test:artifact-isolation": "vitest run tests/unit/playwrightArtifactIsolation.test.mjs",
     "smoke:artifact": "node scripts/run-playwright-artifact.mjs",
     "artifacts:cleanup": "node scripts/plan-playwright-artifact-cleanup.mjs",

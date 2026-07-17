@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "NSS-STAGE7-PLAYWRIGHT-REPORT-OVERWRITE-INCIDENT-V1",
+  "incidentId": "STAGE7-PLAYWRIGHT-REPORT-OVERWRITE-001",
+  "status": "RESOLVED_WITH_GIT_OBJECT_RECOVERY",
+  "formalReportPath": "reports/validation/phase3b-stage7-playwright-repaired-v2.json",
+  "formalReportSha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc",
+  "overwrittenCollectionSha256": "067d7d4560eb57c4ec7709b266dbf35a1c7500a2c1212f01c42550609a0e1793",
+  "overwrittenEvidenceType": "OVERWRITTEN_COLLECTION_OUTPUT",
+  "overwriteCommand": "playwright --list",
+  "overwrittenContent": {
+    "collectionRecords": 8,
+    "skipped": 8,
+    "formalExecutionResult": false
+  },
+  "productResultChanged": false,
+  "historicalGitObjectRecoverable": true,
+  "rootCause": "collection command reused formal reporter path",
+  "impactScope": "report artifact only",
+  "repair": {
+    "formalReportRecoveredFrom": "GIT_OBJECT",
+    "collectionGateName": "PLAYWRIGHT_COLLECTION",
+    "collectionEvidenceType": "COLLECTION_ONLY",
+    "uniqueRunDirectoryRequired": true
+  },
+  "approvedBy": "PROJECT_OWNER"
+}
