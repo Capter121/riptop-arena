@@ -16,7 +16,9 @@
       "category": "PRESERVED_HISTORICAL_ARTIFACT",
       "path": "reports/validation/phase3b-stage7-tip-observation-diagnosis.md",
       "exists": true,
-      "sha256": "4a26d1b9ed577fe0280c61dcfda66c7ea84054c17dd29abd0c26706d5663a3a1",
+      "sha256": "ec0ece363cfd094a77e60b2e6b865784afaaec87c96808303f09a2295ba1780d",
+      "previousSha256": "4a26d1b9ed577fe0280c61dcfda66c7ea84054c17dd29abd0c26706d5663a3a1",
+      "refreshAudit": "reports/validation/phase3b-stage7-diagnosis-anchor-refresh.json",
       "evidenceStatus": "PRESERVED_AND_HASHED",
       "resultSummary": "Readout diagnosis Markdown",
       "limitation": "Extracted diagnosis, not a complete trace substitute."
@@ -34,7 +36,9 @@
       "category": "PRESERVED_HISTORICAL_ARTIFACT",
       "path": "reports/validation/phase3b-stage7-collection-boundary-diagnosis.md",
       "exists": true,
-      "sha256": "b7a112df10ab179135ec4e4994883a4aacaef07d4633e4b7d22f5f79a7916f37",
+      "sha256": "8380edb8bb722e3f8a7aaaf8ea5988089f0361dc05e358fd4b47b270c0edef24",
+      "previousSha256": "b7a112df10ab179135ec4e4994883a4aacaef07d4633e4b7d22f5f79a7916f37",
+      "refreshAudit": "reports/validation/phase3b-stage7-diagnosis-anchor-refresh.json",
       "evidenceStatus": "PRESERVED_AND_HASHED",
       "resultSummary": "Collection-boundary diagnosis",
       "limitation": null
@@ -163,7 +167,12 @@
       "sha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc",
       "evidenceStatus": "PRESERVED_AND_HASHED",
       "resultSummary": "Stage 7 combined 8/8 PASS",
-      "limitation": null
+      "limitation": null,
+      "recoveredFrom": "GIT_OBJECT",
+      "sourceCommit": "5770180a0422d977519de6d536577a6d5c8a1d40",
+      "sourceBlob": "9371800c1ff08a9117d8b2b4d1d97e42d1c56ba2",
+      "overwriteIncident": "STAGE7-PLAYWRIGHT-REPORT-OVERWRITE-001",
+      "historicalRunReexecuted": false
     },
     {
       "category": "PRESERVED_HISTORICAL_ARTIFACT",
@@ -229,8 +238,21 @@
       "limitation": "Current revalidation only; not recovered historical evidence."
     }
   ],
+  "collectionEvidencePolicy": {
+    "gateName": "PLAYWRIGHT_COLLECTION",
+    "evidenceType": "COLLECTION_ONLY",
+    "uniqueRunDirectoryRequired": true,
+    "formalEvidence": false
+  },
+  "classificationCounts": {
+    "PRESERVED_HISTORICAL_ARTIFACT": 19,
+    "HISTORICAL_ARTIFACT_UNAVAILABLE": 3,
+    "CURRENT_REVALIDATION_EVIDENCE": 3,
+    "changed": false
+  },
   "incidents": [
     "STAGE7-TRACE-LOSS-001",
-    "STAGE7-MISSING-QUALITY-ANCHORS-001"
+    "STAGE7-MISSING-QUALITY-ANCHORS-001",
+    "STAGE7-PLAYWRIGHT-REPORT-OVERWRITE-001"
   ]
 }

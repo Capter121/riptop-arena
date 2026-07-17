@@ -16,7 +16,11 @@
     {
       "kind": "READOUT_DIAGNOSIS_MARKDOWN",
       "path": "reports/validation/phase3b-stage7-tip-observation-diagnosis.md",
-      "sha256": "4a26d1b9ed577fe0280c61dcfda66c7ea84054c17dd29abd0c26706d5663a3a1"
+      "sha256": "ec0ece363cfd094a77e60b2e6b865784afaaec87c96808303f09a2295ba1780d",
+      "previousSha256": "4a26d1b9ed577fe0280c61dcfda66c7ea84054c17dd29abd0c26706d5663a3a1",
+      "refreshAudit": "reports/validation/phase3b-stage7-diagnosis-anchor-refresh.json",
+      "changeReason": "WHITESPACE_ONLY_PRECOMMIT_NORMALIZATION",
+      "approvedBy": "PROJECT_OWNER"
     },
     {
       "kind": "READOUT_DIAGNOSIS_JSON",
@@ -26,7 +30,11 @@
     {
       "kind": "COLLECTION_BOUNDARY_DIAGNOSIS",
       "path": "reports/validation/phase3b-stage7-collection-boundary-diagnosis.md",
-      "sha256": "b7a112df10ab179135ec4e4994883a4aacaef07d4633e4b7d22f5f79a7916f37"
+      "sha256": "8380edb8bb722e3f8a7aaaf8ea5988089f0361dc05e358fd4b47b270c0edef24",
+      "previousSha256": "b7a112df10ab179135ec4e4994883a4aacaef07d4633e4b7d22f5f79a7916f37",
+      "refreshAudit": "reports/validation/phase3b-stage7-diagnosis-anchor-refresh.json",
+      "changeReason": "WHITESPACE_ONLY_PRECOMMIT_NORMALIZATION",
+      "approvedBy": "PROJECT_OWNER"
     },
     {
       "kind": "EXTRACTED_TIMELINE_SUMMARY",
@@ -82,7 +90,13 @@
       "gate": "Stage 7 combined 8/8",
       "path": "reports/validation/phase3b-stage7-playwright-repaired-v2.json",
       "sha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc",
-      "result": "8/8 PASS"
+      "result": "8/8 PASS",
+      "recoveredFrom": "GIT_OBJECT",
+      "sourceCommit": "5770180a0422d977519de6d536577a6d5c8a1d40",
+      "sourceBlob": "9371800c1ff08a9117d8b2b4d1d97e42d1c56ba2",
+      "overwriteIncident": "STAGE7-PLAYWRIGHT-REPORT-OVERWRITE-001",
+      "evidenceStatus": "PRESERVED_HISTORICAL_ARTIFACT",
+      "historicalRunReexecuted": false
     },
     {
       "gate": "legacy Playwright 18/18",
@@ -116,6 +130,9 @@
     }
   ],
   "missingHistoricalQualityAnchorsIncident": "STAGE7-MISSING-QUALITY-ANCHORS-001",
+  "diagnosisAnchorRefresh": "reports/validation/phase3b-stage7-diagnosis-anchor-refresh.json",
+  "playwrightReportRecovery": "reports/validation/phase3b-stage7-playwright-report-recovery.json",
+  "playwrightReportOverwriteIncident": "STAGE7-PLAYWRIGHT-REPORT-OVERWRITE-001",
   "limitations": [
     "The original trace cannot be verified again at byte level.",
     "This decision does not raise the human visual review status; it remains PENDING.",
