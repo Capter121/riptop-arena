@@ -26,10 +26,14 @@ export function hashFile(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
 }
 
+export function artifactReporterName(evidenceType = 'FORMAL_TEST_EXECUTION') {
+  return evidenceType === 'COLLECTION_ONLY' ? 'collection-report.json' : 'reporter.json';
+}
+
 export function buildArtifactPaths(artifactRoot, runId, evidenceType = 'FORMAL_TEST_EXECUTION') {
   assertRunId(runId);
   const runDir = resolve(artifactRoot, runId);
-  const reporterName = evidenceType === 'COLLECTION_ONLY' ? 'collection-report.json' : 'reporter.json';
+  const reporterName = artifactReporterName(evidenceType);
   return {
     runId,
     runDir,
@@ -53,7 +57,7 @@ export function beginArtifactRun({ artifactRoot, runId, gateName, commit, worksp
     schemaVersion: 'NSS-PLAYWRIGHT-ARTIFACT-RUN-V1', runId, gateName, evidenceType, commit, workspaceDigest,
     startedAt: new Date().toISOString(), completedAt: null, status: 'RUNNING',
     outputDir: posix.join(relativeRun, 'test-results'),
-    reporterPath: posix.join(relativeRun, evidenceType === 'COLLECTION_ONLY' ? 'collection-report.json' : 'reporter.json'),
+    reporterPath: posix.join(relativeRun, artifactReporterName(evidenceType)),
     htmlReportDir: posix.join(relativeRun, 'playwright-report'),
     retry, workers, timeoutPolicy, testSelection, incidentEvidenceProtected, artifactHashes: {},
   };

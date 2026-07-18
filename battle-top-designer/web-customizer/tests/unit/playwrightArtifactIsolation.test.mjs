@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  artifactReporterName,
   beginArtifactRun,
   buildArtifactPaths,
   finalizeArtifactRun,
@@ -25,6 +26,11 @@ const metadata = {
 };
 
 describe('Playwright artifact isolation', () => {
+  it('keeps collection and formal reporter names distinct', () => {
+    expect(artifactReporterName('COLLECTION_ONLY')).toBe('collection-report.json');
+    expect(artifactReporterName('FORMAL_TEST_EXECUTION')).toBe('reporter.json');
+  });
+
   it('assigns different output directories to run A and run B', () => {
     const root = workspace();
     const a = beginArtifactRun({ artifactRoot: root, runId: 'stage7-smoke-a', ...metadata });
