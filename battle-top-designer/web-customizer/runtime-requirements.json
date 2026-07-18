@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "NSS-WEB-RUNTIME-V1",
+  "node": "24.18.0",
+  "npm": "11.16.0",
+  "python": {
+    "resolutionPolicy": "FORMAL_DETERMINISTIC_RESOLVER",
+    "requiredCompatibility": "UNSPECIFIED",
+    "stage8ReferenceRuntime": {
+      "version": "3.11.9",
+      "selectionMode": "NSS_PYTHON_EXECUTABLE",
+      "source": "NSS_PYTHON_EXECUTABLE"
+    },
+    "dependencies": {
+      "jsonschema": {
+        "version": "4.26.0",
+        "versionSelectionSource": "REPOSITORY_EXACT_PIN",
+        "requiredBy": "part-specifications gate"
+      }
+    }
+  },
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "testCommand": "npm run test:unit"
+}
