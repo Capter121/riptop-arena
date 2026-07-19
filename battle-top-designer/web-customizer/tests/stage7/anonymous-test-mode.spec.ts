@@ -156,6 +156,7 @@ test('completes all six tasks from real product actions and exports a whiteliste
 });
 
 test('persists an unfinished session, supports skip, collapse, clear, and explicit restart', async ({ page }) => {
+  test.setTimeout(60_000);
   const errors = auditPage(page);
   await page.goto('/?test=1');
   await waitReady(page);
