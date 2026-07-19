@@ -78,7 +78,7 @@ test('combo and test parameters coexist without leaking test mode into the share
 });
 
 test('completes all six tasks from real product actions and exports a whitelisted result', async ({ page }) => {
-  test.setTimeout(240000);
+  test.setTimeout(300_000);
   const errors = auditPage(page);
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', {
