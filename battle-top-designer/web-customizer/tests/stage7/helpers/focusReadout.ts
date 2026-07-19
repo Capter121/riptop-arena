@@ -31,10 +31,10 @@ export async function observeFocusReadoutDuringSelection({
 }: FocusReadoutSelection) {
   const readout = page.getByTestId(readoutTestId);
   await observeBeforeSelection({
-    observe: () => Promise.all([
-      readout.waitFor({ state: 'visible', timeout: 5000 }),
-      expect(readout).toHaveText(expectedText),
-    ]),
+    observe: async () => {
+      await expect(readout).toBeVisible();
+      await expect(readout).toHaveText(expectedText);
+    },
     select: () => option.click(),
     verify: async () => {
       await readyPredicate();
