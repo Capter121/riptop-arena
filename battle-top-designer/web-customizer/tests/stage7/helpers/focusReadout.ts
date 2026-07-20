@@ -32,7 +32,7 @@ export async function observeFocusReadoutDuringSelection({
   const readout = page.getByTestId(readoutTestId);
   await observeBeforeSelection({
     observe: async () => {
-      await expect(readout).toBeVisible();
+      await readout.waitFor({ state: 'visible' });
       await expect(readout).toHaveText(expectedText);
     },
     select: () => option.click(),
