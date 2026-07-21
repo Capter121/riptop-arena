@@ -342,9 +342,45 @@ def semantic_errors(
     return errors
 
 
+def visual_profile_errors(visual_profiles: object, parts: list[object], materials: object) -> list[dict[str, str]]:
+    errors: list[dict[str, str]] = []
+    part_slots = {part.get("id"): part.get("material_slots", []) for part in parts}
+    material_ids = {item["id"] for item in materials.get("materials", [])}
+    seen: set[str] = set()
+
+    def add(path: str, message: str) -> None:
+        errors.append({"source": "specs/visual-profiles.json", "path": path, "message": message})
+
+    for profile_index, profile in enumerate(visual_profiles.get("profiles", [])):
+        part_id = profile.get("part_id")
+        base_path = f"$.profiles[{profile_index}]"
+        if part_id in seen:
+            add(f"{base_path}.part_id", f"duplicate visual profile: {part_id}")
+        seen.add(part_id)
+        expected_slots = part_slots.get(part_id)
+        if expected_slots is None:
+            add(f"{base_path}.part_id", f"unknown part id: {part_id}")
+            continue
+        slots = profile.get("slots", [])
+        if len(slots) != len(expected_slots):
+            add(f"{base_path}.slots", "slot count must match the part material_slots")
+        for slot_index, slot in enumerate(slots):
+            path = f"{base_path}.slots[{slot_index}]"
+            if slot.get("slot_index") != slot_index:
+                add(f"{path}.slot_index", "slot indexes must be contiguous and ordered from zero")
+            expected_material = expected_slots[slot_index] if slot_index < len(expected_slots) else None
+            if slot.get("source_material_id") != expected_material:
+                add(f"{path}.source_material_id", f"must match part material slot {slot_index}: {expected_material}")
+            if slot.get("source_material_id") not in material_ids:
+                add(f"{path}.source_material_id", "must reference a known shared material")
+    for part_id in sorted(set(part_slots) - seen):
+        add("$.profiles", f"missing visual profile: {part_id}")
+    return errors
+
+
 def validators() -> dict[str, Draft202012Validator]:
     result = {}
-    for name in ("interface", "material", "part", "assembly"):
+    for name in ("interface", "material", "part", "assembly", "visual-profile"):
         schema = load_json(SCHEMA_DIR / f"{name}.schema.json")
         Draft202012Validator.check_schema(schema)
         result[name] = Draft202012Validator(schema)
@@ -581,6 +617,13 @@ def validate_project(all_validators: dict[str, Draft202012Validator]) -> tuple[b
     if assemblies is not None:
         errors += schema_errors(all_validators["assembly"], assemblies, "specs/assemblies.json")
     errors += semantic_errors(interfaces, materials, clean_parts, assemblies)
+    visual_profiles_path = SPEC_DIR / "visual-profiles.json"
+    if not visual_profiles_path.is_file():
+        errors.append({"source": "specs/visual-profiles.json", "path": "$", "message": "required file is missing"})
+    else:
+        visual_profiles = load_json(visual_profiles_path)
+        errors += schema_errors(all_validators["visual-profile"], visual_profiles, "specs/visual-profiles.json")
+        errors += visual_profile_errors(visual_profiles, clean_parts, materials)
     return not errors, errors
 
 

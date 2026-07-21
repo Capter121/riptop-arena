@@ -1,0 +1,4338 @@
+{
+  "schemaVersion": "NSS-PHASE3C-A-INPUT-INVENTORY-V1",
+  "headCommit": "4ca2a3155627384ad6a01cd9d6596aa3367bcd03",
+  "branch": "main",
+  "materialCatalog": {
+    "path": "specs/materials.json",
+    "bytes": 1420,
+    "sha256": "61212730f1b1642af228b73870c500ca6d6e9b643924429eaad3a03d2c33e5d4",
+    "schemaVersion": "1.0",
+    "materialIds": [
+      "gunmetal",
+      "cobalt_blue_translucent",
+      "solar_amber",
+      "obsidian_polymer",
+      "brushed_silver"
+    ]
+  },
+  "interfaces": {
+    "path": "specs/interfaces.json",
+    "bytes": 1229,
+    "sha256": "5744cca158ed260cb4d5c46b57a5f4c306628ca5f932cb3f60347454caaa6e12"
+  },
+  "stage7FormalReport": {
+    "path": "reports/validation/phase3b-stage7-playwright-repaired-v2.json",
+    "bytes": 11694,
+    "sha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc",
+    "expectedSha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc"
+  },
+  "stage8FormalRun": {
+    "runId": "stage8-delivery-20260720T152216Z-12bd89d",
+    "headCommit": "12bd89d9fa21098e30d78c46ea9a02261c973aac",
+    "manifest": {
+      "path": "web-customizer/test-artifacts/stage8-delivery-20260720T152216Z-12bd89d/manifest.json",
+      "bytes": 906,
+      "sha256": "bc7734ec34bf40debb71696624fa66532ce7652a72597756a30bf146bd1a42df"
+    },
+    "hashes": {
+      "path": "web-customizer/test-artifacts/stage8-delivery-20260720T152216Z-12bd89d/hashes.json",
+      "bytes": 29205,
+      "sha256": "7ea058b44346623fed70ad461f811ac02420e878bd9ba0d916cfba2596a8e5ff"
+    },
+    "status": "PASS",
+    "completedAt": "2026-07-20T17:07:12.515Z",
+    "modeStatus": {
+      "preflight": "PASS",
+      "long": "PASS",
+      "finalize": "PASS"
+    },
+    "declaredArtifactHashCount": 230
+  },
+  "geometryTotals": {
+    "partCount": 16,
+    "primitiveCount": 72,
+    "triangleCount": 25760,
+    "texcoord0PrimitiveCount": 0,
+    "texcoord1PrimitiveCount": 0
+  },
+  "parts": [
+    {
+      "id": "assist_air",
+      "partType": "assist_ring",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "cobalt_blue_translucent",
+        "obsidian_polymer"
+      ],
+      "partSpec": {
+        "path": "specs/parts/assist_air.json",
+        "bytes": 1406,
+        "sha256": "1b80222cb56f7d742d36d867a91d8b44994dfd859f2c2305165d999bfada3fa6"
+      },
+      "glb": {
+        "path": "public/models/parts/assist_air.glb",
+        "bytes": 105784,
+        "sha256": "5d932424d3ebe1f597c96f77a63343075bcef48903064c00661b360b3ed2017d",
+        "meshCount": 14,
+        "primitiveCount": 14,
+        "triangleCount": 2160,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 2,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 3,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 4,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 5,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 6,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 7,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 8,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 9,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 10,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 11,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 12,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 13,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1152,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 13824,
+            "sha256": "b49169a698e918e3c7299d862940562af5bc654a2bd1b68ea5ea622a516a3050"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 204,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 32256,
+            "byteLength": 2448,
+            "sha256": "cd1db01b50fa12f337bc9021126015fd2d337061a744ebe2ad1338b3f0e87c39"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 37944,
+            "byteLength": 432,
+            "sha256": "05e71dc0d0b4c779fc0739a117b4775f754962dbdaf167625fb8a9175b0dbc45"
+          },
+          {
+            "accessorIndex": 9,
+            "count": 204,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 38928,
+            "byteLength": 2448,
+            "sha256": "60c7ee9f637322f7f507c82e8c9e085aa59aa9dda4ff35d92f05664cb33f8fbe"
+          },
+          {
+            "accessorIndex": 12,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 44616,
+            "byteLength": 432,
+            "sha256": "b97e25cfb90b7cd7df09b6fb04251884c23a6414dcd5cbd173a79080e17c5a6c"
+          },
+          {
+            "accessorIndex": 15,
+            "count": 204,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 45600,
+            "byteLength": 2448,
+            "sha256": "23de8066d8d308de69a9a0251b23c423a3ac0a0be7d57dc375d81dd3d512abe7"
+          },
+          {
+            "accessorIndex": 18,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 51288,
+            "byteLength": 432,
+            "sha256": "1b4ec43633d1c1d5e6e1a3e95564ba7d96a7c44b3c1338b236f1a28411c3b4f0"
+          },
+          {
+            "accessorIndex": 21,
+            "count": 204,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 52272,
+            "byteLength": 2448,
+            "sha256": "d025adf4264b00483b1809fb32ee24050fdd556373f09d75869b7f0bad890efe"
+          },
+          {
+            "accessorIndex": 24,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 57960,
+            "byteLength": 432,
+            "sha256": "6176e9e676c863c5d645e2843f18ace5b30127432c1c8079e943493ffcaca9f5"
+          },
+          {
+            "accessorIndex": 27,
+            "count": 204,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 58944,
+            "byteLength": 2448,
+            "sha256": "5164d84d8ccb1a737088e0fb985c24c3f7a045587fb9c5969f87b88bb9567135"
+          },
+          {
+            "accessorIndex": 30,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 64632,
+            "byteLength": 432,
+            "sha256": "bb035bb9b4ac85f58ad8b29631077de6af2c9c03af14419b4caac93c022f47eb"
+          },
+          {
+            "accessorIndex": 33,
+            "count": 204,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 65616,
+            "byteLength": 2448,
+            "sha256": "52370ff2fe33f2bf4c64856e85318a9666244491ea740c577b0698e4d4d0a416"
+          },
+          {
+            "accessorIndex": 36,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 71304,
+            "byteLength": 432,
+            "sha256": "7142ee9f99a45db136eb109e0753f5b44bf85b7747b41ce63045b270db72e751"
+          },
+          {
+            "accessorIndex": 39,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 72288,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2304,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 27648,
+            "byteLength": 4608,
+            "sha256": "284e927727c4b3edb2a0e8ccd94cef50e9f7d2cbb64dc2e576dec7fc7a1dc0d9"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 396,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 37152,
+            "byteLength": 792,
+            "sha256": "c3666d8a3ea3ac7b28677cd7de6d3645154ee6a7a7e8a7c86d2053cf3e05fc50"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 38808,
+            "byteLength": 120,
+            "sha256": "76d494f181528140f00a1f8098c59debcf22876898031304977bb41fbaa3fcb2"
+          },
+          {
+            "accessorIndex": 11,
+            "count": 396,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 43824,
+            "byteLength": 792,
+            "sha256": "531dd4bb90509a781c2dc22cdc2c94b4aac2c0037526718b2520bc34fcfe6ff5"
+          },
+          {
+            "accessorIndex": 14,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 45480,
+            "byteLength": 120,
+            "sha256": "66866a2a2f328b36c813cdac1a7e7256077d07f6c2e9b6dae8430bb88d586034"
+          },
+          {
+            "accessorIndex": 17,
+            "count": 396,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 50496,
+            "byteLength": 792,
+            "sha256": "fddfc58f7e47da22935c303cb68e8f1d035eaf6ef44266c52fde658d6bf4c60a"
+          },
+          {
+            "accessorIndex": 20,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 52152,
+            "byteLength": 120,
+            "sha256": "ceca58f870e5eb7c99b00e766e142b29ee9ab46d27e7d9ce4dfced5f089272a3"
+          },
+          {
+            "accessorIndex": 23,
+            "count": 396,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 57168,
+            "byteLength": 792,
+            "sha256": "9fbe0ef40f6159dd0b95471f9c54ce93a83eaedb9ed3194baa0e2bc364007e40"
+          },
+          {
+            "accessorIndex": 26,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 58824,
+            "byteLength": 120,
+            "sha256": "7d9b6feb65fd3a3828efc87ba9880cf9af8638524fe9008dff3b9b19cd4ebaf5"
+          },
+          {
+            "accessorIndex": 29,
+            "count": 396,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 63840,
+            "byteLength": 792,
+            "sha256": "5375485d29f5e41e1614c9d85a8f67c8a140e7f7b7897723bfe82938660fbfa5"
+          },
+          {
+            "accessorIndex": 32,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 65496,
+            "byteLength": 120,
+            "sha256": "da5b88026b92fbd240047ef3a7548c2db579b15ed9f37db76160fd28377ee60a"
+          },
+          {
+            "accessorIndex": 35,
+            "count": 396,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 70512,
+            "byteLength": 792,
+            "sha256": "50a60448488089236f64315b8c91666c399f9719b6e24f9314a128c7c1a382b3"
+          },
+          {
+            "accessorIndex": 38,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 72168,
+            "byteLength": 120,
+            "sha256": "492048d5d097fbcbe9923d31b69355c3227f6495fd2176d32b8d52cc8b72109c"
+          },
+          {
+            "accessorIndex": 41,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 89568,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_assist_air_HUB",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_assist_air_BRIDGE_1",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "GEO_assist_air_SPOKE_1",
+            "mesh": 2,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "GEO_assist_air_BRIDGE_2",
+            "mesh": 3,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 4,
+            "name": "GEO_assist_air_SPOKE_2",
+            "mesh": 4,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 5,
+            "name": "GEO_assist_air_BRIDGE_3",
+            "mesh": 5,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 6,
+            "name": "GEO_assist_air_SPOKE_3",
+            "mesh": 6,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 7,
+            "name": "GEO_assist_air_BRIDGE_4",
+            "mesh": 7,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 8,
+            "name": "GEO_assist_air_SPOKE_4",
+            "mesh": 8,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 9,
+            "name": "GEO_assist_air_BRIDGE_5",
+            "mesh": 9,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 10,
+            "name": "GEO_assist_air_SPOKE_5",
+            "mesh": 10,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 11,
+            "name": "GEO_assist_air_BRIDGE_6",
+            "mesh": 11,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 12,
+            "name": "GEO_assist_air_SPOKE_6",
+            "mesh": 12,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 13,
+            "name": "GEO_assist_air_NSS_V1_COLLAR",
+            "mesh": 13,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 14,
+            "name": "MOUNT_assist_air_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.001500000013038516,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 15,
+            "name": "MOUNT_assist_air_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.001500000013038516,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "assist_guard",
+      "partType": "assist_ring",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "brushed_silver",
+        "obsidian_polymer"
+      ],
+      "partSpec": {
+        "path": "specs/parts/assist_guard.json",
+        "bytes": 1357,
+        "sha256": "6207d7332ddd625a533a7a6a1705360e92950ff7cb72b97a712c557324231253"
+      },
+      "glb": {
+        "path": "public/models/parts/assist_guard.glb",
+        "bytes": 65232,
+        "sha256": "68c526f7b27c0ed599a5a45a65fa8027b138e0003f18fa46ede878abbaaf307f",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 1632,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_brushed_silver"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 864,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 10368,
+            "sha256": "c860bbbfe709405dcec28eb554ae30df9ad316b27d12eb78713ebdcf9ddfd821"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 576,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 25344,
+            "byteLength": 6912,
+            "sha256": "d9ed6569de4b75d244309b186696fcb8fb42f996938fde2b5e9c5b2b6fd4ea4c"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 41472,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2304,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 20736,
+            "byteLength": 4608,
+            "sha256": "c98d2cdfcd64be4c99086c87f4333113ea7ce8c93e9a497ca047f38584ad7c19"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 1152,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 39168,
+            "byteLength": 2304,
+            "sha256": "52107e2d7a21e1a2464b320e7ae2ffd0e593f42fe49aec48a87a110af82120de"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 58752,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_assist_guard_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_assist_guard_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_assist_guard_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0015999999595806003,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_assist_guard_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.0015999999595806003,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "assist_heavy",
+      "partType": "assist_ring",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "brushed_silver",
+        "obsidian_polymer"
+      ],
+      "partSpec": {
+        "path": "specs/parts/assist_heavy.json",
+        "bytes": 1500,
+        "sha256": "31e6211412e1336e6ff399e8ae5e1dad34da14f4e9cd670cf836967613c5188f"
+      },
+      "glb": {
+        "path": "public/models/parts/assist_heavy.glb",
+        "bytes": 68696,
+        "sha256": "2825f5a0aece767364eabf59d61695312e8808a5c5060ff48d8428ff6b08f293",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 1632,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_brushed_silver"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 864,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 10368,
+            "sha256": "e6c47f9e1f3cee05efe16383e56d518eaabb4b7087514d40dd8ed47bb8468e90"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 25056,
+            "byteLength": 8640,
+            "sha256": "f77d80869eecbe296f1df5221a73de1e104e32bc0449a2c240c8a24f18437770"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 44928,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2160,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 20736,
+            "byteLength": 4320,
+            "sha256": "785a4f8b0ab6f2d2b21e5acfb92436f2df4405990602957bb1fb49e64b0cd435"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 1296,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 42336,
+            "byteLength": 2592,
+            "sha256": "e5b5c9c016c8894837d81c5475842bc7d367de3c683cba2d113b63a66ae0f3a5"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 62208,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_assist_heavy_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_assist_heavy_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_assist_heavy_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0017000000225380063,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_assist_heavy_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.0017000000225380063,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "blade_dual_comet",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "gunmetal",
+        "cobalt_blue_translucent",
+        "solar_amber"
+      ],
+      "partSpec": {
+        "path": "specs/parts/blade_dual_comet.json",
+        "bytes": 1759,
+        "sha256": "106c72f2c2d043daaeffb4e944b2c8ebea14c6cbf5ca5c0aca53e6b39496c263"
+      },
+      "glb": {
+        "path": "public/models/parts/blade_dual_comet.glb",
+        "bytes": 72800,
+        "sha256": "26da5bbaebde1dfc5c0dd1ee95b8023e05ad5fafd5799872173d1fc4e5dc498e",
+        "meshCount": 2,
+        "primitiveCount": 4,
+        "triangleCount": 1632,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_gunmetal"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 2,
+            "materialIndex": 2,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_gunmetal"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1182,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 14184,
+            "sha256": "c8cdcfb3d0085705be1232332b8def77a3ea9e8c0f1f7033d7f143370d14f8ee"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 384,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 33696,
+            "byteLength": 4608,
+            "sha256": "bd2d84604534cb1668efbdaf00c46322c1bbbd9e0782e47936fb8fdb5c2f735a"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 144,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 44064,
+            "byteLength": 1728,
+            "sha256": "36310fdf0c6ade66936d9f11d1ddb23ea8080a7ecadff922ce57caedb948446c"
+          },
+          {
+            "accessorIndex": 9,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 47952,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2664,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 28368,
+            "byteLength": 5328,
+            "sha256": "9aabef9b6da5c268fb135e77c4146626853ebbdb09e1fefe303cb07011bb9100"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 576,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 42912,
+            "byteLength": 1152,
+            "sha256": "bc28384c940d9c49c8625390690531557a6f39b8caeaa74ce3b7f88bf422c121"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 216,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 47520,
+            "byteLength": 432,
+            "sha256": "438de0d7ea2b872772b1ca227c00524e33d0b728268875966b413c7bf8b9f244"
+          },
+          {
+            "accessorIndex": 11,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 65232,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_blade_dual_comet_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_blade_dual_comet_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_blade_dual_comet_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.003599999938160181,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_blade_dual_comet_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.002400000113993883,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "blade_iron_bastion",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "brushed_silver",
+        "obsidian_polymer",
+        "solar_amber"
+      ],
+      "partSpec": {
+        "path": "specs/parts/blade_iron_bastion.json",
+        "bytes": 1676,
+        "sha256": "c1ae7a4cab5807a01b1b77907f92f9d128acc8aae3f3fad3bb1673c3f0bee8be"
+      },
+      "glb": {
+        "path": "public/models/parts/blade_iron_bastion.glb",
+        "bytes": 84580,
+        "sha256": "339a70425692b8ff1acc185b580fb8a63a420965c6afb75ec2280ee83e546f57",
+        "meshCount": 2,
+        "primitiveCount": 4,
+        "triangleCount": 2016,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 2,
+            "materialIndex": 2,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_brushed_silver"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1536,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 18432,
+            "sha256": "7704554485b7cd29f79965dafd06d82a67147108bbaf26f186a4797dfcf9d2d3"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 192,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 43776,
+            "byteLength": 2304,
+            "sha256": "4ccab7fea49c5791ad62fe7cfbabc0af86f53ba5a367f5acd90e744ca9850522"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 384,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 49536,
+            "byteLength": 4608,
+            "sha256": "8dd7bd5486007b8f72db00785ab1d441be5405e946e14b7dfb2d2a3de23ebbcb"
+          },
+          {
+            "accessorIndex": 9,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 59904,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 3456,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 36864,
+            "byteLength": 6912,
+            "sha256": "f162e39297d50c1347b0714b14cb741217e651cd47381c762ba80b1ebde367a1"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 576,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 48384,
+            "byteLength": 1152,
+            "sha256": "6ab8536b82a1f1ceb8f4b2b43c61d502fff59ee46314d4e70071c3894ad911c6"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 576,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 58752,
+            "byteLength": 1152,
+            "sha256": "bc28384c940d9c49c8625390690531557a6f39b8caeaa74ce3b7f88bf422c121"
+          },
+          {
+            "accessorIndex": 11,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 77184,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_blade_iron_bastion_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_blade_iron_bastion_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_blade_iron_bastion_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0035000001080334187,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_blade_iron_bastion_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.002400000113993883,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "blade_orbit_halo",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "brushed_silver",
+        "cobalt_blue_translucent",
+        "obsidian_polymer"
+      ],
+      "partSpec": {
+        "path": "specs/parts/blade_orbit_halo.json",
+        "bytes": 1712,
+        "sha256": "cf2bcd18af892f51bb69466139fb2af5af9a56efb0dcbbb0a82a63796e074364"
+      },
+      "glb": {
+        "path": "public/models/parts/blade_orbit_halo.glb",
+        "bytes": 100304,
+        "sha256": "6283ea0689a3eebd46f3e9817fc67fe05e79e6ae54d116dc58ee7a8ae122908f",
+        "meshCount": 10,
+        "primitiveCount": 10,
+        "triangleCount": 2112,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 2,
+            "primitiveIndex": 0,
+            "materialIndex": 2,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 3,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 4,
+            "primitiveIndex": 0,
+            "materialIndex": 2,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 5,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 6,
+            "primitiveIndex": 0,
+            "materialIndex": 2,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 7,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 8,
+            "primitiveIndex": 0,
+            "materialIndex": 2,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 9,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_brushed_silver"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1152,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 13824,
+            "sha256": "23b537d4ce1bc350da745394f3eacde135ba5a67dd3874a0e84e10c32fdfd5be"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 300,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 32256,
+            "byteLength": 3600,
+            "sha256": "00439d62e9ade5d524b6d7c53f02657fbac86a5a226c169ab429edce14f5a86e"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 40632,
+            "byteLength": 432,
+            "sha256": "47847222f1f16259c3cf82826599e283420776c9bec02a404b8e4958f0bd64c5"
+          },
+          {
+            "accessorIndex": 9,
+            "count": 300,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 41616,
+            "byteLength": 3600,
+            "sha256": "7a8f8ebdc4d63a98b4e172ed1bc584f3dc173d2255a146430d3ef58a2c63d34f"
+          },
+          {
+            "accessorIndex": 12,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 49992,
+            "byteLength": 432,
+            "sha256": "c50951a4b22fdf4daceb1f025a4e71891b4683dbb8e969dd08a6745dffc3131f"
+          },
+          {
+            "accessorIndex": 15,
+            "count": 300,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 50976,
+            "byteLength": 3600,
+            "sha256": "bec018ab4311135bd02c7dc4252ea47fac755bbcbb99ecb8197e99c68dbe15d9"
+          },
+          {
+            "accessorIndex": 18,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 59352,
+            "byteLength": 432,
+            "sha256": "fe1bdde16afbc5df69bb0a9850e277b69c908ad1abb8bdaaada707c4ae879a4f"
+          },
+          {
+            "accessorIndex": 21,
+            "count": 300,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 60336,
+            "byteLength": 3600,
+            "sha256": "2168c968baa3e20260d765a26223105c679c6bcda6c394442231782df55a9392"
+          },
+          {
+            "accessorIndex": 24,
+            "count": 36,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 68712,
+            "byteLength": 432,
+            "sha256": "7b6102db191a604e0d766d24a01b25c5c30d1af5654f02eb1b85e4e8a7be0c93"
+          },
+          {
+            "accessorIndex": 27,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 69696,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2304,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 27648,
+            "byteLength": 4608,
+            "sha256": "284e927727c4b3edb2a0e8ccd94cef50e9f7d2cbb64dc2e576dec7fc7a1dc0d9"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 588,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 39456,
+            "byteLength": 1176,
+            "sha256": "ba998a27a94d489799a0b7c7cde5ec0f770e5704ecb22e6b06e63dc2dc4e8c39"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 41496,
+            "byteLength": 120,
+            "sha256": "76d494f181528140f00a1f8098c59debcf22876898031304977bb41fbaa3fcb2"
+          },
+          {
+            "accessorIndex": 11,
+            "count": 588,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 48816,
+            "byteLength": 1176,
+            "sha256": "71b640b7174a542f7200639e528ff9248541658e55b3708aa5ec2c4559f8e1d8"
+          },
+          {
+            "accessorIndex": 14,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 50856,
+            "byteLength": 120,
+            "sha256": "fbc1b28a0bad3e46648493172de2306a21680e086e509c3b89541a91e77bebeb"
+          },
+          {
+            "accessorIndex": 17,
+            "count": 588,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 58176,
+            "byteLength": 1176,
+            "sha256": "71f6c9643fe7f8aa13ee2d52d266e2ab40f0a6a07635ebb6d55199653ecdea4d"
+          },
+          {
+            "accessorIndex": 20,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 60216,
+            "byteLength": 120,
+            "sha256": "7d9b6feb65fd3a3828efc87ba9880cf9af8638524fe9008dff3b9b19cd4ebaf5"
+          },
+          {
+            "accessorIndex": 23,
+            "count": 588,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 67536,
+            "byteLength": 1176,
+            "sha256": "581329ddb7db45b98658dfe42195abcb867c23e9e0e6a9ba5f9c4b1ef9707ea5"
+          },
+          {
+            "accessorIndex": 26,
+            "count": 60,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 69576,
+            "byteLength": 120,
+            "sha256": "e794b483893424a2d9d03839d0cc52723cff91702d9bfa275299bd1adb6fadbd"
+          },
+          {
+            "accessorIndex": 29,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 86976,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_blade_orbit_halo_HUB",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_blade_orbit_halo_RING_1",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "GEO_blade_orbit_halo_SPOKE_1",
+            "mesh": 2,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "GEO_blade_orbit_halo_RING_2",
+            "mesh": 3,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 4,
+            "name": "GEO_blade_orbit_halo_SPOKE_2",
+            "mesh": 4,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 5,
+            "name": "GEO_blade_orbit_halo_RING_3",
+            "mesh": 5,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 6,
+            "name": "GEO_blade_orbit_halo_SPOKE_3",
+            "mesh": 6,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 7,
+            "name": "GEO_blade_orbit_halo_RING_4",
+            "mesh": 7,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 8,
+            "name": "GEO_blade_orbit_halo_SPOKE_4",
+            "mesh": 8,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 9,
+            "name": "GEO_blade_orbit_halo_NSS_V1_COLLAR",
+            "mesh": 9,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 10,
+            "name": "MOUNT_blade_orbit_halo_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0031999999191612005,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 11,
+            "name": "MOUNT_blade_orbit_halo_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.002400000113993883,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "blade_storm_fang",
+      "partType": "main_blade",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "gunmetal",
+        "cobalt_blue_translucent",
+        "solar_amber"
+      ],
+      "partSpec": {
+        "path": "specs/parts/blade_storm_fang.json",
+        "bytes": 1601,
+        "sha256": "4040eed138552d80e94b72bb2175ae8f8e9cbfff3c207d10546bd09f5961d4d0"
+      },
+      "glb": {
+        "path": "public/models/parts/blade_storm_fang.glb",
+        "bytes": 52436,
+        "sha256": "ddc3a0580a2c53c4da1b545669cad30ece4aca36ec3d54b006b442d3f491a5ac",
+        "meshCount": 2,
+        "primitiveCount": 4,
+        "triangleCount": 1056,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_gunmetal"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 2,
+            "materialIndex": 2,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_gunmetal"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 432,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 5184,
+            "sha256": "73e63a9bfa28cf2f30741f7adf3682c721ec8a858bf0c02366359b158ae35db8"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 288,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 12096,
+            "byteLength": 3456,
+            "sha256": "b4a16f1da4b54f9d102e68b3e4f35f12f8e9e6cd882cc326a358256ff08e23dd"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 288,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 19872,
+            "byteLength": 3456,
+            "sha256": "c3b5cd762906326e0166ed0cd469fd61864c9c37f71b1bf51ae5a93539758d49"
+          },
+          {
+            "accessorIndex": 9,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 27648,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 864,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 10368,
+            "byteLength": 1728,
+            "sha256": "2b2750675741a354bbe0925ed6b1d1ae00f1c6c511e3f3a16599d825ba446e3f"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 432,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 19008,
+            "byteLength": 864,
+            "sha256": "def69f6ab800d1235bb4d1096c03d103f37b10cb6ee74dabb5219ec2712bdf2d"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 432,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 26784,
+            "byteLength": 864,
+            "sha256": "990b459571fbfe707b5d6ce9b8cf38a1fe1507dc6e030011e621715369798a37"
+          },
+          {
+            "accessorIndex": 11,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 44928,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_blade_storm_fang_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_blade_storm_fang_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_blade_storm_fang_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0035000001080334187,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_blade_storm_fang_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.002400000113993883,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "core_solar_wolf",
+      "partType": "emblem_core",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "solar_amber",
+        "obsidian_polymer"
+      ],
+      "partSpec": {
+        "path": "specs/parts/core_solar_wolf.json",
+        "bytes": 1390,
+        "sha256": "9d0ca0e77090f2741f41773a9c95b67db96779dc7a933ad990c7394a0fb104ee"
+      },
+      "glb": {
+        "path": "public/models/parts/core_solar_wolf.glb",
+        "bytes": 43888,
+        "sha256": "78407099c4a962a7d30f6a7a62009ca7f04c5e91487aa17899089143d8bd102c",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 960,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_solar_amber"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 600,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 7200,
+            "sha256": "a10bd6c37decb614bcdc718a726426efb8d1337ce76e75455b076702c9fbe22d"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 120,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 16560,
+            "byteLength": 1440,
+            "sha256": "b815d9009a574bfa9f24cef56b7219178c82d10d75493607254c08cf2d0611ce"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 20160,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 1080,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 14400,
+            "byteLength": 2160,
+            "sha256": "0d092c9fb8b1010a36f9646a60f86ceb8cee8a00f9e976fd805fa4d93067415b"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 360,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 19440,
+            "byteLength": 720,
+            "sha256": "81ac3bef6a7b4196b2018de70c7c32e7dc392d7af1213bc077d9b3bd9c39fd42"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 37440,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_core_solar_wolf_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_core_solar_wolf_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_core_solar_wolf_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0017999999690800905,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_core_solar_wolf_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.0017999999690800905,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "core_void_falcon",
+      "partType": "emblem_core",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "cobalt_blue_translucent",
+        "obsidian_polymer"
+      ],
+      "partSpec": {
+        "path": "specs/parts/core_void_falcon.json",
+        "bytes": 1331,
+        "sha256": "a563c151cb813d745296380a51b26a3629efbb97d0e1e1f64c86714215422113"
+      },
+      "glb": {
+        "path": "public/models/parts/core_void_falcon.glb",
+        "bytes": 76528,
+        "sha256": "e2cf565e197dbb76ffb0f891a05ffb5120a3b7279022374f7cbc08dfa4921e1e",
+        "meshCount": 6,
+        "primitiveCount": 6,
+        "triangleCount": 1648,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 2,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 3,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 4,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 5,
+            "primitiveIndex": 0,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 864,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 10368,
+            "sha256": "b68219b884e2934d0b92f1b901e041bdbb56009f0ad9585d58d647ec027b127c"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 228,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 24192,
+            "byteLength": 2736,
+            "sha256": "b3a77b4e72d0855fdefb9ace936fbb89f22b649aefff35c015a72ef1d87a9f57"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 228,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 30552,
+            "byteLength": 2736,
+            "sha256": "9f3fb1144039307ccdeaf5d3d20296f422bd661c01910f6bc4e99ed511791d32"
+          },
+          {
+            "accessorIndex": 9,
+            "count": 228,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 36912,
+            "byteLength": 2736,
+            "sha256": "80fe9a629f18d2145873101c7f97554a0c8f983806a8a698187792641dabd46d"
+          },
+          {
+            "accessorIndex": 12,
+            "count": 228,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 43272,
+            "byteLength": 2736,
+            "sha256": "e6982012f924255358e038429e114f0c778c512f358f4e0c60d5c7f8aa048d31"
+          },
+          {
+            "accessorIndex": 15,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 49632,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 1728,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 20736,
+            "byteLength": 3456,
+            "sha256": "9b646360c9497b907b0107c5d11a296ad6d78eb24244c36f7cc472f60d7239d4"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 444,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 29664,
+            "byteLength": 888,
+            "sha256": "7452e9c956a02e278e0c094c03d915dc734d21cd5ecfbf5eb6cc63554b00b7ee"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 444,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 36024,
+            "byteLength": 888,
+            "sha256": "cb6da6fcea4f253d18fd26fd93d6338b1b218dd0ba81c75f8d298a678494e4ff"
+          },
+          {
+            "accessorIndex": 11,
+            "count": 444,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 42384,
+            "byteLength": 888,
+            "sha256": "30e60dd5781fccd820ef477ab3356c3eb1d5c55cf0ab1d6b7405dca632685040"
+          },
+          {
+            "accessorIndex": 14,
+            "count": 444,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 48744,
+            "byteLength": 888,
+            "sha256": "e71f290aac60669542b9a0247dc757650641bd0d93c644cf0e71c0aecf01af09"
+          },
+          {
+            "accessorIndex": 17,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 66912,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_core_void_falcon_HUB",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_core_void_falcon_INNER_ARC_1",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "GEO_core_void_falcon_OUTER_ARC_1",
+            "mesh": 2,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "GEO_core_void_falcon_INNER_ARC_2",
+            "mesh": 3,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 4,
+            "name": "GEO_core_void_falcon_OUTER_ARC_2",
+            "mesh": 4,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 5,
+            "name": "GEO_core_void_falcon_NSS_V1_COLLAR",
+            "mesh": 5,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 6,
+            "name": "MOUNT_core_void_falcon_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0017999999690800905,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 7,
+            "name": "MOUNT_core_void_falcon_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.0017999999690800905,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "gear_high",
+      "partType": "height_gear",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "gunmetal",
+        "cobalt_blue_translucent"
+      ],
+      "partSpec": {
+        "path": "specs/parts/gear_high.json",
+        "bytes": 1404,
+        "sha256": "4e644210db922c012d96ffabd6097569b34597cbe528bbaf74e705071e0f6159"
+      },
+      "glb": {
+        "path": "public/models/parts/gear_high.glb",
+        "bytes": 113760,
+        "sha256": "704589efa2f82e723389ed427de25ac6df4ab9101f45f8fbe0900356796554f5",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 2784,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_gunmetal"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_gunmetal"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1872,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 22464,
+            "sha256": "0ebbe56208d8c9275c98477b44cc67d72fa4a145baf4ec751ec4dcc6cdfdb901"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 1296,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 51840,
+            "byteLength": 15552,
+            "sha256": "1d66ee142c033c61e7e512796882179463cac498f76a558c37a44c56ab7e32b6"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 89856,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 3456,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 44928,
+            "byteLength": 6912,
+            "sha256": "6ea25d1c06c237a717ff7fd3fc4ee87a05a27c720f5f9c587a8e489daa3c3d58"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 3456,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 82944,
+            "byteLength": 6912,
+            "sha256": "1a9e08d490a103794209713519fa3b71a4b7ea44ae9c570a8e3b9cec3ad1cc2d"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 107136,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_gear_high_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_gear_high_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_gear_high_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.003000000026077032,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_gear_high_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.003000000026077032,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "gear_low",
+      "partType": "height_gear",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "obsidian_polymer",
+        "solar_amber"
+      ],
+      "partSpec": {
+        "path": "specs/parts/gear_low.json",
+        "bytes": 1387,
+        "sha256": "7b1966d08315afd51a500cc91e6d217b880b9f71dc64f55681aba682e3d199c2"
+      },
+      "glb": {
+        "path": "public/models/parts/gear_low.glb",
+        "bytes": 43812,
+        "sha256": "c772a6bbcb4907f4c7805e3571fb3bdaa6a1b7b1ff45d3beddace6632e076b8a",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 960,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 600,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 7200,
+            "sha256": "6a8dfd8c43c8a93473efe4f98bcb70e52ae2f56a0722aeedc2b0fc0d7fde09e0"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 120,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 16560,
+            "byteLength": 1440,
+            "sha256": "ea3ac2e965a87b27d398e2c8a491fc68efb6b3425d94fc0a96b1744cf287dac3"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 20160,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 1080,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 14400,
+            "byteLength": 2160,
+            "sha256": "565d8da6eb5fe2177ea4987aa846aa5a68d10b1d54ec61f0e62ff527b3f3d4bd"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 360,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 19440,
+            "byteLength": 720,
+            "sha256": "81ac3bef6a7b4196b2018de70c7c32e7dc392d7af1213bc077d9b3bd9c39fd42"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 37440,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_gear_low_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_gear_low_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_gear_low_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0020000000949949026,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_gear_low_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.0020000000949949026,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "gear_medium",
+      "partType": "height_gear",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "obsidian_polymer",
+        "solar_amber"
+      ],
+      "partSpec": {
+        "path": "specs/parts/gear_medium.json",
+        "bytes": 1377,
+        "sha256": "d11a1a4ace1f77fd7bfddc2ef12895b6a4ceca69e06878c89032e5cd35a54202"
+      },
+      "glb": {
+        "path": "public/models/parts/gear_medium.glb",
+        "bytes": 96316,
+        "sha256": "947e5c49e87cf9d403dad970f26fa29893d6cded332ccb77a55132db4f900d3f",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 2208,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1584,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 19008,
+            "sha256": "80de0666e0179349d54a3fde19b865ff4652922f418f563d655944d19f0ce61f"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 1008,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 43200,
+            "byteLength": 12096,
+            "sha256": "9ad5fb49e990f61f3045700145ae155f5a3a33d7cb02c76f162824f75df252c9"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 72576,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2592,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 38016,
+            "byteLength": 5184,
+            "sha256": "4707f639c029fc1f30b246ff6d2fd0c5c2f1d73f2f71e57735f159a180ae21c0"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 2592,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 67392,
+            "byteLength": 5184,
+            "sha256": "9704df4a6d93d38b8ec4b88629ca5b275e884fd4e540871d552501af3715151c"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 89856,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_gear_medium_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_gear_medium_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_gear_medium_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.0024999999441206455,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_gear_medium_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.0024999999441206455,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tip_ball_defense",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "obsidian_polymer",
+        "brushed_silver"
+      ],
+      "partSpec": {
+        "path": "specs/parts/tip_ball_defense.json",
+        "bytes": 1301,
+        "sha256": "c9158b065e3ceab5a3a96393069cd9b06aaed40893ce4ad96294afa99014d76f"
+      },
+      "glb": {
+        "path": "public/models/parts/tip_ball_defense.glb",
+        "bytes": 62220,
+        "sha256": "2aff6daee04a2a8c84a8765a1b82bdeaa697250d506d96dd3330b3b5a36bc1e7",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 1248,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_brushed_silver"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1280,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 15360,
+            "sha256": "34f9f8e8e5b5b9bd648126a425a0855fed260c2039de96b0a15e300a17fdc4c3"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 130,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 34560,
+            "byteLength": 1560,
+            "sha256": "f89533bf8f136024842aea4777238ec380a382dc883bb2e7be28a8fd4eb2cb33"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 38448,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 1920,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 30720,
+            "byteLength": 3840,
+            "sha256": "9ece39d54f074a72af10454fc19a1481582c36f7c78a50344f3818b061bc99dc"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 384,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 37680,
+            "byteLength": 768,
+            "sha256": "18b8bcf3f1beb78bbf3b7b7836ed8526a3dd42165f54f2e5f1b048095e85bae7"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 55728,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_tip_ball_defense_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_tip_ball_defense_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_tip_ball_defense_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.000539999979082495,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_tip_ball_defense_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.007660000119358301,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tip_flat_attack",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "obsidian_polymer",
+        "solar_amber"
+      ],
+      "partSpec": {
+        "path": "specs/parts/tip_flat_attack.json",
+        "bytes": 1435,
+        "sha256": "4baa9d2e19a06ad89ea0c81665e3678501b5c046c41af1eae0aaa2774b435674"
+      },
+      "glb": {
+        "path": "public/models/parts/tip_flat_attack.glb",
+        "bytes": 47404,
+        "sha256": "56bd25f90f6898dc3148cc5eb4c8c14741bd8b7ed71e77f6ffae64606b517629",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 960,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 768,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 9216,
+            "sha256": "47044830daa6952f4e3591f22d55403007268df2d6ac754d881be2aa5bdedce5"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 98,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 20736,
+            "byteLength": 1176,
+            "sha256": "4940c17786f0e66277d0bcc88dea3668762b0e50d39e73439226783c2e7a4f08"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 23664,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 1152,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 18432,
+            "byteLength": 2304,
+            "sha256": "669a8bd4e0b9f4ea4dd11ea71566f3666744120109b03144d28c5b728b0110bf"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 288,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 23088,
+            "byteLength": 576,
+            "sha256": "23d22becfa7406468ce3a3e7382dfc3fc4c2aee0e195a2a495cc6090cce5d72a"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 40944,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_tip_flat_attack_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_tip_flat_attack_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_tip_flat_attack_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.000539999979082495,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_tip_flat_attack_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.006500000134110451,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tip_needle_stamina",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "obsidian_polymer",
+        "cobalt_blue_translucent"
+      ],
+      "partSpec": {
+        "path": "specs/parts/tip_needle_stamina.json",
+        "bytes": 1329,
+        "sha256": "6e25d689c5d0e2a726f6846d2e09057c24b3a08b50b4fcb0942c568000bc5058"
+      },
+      "glb": {
+        "path": "public/models/parts/tip_needle_stamina.glb",
+        "bytes": 69332,
+        "sha256": "4a559c080f821587f197c1266db2d3b617b74eb34db5a462c43e3fe6e22223b2",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 1376,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_cobalt_blue_translucent"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1536,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 18432,
+            "sha256": "62b8df517e7543aa1b37b30465b75aa89666da9268a3624e6aad169f6e540f89"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 130,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 41472,
+            "byteLength": 1560,
+            "sha256": "53e8cb98af48e4bb184197a75ec6e3233c1dedd799f79f884c2ea29c8ed7f3c2"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 45360,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2304,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 36864,
+            "byteLength": 4608,
+            "sha256": "a4402a97021bca4d4df10d3a7d54a4cd0984a4540b34ead6c67951b201c3c24b"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 384,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 44592,
+            "byteLength": 768,
+            "sha256": "18b8bcf3f1beb78bbf3b7b7836ed8526a3dd42165f54f2e5f1b048095e85bae7"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 62640,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_tip_needle_stamina_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_tip_needle_stamina_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_tip_needle_stamina_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.000539999979082495,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_tip_needle_stamina_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.008460000157356262,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tip_taper_balance",
+      "partType": "performance_tip",
+      "interfaceId": "NSS-V1",
+      "materialSlots": [
+        "obsidian_polymer",
+        "solar_amber"
+      ],
+      "partSpec": {
+        "path": "specs/parts/tip_taper_balance.json",
+        "bytes": 1314,
+        "sha256": "2ef8d927558f3fd1280db2fdf5eaadcee419ff809e81c8ee7eaf78e6a88366fc"
+      },
+      "glb": {
+        "path": "public/models/parts/tip_taper_balance.glb",
+        "bytes": 69124,
+        "sha256": "d2af25543415598e611deb826f766a217fd65954f3fe5fa7c5b7ca4359eb04b0",
+        "meshCount": 2,
+        "primitiveCount": 3,
+        "triangleCount": 1376,
+        "attributes": [
+          "NORMAL",
+          "POSITION"
+        ],
+        "texcoord0PrimitiveCount": 0,
+        "texcoord1PrimitiveCount": 0,
+        "imageCount": 0,
+        "textureCount": 0,
+        "materialSlotOrder": [
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          },
+          {
+            "meshIndex": 0,
+            "primitiveIndex": 1,
+            "materialIndex": 1,
+            "materialName": "MAT_solar_amber"
+          },
+          {
+            "meshIndex": 1,
+            "primitiveIndex": 0,
+            "materialIndex": 0,
+            "materialName": "MAT_obsidian_polymer"
+          }
+        ],
+        "positions": [
+          {
+            "accessorIndex": 0,
+            "count": 1536,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 0,
+            "byteLength": 18432,
+            "sha256": "bce533ec9fdd6dd2d14cb446583907695b80edb420d61dc20a44aeb312f394b8"
+          },
+          {
+            "accessorIndex": 3,
+            "count": 130,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 41472,
+            "byteLength": 1560,
+            "sha256": "7eedf2d0903ebb0a88390381762498b1826e967b0437f4044cee181e4aa6760c"
+          },
+          {
+            "accessorIndex": 6,
+            "count": 720,
+            "type": "VEC3",
+            "componentType": 5126,
+            "byteOffset": 45360,
+            "byteLength": 8640,
+            "sha256": "39e1cb3119d1eb1a4785be7d271929164f646756c7554bbaad8c39bb78b7e830"
+          }
+        ],
+        "indices": [
+          {
+            "accessorIndex": 2,
+            "count": 2304,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 36864,
+            "byteLength": 4608,
+            "sha256": "1d247afb5d1fb488391527e254e82a2744bf7450cf2e3e8c167d42222d447221"
+          },
+          {
+            "accessorIndex": 5,
+            "count": 384,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 44592,
+            "byteLength": 768,
+            "sha256": "18b8bcf3f1beb78bbf3b7b7836ed8526a3dd42165f54f2e5f1b048095e85bae7"
+          },
+          {
+            "accessorIndex": 8,
+            "count": 1440,
+            "type": "SCALAR",
+            "componentType": 5123,
+            "byteOffset": 62640,
+            "byteLength": 2880,
+            "sha256": "89b687e2e95ae5fecff6279635a8776c3fcdc0e5776b23a5a1dc1eb3e15c0373"
+          }
+        ],
+        "nodeTransforms": [
+          {
+            "nodeIndex": 0,
+            "name": "GEO_tip_taper_balance_BODY",
+            "mesh": 0,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 1,
+            "name": "GEO_tip_taper_balance_NSS_V1_COLLAR",
+            "mesh": 1,
+            "matrix": null,
+            "translation": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 2,
+            "name": "MOUNT_tip_taper_balance_TOP",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              0.000539999979082495,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "nodeIndex": 3,
+            "name": "MOUNT_tip_taper_balance_BOTTOM",
+            "mesh": null,
+            "matrix": null,
+            "translation": [
+              0,
+              -0.007960000075399876,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "generatedAt": "2026-07-21T15:39:23.894Z",
+  "inputDigest": "2cf5fda472e1200d417465b9b1c6ccd532f5fd2d09b718eb9ec33979c7846967"
+}
