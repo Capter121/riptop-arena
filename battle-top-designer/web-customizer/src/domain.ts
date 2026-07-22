@@ -1,4 +1,4 @@
-import catalogJson from './generated/parts.catalog.json';
+import catalogJson from '../../shared/nss/parts.catalog.json';
 
 export const families = ['core', 'blade', 'assist', 'gear', 'tip'] as const;
 export type Family = (typeof families)[number];

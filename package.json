@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "server": "node server/match-server.mjs",
     "test:server": "node scripts/test-match-server.mjs",
+    "test:nss-contract": "node scripts/test-nss-contract.mjs",
     "inspect:canvas": "node scripts/inspect-threejs-canvas.mjs"
   },
   "devDependencies": {

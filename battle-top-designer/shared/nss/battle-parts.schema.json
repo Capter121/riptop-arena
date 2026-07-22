@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nss-battle-parts-v1.schema.json",
+  "title": "NSS Battle Part Catalog V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "parts"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "parts": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "family", "stats", "physics"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "family": { "enum": ["core", "blade", "assist", "gear", "tip"] },
+          "stats": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["attack", "defense", "stamina", "mobility", "burstResist"],
+            "properties": {
+              "attack": { "type": "number", "minimum": 0 },
+              "defense": { "type": "number", "minimum": 0 },
+              "stamina": { "type": "number", "minimum": 0 },
+              "mobility": { "type": "number", "minimum": 0 },
+              "burstResist": { "type": "number", "minimum": 0 }
+            }
+          },
+          "physics": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["weight"],
+            "properties": {
+              "weight": { "type": "number", "exclusiveMinimum": 0 },
+              "collisionRadius": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

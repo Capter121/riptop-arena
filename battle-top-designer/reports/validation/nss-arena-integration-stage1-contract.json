@@ -1,0 +1,35 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_1_SHARED_CONTRACT",
+  "status": "PASS",
+  "headBeforeCommit": "e1756dc3d84fd5be88ae6d51748bdbb1beab5749",
+  "contract": {
+    "schemaVersion": 1,
+    "interfaceId": "NSS-V1",
+    "families": ["core", "blade", "assist", "gear", "tip"],
+    "parts": 16,
+    "combinations": 288,
+    "firstCombinationId": "nss-p2c-0001",
+    "lastCombinationId": "nss-p2c-0288",
+    "sharedCatalogSha256": "6112f3e3418e3e189d5005a208ebf083d8a9d0c91692e96c090b28fa60b98801"
+  },
+  "validation": {
+    "rootTypeScript": "PASS",
+    "rootContractSmoke": "PASS",
+    "rootProductionBuild": "PASS",
+    "matchServerSmoke": "PASS",
+    "customizerTypeScript": "PASS",
+    "customizerContractAndCombinationUnits": "14/14 PASS",
+    "rootMappingDirectUnit": "covered by 5/5 shared-contract tests",
+    "catalogCheck": "PASS; 16 parts and 2 deterministic outputs",
+    "customizerProductionBuild": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "protection": {
+    "formalGlbTreeDigest": "6f6cf35a7b0d53b18fb57ddcc9d9ec8f81db9f7263a2a4a9cc60a3e877054a4e",
+    "formalGlbMatch": true,
+    "mainWorkspaceStatusDigest": "5be7e11a5e73a7dc40c57eec758aee3226791391bb34ec95bd85092a821fb7e6",
+    "mainWorkspaceMatch": true,
+    "playwrightRun": false,
+    "stage8Run": false
+  }
+}

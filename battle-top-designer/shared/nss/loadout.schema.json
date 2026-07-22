@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "nss-battle-loadout-v1.schema.json",
+  "title": "NSS Battle Loadout V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "interfaceId", "combination"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "interfaceId": { "const": "NSS-V1" },
+    "combination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["core", "blade", "assist", "gear", "tip"],
+      "properties": {
+        "core": { "type": "string", "pattern": "^core_[a-z0-9_]+$" },
+        "blade": { "type": "string", "pattern": "^blade_[a-z0-9_]+$" },
+        "assist": { "type": "string", "pattern": "^assist_[a-z0-9_]+$" },
+        "gear": { "type": "string", "pattern": "^gear_[a-z0-9_]+$" },
+        "tip": { "type": "string", "pattern": "^tip_[a-z0-9_]+$" }
+      }
+    }
+  }
+}
