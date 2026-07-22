@@ -12,6 +12,7 @@ import {
   markFocusReadoutCommitted as transitionFocusReadoutCommit, type FocusSessionState, type FocusTarget,
 } from './focusLifecycle';
 import { resolveInitialCombination } from './sharing/combinationUrl';
+import type { ShowcaseCameraPreset, TurntableSpeed } from './rendering/showcasePolicy';
 
 export const combinationStorageKey = 'nova-spin:phase3a:combination:v1';
 const lowPerformanceStorageKey = 'nova-spin:phase3b:low-performance:v1';
@@ -33,6 +34,11 @@ interface CustomizerState {
   pendingPrevious: Combination | null;
   loadProgress: number;
   lowPerformance: boolean;
+  showcaseEnabled: boolean;
+  showcaseCameraPreset: ShowcaseCameraPreset;
+  turntableEnabled: boolean;
+  turntablePausedByInteraction: boolean;
+  turntableSpeed: TurntableSpeed;
   solarWolfBadgeEnabled: boolean;
   stormFangPatternEnabled: boolean;
   voidFalconBadgeEnabled: boolean;
@@ -56,6 +62,11 @@ interface CustomizerState {
   setLoadState: (state: 'loading' | 'ready' | 'error', error?: string) => void;
   setLoadProgress: (progress: number) => void;
   setLowPerformance: (value: boolean) => void;
+  setShowcaseEnabled: (value: boolean) => void;
+  setShowcaseCameraPreset: (preset: ShowcaseCameraPreset) => void;
+  setTurntableEnabled: (value: boolean) => void;
+  setTurntablePausedByInteraction: (value: boolean) => void;
+  setTurntableSpeed: (speed: TurntableSpeed) => void;
   setSolarWolfBadgeEnabled: (value: boolean) => void;
   setStormFangPatternEnabled: (value: boolean) => void;
   setVoidFalconBadgeEnabled: (value: boolean) => void;
@@ -91,6 +102,11 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   pendingPrevious: null,
   loadProgress: 0,
   lowPerformance: false,
+  showcaseEnabled: false,
+  showcaseCameraPreset: 'hero',
+  turntableEnabled: false,
+  turntablePausedByInteraction: false,
+  turntableSpeed: 'slow',
   solarWolfBadgeEnabled: true,
   stormFangPatternEnabled: true,
   voidFalconBadgeEnabled: true,
@@ -185,6 +201,11 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
     try { localStorage.setItem(lowPerformanceStorageKey, String(lowPerformance)); } catch { /* Mode still applies for this session. */ }
     set({ lowPerformance });
   },
+  setShowcaseEnabled: showcaseEnabled => set(state => ({ showcaseEnabled, turntableEnabled: showcaseEnabled ? state.turntableEnabled : false, turntablePausedByInteraction: false })),
+  setShowcaseCameraPreset: showcaseCameraPreset => set({ showcaseCameraPreset }),
+  setTurntableEnabled: turntableEnabled => set(state => ({ turntableEnabled: state.showcaseEnabled && turntableEnabled })),
+  setTurntablePausedByInteraction: turntablePausedByInteraction => set({ turntablePausedByInteraction }),
+  setTurntableSpeed: turntableSpeed => set({ turntableSpeed }),
   setSolarWolfBadgeEnabled: solarWolfBadgeEnabled => set({ solarWolfBadgeEnabled }),
   setStormFangPatternEnabled: stormFangPatternEnabled => set({ stormFangPatternEnabled }),
   setVoidFalconBadgeEnabled: voidFalconBadgeEnabled => set({ voidFalconBadgeEnabled }),

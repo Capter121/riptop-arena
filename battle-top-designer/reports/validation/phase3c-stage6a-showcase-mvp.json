@@ -1,0 +1,44 @@
+{
+  "stage": "PHASE3C_STAGE6A_SHOWCASE_MVP",
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "headAtStart": "477a1f976a49ce3f93e65eea5cf53d0cee11c2a3",
+  "baseline": {
+    "camera": "single PerspectiveCamera, fov 34, near 0.001, far 10",
+    "controls": "OrbitControls",
+    "roomEnvironment": "preserved",
+    "historicalContinuousRotation": "removed"
+  },
+  "lighting": {
+    "profiles": ["editing", "low", "medium", "high"],
+    "semantics": ["key", "fill", "rim"],
+    "shadows": false,
+    "externalResources": false
+  },
+  "showcase": {
+    "defaultEnabled": false,
+    "presets": ["hero", "top", "side", "exploded"],
+    "transitionDurationMs": { "min": 280, "max": 360 },
+    "turntableDefaultEnabled": false,
+    "turntableRadiansPerSecond": { "slow": 0.16, "normal": 0.32 },
+    "interactionYieldsControl": true
+  },
+  "performance": {
+    "additionalMeshes": 0,
+    "additionalTextures": 0,
+    "additionalNetworkRequests": 0,
+    "additionalModelDrawCalls": 0,
+    "perFrameAllocation": false
+  },
+  "formalGlb": { "count": 16, "workingTreeChanged": false },
+  "validation": {
+    "stage6aAndIdentityRegressionUnits": "21/21 PASS",
+    "allUnitTests": "275/275 PASS",
+    "typescript": "PASS",
+    "productCatalog": "16 parts PASS",
+    "productionBuild": "PASS",
+    "gitDiffCheck": "PASS",
+    "browserAutomationRun": false,
+    "stage8Run": false,
+    "glbRegenerated": false
+  }
+}

@@ -1,7 +1,7 @@
 import { OrbitControls, useProgress } from '@react-three/drei';
 import { addAfterEffect, Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { ACESFilmicToneMapping, Color, Group, Matrix4, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, PMREMGenerator, SRGBColorSpace, TextureLoader, Vector3, WebGLRenderTarget } from 'three';
+import { ACESFilmicToneMapping, Group, Matrix4, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, PMREMGenerator, SRGBColorSpace, TextureLoader, Vector3, WebGLRenderTarget } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { assembleMatrices } from './assembly';
@@ -19,6 +19,9 @@ import { recordFocusDiagnostic } from './focusDiagnostics';
 import { FocusExitFrameGate } from './focusLifecycle';
 import { useCustomizer } from './store';
 import { resolveStudioQuality } from './rendering/qualityPolicy';
+import { cameraTransitionProgress, easeOutQuad, showcaseCameraPresets } from './rendering/showcaseCamera';
+import { turntableRotationDelta } from './rendering/showcasePolicy';
+import { resolveStudioLighting } from './rendering/studioLighting';
 import { shouldRenderSolarWolfBadge, solarWolfBadgePolicy } from './rendering/solarWolfBadge';
 import { shouldRenderStormFangPattern, stormFangIdentityPolicy } from './rendering/stormFangIdentity';
 import {
@@ -77,6 +80,19 @@ function StudioEnvironmentIntensity({ intensity }: { intensity: number }) {
   return null;
 }
 
+function StudioLightingRig({ lowPerformance, showcaseEnabled }: { lowPerformance: boolean; showcaseEnabled: boolean }) {
+  const lighting = resolveStudioLighting(lowPerformance, showcaseEnabled);
+  return (
+    <>
+      <ambientLight intensity={lighting.ambientIntensity} />
+      {lighting.hemisphere.enabled && <hemisphereLight args={[lighting.hemisphere.skyColor, lighting.hemisphere.groundColor, lighting.hemisphere.intensity]} />}
+      {lighting.key.enabled && <directionalLight position={lighting.key.position} intensity={lighting.key.intensity} color={lighting.key.color} castShadow={false} />}
+      {lighting.fill.enabled && <directionalLight position={lighting.fill.position} intensity={lighting.fill.intensity} color={lighting.fill.color} castShadow={false} />}
+      {lighting.rim.enabled && <directionalLight position={lighting.rim.position} intensity={lighting.rim.intensity} color={lighting.rim.color} castShadow={false} />}
+    </>
+  );
+}
+
 function CaptureBridge() {
   const { camera, gl, scene } = useThree();
   useEffect(() => {
@@ -111,22 +127,50 @@ function CaptureBridge() {
 
 function CameraRig() {
   const preset = useCustomizer(state => state.cameraPreset);
+  const showcaseEnabled = useCustomizer(state => state.showcaseEnabled);
+  const showcaseCameraPreset = useCustomizer(state => state.showcaseCameraPreset);
   const controls = useRef<any>(null);
+  const transition = useRef({
+    active: false,
+    elapsedMs: 0,
+    durationMs: 0,
+    startPosition: new Vector3(),
+    startTarget: new Vector3(),
+    endPosition: new Vector3(),
+    endTarget: new Vector3(),
+  });
   const { camera, gl } = useThree();
   useEffect(() => {
-    camera.position.copy(cameraPositions[preset]);
-    camera.lookAt(target);
-    camera.updateProjectionMatrix();
-    if (controls.current) {
-      controls.current.target.copy(target);
-      controls.current.update();
+    const next = showcaseEnabled ? showcaseCameraPresets[showcaseCameraPreset] : {
+      position: cameraPositions[preset].toArray() as [number, number, number], target: target.toArray() as [number, number, number], durationMs: 260,
+    };
+    transition.current.startPosition.copy(camera.position);
+    transition.current.startTarget.copy(controls.current?.target ?? target);
+    transition.current.endPosition.set(next.position[0], next.position[1], next.position[2]);
+    transition.current.endTarget.set(next.target[0], next.target[1], next.target[2]);
+    transition.current.durationMs = next.durationMs;
+    transition.current.elapsedMs = 0;
+    transition.current.active = true;
+  }, [camera, preset, showcaseCameraPreset, showcaseEnabled]);
+  useFrame((_, delta) => {
+    if (transition.current.active && !useCustomizer.getState().turntablePausedByInteraction) {
+      transition.current.elapsedMs += delta * 1000;
+      const progress = cameraTransitionProgress(transition.current.elapsedMs, transition.current.durationMs);
+      const eased = easeOutQuad(progress);
+      camera.position.lerpVectors(transition.current.startPosition, transition.current.endPosition, eased);
+      if (controls.current) {
+        controls.current.target.lerpVectors(transition.current.startTarget, transition.current.endTarget, eased);
+        controls.current.update();
+      } else camera.lookAt(transition.current.endTarget);
+      if (progress === 1) transition.current.active = false;
     }
-  }, [camera, preset]);
-  useFrame(() => {
     updateCamera(camera.position.toArray(), camera.position.distanceTo(target));
     updateWebglResources(gl.info.memory.geometries, gl.info.memory.textures, gl.info.programs?.length ?? 0);
   });
-  return <OrbitControls ref={controls} makeDefault enablePan={false} minDistance={0.065} maxDistance={0.34} />;
+  return <OrbitControls ref={controls} makeDefault enablePan={false} minDistance={0.065} maxDistance={0.34} onStart={() => {
+    transition.current.active = false;
+    useCustomizer.getState().setTurntablePausedByInteraction(true);
+  }} onEnd={() => useCustomizer.getState().setTurntablePausedByInteraction(false)} />;
 }
 
 function cloneForInstance(source: Object3D): Object3D {
@@ -392,6 +436,9 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
   const exploded = useCustomizer(state => state.exploded);
   const debugAxis = useCustomizer(state => state.debugAxis);
   const lowPerformance = useCustomizer(state => state.lowPerformance);
+  const turntableEnabled = useCustomizer(state => state.turntableEnabled);
+  const turntablePausedByInteraction = useCustomizer(state => state.turntablePausedByInteraction);
+  const turntableSpeed = useCustomizer(state => state.turntableSpeed);
   const solarWolfBadgeEnabled = useCustomizer(state => state.solarWolfBadgeEnabled);
   const stormFangPatternEnabled = useCustomizer(state => state.stormFangPatternEnabled);
   const voidFalconBadgeEnabled = useCustomizer(state => state.voidFalconBadgeEnabled);
@@ -430,7 +477,7 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
   }, [combination, matrices, onReady]);
   useEffect(() => addAfterEffect(() => stableFrameBoundary.afterRender(displayedCombinationIdRef.current)), [stableFrameBoundary]);
   useFrame((_, delta) => {
-    if (rotating.current) rotating.current.rotation.y += delta * (focusState.target || exploded ? 0.08 : lowPerformance ? 0.12 : 0.22);
+    if (rotating.current) rotating.current.rotation.y += turntableRotationDelta(turntableEnabled, turntablePausedByInteraction, turntableSpeed, delta);
     const expectedCombinationId = activeCachedSwitchCombination() ?? pendingPartSwitchCombinationId();
     if (!isPartSwitchPending() || (expectedCombinationId && expectedCombinationId !== displayedCombinationId)) return;
     stableFrameBoundary.beforeRender(expectedCombinationId ?? displayedCombinationId, displayedCombinationId);
@@ -465,6 +512,7 @@ function LoadingSignal() {
 
 export function CustomizerScene({ combination }: { combination: Combination }) {
   const lowPerformance = useCustomizer(state => state.lowPerformance);
+  const showcaseEnabled = useCustomizer(state => state.showcaseEnabled);
   const quality = resolveStudioQuality(lowPerformance);
   const ready = useCallback(() => {
     useCustomizer.getState().setLoadState('ready');
@@ -480,10 +528,7 @@ export function CustomizerScene({ combination }: { combination: Combination }) {
         <color attach="background" args={['#080b12']} />
         <StudioEnvironment />
         <StudioEnvironmentIntensity intensity={quality.environmentIntensity} />
-        <ambientLight intensity={lowPerformance ? 1.9 : 1.6} />
-        {!lowPerformance && <hemisphereLight args={['#c9ddff', '#211d2b', 1.8]} />}
-        <directionalLight position={[0.12, 0.16, 0.1]} intensity={3.2} color={new Color('#fff1d2')} />
-        {!lowPerformance && <directionalLight position={[-0.1, 0.04, -0.12]} intensity={1.8} color={new Color('#8bb8ff')} />}
+        <StudioLightingRig lowPerformance={lowPerformance} showcaseEnabled={showcaseEnabled} />
         <Suspense fallback={<LoadingSignal />}>
           <Assembly combination={combination} onReady={ready} />
         </Suspense>

@@ -13,6 +13,9 @@ describe('customizer store and local persistence', () => {
     useCustomizer.getState().setIronBastionPatternEnabled(true);
     useCustomizer.getState().setOrbitHaloPatternEnabled(true);
     useCustomizer.getState().setDualCometPatternEnabled(true);
+    useCustomizer.getState().setShowcaseEnabled(false);
+    useCustomizer.getState().setShowcaseCameraPreset('hero');
+    useCustomizer.getState().setTurntableSpeed('slow');
   });
 
   it('updates the correct family and focus state', () => {
@@ -71,5 +74,30 @@ describe('customizer store and local persistence', () => {
       ironBastionPatternEnabled: true,
       dualCometPatternEnabled: true,
     });
+  });
+
+  it('keeps Showcase state independent from the selected parts, identities, and exploded state', () => {
+    useCustomizer.getState().selectPart('core_void_falcon');
+    useCustomizer.getState().setExploded(true);
+    useCustomizer.getState().setVoidFalconBadgeEnabled(false);
+    const before = useCustomizer.getState();
+    useCustomizer.getState().setShowcaseEnabled(true);
+    useCustomizer.getState().setShowcaseCameraPreset('exploded');
+    expect(useCustomizer.getState()).toMatchObject({
+      showcaseEnabled: true,
+      showcaseCameraPreset: 'exploded',
+      turntableEnabled: false,
+      combination: before.combination,
+      exploded: true,
+      voidFalconBadgeEnabled: false,
+    });
+  });
+
+  it('stops the turntable when Showcase closes', () => {
+    useCustomizer.getState().setShowcaseEnabled(true);
+    useCustomizer.getState().setTurntableEnabled(true);
+    expect(useCustomizer.getState().turntableEnabled).toBe(true);
+    useCustomizer.getState().setShowcaseEnabled(false);
+    expect(useCustomizer.getState()).toMatchObject({ showcaseEnabled: false, turntableEnabled: false });
   });
 });

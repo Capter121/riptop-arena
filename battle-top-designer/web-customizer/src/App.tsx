@@ -296,9 +296,19 @@ export default function App() {
           {state.loadState === 'loading' ? `Loading local assets… ${state.loadProgress}%` : state.loadState === 'error' ? state.error : 'Offline model ready'}
         </div>
         <div className="viewer-tools" aria-label="Camera controls">
-          {(['top', 'perspective', 'side', 'bottom'] as const).map(preset => (
+          {!state.showcaseEnabled && (['top', 'perspective', 'side', 'bottom'] as const).map(preset => (
             <button key={preset} data-testid={`camera-${preset}`} className={state.cameraPreset === preset ? 'active' : ''} onClick={() => state.setCamera(preset)}>{preset === 'perspective' ? '45°' : preset}</button>
           ))}
+          <button data-testid="showcase" className={state.showcaseEnabled ? 'active' : ''} aria-pressed={state.showcaseEnabled} onClick={() => state.setShowcaseEnabled(!state.showcaseEnabled)}>Showcase</button>
+          {state.showcaseEnabled && <span role="group" aria-label="Showcase controls">
+            {(['hero', 'top', 'side', 'exploded'] as const).map(preset => (
+              <button key={preset} data-testid={`showcase-${preset}`} className={state.showcaseCameraPreset === preset ? 'active' : ''} onClick={() => state.setShowcaseCameraPreset(preset)}>{preset}</button>
+            ))}
+            <button data-testid="turntable" className={state.turntableEnabled ? 'active' : ''} aria-pressed={state.turntableEnabled} onClick={() => state.setTurntableEnabled(!state.turntableEnabled)}>Turntable</button>
+            {state.turntableEnabled && (['slow', 'normal'] as const).map(speed => (
+              <button key={speed} data-testid={`turntable-${speed}`} className={state.turntableSpeed === speed ? 'active' : ''} onClick={() => state.setTurntableSpeed(speed)}>{speed}</button>
+            ))}
+          </span>}
           <button data-testid="reset-view" onClick={state.restorePresentation}>Reset</button>
           <button data-testid="debug-axis" aria-pressed={state.debugAxis} onClick={() => state.setDebugAxis(!state.debugAxis)}>Axis</button>
           <button data-testid="low-performance" aria-pressed={state.lowPerformance} onClick={() => state.setLowPerformance(!state.lowPerformance)}>Low performance</button>
