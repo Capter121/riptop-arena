@@ -302,6 +302,7 @@ export default function App() {
           <button data-testid="reset-view" onClick={state.restorePresentation}>Reset</button>
           <button data-testid="debug-axis" aria-pressed={state.debugAxis} onClick={() => state.setDebugAxis(!state.debugAxis)}>Axis</button>
           <button data-testid="low-performance" aria-pressed={state.lowPerformance} onClick={() => state.setLowPerformance(!state.lowPerformance)}>Low performance</button>
+          <button data-testid="solar-wolf-badge" aria-pressed={state.solarWolfBadgeEnabled} onClick={() => state.setSolarWolfBadgeEnabled(!state.solarWolfBadgeEnabled)}>Solar badge</button>
         </div>
         {readoutTarget === 'gear' && <FocusReadout testId="gear-height-readout" phase={focusState.phase} sessionId={focusState.sessionId} activeFramePainted={focusState.activeFramePainted} onPresentationComplete={completeFocusPresentation}>Gear {selectedGear.heightMm.toFixed(1)} mm · total height Δ {(selectedGear.heightMm - lowGearHeight).toFixed(1)} mm vs Low</FocusReadout>}
         {readoutTarget === 'tip' && <FocusReadout testId="tip-contact-readout" phase={focusState.phase} sessionId={focusState.sessionId} activeFramePainted={focusState.activeFramePainted} onPresentationComplete={completeFocusPresentation}>Contact focus · {familyParts.tip.find(part => part.id === state.combination.tip)!.displayName}</FocusReadout>}

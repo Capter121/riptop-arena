@@ -1,0 +1,23 @@
+{
+  "stage": "PHASE3C_STAGE5B_SOLAR_WOLF_BADGE_PROTOTYPE",
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "targetCore": "core_solar_wolf",
+  "sourceAsset": "design/visual-identity/solar-wolf-concept.svg",
+  "runtimeAttachment": "web-customizer/src/Scene.tsx:SolarWolfBadge",
+  "safeRadiusMm": 8.0,
+  "badgeRadiusMm": 7.6,
+  "topOffsetMm": 0.16,
+  "synchronization": ["assembly matrix", "Core rotation", "part switching", "exploded offset"],
+  "removal": "solarWolfBadgeEnabled false or a non-Solar-Wolf core removes the attachment",
+  "glbMaterialReplacement": false,
+  "glbModified": false,
+  "positionModified": false,
+  "indicesModified": false,
+  "primitiveCountModified": false,
+  "texcoordAdded": false,
+  "nssV1Modified": false,
+  "zFightingMitigation": ["0.16 mm surface offset", "depthWrite false", "polygon offset"],
+  "resourceBudget": {"additionalDrawCalls": 1, "additionalTextures": 1, "sourceResolutionPx": 1024},
+  "mobilePolicy": "SVG source is 1024 px; the user can remove the single attachment layer at any time.",
+  "validation": {"unitTests": "254/254 PASS", "typescript": "PASS", "catalog": "PASS", "productionBuild": "PASS", "svgIsolation": "PASS", "protectedGlbDiff": "0", "gitDiffCheck": "PASS"}
+}

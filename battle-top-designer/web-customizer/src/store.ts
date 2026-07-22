@@ -33,6 +33,7 @@ interface CustomizerState {
   pendingPrevious: Combination | null;
   loadProgress: number;
   lowPerformance: boolean;
+  solarWolfBadgeEnabled: boolean;
   startupNotice: string | null;
   testMode: boolean;
   hydrate: (search: string, savedText?: string | null) => void;
@@ -50,6 +51,7 @@ interface CustomizerState {
   setLoadState: (state: 'loading' | 'ready' | 'error', error?: string) => void;
   setLoadProgress: (progress: number) => void;
   setLowPerformance: (value: boolean) => void;
+  setSolarWolfBadgeEnabled: (value: boolean) => void;
   replaceCombination: (combination: Combination) => void;
   reset: () => void;
   save: () => void;
@@ -79,6 +81,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   pendingPrevious: null,
   loadProgress: 0,
   lowPerformance: false,
+  solarWolfBadgeEnabled: true,
   startupNotice: null,
   testMode: false,
   hydrate: (search, savedText) => {
@@ -167,6 +170,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
     try { localStorage.setItem(lowPerformanceStorageKey, String(lowPerformance)); } catch { /* Mode still applies for this session. */ }
     set({ lowPerformance });
   },
+  setSolarWolfBadgeEnabled: solarWolfBadgeEnabled => set({ solarWolfBadgeEnabled }),
   replaceCombination: combination => {
     if (!isCombination(combination)) return set({ loadState: 'error', error: 'Illegal combination.' });
     set(state => ({ combination, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? state.combination }));

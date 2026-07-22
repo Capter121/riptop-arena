@@ -1,7 +1,7 @@
 import { OrbitControls, useProgress } from '@react-three/drei';
 import { addAfterEffect, Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { ACESFilmicToneMapping, Color, Group, Matrix4, Mesh, Object3D, PerspectiveCamera, PMREMGenerator, SRGBColorSpace, Vector3, WebGLRenderTarget } from 'three';
+import { ACESFilmicToneMapping, Color, Group, Matrix4, Mesh, Object3D, PerspectiveCamera, PMREMGenerator, SRGBColorSpace, TextureLoader, Vector3, WebGLRenderTarget } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { assembleMatrices } from './assembly';
@@ -19,6 +19,8 @@ import { recordFocusDiagnostic } from './focusDiagnostics';
 import { FocusExitFrameGate } from './focusLifecycle';
 import { useCustomizer } from './store';
 import { resolveStudioQuality } from './rendering/qualityPolicy';
+import { shouldRenderSolarWolfBadge, solarWolfBadgePolicy } from './rendering/solarWolfBadge';
+import solarWolfBadgeUrl from '../../design/visual-identity/solar-wolf-concept.svg?url';
 
 const cameraPositions = {
   top: new Vector3(0, 0.16, 0.001),
@@ -144,12 +146,27 @@ function setBladeFade(scene: Object3D, faded: boolean) {
   });
 }
 
-function PresentationPart({ family, scene, permanent, offset, assistFocus }: {
+function SolarWolfBadge() {
+  const texture = useLoader(TextureLoader, solarWolfBadgeUrl);
+  useEffect(() => {
+    texture.colorSpace = SRGBColorSpace;
+    texture.needsUpdate = true;
+  }, [texture]);
+  return (
+    <mesh position={[0, solarWolfBadgePolicy.topOffsetM, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
+      <circleGeometry args={[solarWolfBadgePolicy.radiusM, 64]} />
+      <meshBasicMaterial map={texture} transparent alphaTest={0.02} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} toneMapped={false} />
+    </mesh>
+  );
+}
+
+function PresentationPart({ family, scene, permanent, offset, assistFocus, solarWolfBadge }: {
   family: Family;
   scene: Object3D;
   permanent: Matrix4;
   offset: number;
   assistFocus: boolean;
+  solarWolfBadge: boolean;
 }) {
   const group = useRef<Group>(null);
   const contentGroup = useRef<Group>(null);
@@ -234,6 +251,7 @@ function PresentationPart({ family, scene, permanent, offset, assistFocus }: {
             <meshBasicMaterial color="#ffcc42" transparent opacity={0.92} depthTest={false} />
           </mesh>
         )}
+        {family === 'core' && solarWolfBadge && <SolarWolfBadge />}
       </group>
     </group>
   );
@@ -256,6 +274,7 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
   const exploded = useCustomizer(state => state.exploded);
   const debugAxis = useCustomizer(state => state.debugAxis);
   const lowPerformance = useCustomizer(state => state.lowPerformance);
+  const solarWolfBadgeEnabled = useCustomizer(state => state.solarWolfBadgeEnabled);
   const coreGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.core}.glb`);
   const bladeGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.blade}.glb`);
   const assistGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.assist}.glb`);
@@ -303,6 +322,7 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
           permanent={matrices[family]}
           offset={offsets[family]}
           assistFocus={focusState.target === 'assist' && focusState.pulseActive}
+          solarWolfBadge={shouldRenderSolarWolfBadge(combination.core, solarWolfBadgeEnabled)}
         />
       ))}
       {debugAxis && <axesHelper args={[0.09]} />}
