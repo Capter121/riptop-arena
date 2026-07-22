@@ -310,8 +310,9 @@ export class TopEntity {
   // The Group itself handles position + tilt.
   // Rotation is split per-part for the shutter-speed illusion.
 
-  syncMesh(time: number, energy: number = 0) {
-    const spinRatio = this.spin / this.stats.maxSpin;
+  syncMesh(time: number, energy: number = 0, dt: number = 0) {
+    const hpRatio = this.getIntegrityRatio();
+    const visualSpinRatio = this.getVisualSpinRatio();
     const turnProgress = this.turnMotion.duration > 0
       ? 1 - this.turnMotion.remaining / this.turnMotion.duration
       : 1;
@@ -337,11 +338,10 @@ export class TopEntity {
       rotZ += Math.cos(time * 54) * hitShake * 0.18;
     }
 
-    if (this.alive && spinRatio < 0.15 && spinRatio > 0) {
-      // ── Dying Chaotic Wobble ──
-      const chaos = (0.15 - spinRatio) / 0.15; // 0 to 1
-      rotX += Math.sin(time * 35) * chaos * 0.15;
-      rotZ += Math.cos(time * 38) * chaos * 0.15;
+    if (this.alive && hpRatio < 0.2 && hpRatio > 0) {
+      const damageSeverity = (0.2 - hpRatio) / 0.2;
+      rotX += Math.sin(time * 24) * damageSeverity * 0.06;
+      rotZ += Math.cos(time * 27) * damageSeverity * 0.06;
     } else if (!this.alive) {
       if (this.burst >= MAX_BURST) {
         if (!this.isTransformedToSheep) {
@@ -368,7 +368,8 @@ export class TopEntity {
     // Ring spins at 40% speed + periodic yaw jitter, so blade
     // teeth remain visible even at maximum RPM.
     const energyBoost = 1 + (energy / 10) * 1.5;
-    const baseRotDelta = spinRatio * 0.62 * energyBoost;
+    const visualDt = clamp(Number.isFinite(dt) ? dt : 0, 0, 1 / 20);
+    const baseRotDelta = visualSpinRatio * 0.62 * 60 * energyBoost * visualDt;
 
     // Core / weight disc: full speed.
     this.coreAngle += baseRotDelta;
@@ -380,8 +381,8 @@ export class TopEntity {
     // sin(time * 17) is a high-frequency oscillation that creates
     // a subtle back-and-forth stutter matching real-world stroboscopic
     // effects seen through high-speed camera shutters.
-    const jitter = Math.sin(time * 17) * 0.015 * spinRatio;
-    this.ringAngle += baseRotDelta * 0.4 + jitter;
+    const jitterDelta = Math.sin(time * 17) * 0.015 * 60 * visualDt * visualSpinRatio;
+    this.ringAngle += baseRotDelta * 0.4 + jitterDelta;
     this.ring.rotation.z = this.ringAngle;
 
     // Rivets stay static relative to their parent layer (already baked).
@@ -396,7 +397,7 @@ export class TopEntity {
     const stormBoost = hasStorm ? 1.6 : 0;
     const chargePulse = isCharging ? 1.1 + Math.sin(time * 26) * 0.75 : 0;
     const attackPulse = attackMeta ? 0.65 + Math.sin(time * 30) * 0.18 : 0;
-    const glow = 0.08 + spinRatio * 0.18 + stormBoost + chargePulse + attackPulse;
+    const glow = 0.08 + visualSpinRatio * 0.18 + stormBoost + chargePulse + attackPulse;
     (this.ring.material as THREE.MeshStandardMaterial).emissiveIntensity = glow;
     (this.core.material as THREE.MeshStandardMaterial).emissiveIntensity = isCharging ? 1.25 + Math.sin(time * 24) * 0.45 : hasStorm ? 0.8 : 0.05;
     (this.weightDisc.material as THREE.MeshStandardMaterial).emissiveIntensity = isCharging ? 0.9 + Math.sin(time * 20) * 0.28 : hasStorm ? 0.6 : 0.03;
@@ -445,12 +446,28 @@ export class TopEntity {
     }
 
     // Blur Ring Opacity
-    if (this.alive && spinRatio > 0.5) {
-      const blurOpacity = (spinRatio - 0.5) * 1.5; // 0.0 at 50%, 0.75 at 100%
+    if (this.alive && visualSpinRatio > 0.5) {
+      const blurOpacity = (visualSpinRatio - 0.5) * 1.5;
       (this.blurRing.material as THREE.MeshBasicMaterial).opacity = Math.min(blurOpacity, 0.7);
     } else {
       (this.blurRing.material as THREE.MeshBasicMaterial).opacity = 0;
     }
+  }
+
+  getVisualRotationAngles() {
+    return {
+      core: this.coreAngle,
+      ring: this.ringAngle,
+    };
+  }
+
+  getIntegrityRatio() {
+    return clamp(this.integrity / Math.max(1, this.stats.maxIntegrity), 0, 1);
+  }
+
+  getVisualSpinRatio() {
+    if (!this.alive || this.integrity <= 0) return 0;
+    return 0.35 + 0.65 * this.getIntegrityRatio();
   }
 
   // ── Per-frame effects driver ──────────────────────────────

@@ -1,0 +1,53 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_BATTLE_DEVELOPMENT_BASELINE",
+  "status": "PASS",
+  "capturedAt": "2026-07-22T17:21:49.9212015+08:00",
+  "source": {
+    "worktree": "E:\\战斗陀螺项目",
+    "head": "226fc8ea1dbd33d53d678528fb61eb4a84371a78",
+    "statusEntriesExcludingIntegrationWorktree": 55,
+    "statusDigest": "5be7e11a5e73a7dc40c57eec758aee3226791391bb34ec95bd85092a821fb7e6",
+    "trackedDiffDigest": "5b8938f89dd21a0b3e6eee367aeb8f930124e2409fd5b555fcd69fc7ed3271c0",
+    "modifiedByTransfer": false,
+    "stagedByTransfer": false
+  },
+  "destination": {
+    "worktree": "E:\\战斗陀螺项目\\nss-arena-integration",
+    "branch": "codex/nss-arena-integration"
+  },
+  "transfer": {
+    "files": 21,
+    "bytes": 380235,
+    "treeDigest": "9768d572b4e9051786cbd23a183d5c923cf1e370ae63e73482f4484b777c9972",
+    "entries": [
+      "package.json|648|28cdedb88601bce0f0968c30e1a2458c13dc596b1a6d9b0b511911995193a626",
+      "package-lock.json|34554|78424b302d484bac61e576990086c40196ffee8a76f71e3a2c630c9355e73591",
+      "src/app/game.ts|121579|667cd49c1d0ea233020fd83d1b170d04a683d2b34163b1857cc54004d16729a7",
+      "src/gameplay/battlePhysics.ts|31617|cd26a4b65021b07d1e1b816c8a26156e0b4944a4fe94b31f20a32926f61c43d0",
+      "src/gameplay/build.ts|4818|66e67ae153e1ffbf9b8d555309afcfebf23757deb9571e73c7728a76edd79fe2",
+      "src/gameplay/top.ts|24487|be543f30b166e993a64dafa582d71cf422718cce609b4598cb96f1fc6e00f73f",
+      "src/scene/arena.ts|18378|e1b111c5d3c7fd331d9978fc65645ffc4a0d8a07ab9b1723f55e4d3301d6b650",
+      "src/scene/arenaVisuals.ts|5893|f80e9175e26b6a7f8f003a62c52552c71fd70f4a07b266f87ddaa0ec7bff9fc8",
+      "src/scene/topMaterials.ts|11736|e9de19566a284cca6b200af5d44fe0bb559521bd28f5dd3ba832b7bc370360a8",
+      "src/style.css|60698|3cbf2c3f339ee3ea03639623c25da921fb8bf1b77c5650b53aaf07c90c734a88",
+      "src/types/battle.ts|3400|73eb35d9be9bf8fdd545cc78a0964e0b1243c29302a1242c1e9984310427f876",
+      "src/ui/hud.ts|12333|eb439a5cf0bafb8bfc71c0452ba5120ee3534a43574ef07fa69d388c11c8b98f",
+      "src/ui/menus.ts|4164|1f16826a064eb2880f3463007b285a4ec60c74413b69b001803ddaee48fa2727",
+      "src/utils/events.ts|1411|52cca35055b3b0ade7c5969392ea569dd902ccf3327a2c57e205d75caa48bb06",
+      "scripts/test-match-server.mjs|6499|e8ee16a00b5b149ca66c292eaad079f40ceb52e6b8b3c8df20f3b9ec415c347e",
+      "server/match-server.mjs|10713|8ee58f2ca0fdf35302974bf07c22a18f1429b1548451f61dd65bc80dac96a856",
+      "src/gameplay/damage.ts|3073|7381c91e295d9a66b7b927d0b8cb3752240cfb16c2da7c141e337ed785d3edd3",
+      "src/network/networkClient.ts|8890|a34973903579b50844548e460661f6191da54fb4997895a6fd7ccc1e2cb0bdbf",
+      "src/network/protocol.ts|5290|83b66ae442cc5ebb7ff3409f373563ee87d7b529a71e7aa12a7e4b67bd7b8b99",
+      "src/ui/clashQtePanel.ts|4243|daf858a5a0aad9c96d0967fea02c70fd5b0290da876cb62c106e552639c3d3ab",
+      "src/ui/floatingTextManager.ts|5811|643a0ad747cef413661f2fcecaf99f9f051238fa871039def85f28edf7ac74c7"
+    ]
+  },
+  "excluded": [
+    "battle-top-designer reports and Stage 8 runner changes",
+    "test-artifacts and browser caches",
+    "Blender and output directories",
+    "nested release and localization worktrees",
+    "diagnostic fix scripts and unrelated user files"
+  ]
+}

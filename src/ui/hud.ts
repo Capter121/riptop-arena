@@ -48,8 +48,10 @@ export class Hud {
 
   private playerSpinFill = document.createElement('div');
   private playerIntegrityFill = document.createElement('div');
+  private playerIntegrityText = document.createElement('div');
   private enemySpinFill = document.createElement('div');
   private enemyIntegrityFill = document.createElement('div');
+  private enemyIntegrityText = document.createElement('div');
   private playerBurst = document.createElement('span');
   private enemyBurst = document.createElement('span');
   private playerEnergyFill = document.createElement('div');
@@ -76,7 +78,10 @@ export class Hud {
       <div class="status status-player">
         <div class="status__title">玩家 <div class="status__attributes js-player-attributes"></div></div>
         <div class="bar"><div class="bar__fill js-player-spin"></div></div>
-        <div class="bar bar--integrity"><div class="bar__fill js-player-integrity"></div></div>
+        <div class="bar bar--integrity">
+          <div class="bar__fill js-player-integrity"></div>
+          <div class="bar__text js-player-integrity-text"></div>
+        </div>
         <div class="bar bar--energy"><div class="bar__fill js-player-energy"></div></div>
         <div class="status__meta">爆裂风险 <span class="js-player-burst">0%</span></div>
       </div>
@@ -90,7 +95,10 @@ export class Hud {
       <div class="status status-enemy">
         <div class="status__title js-enemy-name">对手 <div class="status__attributes js-enemy-attributes"></div></div>
         <div class="bar"><div class="bar__fill js-enemy-spin"></div></div>
-        <div class="bar bar--integrity"><div class="bar__fill js-enemy-integrity"></div></div>
+        <div class="bar bar--integrity">
+          <div class="bar__fill js-enemy-integrity"></div>
+          <div class="bar__text js-enemy-integrity-text"></div>
+        </div>
         <div class="bar bar--energy"><div class="bar__fill js-enemy-energy"></div></div>
         <div class="status__meta">爆裂风险 <span class="js-enemy-burst">0%</span></div>
       </div>
@@ -98,9 +106,11 @@ export class Hud {
 
     this.playerSpinFill = this.root.querySelector('.js-player-spin') as HTMLDivElement;
     this.playerIntegrityFill = this.root.querySelector('.js-player-integrity') as HTMLDivElement;
+    this.playerIntegrityText = this.root.querySelector('.js-player-integrity-text') as HTMLDivElement;
     this.playerEnergyFill = this.root.querySelector('.js-player-energy') as HTMLDivElement;
     this.enemySpinFill = this.root.querySelector('.js-enemy-spin') as HTMLDivElement;
     this.enemyIntegrityFill = this.root.querySelector('.js-enemy-integrity') as HTMLDivElement;
+    this.enemyIntegrityText = this.root.querySelector('.js-enemy-integrity-text') as HTMLDivElement;
     this.enemyEnergyFill = this.root.querySelector('.js-enemy-energy') as HTMLDivElement;
     this.playerBurst = this.root.querySelector('.js-player-burst') as HTMLSpanElement;
     this.enemyBurst = this.root.querySelector('.js-enemy-burst') as HTMLSpanElement;
@@ -171,11 +181,14 @@ export class Hud {
   }
 
   update(state: RoundHud) {
-    this.playerSpinFill.style.width = `${(state.playerSpin / state.playerSpinMax) * 100}%`;
-    this.playerIntegrityFill.style.width = `${(state.playerIntegrity / state.playerIntegrityMax) * 100}%`;
+    const percent = (value: number, max: number) => Math.max(0, Math.min(100, (value / Math.max(1, max)) * 100));
+    this.playerSpinFill.style.width = `${percent(state.playerSpin, state.playerSpinMax)}%`;
+    this.playerIntegrityFill.style.width = `${percent(state.playerIntegrity, state.playerIntegrityMax)}%`;
+    this.playerIntegrityText.textContent = `${Math.ceil(state.playerIntegrity)} / ${Math.ceil(state.playerIntegrityMax)}`;
     this.playerEnergyFill.style.width = `${state.playerEnergy}%`;
-    this.enemySpinFill.style.width = `${(state.enemySpin / state.enemySpinMax) * 100}%`;
-    this.enemyIntegrityFill.style.width = `${(state.enemyIntegrity / state.enemyIntegrityMax) * 100}%`;
+    this.enemySpinFill.style.width = `${percent(state.enemySpin, state.enemySpinMax)}%`;
+    this.enemyIntegrityFill.style.width = `${percent(state.enemyIntegrity, state.enemyIntegrityMax)}%`;
+    this.enemyIntegrityText.textContent = `${Math.ceil(state.enemyIntegrity)} / ${Math.ceil(state.enemyIntegrityMax)}`;
     this.enemyEnergyFill.style.width = `${state.enemyEnergy}%`;
     this.playerBurst.textContent = `${Math.round(state.playerBurst)}%`;
     this.enemyBurst.textContent = `${Math.round(state.enemyBurst)}%`;

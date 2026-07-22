@@ -60,6 +60,10 @@ export class ArenaScene {
 
   private currentThemeId: string = 'classic_grid';
   private currentVideo?: HTMLVideoElement;
+  private currentBackgroundTexture?: THREE.Texture;
+  private surfaceTextures: THREE.Texture[] = [];
+  private themeRevision = 0;
+  private themeInitialized = false;
   private scene?: THREE.Scene;
   private textureLoader = new THREE.TextureLoader();
   private bowlMaterial: THREE.MeshStandardMaterial;
@@ -113,26 +117,26 @@ export class ArenaScene {
     this.bowlMesh.position.y = 0.28;
 
     this.iceBowlMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xaaddff,
-      transmission: 0.9,
+      color: 0x78aeca,
+      transmission: 0.48,
       opacity: 1,
       transparent: true,
       metalness: 0.1,
-      roughness: 0.1,
+      roughness: 0.32,
       ior: 1.31,
-      thickness: 1.5,
+      thickness: 0.9,
       side: THREE.DoubleSide,
     });
 
     this.iceBaseMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x4488ff,
-      transmission: 0.8,
+      color: 0x285f8a,
+      transmission: 0.35,
       opacity: 1,
       transparent: true,
       metalness: 0.2,
-      roughness: 0.1,
+      roughness: 0.38,
       ior: 1.31,
-      thickness: 5.0,
+      thickness: 2.5,
     });
 
     this.floorMaterial = new THREE.MeshStandardMaterial({
@@ -266,7 +270,16 @@ export class ArenaScene {
   setTheme(themeId: string) {
     const theme = ARENA_THEMES[themeId];
     if (!theme) return;
+    if (this.themeInitialized && themeId === this.currentThemeId) {
+      arenaManager.setTheme(themeId);
+      return;
+    }
+
+    this.themeInitialized = true;
     this.currentThemeId = themeId;
+    const revision = ++this.themeRevision;
+    this.releaseBackgroundMedia();
+    this.releaseSurfaceTextures();
 
     this.dangerRingMaterial.color.set(theme.dangerRingColor);
     this.forcefieldMaterial.color.set(theme.forcefieldColor);
@@ -342,6 +355,11 @@ export class ArenaScene {
 
     if (theme.floorDiffuse) {
       this.textureLoader.load(theme.floorDiffuse, (tex) => {
+        if (revision !== this.themeRevision) {
+          tex.dispose();
+          return;
+        }
+        this.surfaceTextures.push(tex);
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
         tex.repeat.set(1.5, 1.5);
@@ -387,6 +405,11 @@ export class ArenaScene {
 
     if (theme.floorEmissive) {
       this.textureLoader.load(theme.floorEmissive, (tex) => {
+        if (revision !== this.themeRevision) {
+          tex.dispose();
+          return;
+        }
+        this.surfaceTextures.push(tex);
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
         tex.repeat.set(1.5, 1.5);
@@ -402,13 +425,6 @@ export class ArenaScene {
       this.floorMaterial.needsUpdate = true;
     }
 
-    if (this.currentVideo) {
-      this.currentVideo.pause();
-      this.currentVideo.removeAttribute('src');
-      this.currentVideo.load();
-      this.currentVideo = undefined;
-    }
-
     if (this.scene) {
       if (theme.backgroundVideo) {
         const video = document.createElement('video');
@@ -422,7 +438,7 @@ export class ArenaScene {
 
         const tex = new THREE.VideoTexture(video);
         tex.colorSpace = THREE.SRGBColorSpace;
-        
+        this.currentBackgroundTexture = tex;
         this.scene.background = tex;
         // Restore the high-quality default PMREM environment map for proper metallic reflections
         if (this.defaultEnvironment) {
@@ -430,9 +446,14 @@ export class ArenaScene {
         }
       } else if (theme.backgroundPanorama) {
         this.textureLoader.load(theme.backgroundPanorama, (tex) => {
+          if (revision !== this.themeRevision) {
+            tex.dispose();
+            return;
+          }
           tex.mapping = THREE.EquirectangularReflectionMapping;
           tex.colorSpace = THREE.SRGBColorSpace;
           if (this.scene) {
+            this.currentBackgroundTexture = tex;
             this.scene.background = tex;
             this.scene.environment = tex;
           }
@@ -446,6 +467,43 @@ export class ArenaScene {
         }
       }
     }
+  }
+
+  private releaseBackgroundMedia() {
+    if (this.currentVideo) {
+      this.currentVideo.pause();
+      this.currentVideo.removeAttribute('src');
+      this.currentVideo.load();
+      this.currentVideo = undefined;
+    }
+
+    if (this.currentBackgroundTexture) {
+      if (this.scene?.background === this.currentBackgroundTexture) {
+        this.scene.background = null;
+      }
+      if (this.scene?.environment === this.currentBackgroundTexture) {
+        this.scene.environment = this.defaultEnvironment;
+      }
+      this.currentBackgroundTexture.dispose();
+      this.currentBackgroundTexture = undefined;
+    }
+  }
+
+  private releaseSurfaceTextures() {
+    for (const texture of this.surfaceTextures) texture.dispose();
+    this.surfaceTextures = [];
+
+    this.floorMaterial.map = null;
+    this.floorMaterial.bumpMap = null;
+    this.floorMaterial.displacementMap = null;
+    this.floorMaterial.emissiveMap = null;
+    this.bowlMaterial.map = null;
+    this.bowlMaterial.bumpMap = null;
+    this.baseMaterial.map = null;
+    this.baseMaterial.bumpMap = null;
+    this.floorMaterial.needsUpdate = true;
+    this.bowlMaterial.needsUpdate = true;
+    this.baseMaterial.needsUpdate = true;
   }
 
   update(dt: number, time: number) {

@@ -14,12 +14,15 @@ import { BattlePhysicsSystem, TurnArbitrator, type TurnResolution } from '../gam
 import { arenaManager } from '../gameplay/arenaManager';
 import { RuleSystem, type BattleResult } from '../gameplay/rules';
 import { launchTop } from '../gameplay/launch';
+import { applyDamageResult, calculateTurnDamage, type DamageResult } from '../gameplay/damage';
 import { clearTransientFlags } from '../gameplay/flags';
 import { EnergySystem } from '../gameplay/energy';
 import { resolveModifiers } from '../gameplay/modifiers';
 import { SkillManager, getSkillLabel } from '../gameplay/skills';
 import { SpiritSystem } from '../gameplay/spirit';
 import { TurnPanel } from '../ui/turnPanel';
+import { ClashQtePanel } from '../ui/clashQtePanel';
+import { FloatingTextManager } from '../ui/floatingTextManager';
 import { MenuPanel } from '../ui/menus';
 import { GaragePanel } from '../ui/garage';
 import { ResultPanel } from '../ui/results';
@@ -38,14 +41,44 @@ import { LightningFX } from '../fx/lightning';
 import { ShockwaveFX } from '../fx/shockwave';
 import { PickupManager } from '../gameplay/pickups';
 import { createBloomPipeline, type BloomPipeline } from '../scene/postProcessing';
+import { NetworkClient } from '../network/networkClient';
+import {
+  oppositeRole,
+  type LaunchConfig,
+  type NetworkTopState,
+  type OnlineLoadout,
+  type OnlineRole,
+  type ServerMessage,
+  type TurnSnapshot,
+} from '../network/protocol';
 import {
   ELEMENT_ATTACKS,
   DEFAULT_TACTICAL_MODE,
   type ElementAttackSkillId,
+  type SkillTier,
   type SkillId,
   type TacticalMode,
   type TurnAction,
 } from '../types/battle';
+
+type TurnState = 'awaiting' | 'approaching' | 'clash_qte' | 'resolving' | 'cutin';
+
+type ClashQteState = {
+  resolution: TurnResolution;
+  tier: SkillTier;
+  phase: 'intro' | 'active';
+  introLeft: number;
+  playerScore: number;
+  enemyScore: number;
+  timeLeft: number;
+  duration: number;
+  aiRate: number;
+  tapPower: number;
+  lastScoreSentAt: number;
+  finalScoreSent: boolean;
+  remoteFinalReceived: boolean;
+  finishGraceLeft: number;
+};
 import {
   advanceLadder,
   awardCoins,
@@ -87,6 +120,7 @@ export class Game {
   private readonly pickups = new PickupManager();
   private readonly bloom: BloomPipeline;
   private readonly loop = new Loop((dt) => this.update(dt));
+  private readonly network = new NetworkClient();
   private readonly overlay = document.createElement('div');
   private phase: Phase = 'menu';
   private progression: ProgressionState = loadProgression();
@@ -110,6 +144,7 @@ export class Game {
   );
   private readonly cutinPanel = new CutinPanel();
   private readonly hud = new Hud();
+  private readonly floatingTexts = new FloatingTextManager(this.camera);
   private readonly audio = new SynthAudio();
   private readonly launchFlash = document.createElement('div');
   private readonly cameraDebug = document.createElement('div');
@@ -123,10 +158,19 @@ export class Game {
   private skillManager = new SkillManager(this.spirit);
   private readonly turnArbitrator = new TurnArbitrator();
   private readonly turnPanel = new TurnPanel((action) => this.submitTurnAction(action));
-  private turnState: 'awaiting' | 'approaching' | 'resolving' | 'cutin' = 'awaiting';
+  private readonly clashQtePanel = new ClashQtePanel();
+  private turnState: TurnState = 'awaiting';
   private turnTimer = 0;
   private turnIndex = 1;
   private activeTurnResolution: TurnResolution | null = null;
+  private activeClashQte: ClashQteState | null = null;
+  private battleMode: 'single' | 'online' = 'single';
+  private onlineTurnId = 0;
+  private onlineTurnDeadline = 0;
+  private onlineStartAt: number | null = null;
+  private onlineLaunchConfig: LaunchConfig | null = null;
+  private pendingOnlineSnapshot: TurnSnapshot | null = null;
+  private onlineOpponentName = 'Online Rival';
 
   private mode: 'quick' | 'tournament' | 'survival' = 'quick';
   private survivalWave = 1;
@@ -177,7 +221,7 @@ export class Game {
 
     // 閳光偓閳光偓 Cyberpunk Stage Lighting 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
     // Dim ambient (just fills the darkest crevices).
-    const ambient = new THREE.AmbientLight('#0a1020', 0.4);
+    const ambient = new THREE.AmbientLight('#2a3240', 1.0);
 
     // Hard key light for solid form shadows.
     const key = new THREE.DirectionalLight('#ffe8c8', 2.2);
@@ -209,7 +253,7 @@ export class Game {
     // cyberpunk reflections on all metallic surfaces.
     const pmremGen = new THREE.PMREMGenerator(this.renderer);
     const envScene = new THREE.Scene();
-    envScene.background = new THREE.Color('#0a0e14');
+    envScene.background = new THREE.Color('#252b36');
     // Neon accent panels.
     const neonBlue = new THREE.Mesh(
       new THREE.PlaneGeometry(20, 10),
@@ -266,7 +310,9 @@ export class Game {
       this.mount.append(this.cameraDebug);
     }
     this.hud.attach(this.mount);
+    this.floatingTexts.attach(this.mount);
     this.turnPanel.attach(this.mount);
+    this.clashQtePanel.attach(this.mount);
     this.hud.bindControls({
       onLaunchChargeStart: () => {
         this.audio.unlock();
@@ -281,10 +327,15 @@ export class Game {
     });
 
     this.events.on('spark', ({ x, z, intensity }) => {
-      this.sparks.emit(x, z, intensity);
-      if (intensity > 1.2) {
+      const isAbsoluteZero = arenaManager.getTheme() === 'absolute_zero';
+      const particleIntensity = isAbsoluteZero ? intensity * 0.55 : intensity;
+      this.sparks.emit(x, z, particleIntensity);
+      if (!isAbsoluteZero && intensity > 1.2) {
         this.lightning.strike(x, 0.4, z, 0x00ffff);
       }
+    });
+    this.events.on('collision_damage', ({ side, amount, x, z, intensity }) => {
+      this.floatingTexts.spawnCollisionDamage(side, amount, x, 0.72, z, intensity);
     });
     this.events.on('shield_block', ({ x, z, side, shieldHits }) => {
       const color = side === 'player' ? 0x7ef0ff : 0xffcc66;
@@ -338,16 +389,20 @@ export class Game {
     });
 
     this.menu.start.addEventListener('click', () => {
+      this.beginSingleSession();
       this.mode = 'quick';
       this.enemyPreset = pick(ENEMIES);
       this.startBattle();
     });
+    this.menu.online.addEventListener('click', () => this.toggleOnlineQueue());
     this.menu.survival.addEventListener('click', () => {
+      this.beginSingleSession();
       this.mode = 'survival';
       this.enemyPreset = pick(ENEMIES);
       this.startBattle();
     });
     this.menu.tournament.addEventListener('click', () => {
+      this.beginSingleSession();
       this.mode = 'tournament';
       this.enemyPreset = this.getTournamentEnemy();
       this.startBattle();
@@ -384,6 +439,7 @@ export class Game {
     });
     this.garage.shopButton.addEventListener('click', () => this.showShop());
     this.garage.battleButton.addEventListener('click', () => {
+      this.beginSingleSession();
       this.build = this.garage.readBuild();
       this.progression = setProgressionBuild(this.progression, this.build);
       saveProgression(this.progression);
@@ -396,6 +452,12 @@ export class Game {
     }
 
     this.results.retry.addEventListener('click', () => {
+      if (this.battleMode === 'online') {
+        this.network.disconnect();
+        this.battleMode = 'single';
+        this.showMenu();
+        return;
+      }
       this.enemyPreset = this.mode === 'tournament' ? this.getTournamentEnemy() : pick(ENEMIES);
       this.arena.setTheme(this.garage.stageSelect.value);
       this.startBattle();
@@ -413,6 +475,9 @@ export class Game {
     window.addEventListener('keydown', () => this.audio.startMenuAmbience(), { once: true });
     window.addEventListener('keydown', (event) => this.onKeyDown(event));
     window.addEventListener('keyup', (event) => this.onKeyUp(event));
+
+    this.network.onStateChange((state) => this.updateOnlineMenuState(state));
+    this.network.onMessage((message) => this.handleNetworkMessage(message));
     this.resize();
     this.showMenu();
     window.setTimeout(() => this.introCard.classList.add('intro-card--hidden'), 1800);
@@ -430,6 +495,353 @@ export class Game {
     this.loop.start();
   }
 
+  private beginSingleSession() {
+    // [ONLINE HOOK] Single-player entry points always release queue or room state.
+    this.network.disconnect();
+    this.battleMode = 'single';
+    this.onlineTurnId = 0;
+    this.onlineStartAt = null;
+    this.onlineLaunchConfig = null;
+    this.pendingOnlineSnapshot = null;
+  }
+
+  private async toggleOnlineQueue() {
+    if (['connecting', 'queued', 'matched', 'in_battle'].includes(this.network.state)) {
+      this.network.cancelQueue();
+      this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', '\u5df2\u53d6\u6d88\u5339\u914d');
+      return;
+    }
+
+    this.battleMode = 'online';
+    this.mode = 'quick';
+    const loadout: OnlineLoadout = {
+      build: cloneBuild(this.build),
+      upgrades: { ...this.progression.upgrades },
+      partUpgrades: { ...this.progression.partUpgrades },
+    };
+    try {
+      await this.network.joinQueue('Player', loadout);
+    } catch (error) {
+      this.battleMode = 'single';
+      this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', error instanceof Error ? error.message : '\u8054\u673a\u670d\u52a1\u4e0d\u53ef\u7528');
+    }
+  }
+
+  private updateOnlineMenuState(state: string) {
+    if (state === 'connecting') this.menu.setOnlineState('\u8fde\u63a5\u4e2d...', '\u6b63\u5728\u8fde\u63a5\u672c\u673a\u5bf9\u6218\u670d\u52a1', true);
+    else if (state === 'queued') this.menu.setOnlineState('\u5339\u914d\u4e2d...\uff08\u70b9\u51fb\u53d6\u6d88\uff09', '\u7b49\u5f85\u7b2c\u4e8c\u4f4d\u73a9\u5bb6', true);
+    else if (state === 'matched') this.menu.setOnlineState('\u5bf9\u624b\u5df2\u627e\u5230', '\u6b63\u5728\u51c6\u5907\u6218\u6597\u573a', true);
+    else if (state === 'in_battle') this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', '\u8054\u673a\u5bf9\u6218\u8fdb\u884c\u4e2d', true);
+    else if (state === 'idle') this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', '\u5c40\u57df\u7f51 WebSocket \u53cc\u4eba\u5bf9\u6218');
+    else if (state === 'closed' && this.battleMode === 'online' && (this.phase === 'launch' || this.phase === 'battle')) {
+      this.handleOnlineAbort('\u8054\u673a\u670d\u52a1\u5df2\u65ad\u5f00');
+    }
+  }
+
+  private handleNetworkMessage(message: ServerMessage) {
+    switch (message.type) {
+      case 'MATCHED':
+        this.prepareOnlineBattle(message.opponentLoadout, message.opponentName);
+        break;
+      case 'ALL_READY':
+        if (this.network.role === 'host') {
+          this.network.sendMatchStart(3_000, {
+            hostX: -6,
+            guestX: 6,
+            z: 0,
+            hostPower: 0.82,
+            guestPower: 0.82,
+          });
+        }
+        break;
+      case 'MATCH_START':
+        this.onlineStartAt = performance.now() + message.startDelayMs;
+        this.onlineLaunchConfig = message.launchConfig;
+        this.countdown = message.startDelayMs / 1000;
+        break;
+      case 'STATE':
+        this.applyRemoteNetworkState(message);
+        break;
+      case 'TURN_OPEN':
+        this.onlineTurnId = message.turnId;
+        this.onlineTurnDeadline = message.deadline;
+        this.turnIndex = message.turnId;
+        this.turnState = 'awaiting';
+        this.turnPanel.setPanelLock(false);
+        break;
+      case 'TURN_ACTION_SET':
+        if (this.network.role === 'host') this.resolveOnlineHostTurn(message.hostAction, message.guestAction, message.turnId);
+        break;
+      case 'TURN_RESOLVED':
+        if (this.network.role === 'guest') this.beginOnlineGuestTurn(message.resolution, message.snapshot);
+        break;
+      case 'CLASH_QTE_START':
+        if (this.network.role === 'guest') this.beginOnlineGuestClashQte(message.resolution);
+        break;
+      case 'CLASH_QTE_SCORE':
+        this.receiveOnlineClashQteScore(message.turnId, message.score, message.final);
+        break;
+      case 'CRIT_TRIGGERED':
+        this.playRemoteCrit(message.target, message.damage, message.skillTier);
+        break;
+      case 'SUBSTITUTE_HERO':
+        this.playOnlineSubstitution(message.actor === this.network.role ? this.player : this.enemy, '\u5bf9\u624b\u6362\u4eba');
+        break;
+      case 'TURN_TIMEOUT': {
+        const winner = message.winner === this.network.role ? 'player' : 'enemy';
+        this.showResult({ winner, loser: winner === 'player' ? 'enemy' : 'player', kind: 'timeout', label: '\u56de\u5408\u8d85\u65f6' });
+        this.network.disconnect();
+        break;
+      }
+      case 'PEER_DISCONNECTED':
+        this.handleOnlineAbort('\u5bf9\u624b\u5df2\u65ad\u5f00\uff0c\u8054\u673a\u5bf9\u6218\u5df2\u7ed3\u675f');
+        break;
+      case 'ERROR':
+        if (message.code === 'READY_TIMEOUT' || message.code === 'ROOM_NOT_FOUND') this.handleOnlineAbort(message.message);
+        else this.hud.combatLog.log(`Network: ${message.message}`, '#ff7b5b');
+        break;
+    }
+  }
+
+  private prepareOnlineBattle(loadout: OnlineLoadout, opponentName: string) {
+    // [ONLINE HOOK] Reuse single-player setup, then replace only the remote combatant.
+    this.battleMode = 'online';
+    this.onlineOpponentName = opponentName;
+    this.startBattle();
+    this.scene.remove(this.enemy.mesh);
+    this.enemy = new TopEntity('enemy', loadout.build, loadout.upgrades, loadout.partUpgrades);
+    this.enemy.reset(6, 0);
+    this.scene.add(this.enemy.mesh);
+    this.phase = 'launch';
+    this.charging = false;
+    this.countdown = COUNTDOWN_SECONDS;
+    this.network.sendReady();
+  }
+
+  private handleOnlineAbort(message: string) {
+    this.network.disconnect();
+    this.battleMode = 'single';
+    this.activeTurnResolution = null;
+    this.activeClashQte = null;
+    this.clashQtePanel.hide();
+    this.pendingOnlineSnapshot = null;
+    this.turnState = 'awaiting';
+    this.turnPanel.setPanelLock(false);
+    this.showMenu();
+    this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', message);
+  }
+
+  private applyRemoteNetworkState(state: NetworkTopState) {
+    // [ONLINE HOOK] Deliberate direct overwrite: no prediction or interpolation in the MVP.
+    this.enemy.position.set(
+      THREE.MathUtils.clamp(state.x, -20, 20),
+      THREE.MathUtils.clamp(state.z, -20, 20),
+    );
+    this.enemy.velocity.set(
+      THREE.MathUtils.clamp(state.vx, -100, 100),
+      THREE.MathUtils.clamp(state.vz, -100, 100),
+    );
+    this.enemy.spin = THREE.MathUtils.clamp(state.spin, 0, this.enemy.stats.maxSpin * 2);
+    if (this.network.role === 'guest') {
+      this.enemy.integrity = THREE.MathUtils.clamp(state.hp, 0, this.enemy.stats.maxIntegrity);
+      this.enemy.alive = state.alive && this.enemy.integrity > 0;
+    }
+  }
+
+  private playRemoteCrit(targetRole: OnlineRole, damage: number, skillTier: SkillTier) {
+    const target = targetRole === this.network.role ? this.player : this.enemy;
+    this.floatingTexts.spawn(`CRIT T${skillTier} -${damage}`, target.position.x, 0.78, target.position.y, '#ff4d3d', true);
+    this.shockwave.trigger(target.position.x, 0.45, target.position.y, 1.25, 0xff4d3d);
+    this.rig.kickShake(0.8);
+  }
+
+  private playOnlineSubstitution(top: TopEntity, label: string) {
+    const startedAt = performance.now();
+    this.floatingTexts.spawn(label, top.position.x, 0.82, top.position.y, '#7ef0ff');
+    this.shockwave.trigger(top.position.x, 0.35, top.position.y, 0.9, 0x7ef0ff);
+    const animate = (now: number) => {
+      const progress = THREE.MathUtils.clamp((now - startedAt) / 350, 0, 1);
+      const scale = Math.max(0.08, Math.abs(progress * 2 - 1));
+      top.mesh.scale.multiplyScalar(scale);
+      top.mesh.visible = progress < 0.44 || progress > 0.56;
+      if (progress < 1) requestAnimationFrame(animate);
+      else top.mesh.visible = true;
+    };
+    requestAnimationFrame(animate);
+  }
+
+  private resolveOnlineHostTurn(hostAction: TurnAction, guestAction: TurnAction, turnId: number) {
+    // [ONLINE HOOK] Host is the only client that invokes random turn arbitration.
+    const rawResolution = this.turnArbitrator.executeTurnResolution(hostAction, guestAction, this.player, this.enemy, turnId);
+    const resolution = rawResolution.kind === 'clash_qte'
+      ? this.createOnlineSafeClashResolution(rawResolution)
+      : rawResolution;
+    if (resolution.kind === 'clash_qte') {
+      this.network.sendClashQteStart(turnId, resolution);
+      this.startTurnPresentation(resolution);
+      return;
+    }
+    const snapshot = this.projectOnlineSnapshot(resolution);
+    this.pendingOnlineSnapshot = snapshot;
+    this.network.sendTurnResolved(turnId, resolution, snapshot);
+    this.startTurnPresentation(resolution);
+  }
+
+  private createOnlineSafeClashResolution(resolution: TurnResolution): TurnResolution {
+    return {
+      ...resolution,
+      kind: 'same_attack_cancel',
+      winner: null,
+      loser: null,
+      playerVisual: 'clash',
+      enemyVisual: 'clash',
+      safeNoSpinDamage: true,
+      damageResults: [],
+      log: '真人联机同级技能相持：按空格蓄力已禁用，双方能量即时抵消。',
+    };
+  }
+
+  private beginOnlineGuestTurn(hostResolution: TurnResolution, snapshot: TurnSnapshot) {
+    if (hostResolution.kind === 'clash_qte' || this.turnState === 'clash_qte') {
+      this.completeOnlineGuestClashQte(this.mirrorHostResolution(hostResolution), snapshot);
+      return;
+    }
+    this.pendingOnlineSnapshot = snapshot;
+    this.startTurnPresentation(this.mirrorHostResolution(hostResolution));
+  }
+
+  private beginOnlineGuestClashQte(hostResolution: TurnResolution) {
+    this.pendingOnlineSnapshot = null;
+    this.startTurnPresentation(this.mirrorHostResolution(hostResolution));
+  }
+
+  private mirrorHostResolution(resolution: TurnResolution): TurnResolution {
+    const swapSide = (side: 'player' | 'enemy' | null) => side === 'player' ? 'enemy' : side === 'enemy' ? 'player' : null;
+    return {
+      ...resolution,
+      playerAction: resolution.aiAction,
+      aiAction: resolution.playerAction,
+      winner: swapSide(resolution.winner),
+      loser: swapSide(resolution.loser),
+      playerSpiritDelta: resolution.enemySpiritDelta,
+      enemySpiritDelta: resolution.playerSpiritDelta,
+      playerVisual: resolution.enemyVisual,
+      enemyVisual: resolution.playerVisual,
+      damageResults: resolution.damageResults?.map((damage) => ({
+        ...damage,
+        defender: damage.defender === 'player' ? 'enemy' : 'player',
+      })),
+    };
+  }
+
+  private projectOnlineSnapshot(resolution: TurnResolution): TurnSnapshot {
+    const snapshot: TurnSnapshot = {
+      host: this.snapshotTop(this.player),
+      guest: this.snapshotTop(this.enemy),
+    };
+    snapshot.host.spirit = THREE.MathUtils.clamp(snapshot.host.spirit + resolution.playerSpiritDelta, 0, this.player.maxSpirit);
+    snapshot.guest.spirit = THREE.MathUtils.clamp(snapshot.guest.spirit + resolution.enemySpiritDelta, 0, this.enemy.maxSpirit);
+
+    for (const damage of resolution.damageResults ?? []) {
+      if (damage.didMiss || damage.finalDamage <= 0) continue;
+      const target = damage.defender === 'player' ? snapshot.host : snapshot.guest;
+      target.integrity = Math.max(0, target.integrity - damage.finalDamage);
+      target.lockStability = Math.max(0, target.lockStability - damage.lockDamage);
+      target.alive = target.integrity > 0;
+    }
+    if (resolution.firePenetration) {
+      const target = resolution.playerVisual === 'defense' ? snapshot.host : resolution.enemyVisual === 'defense' ? snapshot.guest : null;
+      if (target) {
+        target.integrity = Math.max(0, target.integrity - 10);
+        target.alive = target.integrity > 0;
+      }
+    }
+    return snapshot;
+  }
+
+  private snapshotTop(top: TopEntity) {
+    return {
+      integrity: top.integrity,
+      spirit: top.spirit,
+      lockStability: top.lockStability,
+      spin: top.spin,
+      alive: top.alive,
+    };
+  }
+
+  private applyOnlineSnapshot(snapshot: TurnSnapshot) {
+    const localRole = this.network.role;
+    if (!localRole) return;
+    const local = localRole === 'host' ? snapshot.host : snapshot.guest;
+    const remote = localRole === 'host' ? snapshot.guest : snapshot.host;
+    this.applyActorSnapshot(this.player, local);
+    this.applyActorSnapshot(this.enemy, remote);
+    this.pendingOnlineSnapshot = null;
+  }
+
+  private applyActorSnapshot(top: TopEntity, snapshot: TurnSnapshot['host']) {
+    top.integrity = THREE.MathUtils.clamp(snapshot.integrity, 0, top.stats.maxIntegrity);
+    top.spirit = THREE.MathUtils.clamp(snapshot.spirit, 0, top.maxSpirit);
+    top.lockStability = THREE.MathUtils.clamp(snapshot.lockStability, 0, 100);
+    top.spin = THREE.MathUtils.clamp(snapshot.spin, 0, top.stats.maxSpin * 2);
+    top.alive = snapshot.alive && top.integrity > 0;
+  }
+
+  private receiveOnlineClashQteScore(turnId: number, score: number, final: boolean) {
+    const qte = this.activeClashQte;
+    if (!qte || this.turnState !== 'clash_qte' || turnId !== this.onlineTurnId || !Number.isFinite(score)) return;
+    qte.enemyScore = THREE.MathUtils.clamp(score, 0, 9999);
+    if (final) qte.remoteFinalReceived = true;
+    this.clashQtePanel.update({
+      visible: true,
+      playerScore: qte.playerScore,
+      enemyScore: qte.enemyScore,
+      timeLeft: qte.phase === 'intro' ? qte.introLeft : qte.timeLeft,
+      duration: qte.phase === 'intro' ? 1 : qte.duration,
+      tier: qte.tier,
+      resultText: qte.phase === 'intro' ? '进入相持阶段' : undefined,
+    });
+  }
+
+  private completeOnlineGuestClashQte(resolution: TurnResolution, snapshot: TurnSnapshot) {
+    const qte = this.activeClashQte;
+    this.activeClashQte = null;
+    this.activeTurnResolution = resolution;
+    this.clashQtePanel.update({
+      visible: true,
+      playerScore: qte?.playerScore ?? 50,
+      enemyScore: qte?.enemyScore ?? 50,
+      timeLeft: 0,
+      duration: qte?.duration ?? 5,
+      tier: this.getClashQteTier(resolution),
+      resultText: this.getClashQteResultText(resolution),
+    });
+    this.hud.combatLog.log(resolution.log, resolution.playerVisual === 'attack' ? '#7ef0ff' : resolution.enemyVisual === 'attack' ? '#ff7b5b' : '#ffd166');
+    this.applyTurnVisuals(resolution);
+    this.applyOnlineSnapshot(snapshot);
+    this.turnState = 'resolving';
+    this.turnTimer = this.player.integrity <= 0 || this.enemy.integrity <= 0 ? 0.5 : 1.5;
+    this.turnPanel.showResolution(resolution);
+    window.setTimeout(() => this.clashQtePanel.hide(), 650);
+  }
+
+  private projectOnlineQteSnapshot(resolution: TurnResolution): TurnSnapshot {
+    const snapshot: TurnSnapshot = {
+      host: this.snapshotTop(this.player),
+      guest: this.snapshotTop(this.enemy),
+    };
+
+    for (const damage of resolution.damageResults ?? []) {
+      if (damage.didMiss || damage.finalDamage <= 0) continue;
+      const target = damage.defender === 'player' ? snapshot.host : snapshot.guest;
+      target.integrity = Math.max(0, target.integrity - damage.finalDamage);
+      target.lockStability = Math.max(0, target.lockStability - damage.lockDamage);
+      target.alive = target.integrity > 0;
+    }
+
+    return snapshot;
+  }
+
   private showMenu() {
     this.phase = 'menu';
     this.audio.startMenuAmbience();
@@ -441,6 +853,9 @@ export class Game {
     this.shop.root.style.display = 'none';
     this.results.root.style.display = 'none';
     this.hud.root.style.display = 'none';
+    this.turnPanel.root.style.display = 'none';
+    this.activeClashQte = null;
+    this.clashQtePanel.hide();
   }
   private getTrophyTitle() {
     if (this.progression.championshipCount > 0) {
@@ -533,8 +948,18 @@ export class Game {
   private showResult(result: BattleResult) {
     this.phase = 'result';
     this.currentResult = result;
+    this.activeClashQte = null;
+    this.clashQtePanel.hide();
     const progressionBefore = this.captureProgressionSnapshot();
-    this.applyProgressionResult(result);
+    if (this.battleMode === 'online') {
+      this.resultRewardText = '\u771f\u4eba\u8054\u673a MVP \u4e0d\u8ba1\u5165\u5355\u673a\u6210\u957f\u4e0e\u91d1\u5e01\u3002';
+      this.retryLabel = '\u8fd4\u56de\u4e3b\u83dc\u5355';
+      this.lastCoinReward = 0;
+      this.featuredUnlockPart = null;
+      this.championMoment = null;
+    } else {
+      this.applyProgressionResult(result);
+    }
     this.audio.startMenuAmbience();
     this.results.render(
       result,
@@ -545,10 +970,10 @@ export class Game {
       this.lastCoinReward,
       this.progression.coins,
       {
-        modeLabel: this.getModeLabelCn(),
-        enemyName: this.enemyPreset.name,
+        modeLabel: this.battleMode === 'online' ? '\u771f\u4eba\u8054\u673a' : this.getModeLabelCn(),
+        enemyName: this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
         growthTitle: '本局成长变化',
-        growthLines: this.getResultGrowthLines(progressionBefore),
+        growthLines: this.battleMode === 'online' ? ['\u8054\u673a\u5bf9\u6218\u4e0d\u4fee\u6539\u5355\u673a\u6210\u957f\u6570\u636e'] : this.getResultGrowthLines(progressionBefore),
       },
     );
     this.menu.root.style.display = 'none';
@@ -562,6 +987,7 @@ export class Game {
 
   private startBattle() {
     this.audio.stopMenuAmbience();
+    this.floatingTexts.clear();
     this.currentResult = null;
     this.resultRewardText = '';
     this.lastCoinReward = 0;
@@ -582,6 +1008,8 @@ export class Game {
     this.turnTimer = 0;
     this.turnIndex = 1;
     this.activeTurnResolution = null;
+    this.activeClashQte = null;
+    this.clashQtePanel.hide();
     this.turnPanel.setPanelLock(false);
     this.turnPanel.update({ visible: false, resolving: false, turnIndex: this.turnIndex, lastLog: '发射后进入回合博弈。' });
     this.pickups.reset();
@@ -664,6 +1092,12 @@ export class Game {
     this.turnState = 'cutin';
     this.turnPanel.setPanelLock(true);
 
+    if (this.battleMode === 'online') {
+      // [ONLINE HOOK] Online clients submit once and wait for the Host result.
+      this.network.sendTurnAction(this.onlineTurnId, playerAction);
+      return;
+    }
+
     const proceed = () => {
         const aiAction = this.pickAiTurnAction();
         const resolution = this.turnArbitrator.executeTurnResolution(
@@ -673,20 +1107,7 @@ export class Game {
           this.enemy,
           this.turnIndex
         );
-
-        this.activeTurnResolution = resolution;
-        this.turnState = 'approaching';
-        this.turnTimer = 0;
-        this.timeScale = 1.0;
-        this.rules.reset();
-        
-        this.player.dashCooldown = 0;
-        this.player.stunTimer = 0;
-        this.enemy.dashCooldown = 0;
-        this.enemy.stunTimer = 0;
-        
-        this.physics.dashPlayer(this.player, new THREE.Vector3(this.enemy.position.x, 0, this.enemy.position.y));
-        this.physics.dashPlayer(this.enemy, new THREE.Vector3(this.player.position.x, 0, this.player.position.y));
+        this.startTurnPresentation(resolution);
     };
 
     if (playerAction.kind === 'attack') {
@@ -704,6 +1125,304 @@ export class Game {
     } else {
         proceed();
     }
+  }
+
+  private startTurnPresentation(resolution: TurnResolution) {
+    this.activeTurnResolution = resolution;
+    this.turnState = 'approaching';
+    this.turnTimer = 0;
+
+    const dist = this.player.position.distanceTo(this.enemy.position);
+    if (dist > 0) {
+      const dirP = this.enemy.position.clone().sub(this.player.position).normalize();
+      const dirE = this.player.position.clone().sub(this.enemy.position).normalize();
+      const chargeSpeed = Math.max(15, dist * 1.5);
+      this.player.velocity.copy(dirP).multiplyScalar(chargeSpeed);
+      this.enemy.velocity.copy(dirE).multiplyScalar(chargeSpeed);
+    }
+    this.timeScale = 1;
+    this.rules.reset();
+    this.player.dashCooldown = 0;
+    this.player.stunTimer = 0;
+    this.enemy.dashCooldown = 0;
+    this.enemy.stunTimer = 0;
+    this.physics.dashPlayer(this.player, new THREE.Vector3(this.enemy.position.x, 0, this.enemy.position.y));
+    this.physics.dashPlayer(this.enemy, new THREE.Vector3(this.player.position.x, 0, this.player.position.y));
+  }
+
+  private landTurnResolution() {
+    const resolution = this.activeTurnResolution;
+    if (!resolution || this.turnState !== 'approaching') return false;
+    this.applyTurnSpiritDelta(resolution);
+    this.applyTurnVisuals(resolution);
+    if (this.battleMode === 'online' && this.pendingOnlineSnapshot) {
+      this.applyOnlineSnapshot(this.pendingOnlineSnapshot);
+    }
+    this.hud.combatLog.log(resolution.log, resolution.winner === 'player' ? '#ffd166' : resolution.winner === 'enemy' ? '#ff7b5b' : '#7ef0ff');
+    if (resolution.kind === 'clash_qte') {
+      this.beginClashQte(resolution);
+      return true;
+    }
+    this.turnState = 'resolving';
+    this.turnTimer = this.player.integrity <= 0 || this.enemy.integrity <= 0 ? 0.5 : 2;
+    this.turnPanel.showResolution(resolution);
+    return true;
+  }
+
+  private beginClashQte(resolution: TurnResolution) {
+    const tier = this.getClashQteTier(resolution);
+    const duration = 5;
+    const introDuration = 1;
+    const enemyPressure = this.battleMode === 'online' ? 0 : 15 + tier * 3 + this.enemy.stats.attack * 0.7;
+    this.activeClashQte = {
+      resolution,
+      tier,
+      phase: 'intro',
+      introLeft: introDuration,
+      playerScore: 50,
+      enemyScore: 50,
+      timeLeft: duration,
+      duration,
+      aiRate: enemyPressure * (0.88 + Math.random() * 0.24),
+      tapPower: 7 + tier * 1.4 + this.player.stats.attack * 0.18,
+      lastScoreSentAt: 0,
+      finalScoreSent: false,
+      remoteFinalReceived: false,
+      finishGraceLeft: 3.5,
+    };
+    this.turnState = 'clash_qte';
+    this.turnTimer = introDuration;
+    this.turnPanel.update({ visible: false, resolving: true, lastLog: resolution.log });
+    this.clashQtePanel.update({
+      visible: true,
+      playerScore: 50,
+      enemyScore: 50,
+      timeLeft: introDuration,
+      duration: introDuration,
+      tier,
+      resultText: '进入相持阶段',
+    });
+    this.sendOnlineClashQteScore(false, true);
+    const midX = (this.player.position.x + this.enemy.position.x) * 0.5;
+    const midZ = (this.player.position.y + this.enemy.position.y) * 0.5;
+    this.floatingTexts.spawn('进入相持阶段', midX, 1.05, midZ, '#ffd166', true);
+    this.hud.combatLog.log('同级技能触发相持：准备阶段结束后开始按 SPACE 蓄力！', '#ffd166');
+  }
+
+  private getClashQteTier(resolution: TurnResolution): SkillTier {
+    if (resolution.playerAction.kind === 'attack') {
+      return ELEMENT_ATTACKS[resolution.playerAction.skillId].tier;
+    }
+    if (resolution.aiAction.kind === 'attack') {
+      return ELEMENT_ATTACKS[resolution.aiAction.skillId].tier;
+    }
+    return 1;
+  }
+
+  private updateClashQte(dt: number, simulationDt: number) {
+    const qte = this.activeClashQte;
+    if (!qte) return;
+
+    if (qte.phase === 'intro') {
+      qte.introLeft = Math.max(0, qte.introLeft - dt);
+      this.turnTimer = qte.introLeft;
+      this.physics.update(this.player, this.enemy, simulationDt, true);
+      this.clashQtePanel.update({
+        visible: true,
+        playerScore: qte.playerScore,
+        enemyScore: qte.enemyScore,
+        timeLeft: qte.introLeft,
+        duration: 1,
+        tier: qte.tier,
+        resultText: '进入相持阶段',
+      });
+      if (qte.introLeft <= 0) {
+        qte.phase = 'active';
+        qte.timeLeft = qte.duration;
+        this.turnTimer = qte.duration;
+        this.sendOnlineClashQteScore(false, true);
+        this.clashQtePanel.update({
+          visible: true,
+          playerScore: qte.playerScore,
+          enemyScore: qte.enemyScore,
+          timeLeft: qte.timeLeft,
+          duration: qte.duration,
+          tier: qte.tier,
+          resultText: undefined,
+        });
+        this.hud.combatLog.log('开始蓄力：狂按 SPACE！', '#7ef0ff');
+      }
+      return;
+    }
+
+    qte.timeLeft = Math.max(0, qte.timeLeft - dt);
+    this.turnTimer = qte.timeLeft;
+
+    if (this.battleMode === 'online') {
+      this.sendOnlineClashQteScore(false);
+    } else {
+      const aiSurge = 1 + Math.sin(this.time * 8.5 + qte.tier) * 0.08 + Math.random() * 0.12;
+      qte.enemyScore += qte.aiRate * aiSurge * dt;
+    }
+    this.physics.update(this.player, this.enemy, simulationDt, true);
+
+    const midX = (this.player.position.x + this.enemy.position.x) * 0.5;
+    const midZ = (this.player.position.y + this.enemy.position.y) * 0.5;
+    this.sparks.emit(midX, midZ, 0.45 + qte.tier * 0.08);
+
+    this.clashQtePanel.update({
+      visible: true,
+      playerScore: qte.playerScore,
+      enemyScore: qte.enemyScore,
+      timeLeft: qte.timeLeft,
+      duration: qte.duration,
+      tier: qte.tier,
+    });
+
+    if (qte.timeLeft <= 0) {
+      if (this.battleMode === 'online' && this.network.role === 'guest') {
+        this.sendOnlineClashQteScore(true, true);
+        this.clashQtePanel.update({
+          visible: true,
+          playerScore: qte.playerScore,
+          enemyScore: qte.enemyScore,
+          timeLeft: 0,
+          duration: qte.duration,
+          tier: qte.tier,
+          resultText: '等待 Host 结算...',
+        });
+        return;
+      }
+      if (this.battleMode === 'online' && this.network.role === 'host') {
+        this.sendOnlineClashQteScore(true, true);
+        if (!qte.remoteFinalReceived && qte.finishGraceLeft > 0) {
+          qte.finishGraceLeft = Math.max(0, qte.finishGraceLeft - dt);
+          this.clashQtePanel.update({
+            visible: true,
+            playerScore: qte.playerScore,
+            enemyScore: qte.enemyScore,
+            timeLeft: qte.finishGraceLeft,
+            duration: 3.5,
+            tier: qte.tier,
+            resultText: '等待对手蓄力结果...',
+          });
+          return;
+        }
+      }
+      this.finishClashQte();
+    }
+  }
+
+  private registerClashQteTap(event: KeyboardEvent) {
+    const qte = this.activeClashQte;
+    if (!qte || this.turnState !== 'clash_qte' || event.repeat) return false;
+
+    event.preventDefault();
+    if (qte.phase !== 'active') return true;
+    qte.playerScore += qte.tapPower;
+    this.sendOnlineClashQteScore(false, true);
+    this.sparks.emit(this.player.position.x, this.player.position.y, 0.8 + qte.tier * 0.1);
+    this.audio.clash(0.25);
+    this.clashQtePanel.update({
+      visible: true,
+      playerScore: qte.playerScore,
+      enemyScore: qte.enemyScore,
+      timeLeft: qte.timeLeft,
+      duration: qte.duration,
+      tier: qte.tier,
+    });
+    return true;
+  }
+
+  private sendOnlineClashQteScore(final: boolean, force = false) {
+    const qte = this.activeClashQte;
+    if (!qte || this.battleMode !== 'online') return;
+    if (final && qte.finalScoreSent) return;
+    if (!force && !final && this.time - qte.lastScoreSentAt < 0.1) return;
+    qte.lastScoreSentAt = this.time;
+    if (final) qte.finalScoreSent = true;
+    this.network.sendClashQteScore(this.onlineTurnId, qte.playerScore, final);
+  }
+
+  private finishClashQte() {
+    const qte = this.activeClashQte;
+    if (!qte) return;
+
+    const diff = qte.playerScore - qte.enemyScore;
+    const margin = Math.abs(diff);
+    const damageResults: DamageResult[] = [];
+    let playerVisual: TurnResolution['playerVisual'] = 'clash';
+    let enemyVisual: TurnResolution['enemyVisual'] = 'clash';
+    let resultText = '平分秋色';
+    let log = '真三国无双拔河平局：同级能量互相抵消。';
+
+    if (margin < 1) {
+      damageResults.push(
+        calculateTurnDamage({ attacker: this.enemy, defender: this.player, skillTier: qte.tier, isCounter: false, isClash: true, isBlockOrMiss: false, contextMultiplier: 0.5 }),
+        calculateTurnDamage({ attacker: this.player, defender: this.enemy, skillTier: qte.tier, isCounter: false, isClash: true, isBlockOrMiss: false, contextMultiplier: 0.5 }),
+      );
+    } else {
+      const playerWins = diff > 0;
+      const attacker = playerWins ? this.player : this.enemy;
+      const defender = playerWins ? this.enemy : this.player;
+      damageResults.push(
+        calculateTurnDamage({
+          attacker,
+          defender,
+          skillTier: qte.tier,
+          isCounter: false,
+          isClash: true,
+          isBlockOrMiss: false,
+          contextMultiplier: 0.5,
+        }),
+      );
+      playerVisual = playerWins ? 'attack' : 'hit';
+      enemyVisual = playerWins ? 'hit' : 'attack';
+      resultText = playerWins ? 'PLAYER WINS' : 'AI WINS';
+      const winnerLabel = playerWins ? '玩家' : 'AI';
+      const loserLabel = playerWins ? 'AI' : '玩家';
+      log = `${winnerLabel} 拔河胜利：T${qte.tier} 同级技能压制，${loserLabel} 承受 ${damageResults[0]?.finalDamage ?? 0} 点冲击伤害。`;
+    }
+
+    const finalResolution: TurnResolution = {
+      ...qte.resolution,
+      playerVisual,
+      enemyVisual,
+      winner: null,
+      loser: null,
+      log,
+      damageResults,
+    };
+
+    if (this.battleMode === 'online' && this.network.role === 'host') {
+      this.sendOnlineClashQteScore(true, true);
+      const snapshot = this.projectOnlineQteSnapshot(finalResolution);
+      this.network.sendTurnResolved(this.onlineTurnId, finalResolution, snapshot);
+    }
+
+    this.activeClashQte = null;
+    this.activeTurnResolution = finalResolution;
+    this.clashQtePanel.update({
+      visible: true,
+      playerScore: qte.playerScore,
+      enemyScore: qte.enemyScore,
+      timeLeft: 0,
+      duration: qte.duration,
+      tier: qte.tier,
+      resultText,
+    });
+    this.hud.combatLog.log(log, diff >= 0 ? '#7ef0ff' : '#ff7b5b');
+    this.applyTurnVisuals(finalResolution);
+    this.turnState = 'resolving';
+    this.turnTimer = this.player.integrity <= 0 || this.enemy.integrity <= 0 ? 0.5 : 1.5;
+    this.turnPanel.showResolution(finalResolution);
+    window.setTimeout(() => this.clashQtePanel.hide(), 650);
+  }
+
+  private getClashQteResultText(resolution: TurnResolution) {
+    if (resolution.playerVisual === 'attack') return 'PLAYER WINS';
+    if (resolution.enemyVisual === 'attack') return 'RIVAL WINS';
+    return '平分秋色';
   }
 
   private canAffordTurnAction(top: TopEntity, action: TurnAction) {
@@ -788,10 +1507,14 @@ export class Game {
     const midX = (this.player.position.x + this.enemy.position.x) / 2;
     const midZ = (this.player.position.y + this.enemy.position.y) / 2;
     const shockColor = resolution.winner ? 0xff7b5b : 0x7ef0ff;
-    this.shockwave.trigger(midX, 0.45, midZ, resolution.safeNoSpinDamage ? 1.1 : 1.55, shockColor);
-    this.sparks.emit(midX, midZ, resolution.safeNoSpinDamage ? 1.2 : 2.0);
-    this.audio.clash(resolution.winner ? 1.4 : 0.85);
-    this.rig.kickShake(resolution.winner ? 1.2 : 0.65);
+    const highestLandedTier = Math.max(1, ...(resolution.damageResults ?? [])
+      .filter((damage) => !damage.didMiss && damage.finalDamage > 0)
+      .map((damage) => damage.skillTier));
+    const tierImpact = 1 + (highestLandedTier - 1) * 0.15;
+    this.shockwave.trigger(midX, 0.45, midZ, (resolution.safeNoSpinDamage ? 1.1 : 1.55) * tierImpact, shockColor);
+    this.sparks.emit(midX, midZ, (resolution.safeNoSpinDamage ? 1.2 : 2.0) * tierImpact);
+    this.audio.clash((resolution.winner ? 1.4 : 0.85) * tierImpact);
+    this.rig.kickShake((resolution.winner ? 1.2 : 0.65) * tierImpact);
 
     if (resolution.knockbackBoost && resolution.knockbackBoost > 0) {
       // Find who was defending and push them away
@@ -810,6 +1533,64 @@ export class Game {
         defender.integrity = Math.max(0, defender.integrity - 10);
         defender.addBurst(15);
         this.sparks.emit(defender.position.x, defender.position.y, 2.5); // extra sparks
+      }
+    }
+
+    if (resolution.damageResults) {
+      for (const dmg of resolution.damageResults) {
+        const target = dmg.defender === 'player' ? this.player : this.enemy;
+
+        if (dmg.didMiss) {
+          const blocked = dmg.tags.includes('block');
+          this.floatingTexts.spawn(
+            blocked ? 'BLOCK' : 'MISS',
+            target.position.x,
+            0.78,
+            target.position.y,
+            blocked ? '#7ef0ff' : '#aaaaaa',
+          );
+          this.hud.combatLog.log(blocked ? `${dmg.defender === 'player' ? '玩家' : '敌方'} BLOCK` : `${dmg.defender === 'player' ? '玩家' : '敌方'} MISS`, blocked ? '#7ef0ff' : '#aaaaaa');
+        } else {
+          applyDamageResult(target, dmg);
+          const label = dmg.defender === 'player' ? '玩家' : '敌方';
+          const isCounter = dmg.tags.includes('counter');
+          const impactTag = isCounter ? ' 反击!' : dmg.didCrit ? ' 暴击!' : '';
+          const remoteCritPresentation = this.battleMode === 'online' && this.network.role === 'guest' && dmg.didCrit;
+          if (!remoteCritPresentation) {
+            const damagePrefix = isCounter ? `COUNTER T${dmg.skillTier}` : dmg.didCrit ? `CRIT T${dmg.skillTier}` : `T${dmg.skillTier}`;
+            this.floatingTexts.spawn(
+              `${damagePrefix} -${dmg.finalDamage}`,
+              target.position.x,
+              0.78,
+              target.position.y,
+              isCounter ? '#ff9f1c' : dmg.didCrit ? '#ff4d3d' : (dmg.defender === 'player' ? '#ff6b5f' : '#ffd166'),
+              isCounter || dmg.didCrit || dmg.skillTier >= 4,
+            );
+            this.hud.combatLog.log(`${label} T${dmg.skillTier} -${dmg.finalDamage} HP${impactTag}${dmg.armorReduced > 0 ? ` (${dmg.armorReduced} 减伤)` : ''}`, isCounter ? '#ff9f1c' : dmg.didCrit ? '#ff3300' : (dmg.defender === 'player' ? '#ff7b5b' : '#ffffff'));
+          }
+          if (dmg.didCrit && this.battleMode === 'online' && this.network.role === 'host') {
+            const targetRole: OnlineRole = dmg.defender === 'player' ? 'host' : 'guest';
+            this.network.sendCritTriggered(
+              this.onlineTurnId,
+              oppositeRole(targetRole),
+              targetRole,
+              dmg.finalDamage,
+              dmg.skillTier,
+              { x: target.position.x, z: target.position.y },
+            );
+          }
+        }
+      }
+    }
+
+    if (this.player.integrity <= 0 || this.enemy.integrity <= 0) {
+      const loserTop = this.player.integrity <= 0 ? this.player : this.enemy;
+      const winnerTop = loserTop === this.player ? this.enemy : this.player;
+      if (!resolution.loser) {
+        loserTop.addBurst(100);
+        loserTop.setEliminated();
+        this.events.emit('burst', { winner: winnerTop.side, loser: loserTop.side });
+        this.audio.finish(winnerTop.side === 'player');
       }
     }
 
@@ -859,6 +1640,13 @@ export class Game {
     const resolution = this.activeTurnResolution;
     if (!resolution) return;
 
+    if (this.player.integrity <= 0 || this.enemy.integrity <= 0) {
+      const winnerSide: 'player' | 'enemy' = this.player.integrity <= 0 ? 'enemy' : 'player';
+      const loserSide: 'player' | 'enemy' = this.player.integrity <= 0 ? 'player' : 'enemy';
+      this.showTurnResult({ ...resolution, winner: winnerSide, loser: loserSide });
+      return;
+    }
+
     if (resolution.winner) {
       this.showTurnResult(resolution);
       return;
@@ -866,6 +1654,8 @@ export class Game {
 
     this.turnIndex += 1;
     this.activeTurnResolution = null;
+    this.activeClashQte = null;
+    this.clashQtePanel.hide();
     this.turnState = 'awaiting';
     this.turnTimer = 0;
     this.player.velocity.multiplyScalar(0.15);
@@ -880,6 +1670,10 @@ export class Game {
       turnIndex: this.turnIndex,
       lastLog: resolution.log,
     });
+    if (this.battleMode === 'online' && this.network.role === 'host') {
+      // [ONLINE HOOK] Server starts the next authoritative action window.
+      this.network.openTurn(this.onlineTurnId + 1);
+    }
   }
 
   private showTurnResult(resolution: TurnResolution) {
@@ -1280,7 +2074,7 @@ export class Game {
 
   private onPointerDown() {
     if (this.paused) return;
-    if (this.phase === 'launch') {
+    if (this.phase === 'launch' && this.battleMode !== 'online') {
       this.charging = true;
       return;
     }
@@ -1297,22 +2091,23 @@ export class Game {
   }
 
   private onTouchLaunchStart() {
-    if (this.paused || this.phase !== 'launch') return;
+    if (this.paused || this.phase !== 'launch' || this.battleMode === 'online') return;
     this.charging = true;
   }
 
   private onTouchLaunchEnd() {
-    if (this.paused || this.phase !== 'launch' || !this.charging) return;
+    if (this.paused || this.phase !== 'launch' || !this.charging || this.battleMode === 'online') return;
     this.charging = false;
     this.doLaunch();
   }
 
   private nudgeLaunchAngle(delta: number) {
-    if (this.phase !== 'launch' || this.paused) return;
+    if (this.phase !== 'launch' || this.paused || this.battleMode === 'online') return;
     this.launchAngleDeg = THREE.MathUtils.clamp(this.launchAngleDeg + delta, -35, 35);
   }
 
   private togglePause() {
+    if (this.battleMode === 'online') return;
     if (this.phase === 'battle' || this.paused) {
       this.paused = !this.paused;
     }
@@ -1331,6 +2126,10 @@ export class Game {
     }
 
     if (this.paused) return;
+
+    if (this.turnState === 'clash_qte' && event.code === 'Space') {
+      if (this.registerClashQteTap(event)) return;
+    }
 
     if (this.camDebugEnabled) {
       if (event.key === '[') {
@@ -1352,6 +2151,7 @@ export class Game {
     }
 
     if (this.phase === 'launch') {
+      if (this.battleMode === 'online') return;
       if (event.code === 'Space') {
         this.charging = true;
       }
@@ -1368,7 +2168,12 @@ export class Game {
       return;
     }
     if (event.key.toLowerCase() === 't') {
-      this.executeTagSubstitution();
+      if (this.battleMode === 'online') {
+        this.playOnlineSubstitution(this.player, '\u63a5\u529b\u5207\u6362');
+        this.network.sendSubstitution({ x: this.player.position.x, z: this.player.position.y });
+      } else {
+        this.executeTagSubstitution();
+      }
       return;
     }
 
@@ -1429,6 +2234,8 @@ export class Game {
     this.enemy.velocity.set(0, 0);
     this.turnState = 'awaiting';
     this.turnTimer = 0;
+    this.activeClashQte = null;
+    this.clashQtePanel.hide();
     this.turnPanel.update({
       visible: true,
       resolving: false,
@@ -1440,13 +2247,35 @@ export class Game {
     });
   }
 
+  private doOnlineLaunch(config: LaunchConfig) {
+    const isHost = this.network.role === 'host';
+    const localX = isHost ? config.hostX : config.guestX;
+    const remoteX = isHost ? config.guestX : config.hostX;
+    this.player.reset(localX, config.z);
+    this.enemy.reset(remoteX, config.z);
+    launchTop(this.player, new THREE.Vector2(isHost ? 1 : -1, 0), isHost ? config.hostPower : config.guestPower, 0);
+    launchTop(this.enemy, new THREE.Vector2(isHost ? -1 : 1, 0), isHost ? config.guestPower : config.hostPower, 0);
+    this.events.emit('launch', { side: 'player', power: isHost ? config.hostPower : config.guestPower });
+    this.events.emit('launch', { side: 'enemy', power: isHost ? config.guestPower : config.hostPower });
+    this.triggerLaunchFlash(0.82);
+    this.phase = 'battle';
+    this.player.velocity.set(0, 0);
+    this.enemy.velocity.set(0, 0);
+    this.turnState = this.onlineTurnId > 0 ? 'awaiting' : 'cutin';
+    this.activeClashQte = null;
+    this.clashQtePanel.hide();
+    this.turnPanel.setPanelLock(this.onlineTurnId <= 0);
+    this.onlineStartAt = null;
+    this.onlineLaunchConfig = null;
+  }
+
   private update(dt: number) {
     this.time += dt;
     const edgeDanger = Math.max(this.player.position.length() / 8.6, this.enemy.position.length() / 8.6);
     this.arena.setDangerLevel(this.phase === 'battle' ? Math.max(0, (edgeDanger - 0.58) / 0.24) : 0);
     if (this.paused) {
-      this.player.syncMesh(this.time, this.energy.get('player'));
-      this.enemy.syncMesh(this.time, this.energy.get('enemy'));
+      this.player.syncMesh(this.time, this.energy.get('player'), dt);
+      this.enemy.syncMesh(this.time, this.energy.get('enemy'), dt);
       this.energyRings.update(this.player, this.enemy, this.time, this.energy.get('player'));
       this.hud.combatLog.update(dt);
       this.hud.update({
@@ -1464,7 +2293,7 @@ export class Game {
         enemyEnergy: this.enemy.spirit,
         timeLeft: this.rules.timeLeft,
         result: this.currentResult,
-        enemyName: this.enemyPreset.name,
+        enemyName: this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
         launchPower: this.launchCharge,
         angleDeg: this.launchAngleDeg,
         phase: this.phase,
@@ -1490,18 +2319,23 @@ export class Game {
     this.skillManager.update(this.enemy, dt, this.player);
 
     if (this.phase === 'launch') {
-      if (this.charging) {
-        this.launchCharge = Math.min(1, this.launchCharge + dt * 0.45);
-      }
-      this.countdown = Math.max(0, this.countdown - dt);
-      if (this.countdown <= 0 && !this.charging && this.launchCharge <= 0.1) {
-        this.launchCharge = 0.72;
-        this.doLaunch();
+      if (this.battleMode === 'online' && this.onlineStartAt && this.onlineLaunchConfig) {
+        this.countdown = Math.max(0, (this.onlineStartAt - performance.now()) / 1000);
+        if (performance.now() >= this.onlineStartAt) this.doOnlineLaunch(this.onlineLaunchConfig);
+      } else {
+        if (this.charging) {
+          this.launchCharge = Math.min(1, this.launchCharge + dt * 0.45);
+        }
+        this.countdown = Math.max(0, this.countdown - dt);
+        if (this.countdown <= 0 && !this.charging && this.launchCharge <= 0.1) {
+          this.launchCharge = 0.72;
+          this.doLaunch();
+        }
       }
     }
 
     if (this.phase === 'battle') {
-      document.body.classList.toggle('vignette-active', this.turnState === 'resolving');
+      document.body.classList.toggle('vignette-active', this.turnState === 'resolving' || this.turnState === 'clash_qte');
 
       if (this.turnState === 'awaiting') {
         this.rules.timeLeft = Math.max(0, this.rules.timeLeft - dt);
@@ -1525,13 +2359,7 @@ export class Game {
         this.turnTimer += dt;
         this.physics.update(this.player, this.enemy, simulationDt, true);
         if (this.physics.checkClashProximity(this.player, this.enemy) || this.turnTimer > 1.5) {
-          const resolution = this.activeTurnResolution!;
-          this.applyTurnSpiritDelta(resolution);
-          this.applyTurnVisuals(resolution);
-          this.turnState = 'resolving';
-          this.turnTimer = 2.0; // 2 seconds delay as requested
-          this.hud.combatLog.log(resolution.log, resolution.winner === 'player' ? '#ffd166' : resolution.winner === 'enemy' ? '#ff7b5b' : '#7ef0ff');
-          this.turnPanel.showResolution(resolution);
+          this.landTurnResolution();
         }
       } else if (this.turnState === 'resolving') {
         this.turnTimer = Math.max(0, this.turnTimer - dt);
@@ -1541,6 +2369,8 @@ export class Game {
         if (this.turnTimer <= 0) {
           this.completeTurnResolution();
         }
+      } else if (this.turnState === 'clash_qte') {
+        this.updateClashQte(dt, simulationDt);
       } else {
         this.player.velocity.multiplyScalar(0.9);
         this.enemy.velocity.multiplyScalar(0.9);
@@ -1561,18 +2391,36 @@ export class Game {
       this.processBackgroundCharging(simulationDt);
     }
 
-    this.player.syncMesh(this.time, this.energy.get('player'));
-    this.enemy.syncMesh(this.time, this.energy.get('enemy'));
+    if (this.battleMode === 'online' && this.phase === 'battle') {
+      // [ONLINE HOOK] Send only the newest local state at a fixed 20Hz cadence.
+      this.network.update(dt, () => ({
+        x: this.player.position.x,
+        z: this.player.position.y,
+        vx: this.player.velocity.x,
+        vz: this.player.velocity.y,
+        spin: this.player.spin,
+        hp: this.player.integrity,
+        alive: this.player.alive,
+      }));
+    }
+
+    this.player.syncMesh(this.time, this.energy.get('player'), dt);
+    this.enemy.syncMesh(this.time, this.energy.get('enemy'), dt);
     this.player.updateEffects(dt);
     this.enemy.updateEffects(dt);
     this.sparks.update(dt);
     this.lightning.update(dt);
     this.shockwave.update(dt);
+    this.floatingTexts.update(dt);
     this.trails.update(dt, this.player, this.enemy);
 
     // 閳光偓閳光偓 Dynamic Visual FX 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
     const totalEnergy = this.energy.get('player') + this.energy.get('enemy');
-    this.bloom.setBloomStrength(0.65 + (totalEnergy / 20) * 1.2);
+    const normalBloom = 0.65 + (totalEnergy / 20) * 1.2;
+    const bloomStrength = arenaManager.getTheme() === 'absolute_zero'
+      ? Math.min(normalBloom * 0.62, 1.05)
+      : normalBloom;
+    this.bloom.setBloomStrength(bloomStrength);
     
     // Smoothly apply RGB shift / glitch when timeScale is reduced (bullet time)
     const bulletTimeDepth = 1.0 - this.timeScale;
@@ -1616,7 +2464,7 @@ export class Game {
       enemyEnergy: this.enemy.spirit,
       timeLeft: this.rules.timeLeft,
       result: this.currentResult,
-      enemyName: this.enemyPreset.name,
+      enemyName: this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
       launchPower: this.launchCharge,
       angleDeg: this.launchAngleDeg,
       phase: this.phase,
@@ -1653,6 +2501,12 @@ export class Game {
       phase: this.phase,
       enemy: this.enemyPreset.name,
       mode: this.mode,
+      online: {
+        battleMode: this.battleMode,
+        turnId: this.onlineTurnId,
+        turnDeadline: this.onlineTurnDeadline,
+        ...this.network.getDiagnostics(),
+      },
       progression: {
         ladderIndex: this.progression.ladderIndex,
         bestLadder: this.progression.bestLadder,
@@ -1662,6 +2516,8 @@ export class Game {
       },
       player: {
         spin: this.player.spin,
+        visualRotation: this.player.getVisualRotationAngles(),
+        visualSpinRatio: this.player.getVisualSpinRatio(),
         integrity: this.player.integrity,
         burst: this.player.burst,
         speed: this.player.velocity.length(),
@@ -1679,6 +2535,8 @@ export class Game {
       },
       enemyState: {
         spin: this.enemy.spin,
+        visualRotation: this.enemy.getVisualRotationAngles(),
+        visualSpinRatio: this.enemy.getVisualSpinRatio(),
         integrity: this.enemy.integrity,
         burst: this.enemy.burst,
         speed: this.enemy.velocity.length(),
@@ -1694,6 +2552,15 @@ export class Game {
         timer: this.turnTimer,
         index: this.turnIndex,
         resolution: this.activeTurnResolution?.kind ?? null,
+        qte: this.activeClashQte
+          ? {
+              phase: this.activeClashQte.phase,
+              tier: this.activeClashQte.tier,
+              playerScore: Number(this.activeClashQte.playerScore.toFixed(1)),
+              enemyScore: Number(this.activeClashQte.enemyScore.toFixed(1)),
+              timeLeft: Number((this.activeClashQte.phase === 'intro' ? this.activeClashQte.introLeft : this.activeClashQte.timeLeft).toFixed(2)),
+            }
+          : null,
       },
       paused: this.paused,
       camera: this.rig.getDebugState(),
@@ -1740,6 +2607,25 @@ export class Game {
         this.enemy.position.set(0.95, -0.02);
         this.enemy.velocity.set(-2.4, 0);
       },
+      forceCollisionDamage: (playerDamage = 8, enemyDamage = 12) => {
+        this.physics.applyClashImpulse(this.player, this.enemy, 1.4, 1.4, playerDamage, enemyDamage);
+        return {
+          playerIntegrity: this.player.integrity,
+          enemyIntegrity: this.enemy.integrity,
+        };
+      },
+      setSpinTestState: (side: 'player' | 'enemy', hpRatio: number, combatSpin = 0) => {
+        const target = side === 'player' ? this.player : this.enemy;
+        const safeHpRatio = THREE.MathUtils.clamp(Number.isFinite(hpRatio) ? hpRatio : 0, 0, 1);
+        target.integrity = target.stats.maxIntegrity * safeHpRatio;
+        target.spin = THREE.MathUtils.clamp(Number.isFinite(combatSpin) ? combatSpin : 0, 0, target.stats.maxSpin);
+        target.alive = safeHpRatio > 0;
+        return {
+          integrity: target.integrity,
+          spin: target.spin,
+          visualSpinRatio: target.getVisualSpinRatio(),
+        };
+      },
       forceResult: (winner: 'player' | 'enemy' = 'player') =>
         this.showResult({
           winner,
@@ -1753,6 +2639,25 @@ export class Game {
       cycleTacticalMode: () => this.cyclePlayerTacticalMode(),
       castSkill: (skillId: SkillId) => this.castSkill(skillId),
       submitTurnAction: (action: TurnAction) => this.submitTurnAction(action),
+      forceClashQte: (skillId: ElementAttackSkillId = 'wind_blade') => {
+        this.phase = 'battle';
+        this.currentResult = null;
+        this.turnState = 'awaiting';
+        this.spirit.set(this.player, this.player.maxSpirit);
+        this.spirit.set(this.enemy, this.enemy.maxSpirit);
+        const action: TurnAction = { kind: 'attack', skillId };
+        const resolution = this.turnArbitrator.executeTurnResolution(action, action, this.player, this.enemy, this.turnIndex);
+        this.startTurnPresentation(resolution);
+        return resolution.kind;
+      },
+      qteTap: () => {
+        const event = new KeyboardEvent('keydown', { code: 'Space', key: ' ' });
+        return this.registerClashQteTap(event);
+      },
+      finishClashQte: () => {
+        this.finishClashQte();
+        return this.turnState;
+      },
       executeTagSubstitution: () => this.executeTagSubstitution(),
       fillSpirit: (side: 'player' | 'enemy' = 'player') => {
         const target = side === 'player' ? this.player : this.enemy;
@@ -1771,6 +2676,132 @@ export class Game {
         player: resolveModifiers(this.player),
         enemy: resolveModifiers(this.enemy),
       }),
+      sampleVisualSpin: (frameDt: number, frames: number, side: 'player' | 'enemy' = 'player') => {
+        const safeDt = THREE.MathUtils.clamp(Number.isFinite(frameDt) ? frameDt : 0, 0, 1 / 20);
+        const safeFrames = THREE.MathUtils.clamp(Math.floor(Number.isFinite(frames) ? frames : 0), 0, 600);
+        const target = side === 'player' ? this.player : this.enemy;
+        const before = target.getVisualRotationAngles();
+        for (let frame = 0; frame < safeFrames; frame += 1) {
+          target.syncMesh(this.time + frame * safeDt, this.energy.get(side), safeDt);
+        }
+        const after = target.getVisualRotationAngles();
+        return {
+          seconds: safeDt * safeFrames,
+          visualSpinRatio: target.getVisualSpinRatio(),
+          coreDelta: after.core - before.core,
+          ringDelta: after.ring - before.ring,
+        };
+      },
+      skillDamageMatrix: () => {
+        const attackerStats = {
+          attack: this.player.stats.attack,
+          critChance: this.player.stats.critChance,
+          critMultiplier: this.player.stats.critMultiplier,
+        };
+        const defenderStats = {
+          armor: this.enemy.stats.armor,
+          evasion: this.enemy.stats.evasion,
+        };
+        Object.assign(this.player.stats, { attack: 8, critChance: 0, critMultiplier: 2 });
+        Object.assign(this.enemy.stats, { armor: 30, evasion: 0 });
+        try {
+          const tiers: SkillTier[] = [1, 2, 3, 4, 5];
+          const calculate = (skillTier: SkillTier, options: { counter?: boolean; clash?: boolean; multiplier?: number } = {}) => calculateTurnDamage({
+            attacker: this.player,
+            defender: this.enemy,
+            skillTier,
+            isCounter: options.counter ?? false,
+            isClash: options.clash ?? false,
+            isBlockOrMiss: false,
+            contextMultiplier: options.multiplier ?? 1,
+            random: () => 1,
+          });
+          Object.assign(this.player.stats, { critChance: 1, critMultiplier: 3 });
+          const counterCritCheck = calculateTurnDamage({
+            attacker: this.player,
+            defender: this.enemy,
+            skillTier: 5,
+            isCounter: true,
+            isClash: false,
+            isBlockOrMiss: false,
+            random: () => 0,
+          });
+          Object.assign(this.player.stats, { critChance: 0, critMultiplier: 2 });
+          return {
+            normal: tiers.map((tier) => calculate(tier).finalDamage),
+            counter: tiers.map((tier) => calculate(tier, { counter: true }).finalDamage),
+            overpower: tiers.map((tier) => calculate(tier, { multiplier: 1.15 }).finalDamage),
+            clash: tiers.map((tier) => calculate(tier, { clash: true, multiplier: 0.5 }).finalDamage),
+            counterCritMutualExclusion: {
+              didCrit: counterCritCheck.didCrit,
+              tags: counterCritCheck.tags,
+              finalDamage: counterCritCheck.finalDamage,
+            },
+          };
+        } finally {
+          Object.assign(this.player.stats, attackerStats);
+          Object.assign(this.enemy.stats, defenderStats);
+        }
+      },
+      previewTierHit: (requestedTier: number, counter = false) => {
+        const skillTier = THREE.MathUtils.clamp(Math.round(requestedTier), 1, 5) as SkillTier;
+        const skillByTier: Record<SkillTier, ElementAttackSkillId> = {
+          1: 'wind_blade',
+          2: 'aqua_surge',
+          3: 'lightning_bolt',
+          4: 'blazing_meteor',
+          5: 'phantom_clone',
+        };
+        const damage = calculateTurnDamage({
+          attacker: this.player,
+          defender: this.enemy,
+          skillTier,
+          isCounter: counter,
+          isClash: false,
+          isBlockOrMiss: false,
+          random: () => 1,
+        });
+        this.enemy.integrity = this.enemy.stats.maxIntegrity;
+        this.enemy.alive = true;
+        this.applyTurnVisuals({
+          kind: counter ? 'attack_catches_charge' : 'defense_fail',
+          playerAction: { kind: 'attack', skillId: skillByTier[skillTier] },
+          aiAction: counter ? { kind: 'charge' } : { kind: 'defense' },
+          winner: null,
+          loser: null,
+          playerSpiritDelta: 0,
+          enemySpiritDelta: 0,
+          playerVisual: 'attack',
+          enemyVisual: 'hit',
+          safeNoSpinDamage: false,
+          log: `T${skillTier} damage preview`,
+          damageResults: [damage],
+        });
+        return damage;
+      },
+      sampleNetworkCadence: (seconds = 1, fps = 60) => {
+        const safeSeconds = THREE.MathUtils.clamp(Number.isFinite(seconds) ? seconds : 1, 0, 10);
+        const safeFps = THREE.MathUtils.clamp(Math.floor(Number.isFinite(fps) ? fps : 60), 1, 240);
+        const before = this.network.getDiagnostics().sentStatePackets;
+        const frames = Math.round(safeSeconds * safeFps);
+        for (let frame = 0; frame < frames; frame += 1) {
+          this.network.update(1 / safeFps, () => ({
+            x: this.player.position.x,
+            z: this.player.position.y,
+            vx: this.player.velocity.x,
+            vz: this.player.velocity.y,
+            spin: this.player.spin,
+            hp: this.player.integrity,
+            alive: this.player.alive,
+          }));
+        }
+        return this.network.getDiagnostics().sentStatePackets - before;
+      },
+      forceOnlineLaunch: () => {
+        if (this.onlineLaunchConfig) this.doOnlineLaunch(this.onlineLaunchConfig);
+        return this.phase;
+      },
+      landTurnResolution: () => this.landTurnResolution(),
       dashCenter: () => this.physics.dashPlayer(this.player, new THREE.Vector3(0, 0, 0), this.energy),
       state: () => globalWindow.__THREE_GAME_DIAGNOSTICS__,
     };

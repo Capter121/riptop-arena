@@ -268,7 +268,7 @@ export function createTopMaterials(
   // Face of the dragon ring
   const ringMaterial = new THREE.MeshStandardMaterial({
     color: '#0d3d3d', // Dragon Scale Teal
-    metalness: 0.8,
+    metalness: 0.5,
     roughness: 0.4,
     roughnessMap: scratchMap,
     normalMap,
@@ -278,7 +278,7 @@ export function createTopMaterials(
   // Sharp Chrome Silver Bevels
   const ringBevelMaterial = new THREE.MeshStandardMaterial({
     color: '#e0e0e0', // Chrome Silver
-    metalness: 0.98,
+    metalness: 0.7,
     roughness: 0.05,
   });
 
@@ -286,14 +286,14 @@ export function createTopMaterials(
 
   const weightDisc = new THREE.MeshStandardMaterial({
     color: '#2a2e33',
-    metalness: 0.85,
+    metalness: 0.6,
     roughness: 0.3,
   });
 
   const emblemMap = createDragonEmblemTexture();
   const core = new THREE.MeshStandardMaterial({
     color: '#ffffff',
-    metalness: 0.9,
+    metalness: 0.6,
     roughness: 0.2,
     map: emblemMap,
     emissiveMap: emblemMap,
@@ -303,7 +303,7 @@ export function createTopMaterials(
 
   const driver = new THREE.MeshStandardMaterial({
     color: '#0a1a1f', // Dark bluish grey
-    metalness: 0.7,
+    metalness: 0.5,
     roughness: 0.5,
   });
 
@@ -354,16 +354,16 @@ export function getDynamicComponentMaterial(attribute: ElementAttribute, tier: M
     material.metalness = 0.1;
     material.roughness = 0.8;
   } else if (tier === 'REFINED') {
-    material.metalness = 0.6;
+    material.metalness = 0.4;
     material.roughness = 0.4;
   } else if (tier === 'RARE') {
-    material.metalness = 0.95;
+    material.metalness = 0.6;
     material.roughness = 0.1;
   } else if (tier === 'LEGENDARY') {
-    material.metalness = 0.95;
+    material.metalness = 0.6;
     material.roughness = 0.1;
   } else if (tier === 'MYTHIC') {
-    material.metalness = 0.95;
+    material.metalness = 0.7;
     material.roughness = 0.05;
     material.emissive.copy(color);
     material.emissiveIntensity = 3.5;

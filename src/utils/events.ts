@@ -9,6 +9,7 @@ type EventMap = {
   dash: { side: 'player' | 'enemy' };
   finish: { winner: 'player' | 'enemy'; kind: string };
   impact: { intensity: number };
+  collision_damage: { side: 'player' | 'enemy'; amount: number; x: number; z: number; intensity: number };
   battle_start: {};
   clash_start: {};
   clash_input: ClashAction;

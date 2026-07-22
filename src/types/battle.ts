@@ -11,6 +11,7 @@ export type SkillId =
 export type ElementAttackSkillId = Exclude<SkillId, 'frost_bite'>;
 
 export type BattleSide = 'player' | 'enemy';
+export type SkillTier = 1 | 2 | 3 | 4 | 5;
 
 export type TurnActionKind = 'attack' | 'evade' | 'defense' | 'charge';
 
@@ -26,13 +27,21 @@ export type ElementAttackMeta = {
   skillId: ElementAttackSkillId;
   label: string;
   icon: string;
-  tier: 1 | 2 | 3 | 4 | 5;
+  tier: SkillTier;
   spiritCost: number;
   color: string;
 };
 
 export const MAX_SPIRIT = 100;
 export const TURN_CHARGE_SPIRIT = 20;
+
+export const SKILL_BASE_DAMAGE: Record<SkillTier, number> = {
+  1: 400,
+  2: 580,
+  3: 800,
+  4: 1080,
+  5: 1400,
+};
 
 export const ELEMENT_ATTACKS: Record<ElementAttackSkillId, ElementAttackMeta> = {
   wind_blade: {

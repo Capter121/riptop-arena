@@ -24,6 +24,7 @@ import {
   type TurnAction,
   type TurnVisual,
 } from '../types/battle';
+import { type DamageResult, calculateTurnDamage } from './damage';
 
 export type TurnResolutionKind =
   | 'same_attack_cancel'
@@ -52,6 +53,7 @@ export type TurnResolution = {
   log: string;
   knockbackBoost?: number;
   firePenetration?: boolean;
+  damageResults?: DamageResult[];
 };
 
 import type { ElementAttribute } from '../types/shopItems';
@@ -62,6 +64,8 @@ type TurnSpiritSnapshot = {
   turnIndex: number;
   playerAttributes?: Partial<Record<ElementAttribute, number>>;
   enemyAttributes?: Partial<Record<ElementAttribute, number>>;
+  playerSpiritRegenBonus: number;
+  enemySpiritRegenBonus: number;
 };
 
 export class TurnArbitrator {
@@ -72,6 +76,8 @@ export class TurnArbitrator {
       turnIndex: turnIndex,
       playerAttributes: player.stats.attributes,
       enemyAttributes: enemy.stats.attributes,
+      playerSpiritRegenBonus: player.stats.spiritRegenBonus,
+      enemySpiritRegenBonus: enemy.stats.spiritRegenBonus,
     };
     
     const playerSpiritDelta = this.getActionCost(playerAction, spirit.playerSpirit);
@@ -89,9 +95,10 @@ export class TurnArbitrator {
       chargeEnemy = false,
       knockbackBoost = 0,
       firePenetration = false,
+      damageResults: DamageResult[] = [],
     ): TurnResolution => {
-      const getCharge = (base: number, isLight: boolean) => {
-        const gain = this.getChargeGain(base);
+      const getCharge = (base: number, isLight: boolean, regenBonus: number) => {
+        const gain = this.getChargeGain(base, regenBonus);
         return isLight ? gain * 2 : gain; // LIGHT: Double passive Spirit regen
       };
 
@@ -104,14 +111,15 @@ export class TurnArbitrator {
         aiAction,
         winner,
         loser,
-        playerSpiritDelta: playerSpiritDelta + (chargePlayer ? getCharge(spirit.playerSpirit + playerSpiritDelta, playerHasLight) : 0),
-        enemySpiritDelta: enemySpiritDelta + (chargeEnemy ? getCharge(spirit.enemySpirit + enemySpiritDelta, enemyHasLight) : 0),
+        playerSpiritDelta: playerSpiritDelta + (chargePlayer ? getCharge(spirit.playerSpirit + playerSpiritDelta, playerHasLight, spirit.playerSpiritRegenBonus) : 0),
+        enemySpiritDelta: enemySpiritDelta + (chargeEnemy ? getCharge(spirit.enemySpirit + enemySpiritDelta, enemyHasLight, spirit.enemySpiritRegenBonus) : 0),
         playerVisual,
         enemyVisual,
         safeNoSpinDamage,
         log,
         knockbackBoost,
         firePenetration,
+        damageResults,
       };
     };
 
@@ -124,19 +132,23 @@ export class TurnArbitrator {
         const eDivine = (spirit.enemyAttributes?.['DIVINE'] || 0) > 0;
         
         if (pDivine && !eDivine) {
-          return finish('attack_overpower', 'player', 'enemy', 'attack', 'hit', `${playerAttack.label} 触发神圣裁决(DIVINE)，强制赢得拼刀！`);
+          const dmg = calculateTurnDamage({ attacker: player, defender: enemy, skillTier: playerAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.2 });
+          return finish('attack_overpower', null, null, 'attack', 'hit', `${playerAttack.label} 触发神圣裁决(DIVINE)，强制赢得拼刀！`, false, false, false, 0, false, [dmg]);
         } else if (eDivine && !pDivine) {
-          return finish('attack_overpower', 'enemy', 'player', 'hit', 'attack', `${enemyAttack.label} 触发神圣裁决(DIVINE)，玩家爆裂！`);
+          const dmg = calculateTurnDamage({ attacker: enemy, defender: player, skillTier: enemyAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.2 });
+          return finish('attack_overpower', null, null, 'hit', 'attack', `${enemyAttack.label} 触发神圣裁决(DIVINE)，玩家被压制！`, false, false, false, 0, false, [dmg]);
         }
 
-        return finish('clash_qte', null, null, 'clash', 'clash', `${playerAttack.label} 对 ${enemyAttack.label}：同级能量正面抵消，双方不损失转速。`, true);
+        return finish('clash_qte', null, null, 'clash', 'clash', `${playerAttack.label} 对 ${enemyAttack.label}：同级能量对撞，进入拼刀拔河！`, true);
       }
 
       if (playerAttack.tier > enemyAttack.tier) {
-        return finish('attack_overpower', 'player', 'enemy', 'attack', 'hit', `${playerAttack.label} 高阶碾压 ${enemyAttack.label}，对手爆裂出局。`);
+        const dmg = calculateTurnDamage({ attacker: player, defender: enemy, skillTier: playerAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.15 });
+        return finish('attack_overpower', null, null, 'attack', 'hit', `${playerAttack.label} 高阶碾压 ${enemyAttack.label}，对手受到重创。`, false, false, false, 0, false, [dmg]);
       }
 
-      return finish('attack_overpower', 'enemy', 'player', 'hit', 'attack', `${enemyAttack.label} 高阶碾压 ${playerAttack.label}，玩家爆裂出局。`);
+      const dmg = calculateTurnDamage({ attacker: enemy, defender: player, skillTier: enemyAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.15 });
+      return finish('attack_overpower', null, null, 'hit', 'attack', `${enemyAttack.label} 高阶碾压 ${playerAttack.label}，玩家受到重创。`, false, false, false, 0, false, [dmg]);
     }
 
     if (playerAction.kind === 'attack') {
@@ -183,6 +195,7 @@ export class TurnArbitrator {
       chargeEnemy?: boolean,
       knockbackBoost?: number,
       firePenetration?: boolean,
+      damageResults?: DamageResult[],
     ) => TurnResolution,
     player: TopEntity,
     enemy: TopEntity,
@@ -211,13 +224,23 @@ export class TurnArbitrator {
         hexLog = ' 邪恶镰刀触发！对手被变形为废塑料！';
       }
 
+      const dmg = calculateTurnDamage({
+        attacker: attackerTop,
+        defender: defenderTop,
+        skillTier: attack.tier,
+        isCounter: true,
+        isClash: false,
+        isBlockOrMiss: false,
+      });
+
       return finish(
         'attack_catches_charge',
-        attacker,
-        defender,
+        null,
+        null,
         playerVisual,
         enemyVisual,
-        `${attack.label} 抓住蓄能空档，${defender === 'player' ? '玩家' : '对手'}立刻爆裂。${hexLog}`,
+        `${attack.label} 抓住蓄能空档，触发反击重创！${hexLog}`,
+        false, false, false, 0, false, [dmg]
       );
     }
 
@@ -238,28 +261,48 @@ export class TurnArbitrator {
         const chargePlayer = defender === 'player';
         const chargeEnemy = defender === 'enemy';
 
+        const dmg = calculateTurnDamage({
+          attacker: attackerTop,
+          defender: defenderTop,
+          skillTier: attack.tier,
+          isCounter: false,
+          isClash: false,
+          isBlockOrMiss: true,
+        });
+
         return finish(
           defender === 'player' ? 'qte_parry' : 'defense_success',
           null,
           null,
           playerVisual,
           enemyVisual,
-          `${attack.label} 是偶数档，防守扎根成功，只产生轻微摩擦。${isFire ? ' (火焰渗透伤害!)' : ''}${reflectLog}`,
+          `${attack.label} 是偶数档，防守扎根成功，抵消大量伤害。${isFire ? ' (火焰渗透伤害!)' : ''}${reflectLog}`,
           true,
           chargePlayer,
           chargeEnemy,
           isWater ? 2.5 : 0, // WATER: increased knockback
           isFire, // FIRE: 10% penetration
+          [dmg]
         );
       }
 
+      const dmg = calculateTurnDamage({
+        attacker: attackerTop,
+        defender: defenderTop,
+        skillTier: attack.tier,
+        isCounter: false,
+        isClash: false,
+        isBlockOrMiss: false,
+      });
+
       return finish(
         'defense_fail',
-        attacker,
-        defender,
+        null,
+        null,
         playerVisual,
         enemyVisual,
-        `${attack.label} 是奇数档，防守判定失败，${defender === 'player' ? '玩家' : '对手'}爆裂。`,
+        `${attack.label} 是奇数档，防守判定失败，受到重创。`,
+        false, false, false, 0, false, [dmg]
       );
     }
 
@@ -272,6 +315,15 @@ export class TurnArbitrator {
         const chargePlayer = defender === 'player';
         const chargeEnemy = defender === 'enemy';
 
+        const dmg = calculateTurnDamage({
+          attacker: attackerTop,
+          defender: defenderTop,
+          skillTier: attack.tier,
+          isCounter: false,
+          isClash: false,
+          isBlockOrMiss: true,
+        });
+
         return finish(
           defender === 'player' ? 'qte_parry' : 'evade_success',
           null,
@@ -282,27 +334,47 @@ export class TurnArbitrator {
           true,
           chargePlayer,
           chargeEnemy,
+          0, false, [dmg]
         );
       }
 
+      const dmg = calculateTurnDamage({
+        attacker: attackerTop,
+        defender: defenderTop,
+        skillTier: attack.tier,
+        isCounter: false,
+        isClash: false,
+        isBlockOrMiss: false,
+      });
+
       return finish(
         'evade_fail',
-        attacker,
-        defender,
+        null,
+        null,
         playerVisual,
         enemyVisual,
-        `${attack.label} 是偶数档，回避路线被封死，${defender === 'player' ? '玩家' : '对手'}爆裂。`,
+        `${attack.label} 是偶数档，回避路线被封死，受到打击。`,
+        false, false, false, 0, false, [dmg]
       );
     }
 
     const [playerVisual, enemyVisual] = visual('hit');
+    const dmg = calculateTurnDamage({
+      attacker: attackerTop,
+      defender: defenderTop,
+      skillTier: attack.tier,
+      isCounter: false,
+      isClash: false,
+      isBlockOrMiss: false,
+    });
     return finish(
       'defense_fail',
-      attacker,
-      defender,
+      null,
+      null,
       playerVisual,
       enemyVisual,
-      `${attack.label} 命中裸露节奏，${defender === 'player' ? '玩家' : '对手'}没有正确防御而爆裂。`,
+      `${attack.label} 命中裸露节奏，${defender === 'player' ? '玩家' : '对手'}受到打击。`,
+      false, false, false, 0, false, [dmg],
     );
   }
 
@@ -314,8 +386,8 @@ export class TurnArbitrator {
     return 0;
   }
 
-  private getChargeGain(currentSpirit: number) {
-    return Math.max(0, Math.min(TURN_CHARGE_SPIRIT, MAX_SPIRIT - currentSpirit));
+  private getChargeGain(currentSpirit: number, regenBonus = 0) {
+    return Math.max(0, Math.min(TURN_CHARGE_SPIRIT + regenBonus, MAX_SPIRIT - currentSpirit));
   }
 }
 
@@ -385,8 +457,12 @@ export class BattlePhysicsSystem {
     player.velocity.add(normal.clone().multiplyScalar(-playerPush));
     enemy.velocity.add(normal.clone().multiplyScalar(enemyPush));
 
+    const playerIntegrityBefore = player.integrity;
+    const enemyIntegrityBefore = enemy.integrity;
     player.integrity = Math.max(0, player.integrity - playerDamage);
     enemy.integrity = Math.max(0, enemy.integrity - enemyDamage);
+    this.emitCollisionDamage(player, playerIntegrityBefore - player.integrity, 1.5);
+    this.emitCollisionDamage(enemy, enemyIntegrityBefore - enemy.integrity, 1.5);
 
     this.events.emit('spark', {
       x: (player.position.x + enemy.position.x) * 0.5,
@@ -584,8 +660,13 @@ export class BattlePhysicsSystem {
         );
 
     if (!suppressDamage) {
+      const integrityBeforeA = a.integrity;
+      const integrityBeforeB = b.integrity;
       a.integrity = Math.max(0, a.integrity - damageToA * TUNING.collisionDamageScale * 0.08);
       b.integrity = Math.max(0, b.integrity - damageToB * TUNING.collisionDamageScale * 0.08);
+      const collisionIntensity = clamp(impulseMagnitude / 10, 0.35, 1.4);
+      this.emitCollisionDamage(a, integrityBeforeA - a.integrity, collisionIntensity);
+      this.emitCollisionDamage(b, integrityBeforeB - b.integrity, collisionIntensity);
       a.addBurst((damageToA * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + a.stats.burstResist * 0.25 * modifiersA.burstResistanceMultiplier));
       b.addBurst((damageToB * TUNING.burstDamageScale * 0.04) / Math.max(0.35, 1 + b.stats.burstResist * 0.25 * modifiersB.burstResistanceMultiplier));
 
@@ -624,6 +705,17 @@ export class BattlePhysicsSystem {
         this.forceCollisionSettlement(a, b);
       }
     }
+  }
+
+  private emitCollisionDamage(top: TopEntity, amount: number, intensity: number) {
+    if (amount <= 0) return;
+    this.events.emit('collision_damage', {
+      side: top.side,
+      amount,
+      x: top.position.x,
+      z: top.position.y,
+      intensity,
+    });
   }
 
   private triggerLightning(caster: TopEntity) {

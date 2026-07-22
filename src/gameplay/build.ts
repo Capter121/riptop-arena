@@ -8,6 +8,11 @@ export type BattleStats = StatBlock & {
   maxSpin: number;
   maxIntegrity: number;
   weight: number;
+  armor: number;
+  evasion: number;
+  critChance: number;
+  critMultiplier: number;
+  spiritRegenBonus: number;
   attributes: Partial<Record<ElementAttribute, number>>;
   perks: string[];
   guardStamina: number;
@@ -112,8 +117,13 @@ export function buildStats(
   return {
     ...combined,
     maxSpin: 74 + combined.stamina * 6 + combined.mobility * 2,
-    maxIntegrity: 100 + combined.defense * 6 + combined.burstResist * 5,
+    maxIntegrity: 1000 + combined.defense * 60 + combined.burstResist * 50,
     weight: 1 + combined.defense * 0.12 + combined.burstResist * 0.05,
+    armor: combined.defense * 2 + combined.burstResist,
+    evasion: Math.min(0.4, combined.mobility * 0.02),
+    critChance: Math.min(0.5, combined.attack * 0.02 + combined.mobility * 0.005),
+    critMultiplier: 1.5 + combined.attack * 0.05,
+    spiritRegenBonus: combined.stamina * 0.5,
     attributes,
     perks,
     guardStamina: 3,

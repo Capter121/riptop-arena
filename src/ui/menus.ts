@@ -1,6 +1,8 @@
 export class MenuPanel {
   readonly root = document.createElement('section');
   readonly start = document.createElement('button');
+  readonly online = document.createElement('button');
+  readonly onlineStatus = document.createElement('div');
   readonly survival = document.createElement('button');
   readonly tournament = document.createElement('button');
   readonly garage = document.createElement('button');
@@ -13,6 +15,10 @@ export class MenuPanel {
   constructor() {
     this.root.className = 'card menu';
     this.start.className = 'button button--primary';
+    this.online.className = 'button button--online';
+    this.online.textContent = '\u771f\u4eba\u8054\u673a';
+    this.onlineStatus.className = 'menu__online-status';
+    this.onlineStatus.textContent = '\u5c40\u57df\u7f51 WebSocket \u53cc\u4eba\u5bf9\u6218';
     this.start.textContent = '快速战斗';
     this.survival.className = 'button button--danger';
     this.survival.textContent = '生存模式';
@@ -68,13 +74,19 @@ export class MenuPanel {
 
     this.root.append(
       eyebrow, title, intro, stageStrip, stageWrap, 
-      this.start, this.survival, this.tournament, this.garage, this.forge, this.blackMarket,
+      this.start, this.online, this.onlineStatus, this.survival, this.tournament, this.garage, this.forge, this.blackMarket,
       this.meta, this.trophyShelf
     );
   }
 
   setMeta(text: string) {
     this.meta.textContent = text;
+  }
+
+  setOnlineState(label: string, status: string, active = false) {
+    this.online.textContent = label;
+    this.online.classList.toggle('is-active', active);
+    this.onlineStatus.textContent = status;
   }
 
   setTrophyShelf(title: string, body: string) {

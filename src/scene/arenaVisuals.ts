@@ -8,6 +8,8 @@ export class ArenaVisuals {
   private fallbackMesh: THREE.Mesh | null = null;
   private gridHelper: THREE.GridHelper | null = null;
   private iceGroup: THREE.Group | null = null;
+  private iceGeometry: THREE.ConeGeometry | null = null;
+  private iceMaterial: THREE.MeshPhysicalMaterial | null = null;
   private glitchTimer = 0;
   private isActive = false;
 
@@ -16,39 +18,40 @@ export class ArenaVisuals {
   }
 
   public initAbsoluteZero(parent: THREE.Object3D) {
-    this.isActive = true;
-    
-    const isLowEnd = window.innerWidth < 768 || window.devicePixelRatio < 1.5;
-    const textureWidth = isLowEnd ? 512 : window.innerWidth * window.devicePixelRatio;
-    const textureHeight = isLowEnd ? 512 : window.innerHeight * window.devicePixelRatio;
-    
+    if (this.isActive) {
+      if (this.root.parent !== parent) parent.add(this.root);
+      return;
+    }
+
+    const isLowEnd = window.innerWidth < 768
+      || window.matchMedia('(pointer: coarse)').matches
+      || navigator.maxTouchPoints > 0;
+    const mirrorDpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    const requestedWidth = window.innerWidth * mirrorDpr;
+    const requestedHeight = window.innerHeight * mirrorDpr;
+    const mirrorScale = Math.min(1, 1024 / requestedWidth, 1024 / requestedHeight);
+    const textureWidth = Math.max(256, Math.floor(requestedWidth * mirrorScale));
+    const textureHeight = Math.max(256, Math.floor(requestedHeight * mirrorScale));
+
     const geo = new THREE.CircleGeometry(this.radius * 0.94, 64);
-    
-    // Create Reflector or fallback
+
     if (isLowEnd) {
-      this.fallbackMesh = new THREE.Mesh(
-        geo,
-        new THREE.MeshStandardMaterial({
-          color: 0x004488,
-          metalness: 0.9,
-          roughness: 0.1,
-          transparent: true,
-          opacity: 0.8
-        })
-      );
-      this.fallbackMesh.rotation.x = -Math.PI / 2;
-      this.fallbackMesh.position.y = 0.29; // slightly above bowl base
-      this.root.add(this.fallbackMesh);
+      this.createFallback(geo);
     } else {
-      this.reflector = new Reflector(geo, {
-        clipBias: 0.003,
-        textureWidth,
-        textureHeight,
-        color: 0x77aaee,
-      });
-      this.reflector.rotation.x = -Math.PI / 2;
-      this.reflector.position.y = 0.29;
-      this.root.add(this.reflector);
+      try {
+        this.reflector = new Reflector(geo, {
+          clipBias: 0.003,
+          textureWidth,
+          textureHeight,
+          color: 0x183c55,
+        });
+        this.reflector.rotation.x = -Math.PI / 2;
+        this.reflector.position.y = 0.29;
+        this.root.add(this.reflector);
+      } catch (error) {
+        console.warn('Absolute Zero reflector unavailable; using fallback.', error);
+        this.createFallback(geo);
+      }
     }
 
     // Hologrid overlay
@@ -62,11 +65,11 @@ export class ArenaVisuals {
 
     // Ice peaks around the rim
     this.iceGroup = new THREE.Group();
-    const iceGeo = new THREE.ConeGeometry(0.6, 2.5, 5); // jagged ice spikes
-    iceGeo.translate(0, 1.25, 0); // anchor at base
+    this.iceGeometry = new THREE.ConeGeometry(0.6, 2.5, 5);
+    this.iceGeometry.translate(0, 1.25, 0);
     
     // MeshPhysicalMaterial for beautiful glass/ice look
-    const iceMat = new THREE.MeshPhysicalMaterial({
+    this.iceMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x88ccff,
       transmission: 0.9,
       opacity: 1,
@@ -80,7 +83,7 @@ export class ArenaVisuals {
     for (let i = 0; i < 36; i++) {
       const angle = (i / 36) * Math.PI * 2;
       const r = this.radius * 0.95 + Math.random() * 0.3; // around the rim
-      const peak = new THREE.Mesh(iceGeo, iceMat);
+      const peak = new THREE.Mesh(this.iceGeometry, this.iceMaterial);
       peak.position.set(Math.cos(angle) * r, 0.2, Math.sin(angle) * r);
       
       // Point outwards and randomly tilt
@@ -94,19 +97,16 @@ export class ArenaVisuals {
       this.iceGroup.add(peak);
     }
     this.root.add(this.iceGroup);
-    
+
     parent.add(this.root);
+    this.isActive = true;
   }
 
-  public remove(parent: THREE.Object3D) {
+  public remove(_parent: THREE.Object3D) {
     this.isActive = false;
-    parent.remove(this.root);
+    this.root.removeFromParent();
     if (this.reflector) {
       this.reflector.geometry.dispose();
-      const materials = Array.isArray(this.reflector.material)
-        ? this.reflector.material
-        : [this.reflector.material];
-      materials.forEach((material) => material.dispose());
       this.reflector.dispose();
       this.root.remove(this.reflector);
       this.reflector = null;
@@ -127,15 +127,32 @@ export class ArenaVisuals {
       this.gridHelper = null;
     }
     if (this.iceGroup) {
-      this.iceGroup.children.forEach(child => {
-        const mesh = child as THREE.Mesh;
-        mesh.geometry.dispose();
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        materials.forEach((material) => material.dispose());
-      });
+      this.iceGroup.clear();
       this.root.remove(this.iceGroup);
       this.iceGroup = null;
     }
+    this.iceGeometry?.dispose();
+    this.iceMaterial?.dispose();
+    this.iceGeometry = null;
+    this.iceMaterial = null;
+    this.root.clear();
+    this.glitchTimer = 0;
+  }
+
+  private createFallback(geometry: THREE.CircleGeometry) {
+    this.fallbackMesh = new THREE.Mesh(
+      geometry,
+      new THREE.MeshStandardMaterial({
+        color: 0x062b44,
+        metalness: 0.9,
+        roughness: 0.1,
+        transparent: true,
+        opacity: 0.8,
+      }),
+    );
+    this.fallbackMesh.rotation.x = -Math.PI / 2;
+    this.fallbackMesh.position.y = 0.29;
+    this.root.add(this.fallbackMesh);
   }
 
   public update(dt: number) {

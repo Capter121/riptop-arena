@@ -1,0 +1,178 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import WebSocket from 'ws';
+
+const PORT = 8091;
+const URL = `ws://127.0.0.1:${PORT}`;
+const v = 1;
+
+class TestClient {
+  constructor(ws) {
+    this.ws = ws;
+    this.inbox = [];
+    this.waiters = [];
+    ws.on('message', (data) => {
+      const message = JSON.parse(data.toString());
+      const waiterIndex = this.waiters.findIndex((waiter) => waiter.type === message.type);
+      if (waiterIndex >= 0) {
+        const [waiter] = this.waiters.splice(waiterIndex, 1);
+        clearTimeout(waiter.timer);
+        waiter.resolve(message);
+      } else {
+        this.inbox.push(message);
+      }
+    });
+  }
+
+  send(message) {
+    this.ws.send(JSON.stringify({ v, ...message }));
+  }
+
+  waitFor(type, timeoutMs = 2_000) {
+    const index = this.inbox.findIndex((message) => message.type === type);
+    if (index >= 0) return Promise.resolve(this.inbox.splice(index, 1)[0]);
+    return new Promise((resolve, reject) => {
+      const waiter = { type, resolve, timer: null };
+      waiter.timer = setTimeout(() => {
+        const index = this.waiters.indexOf(waiter);
+        if (index >= 0) this.waiters.splice(index, 1);
+        reject(new Error(`Timed out waiting for ${type}`));
+      }, timeoutMs);
+      this.waiters.push(waiter);
+    });
+  }
+
+  close() {
+    this.ws.close();
+  }
+}
+
+function connect() {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(URL);
+    ws.once('open', () => resolve(new TestClient(ws)));
+    ws.once('error', reject);
+  });
+}
+
+function join(client, name) {
+  client.send({
+    type: 'JOIN_QUEUE',
+    displayName: name,
+    loadout: { build: { attackRing: 'ring', core: 'core', driver: 'driver' }, upgrades: {}, partUpgrades: {} },
+  });
+}
+
+async function matchedPair(prefix) {
+  const first = await connect();
+  const second = await connect();
+  join(first, `${prefix}-1`);
+  await first.waitFor('QUEUED');
+  join(second, `${prefix}-2`);
+  const [firstMatch, secondMatch] = await Promise.all([first.waitFor('MATCHED'), second.waitFor('MATCHED')]);
+  assert.equal(firstMatch.roomId, secondMatch.roomId);
+  const host = firstMatch.role === 'host' ? first : second;
+  const guest = host === first ? second : first;
+  return { first, second, host, guest, roomId: firstMatch.roomId };
+}
+
+const server = spawn(process.execPath, ['server/match-server.mjs'], {
+  cwd: process.cwd(),
+  env: {
+    ...process.env,
+    PORT: String(PORT),
+    READY_TIMEOUT_MS: '300',
+    TURN_TIMEOUT_MS: '500',
+    HEARTBEAT_INTERVAL_MS: '100',
+    HEARTBEAT_DEAD_MS: '700',
+  },
+  stdio: ['ignore', 'pipe', 'pipe'],
+});
+
+try {
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Server did not start.')), 2_000);
+    server.stdout.on('data', (data) => {
+      if (!data.toString().includes('Match server listening')) return;
+      clearTimeout(timer);
+      resolve();
+    });
+    server.once('exit', (code) => reject(new Error(`Server exited early with ${code}.`)));
+  });
+
+  const battle = await matchedPair('battle');
+  battle.host.send({ type: 'CLIENT_READY', roomId: battle.roomId });
+  battle.guest.send({ type: 'CLIENT_READY', roomId: battle.roomId });
+  await battle.host.waitFor('ALL_READY');
+
+  const startDelayMs = 500;
+  const launchConfig = { hostX: -6, guestX: 6, z: 0, hostPower: 0.8, guestPower: 0.8 };
+  battle.host.send({ type: 'MATCH_START', roomId: battle.roomId, startDelayMs, launchConfig });
+  await Promise.all([battle.host.waitFor('MATCH_START'), battle.guest.waitFor('MATCH_START')]);
+  const [hostTurn, guestTurn] = await Promise.all([
+    battle.host.waitFor('TURN_OPEN'),
+    battle.guest.waitFor('TURN_OPEN'),
+  ]);
+  assert.equal(hostTurn.turnId, 1);
+  assert.equal(guestTurn.turnId, 1);
+
+  battle.host.send({ type: 'TURN_ACTION', roomId: battle.roomId, turnId: 1, action: { kind: 'charge' } });
+  battle.guest.send({ type: 'TURN_ACTION', roomId: battle.roomId, turnId: 1, action: { kind: 'defense' } });
+  const actionSet = await battle.host.waitFor('TURN_ACTION_SET');
+  assert.equal(actionSet.hostAction.kind, 'charge');
+  assert.equal(actionSet.guestAction.kind, 'defense');
+
+  const qteResolution = {
+    kind: 'clash_qte',
+    playerAction: { kind: 'attack', skillId: 'wind_blade' },
+    aiAction: { kind: 'attack', skillId: 'wind_blade' },
+    winner: null,
+    loser: null,
+    playerSpiritDelta: -20,
+    enemySpiritDelta: -20,
+    playerVisual: 'clash',
+    enemyVisual: 'clash',
+    safeNoSpinDamage: true,
+    log: 'QTE test',
+  };
+  battle.host.send({ type: 'CLASH_QTE_START', roomId: battle.roomId, turnId: 1, resolution: qteResolution });
+  const qteStart = await battle.guest.waitFor('CLASH_QTE_START');
+  assert.equal(qteStart.resolution.kind, 'clash_qte');
+
+  battle.guest.send({ type: 'CLASH_QTE_SCORE', roomId: battle.roomId, turnId: 1, score: 128, final: false });
+  const hostScore = await battle.host.waitFor('CLASH_QTE_SCORE');
+  assert.equal(hostScore.score, 128);
+
+  battle.host.send({ type: 'CLASH_QTE_SCORE', roomId: battle.roomId, turnId: 1, score: 144, final: true });
+  const guestScore = await battle.guest.waitFor('CLASH_QTE_SCORE');
+  assert.equal(guestScore.final, true);
+
+  battle.guest.send({ type: 'TURN_ACTION', roomId: battle.roomId, turnId: 1, action: { kind: 'charge' } });
+  const duplicateError = await battle.guest.waitFor('ERROR');
+  assert.equal(duplicateError.code, 'ACTION_ALREADY_SUBMITTED');
+
+  battle.host.send({ type: 'TURN_OPEN', roomId: battle.roomId, turnId: 2 });
+  await Promise.all([battle.host.waitFor('TURN_OPEN'), battle.guest.waitFor('TURN_OPEN')]);
+  battle.host.send({ type: 'TURN_ACTION', roomId: battle.roomId, turnId: 2, action: { kind: 'charge' } });
+  const timeout = await battle.host.waitFor('TURN_TIMEOUT');
+  assert.equal(timeout.loser, 'guest');
+  battle.first.close();
+  battle.second.close();
+
+  const readyTimeout = await matchedPair('ready-timeout');
+  readyTimeout.host.send({ type: 'CLIENT_READY', roomId: readyTimeout.roomId });
+  const readyError = await readyTimeout.host.waitFor('ERROR');
+  assert.equal(readyError.code, 'READY_TIMEOUT');
+  readyTimeout.first.close();
+  readyTimeout.second.close();
+
+  const disconnect = await matchedPair('disconnect');
+  disconnect.guest.close();
+  const disconnected = await disconnect.host.waitFor('PEER_DISCONNECTED');
+  assert.equal(disconnected.roomId, disconnect.roomId);
+  disconnect.host.close();
+
+  console.log('Match server smoke tests passed.');
+} finally {
+  server.kill();
+}
