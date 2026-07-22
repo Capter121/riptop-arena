@@ -1,0 +1,26 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_4_MODEL_ASSEMBLY",
+  "status": "PASS",
+  "headBeforeCommit": "b4b9b01d8405e4ac41ecd143396934d3511973c9",
+  "modelSource": "battle-top-designer/public/models/parts",
+  "formalModelCount": 16,
+  "assemblyOrder": ["core", "blade", "assist", "gear", "tip"],
+  "interfaceId": "NSS-V1",
+  "visualScale": 20,
+  "instanceDisposesSharedResources": false,
+  "cacheOwnsSharedResources": true,
+  "validation": {
+    "assemblyAndCacheUnits": "3/3 PASS",
+    "formalGlbMountUnits": "2/2 PASS",
+    "rootTypeScript": "PASS",
+    "rootProductionBuild": "PASS",
+    "publishedGlbCount": 16,
+    "publishedGlbHashMismatchCount": 0,
+    "gitDiffCheck": "PASS"
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "playwrightRun": false,
+    "stage8Run": false
+  }
+}

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: './',
+  publicDir: 'battle-top-designer/public',
   build: {
     chunkSizeWarningLimit: 550,
     rollupOptions: {
