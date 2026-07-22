@@ -41,14 +41,19 @@ export function assembleNssScenes(
   root.name = 'NSS_BATTLE_TOP';
   root.scale.setScalar(NSS_ARENA_VISUAL_SCALE);
   const parts = {} as Record<NssFamily, Group>;
+  let blade: Group | null = null;
   for (const family of NSS_FAMILIES) {
     const group = new Group();
     group.name = `NSS_${family.toUpperCase()}`;
     group.matrix.copy(matrices[family]);
     group.matrixAutoUpdate = false;
-    group.add(scenes[family]);
+    const content = new Group();
+    content.name = `NSS_${family.toUpperCase()}_CONTENT`;
+    content.add(scenes[family]);
+    group.add(content);
     root.add(group);
     parts[family] = group;
+    if (family === 'blade') blade = content;
   }
-  return { root, parts, blade: parts.blade };
+  return { root, parts, blade: blade! };
 }

@@ -30,7 +30,8 @@ describe('NSS Arena model assembly', () => {
     const assembly = assembleNssScenes(scenes(), loadout);
     assembly.root.updateMatrixWorld(true);
     expect(assembly.root.scale.x).toBe(NSS_ARENA_VISUAL_SCALE);
-    expect(assembly.blade).toBe(assembly.parts.blade);
+    expect(assembly.blade.parent).toBe(assembly.parts.blade);
+    expect(assembly.blade.name).toBe('NSS_BLADE_CONTENT');
     for (let index = 1; index < NSS_FAMILIES.length; index += 1) {
       const upper = NSS_FAMILIES[index - 1];
       const lower = NSS_FAMILIES[index];

@@ -1,10 +1,13 @@
 import * as THREE from 'three';
-import { type BuildSelection, getPartById } from '../data/parts';
+import { DEFAULT_BUILD, type BuildSelection, type PlayerBuild, getPartById } from '../data/parts';
 import { globalInventory } from '../data/inventoryManager';
 import { BASE_COMPONENTS } from '../data/recipes';
 
 import { MAX_BURST, RING_EXTRUDE_DEPTH, TOP_HEIGHT, DRIVER_FIN_COUNT } from '../app/config';
-import { buildStats, type BattleStats } from './build';
+import { buildPlayerStats, type BattleStats } from './build';
+import { destroyNssBattleTopVisual } from '../nss/battleTopVisual';
+import type { NssAssembly } from '../nss/assembler';
+import type { NssBattleStats } from '../nss/buildStats';
 import { clamp } from '../utils/math';
 import { createTopGeometry } from '../scene/topGeometry';
 import { createTopMaterials, getDynamicComponentMaterial, type TopMaterialSet } from '../scene/topMaterials';
@@ -43,6 +46,7 @@ type TurnMotionState = {
 export class TopEntity {
   readonly side: TopSide;
   readonly build: BuildSelection;
+  readonly playerBuild: PlayerBuild;
   readonly stats: BattleStats;
   readonly position = new THREE.Vector2();
   readonly velocity = new THREE.Vector2();
@@ -58,6 +62,7 @@ export class TopEntity {
   private readonly energyFlowMesh: THREE.Mesh;
   private readonly blurRing: THREE.Mesh;
   private readonly mats: TopMaterialSet;
+  private nssVisual: NssAssembly | null = null;
 
   /** Effective outer radius for collision detection. */
   readonly collisionRadius: number;
@@ -109,10 +114,11 @@ export class TopEntity {
     return Math.max(0.5, this.stats.weight - this.moiPenalty * 0.01);
   }
 
-  constructor(side: TopSide, build: BuildSelection, upgrades?: UpgradeLevels, partUpgrades?: PartUpgradeLevels) {
+  constructor(side: TopSide, build: BuildSelection | PlayerBuild, upgrades?: UpgradeLevels, partUpgrades?: PartUpgradeLevels) {
     this.side = side;
-    this.build = build;
-    this.stats = buildStats(build as any, upgrades, partUpgrades);
+    this.playerBuild = 'kind' in build ? build : { kind: 'legacy', build };
+    this.build = this.playerBuild.kind === 'legacy' ? this.playerBuild.build : DEFAULT_BUILD;
+    this.stats = buildPlayerStats(this.playerBuild, upgrades, partUpgrades);
     this.spin = this.stats.maxSpin;
     this.maxSpirit = 100;
     this.spirit = 0;
@@ -124,23 +130,25 @@ export class TopEntity {
 
     
     // Map instances to parts
-    const ringInst = globalInventory.getItems().find(i => i.instanceId === build.attackRing);
-    const coreInst = globalInventory.getItems().find(i => i.instanceId === build.core);
-    const driverInst = globalInventory.getItems().find(i => i.instanceId === build.driver);
+    const ringInst = globalInventory.getItems().find(i => i.instanceId === this.build.attackRing);
+    const coreInst = globalInventory.getItems().find(i => i.instanceId === this.build.core);
+    const driverInst = globalInventory.getItems().find(i => i.instanceId === this.build.driver);
 
     const ringBase = ringInst ? BASE_COMPONENTS[ringInst.baseTemplateId] : null;
     const coreBase = coreInst ? BASE_COMPONENTS[coreInst.baseTemplateId] : null;
     const driverBase = driverInst ? BASE_COMPONENTS[driverInst.baseTemplateId] : null;
 
-    const ringPart = ringBase?.visualId ? getPartById(ringBase.visualId) : getPartById(build.attackRing || 'round');
-    const corePart = coreBase?.visualId ? getPartById(coreBase.visualId) : getPartById(build.core || 'balanced');
-    const driverPart = driverBase?.visualId ? getPartById(driverBase.visualId) : getPartById(build.driver || 'grip');
+    const ringPart = ringBase?.visualId ? getPartById(ringBase.visualId) : getPartById(this.build.attackRing || 'round');
+    const corePart = coreBase?.visualId ? getPartById(coreBase.visualId) : getPartById(this.build.core || 'balanced');
+    const driverPart = driverBase?.visualId ? getPartById(driverBase.visualId) : getPartById(this.build.driver || 'grip');
 
     this.hasRubberTip = TopEntity.isRubberTipDriver(driverPart!.id);
 
     // ── Procedural geometry ────────────────────────────────
     const geo = createTopGeometry();
-    this.collisionRadius = geo.collisionRadius;
+    this.collisionRadius = this.playerBuild.kind === 'nss-v1'
+      ? (this.stats as NssBattleStats).collisionRadius
+      : geo.collisionRadius;
 
     // ── PBR materials ──────────────────────────────────────
     this.mats = createTopMaterials(ringPart!.color, corePart!.color, driverPart!.color);
@@ -279,6 +287,32 @@ export class TopEntity {
     this.mesh.receiveShadow = true;
   }
 
+  attachNssVisual(assembly: NssAssembly): void {
+    if (this.playerBuild.kind !== 'nss-v1') throw new Error('Cannot attach an NSS visual to a legacy top');
+    this.detachNssVisual();
+    this.ring.visible = false;
+    this.weightDisc.visible = false;
+    this.core.visible = false;
+    this.driverGroup.visible = false;
+    this.rivets.visible = false;
+    this.energyFlowMesh.visible = false;
+    assembly.root.updateMatrixWorld(true);
+    const bounds = new THREE.Box3().setFromObject(assembly.root);
+    assembly.root.position.y -= bounds.min.y + 0.2;
+    this.nssVisual = assembly;
+    this.mesh.add(assembly.root);
+  }
+
+  detachNssVisual(): void {
+    if (!this.nssVisual) return;
+    destroyNssBattleTopVisual(this.nssVisual);
+    this.nssVisual = null;
+  }
+
+  hasNssVisual(): boolean {
+    return this.nssVisual !== null;
+  }
+
   reset(x: number, z: number) {
     this.position.set(x, z);
     this.velocity.set(0, 0);
@@ -384,6 +418,10 @@ export class TopEntity {
     const jitterDelta = Math.sin(time * 17) * 0.015 * 60 * visualDt * visualSpinRatio;
     this.ringAngle += baseRotDelta * 0.4 + jitterDelta;
     this.ring.rotation.z = this.ringAngle;
+    if (this.nssVisual) {
+      this.nssVisual.root.rotation.y = this.coreAngle;
+      this.nssVisual.blade.rotation.y = this.ringAngle - this.coreAngle;
+    }
 
     // Rivets stay static relative to their parent layer (already baked).
     // Energy flow mesh sits on the ring layer.

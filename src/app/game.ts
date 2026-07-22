@@ -42,6 +42,7 @@ import { ShockwaveFX } from '../fx/shockwave';
 import { PickupManager } from '../gameplay/pickups';
 import { createBloomPipeline, type BloomPipeline } from '../scene/postProcessing';
 import { NetworkClient } from '../network/networkClient';
+import { NssLoadoutController } from '../nss/loadoutController';
 import {
   oppositeRole,
   type LaunchConfig,
@@ -121,6 +122,7 @@ export class Game {
   private readonly bloom: BloomPipeline;
   private readonly loop = new Loop((dt) => this.update(dt));
   private readonly network = new NetworkClient();
+  private readonly nssLoadouts = new NssLoadoutController();
   private readonly overlay = document.createElement('div');
   private phase: Phase = 'menu';
   private progression: ProgressionState = loadProgression();
@@ -192,6 +194,8 @@ export class Game {
   private hitStop = 0;
   private dragDirection = new THREE.Vector2();
   private readonly params = new URLSearchParams(window.location.search);
+  private readonly nssRequest = this.nssLoadouts.resolveVerticalSlice(window.location.search);
+  private nssBattlePreparing = false;
   private paused = false;
   private readonly camDebugEnabled = this.params.has('camDebug');
   private readonly qaEnabled = this.params.has('qa') || this.params.has('debug') || this.camDebugEnabled;
@@ -986,6 +990,31 @@ export class Game {
   }
 
   private startBattle() {
+    if (this.battleMode === 'single' && this.nssRequest.kind === 'unsupported') {
+      this.showGarage();
+      this.garage.setProgress(this.nssRequest.message);
+      return;
+    }
+    if (this.battleMode === 'single' && this.nssRequest.kind === 'ready') {
+      if (this.nssBattlePreparing) return;
+      this.nssBattlePreparing = true;
+      this.garage.setProgress('Loading the approved NSS battle model…');
+      void this.nssLoadouts.createTop('player', this.nssRequest.loadout, this.progression.upgrades)
+        .then(player => {
+          this.nssBattlePreparing = false;
+          this.startBattleWithPlayer(player);
+        })
+        .catch(error => {
+          this.nssBattlePreparing = false;
+          this.showGarage();
+          this.garage.setProgress(`NSS model load failed: ${error instanceof Error ? error.message : String(error)}`);
+        });
+      return;
+    }
+    this.startBattleWithPlayer(new TopEntity('player', this.build, this.progression.upgrades, this.progression.partUpgrades));
+  }
+
+  private startBattleWithPlayer(nextPlayer: TopEntity) {
     this.audio.stopMenuAmbience();
     this.floatingTexts.clear();
     this.currentResult = null;
@@ -1024,7 +1053,8 @@ export class Game {
     this.turnPanel.root.style.display = '';
 
     this.scene.remove(this.player.mesh, this.enemy.mesh);
-    this.player = new TopEntity('player', this.build, this.progression.upgrades, this.progression.partUpgrades);
+    this.player.detachNssVisual();
+    this.player = nextPlayer;
     this.playerTeam = [this.player];
     this.activePlayerIndex = 0;
     this.enemy = new TopEntity('enemy', this.enemyPreset.build);

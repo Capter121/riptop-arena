@@ -1,0 +1,25 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_5_VERTICAL_SLICE",
+  "status": "PASS",
+  "headBeforeCommit": "1aaf59ebb0854114933772d28d5f6fdcfcbffdab",
+  "approvedCombinationId": "nss-p2c-0138",
+  "modelReadyBeforeBattle": true,
+  "legacyBehaviorIntendedUnchanged": true,
+  "onlineNssEnabled": false,
+  "validation": {
+    "verticalSliceUnits": "2/2 PASS",
+    "nssRegressionUnits": "12/12 PASS",
+    "damagePipeline": "PASS with deterministic NSS attacker",
+    "rootTypeScript": "PASS",
+    "rootProductionBuild": "PASS",
+    "matchServerSmoke": "PASS",
+    "rootContractSmoke": "PASS",
+    "customizerTypeScript": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "playwrightRun": false,
+    "stage8Run": false
+  }
+}
