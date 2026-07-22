@@ -1,0 +1,13 @@
+{
+  "stage": "PHASE3C_STAGE5C_STORM_FANG_IDENTITY_PROTOTYPE",
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "targetBlade": "blade_storm_fang",
+  "sourceAsset": "design/visual-identity/storm-fang-concept.svg",
+  "attachment": {"meshCount": 3, "innerRadiusMm": 18.0, "outerRadiusMm": 30.0, "topSurfaceYMm": 3.62, "sectorSpanRadians": 0.48},
+  "synchronization": ["assembly matrix", "Blade rotation", "part switching", "exploded offset"],
+  "removal": "stormFangPatternEnabled false or a non-Storm-Fang blade removes all sectors",
+  "resourceBudget": {"additionalDrawCalls": 3, "additionalTextures": 1, "additionalMaterials": 1, "networkRequests": 0},
+  "depthStrategy": ["local top-surface offset", "depthWrite false", "polygon offset"],
+  "glbMutations": {"position": false, "indices": false, "normal": false, "primitiveCount": false, "materials": false, "texcoord": false, "nssV1": false},
+  "disposal": {"geometries": "R3F unmount", "material": "effect cleanup", "texture": "loader cache ownership"}
+}

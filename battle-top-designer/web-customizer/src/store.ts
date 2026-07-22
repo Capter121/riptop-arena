@@ -34,6 +34,7 @@ interface CustomizerState {
   loadProgress: number;
   lowPerformance: boolean;
   solarWolfBadgeEnabled: boolean;
+  stormFangPatternEnabled: boolean;
   startupNotice: string | null;
   testMode: boolean;
   hydrate: (search: string, savedText?: string | null) => void;
@@ -52,6 +53,7 @@ interface CustomizerState {
   setLoadProgress: (progress: number) => void;
   setLowPerformance: (value: boolean) => void;
   setSolarWolfBadgeEnabled: (value: boolean) => void;
+  setStormFangPatternEnabled: (value: boolean) => void;
   replaceCombination: (combination: Combination) => void;
   reset: () => void;
   save: () => void;
@@ -82,6 +84,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   loadProgress: 0,
   lowPerformance: false,
   solarWolfBadgeEnabled: true,
+  stormFangPatternEnabled: true,
   startupNotice: null,
   testMode: false,
   hydrate: (search, savedText) => {
@@ -171,6 +174,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
     set({ lowPerformance });
   },
   setSolarWolfBadgeEnabled: solarWolfBadgeEnabled => set({ solarWolfBadgeEnabled }),
+  setStormFangPatternEnabled: stormFangPatternEnabled => set({ stormFangPatternEnabled }),
   replaceCombination: combination => {
     if (!isCombination(combination)) return set({ loadState: 'error', error: 'Illegal combination.' });
     set(state => ({ combination, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? state.combination }));

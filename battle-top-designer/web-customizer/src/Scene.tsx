@@ -1,7 +1,7 @@
 import { OrbitControls, useProgress } from '@react-three/drei';
 import { addAfterEffect, Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { ACESFilmicToneMapping, Color, Group, Matrix4, Mesh, Object3D, PerspectiveCamera, PMREMGenerator, SRGBColorSpace, TextureLoader, Vector3, WebGLRenderTarget } from 'three';
+import { ACESFilmicToneMapping, Color, Group, Matrix4, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, PMREMGenerator, SRGBColorSpace, TextureLoader, Vector3, WebGLRenderTarget } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { assembleMatrices } from './assembly';
@@ -20,7 +20,9 @@ import { FocusExitFrameGate } from './focusLifecycle';
 import { useCustomizer } from './store';
 import { resolveStudioQuality } from './rendering/qualityPolicy';
 import { shouldRenderSolarWolfBadge, solarWolfBadgePolicy } from './rendering/solarWolfBadge';
+import { shouldRenderStormFangPattern, stormFangIdentityPolicy } from './rendering/stormFangIdentity';
 import solarWolfBadgeUrl from '../../design/visual-identity/solar-wolf-concept.svg?url';
+import stormFangIdentityUrl from '../../design/visual-identity/storm-fang-concept.svg?url';
 
 const cameraPositions = {
   top: new Vector3(0, 0.16, 0.001),
@@ -160,13 +162,43 @@ function SolarWolfBadge() {
   );
 }
 
-function PresentationPart({ family, scene, permanent, offset, assistFocus, solarWolfBadge }: {
+function StormFangPattern() {
+  const texture = useLoader(TextureLoader, stormFangIdentityUrl);
+  const material = useMemo(() => new MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    alphaTest: 0.02,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
+    toneMapped: false,
+  }), [texture]);
+  useEffect(() => {
+    texture.colorSpace = SRGBColorSpace;
+    texture.needsUpdate = true;
+    return () => material.dispose();
+  }, [material, texture]);
+  return (
+    <group>
+      {stormFangIdentityPolicy.sectorStarts.map(start => (
+        <mesh key={start} position={[0, stormFangIdentityPolicy.topSurfaceYM, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
+          <ringGeometry args={[stormFangIdentityPolicy.innerRadiusM, stormFangIdentityPolicy.outerRadiusM, 24, 1, start, stormFangIdentityPolicy.thetaLengthRadians]} />
+          <primitive object={material} attach="material" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function PresentationPart({ family, scene, permanent, offset, assistFocus, solarWolfBadge, stormFangPattern }: {
   family: Family;
   scene: Object3D;
   permanent: Matrix4;
   offset: number;
   assistFocus: boolean;
   solarWolfBadge: boolean;
+  stormFangPattern: boolean;
 }) {
   const group = useRef<Group>(null);
   const contentGroup = useRef<Group>(null);
@@ -252,6 +284,7 @@ function PresentationPart({ family, scene, permanent, offset, assistFocus, solar
           </mesh>
         )}
         {family === 'core' && solarWolfBadge && <SolarWolfBadge />}
+        {family === 'blade' && stormFangPattern && <StormFangPattern />}
       </group>
     </group>
   );
@@ -275,6 +308,7 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
   const debugAxis = useCustomizer(state => state.debugAxis);
   const lowPerformance = useCustomizer(state => state.lowPerformance);
   const solarWolfBadgeEnabled = useCustomizer(state => state.solarWolfBadgeEnabled);
+  const stormFangPatternEnabled = useCustomizer(state => state.stormFangPatternEnabled);
   const coreGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.core}.glb`);
   const bladeGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.blade}.glb`);
   const assistGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.assist}.glb`);
@@ -323,6 +357,7 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
           offset={offsets[family]}
           assistFocus={focusState.target === 'assist' && focusState.pulseActive}
           solarWolfBadge={shouldRenderSolarWolfBadge(combination.core, solarWolfBadgeEnabled)}
+          stormFangPattern={shouldRenderStormFangPattern(combination.blade, stormFangPatternEnabled)}
         />
       ))}
       {debugAxis && <axesHelper args={[0.09]} />}
