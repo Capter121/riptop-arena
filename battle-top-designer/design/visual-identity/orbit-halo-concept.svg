@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Orbit Halo visual identity concept</title><desc id="desc">Original orbital arcs and balanced energy nodes.</desc>
+  <defs><linearGradient id="orbit" x1="210" y1="210" x2="810" y2="810" gradientUnits="userSpaceOnUse"><stop stop-color="#FFFEEB"/><stop offset=".48" stop-color="#C6F6FF"/><stop offset="1" stop-color="#72C2D6"/></linearGradient></defs>
+  <circle cx="512" cy="512" r="402" fill="#182027" stroke="#46535A" stroke-width="32"/><circle cx="512" cy="512" r="328" stroke="url(#orbit)" stroke-width="42" stroke-dasharray="255 35"/><circle cx="512" cy="512" r="241" stroke="#BDEDF5" stroke-width="14" stroke-dasharray="57 34"/>
+  <g fill="#80E6F5" stroke="#F9FFE9" stroke-width="10"><circle cx="512" cy="184" r="25"/><circle cx="840" cy="512" r="25"/><circle cx="512" cy="840" r="25"/><circle cx="184" cy="512" r="25"/></g>
+  <circle cx="512" cy="512" r="118" fill="#EEF5F3" stroke="#B8A46A" stroke-width="17"/><circle cx="512" cy="512" r="63" fill="#21313B" stroke="#9AF0FA" stroke-width="11"/>
+</svg>

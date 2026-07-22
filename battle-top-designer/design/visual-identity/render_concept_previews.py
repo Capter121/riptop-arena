@@ -11,8 +11,8 @@ SIZE = 1024
 ROOT = Path(__file__).resolve().parent
 
 
-def canvas() -> bytearray:
-    return bytearray([8, 13, 22, 255] * SIZE * SIZE)
+def canvas(background: tuple[int, int, int, int] = (8, 13, 22, 255)) -> bytearray:
+    return bytearray(background * SIZE * SIZE)
 
 
 def pixel(image: bytearray, x: int, y: int, color: tuple[int, int, int, int]) -> None:
@@ -71,5 +71,52 @@ def storm_fang() -> bytearray:
     return image
 
 
+def void_falcon() -> bytearray:
+    image = canvas((0, 0, 0, 0))
+    circle(image, 512, 512, 392, (9, 11, 22, 255))
+    circle(image, 512, 512, 300, (33, 25, 69, 255))
+    for start, end in [((270, 370), (480, 500)), ((754, 370), (544, 500)), ((353, 650), (512, 540)), ((671, 650), (512, 540))]:
+        line(image, start, end, 54, (83, 101, 238, 255))
+    circle(image, 512, 512, 80, (3, 4, 10, 255))
+    return image
+
+
+def iron_bastion() -> bytearray:
+    image = canvas((0, 0, 0, 0))
+    circle(image, 512, 512, 402, (19, 25, 30, 255))
+    for start, end in [((512, 180), (512, 480)), ((250, 650), (490, 530)), ((774, 650), (534, 530))]:
+        line(image, start, end, 112, (115, 128, 137, 255))
+        line(image, start, end, 25, (243, 169, 46, 255))
+    circle(image, 512, 512, 95, (25, 32, 38, 255))
+    return image
+
+
+def orbit_halo() -> bytearray:
+    image = canvas((0, 0, 0, 0))
+    circle(image, 512, 512, 402, (24, 32, 39, 255))
+    circle(image, 512, 512, 330, (195, 246, 255, 255))
+    circle(image, 512, 512, 282, (24, 32, 39, 255))
+    circle(image, 512, 512, 242, (128, 230, 245, 255))
+    circle(image, 512, 512, 205, (24, 32, 39, 255))
+    circle(image, 512, 512, 118, (238, 245, 243, 255))
+    circle(image, 512, 512, 64, (33, 49, 59, 255))
+    return image
+
+
+def dual_comet() -> bytearray:
+    image = canvas((0, 0, 0, 0))
+    circle(image, 512, 512, 402, (11, 27, 48, 255))
+    for start, end, color in [((500, 174), (740, 450), (255, 156, 46, 255)), ((790, 550), (538, 620), (116, 226, 255, 255)), ((315, 730), (460, 500), (255, 156, 46, 255))]:
+        line(image, start, end, 80, color)
+        line(image, start, end, 20, (255, 247, 215, 255))
+    circle(image, 512, 512, 104, (18, 44, 70, 255))
+    circle(image, 512, 512, 50, (255, 246, 221, 255))
+    return image
+
+
 write_png(ROOT / 'solar-wolf-preview.png', solar_wolf())
 write_png(ROOT / 'storm-fang-preview.png', storm_fang())
+write_png(ROOT / 'void-falcon-preview.png', void_falcon())
+write_png(ROOT / 'iron-bastion-preview.png', iron_bastion())
+write_png(ROOT / 'orbit-halo-preview.png', orbit_halo())
+write_png(ROOT / 'dual-comet-preview.png', dual_comet())

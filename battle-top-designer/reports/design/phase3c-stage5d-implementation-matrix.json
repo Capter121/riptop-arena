@@ -1,0 +1,13 @@
+{
+  "stage": "PHASE3C_STAGE5D_IMPLEMENTATION_MATRIX",
+  "status": "READY_FOR_REVIEW",
+  "identities": [
+    {"id":"core_void_falcon","surfaceType":"central split-arc hub","recommendedLayer":"Core badge","meshCount":1,"textureCount":1,"materialCount":1,"drawCalls":1,"expectedMemory":"one 1024px SVG texture","zFightingRisk":"low","complexity":"low"},
+    {"id":"blade_iron_bastion","surfaceType":"inner armour facets","recommendedLayer":"three local sectors","meshCount":3,"textureCount":1,"materialCount":1,"drawCalls":3,"expectedMemory":"one 1024px SVG texture","zFightingRisk":"medium","complexity":"medium"},
+    {"id":"blade_orbit_halo","surfaceType":"outer annular band","recommendedLayer":"single annular layer","meshCount":1,"textureCount":1,"materialCount":1,"drawCalls":1,"expectedMemory":"one 1024px SVG texture","zFightingRisk":"low","complexity":"low"},
+    {"id":"blade_dual_comet","surfaceType":"three repeated directional spans","recommendedLayer":"three local sectors","meshCount":3,"textureCount":1,"materialCount":1,"drawCalls":3,"expectedMemory":"one 1024px SVG texture","zFightingRisk":"medium","complexity":"medium"}
+  ],
+  "registryRecommendation":"Introduce a lightweight layout registry in Stage 5E; retain distinct Core and Blade renderers.",
+  "requiresUv":false,
+  "requiresFormalGlbChange":false
+}

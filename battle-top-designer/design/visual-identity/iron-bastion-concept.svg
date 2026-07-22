@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Iron Bastion visual identity concept</title><desc id="desc">Original armored shield facets for a heavy defensive blade.</desc>
+  <defs><linearGradient id="armor" x1="195" y1="192" x2="825" y2="828" gradientUnits="userSpaceOnUse"><stop stop-color="#D8DEE2"/><stop offset=".36" stop-color="#68727B"/><stop offset="1" stop-color="#1A2026"/></linearGradient></defs>
+  <circle cx="512" cy="512" r="398" fill="#10151A" stroke="#303B43" stroke-width="38"/><circle cx="512" cy="512" r="324" stroke="#89949C" stroke-width="18" stroke-dasharray="72 24"/>
+  <g fill="url(#armor)" stroke="#C8D0D4" stroke-width="18" stroke-linejoin="round"><path d="M512 160l174 90-22 205-152 91-152-91-22-205 174-90z"/><path d="M826 430l-9 196-190 80-115-132 38-173 208 29 68 0z"/><path d="M198 430l9 196 190 80 115-132-38-173-208 29-68 0z"/></g>
+  <g fill="#F3A92E"><path d="M494 261h36v129h-36z"/><path d="M663 555l-19 31-112-65 19-31z"/><path d="M361 555l19 31 112-65-19-31z"/></g>
+  <circle cx="512" cy="512" r="92" fill="#13191E" stroke="#AEB8BD" stroke-width="20"/>
+</svg>

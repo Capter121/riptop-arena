@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Dual Comet visual identity concept</title><desc id="desc">Original alternating orange and ice-blue twin comet trails.</desc>
+  <defs><linearGradient id="orange" x1="200" y1="250" x2="760" y2="740" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF7D7"/><stop offset=".45" stop-color="#FF9C2E"/><stop offset="1" stop-color="#C34816"/></linearGradient><linearGradient id="ice" x1="260" y1="180" x2="810" y2="810" gradientUnits="userSpaceOnUse"><stop stop-color="#F0FEFF"/><stop offset=".42" stop-color="#7DE6FF"/><stop offset="1" stop-color="#3475B7"/></linearGradient></defs>
+  <circle cx="512" cy="512" r="402" fill="#0B1B30" stroke="#1D334C" stroke-width="38"/>
+  <g stroke-linecap="round"><path d="M498 160C687 238 794 382 799 526L620 465 498 160z" fill="url(#orange)" stroke="#FFF4CF" stroke-width="17"/><path d="M799 526C676 690 508 768 358 718L477 568 799 526z" fill="url(#ice)" stroke="#E7FBFF" stroke-width="17"/><path d="M358 718C220 590 209 423 294 301L439 450 358 718z" fill="url(#orange)" stroke="#FFF4CF" stroke-width="17"/></g>
+  <g stroke="#FFFFFF" stroke-width="17" stroke-linecap="round"><path d="M550 246l82 151"/><path d="M678 555l-179 50"/><path d="M341 565l94-140"/></g><circle cx="512" cy="512" r="102" fill="#122C46" stroke="#E8F9FF" stroke-width="17"/><circle cx="512" cy="512" r="49" fill="#FFF6DD"/>
+</svg>

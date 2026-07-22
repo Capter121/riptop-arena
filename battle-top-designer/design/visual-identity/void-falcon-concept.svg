@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Void Falcon visual identity concept</title><desc id="desc">Original mechanical falcon and void-ring emblem.</desc>
+  <defs><radialGradient id="void" cx="50%" cy="45%" r="58%"><stop stop-color="#17142F"/><stop offset=".6" stop-color="#090B16"/><stop offset="1" stop-color="#03040A"/></radialGradient><linearGradient id="wing" x1="245" y1="235" x2="780" y2="790" gradientUnits="userSpaceOnUse"><stop stop-color="#64E6FF"/><stop offset=".45" stop-color="#5866EE"/><stop offset="1" stop-color="#30165F"/></linearGradient></defs>
+  <circle cx="512" cy="512" r="390" fill="url(#void)" stroke="#34285E" stroke-width="42"/><circle cx="512" cy="512" r="292" stroke="#5568E8" stroke-width="22" stroke-dasharray="92 38"/>
+  <path d="M258 380l179 56 75-133 75 133 179-56-119 146 30 215-165-92-165 92 30-215-119-146z" fill="#11182A" stroke="url(#wing)" stroke-width="21" stroke-linejoin="round"/>
+  <path d="M384 470l128 48 128-48-51 163-77 64-77-64-51-163z" fill="#07101E" stroke="#79EEFF" stroke-width="12"/><path d="M449 533l63 20 63-20-63 87-63-87z" fill="#A3F7FF"/>
+  <path d="M304 612l133-62-72 116-61-54zM720 612l-133-62 72 116 61-54z" fill="#402281"/>
+  <circle cx="512" cy="512" r="74" fill="#03040A" stroke="#6575FF" stroke-width="16"/>
+</svg>

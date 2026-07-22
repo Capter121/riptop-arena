@@ -1,0 +1,12 @@
+{
+  "stage": "PHASE3C_STAGE5D_SURFACE_AUDIT",
+  "status": "PASS",
+  "formalGlbMutation": false,
+  "texcoordAdded": false,
+  "targets": [
+    {"id":"core_void_falcon","topVisibleSurface":"split-arc hub around the central terminal","recommendedRadialRangeMm":[0,7.2],"centralSafeZoneMm":7.2,"outerEdgeExclusionMm":[10.8,17.5],"transparentExclusion":"cobalt translucent arc primitives","interfaceExclusion":"NSS-V1 collar","meshBudget":1,"drawCallBudget":1,"heightOffsetMm":0.16,"follow":"Core presentation group","unload":"non-Void-Falcon core or independent toggle","mobileMinimumPx":64},
+    {"id":"blade_iron_bastion","topVisibleSurface":"eight rounded damper spans; use three representative inner armour facets","recommendedRadialRangeMm":[19,28],"centralSafeZoneMm":18,"outerEdgeExclusionMm":[32,35],"transparentExclusion":"none selected; preserve all existing material highlights","interfaceExclusion":"NSS-V1 collar","meshBudget":3,"drawCallBudget":3,"heightOffsetMm":0.14,"follow":"Blade presentation group","unload":"non-Iron-Bastion blade or independent toggle","mobileMinimumPx":64},
+    {"id":"blade_orbit_halo","topVisibleSurface":"symmetric annulus outside four windows","recommendedRadialRangeMm":[27.8,31.2],"centralSafeZoneMm":17,"outerEdgeExclusionMm":[31.5,35.5],"transparentExclusion":"four window spans from 17 to 27.5 mm","interfaceExclusion":"NSS-V1 collar","meshBudget":1,"drawCallBudget":1,"heightOffsetMm":0.14,"follow":"Blade presentation group","unload":"non-Orbit-Halo blade or independent toggle","mobileMinimumPx":64},
+    {"id":"blade_dual_comet","topVisibleSurface":"three repeating top units between inner cap and alternating attack edge","recommendedRadialRangeMm":[18,30.5],"centralSafeZoneMm":17,"outerEdgeExclusionMm":[32.5,36],"transparentExclusion":"cobalt translucent primitive","interfaceExclusion":"NSS-V1 collar","meshBudget":3,"drawCallBudget":3,"heightOffsetMm":0.16,"follow":"Blade presentation group","unload":"non-Dual-Comet blade or independent toggle","mobileMinimumPx":64}
+  ]
+}
