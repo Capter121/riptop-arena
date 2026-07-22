@@ -1,7 +1,8 @@
 import { OrbitControls, useProgress } from '@react-three/drei';
 import { addAfterEffect, Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { Color, Group, Matrix4, Mesh, Object3D, PerspectiveCamera, Vector3, WebGLRenderTarget } from 'three';
+import { ACESFilmicToneMapping, Color, Group, Matrix4, Mesh, Object3D, PerspectiveCamera, PMREMGenerator, SRGBColorSpace, Vector3, WebGLRenderTarget } from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { assembleMatrices } from './assembly';
 import { registerSceneCapture, sceneDiagnostics, updateCamera, updatePermanentMatrices, updateWebglResources } from './diagnostics';
@@ -17,6 +18,7 @@ import { combinationId, families, presentationOffsets, type Combination, type Fa
 import { recordFocusDiagnostic } from './focusDiagnostics';
 import { FocusExitFrameGate } from './focusLifecycle';
 import { useCustomizer } from './store';
+import { resolveStudioQuality } from './rendering/qualityPolicy';
 
 const cameraPositions = {
   top: new Vector3(0, 0.16, 0.001),
@@ -31,6 +33,34 @@ markOnce('phase3b:scene-runtime-loaded');
 function ProgressSignal() {
   const progress = useProgress(state => state.progress);
   useEffect(() => useCustomizer.getState().setLoadProgress(Math.max(15, progress)), [progress]);
+  return null;
+}
+
+function StudioEnvironment() {
+  const { gl, scene } = useThree();
+  useEffect(() => {
+    const previousEnvironment = scene.environment;
+    const pmremGenerator = new PMREMGenerator(gl);
+    const roomEnvironment = new RoomEnvironment();
+    const environmentTarget = pmremGenerator.fromScene(roomEnvironment);
+    scene.environment = environmentTarget.texture;
+    return () => {
+      if (scene.environment === environmentTarget.texture) scene.environment = previousEnvironment;
+      environmentTarget.dispose();
+      roomEnvironment.dispose();
+      pmremGenerator.dispose();
+    };
+  }, [gl, scene]);
+  return null;
+}
+
+function StudioEnvironmentIntensity({ intensity }: { intensity: number }) {
+  const { scene } = useThree();
+  useEffect(() => {
+    const previousIntensity = scene.environmentIntensity;
+    scene.environmentIntensity = intensity;
+    return () => { scene.environmentIntensity = previousIntensity; };
+  }, [intensity, scene]);
   return null;
 }
 
@@ -287,6 +317,7 @@ function LoadingSignal() {
 
 export function CustomizerScene({ combination }: { combination: Combination }) {
   const lowPerformance = useCustomizer(state => state.lowPerformance);
+  const quality = resolveStudioQuality(lowPerformance);
   const ready = useCallback(() => {
     useCustomizer.getState().setLoadState('ready');
     markOnce('phase3b:first-model-ready');
@@ -297,8 +328,10 @@ export function CustomizerScene({ combination }: { combination: Combination }) {
   return (
     <>
       <ProgressSignal />
-      <Canvas camera={{ fov: 34, near: 0.001, far: 10, position: cameraPositions.perspective.toArray() }} dpr={lowPerformance ? 1 : [1, 1.5]} gl={{ antialias: true, alpha: false }}>
+      <Canvas camera={{ fov: 34, near: 0.001, far: 10, position: cameraPositions.perspective.toArray() }} dpr={quality.pixelRatio} shadows={quality.shadows} gl={{ antialias: quality.antialias, alpha: false, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1, outputColorSpace: SRGBColorSpace }}>
         <color attach="background" args={['#080b12']} />
+        <StudioEnvironment />
+        <StudioEnvironmentIntensity intensity={quality.environmentIntensity} />
         <ambientLight intensity={lowPerformance ? 1.9 : 1.6} />
         {!lowPerformance && <hemisphereLight args={['#c9ddff', '#211d2b', 1.8]} />}
         <directionalLight position={[0.12, 0.16, 0.1]} intensity={3.2} color={new Color('#fff1d2')} />
