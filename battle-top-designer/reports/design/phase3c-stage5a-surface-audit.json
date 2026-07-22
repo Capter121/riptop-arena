@@ -1,0 +1,45 @@
+{
+  "stage": "PHASE3C_STAGE5A_VISUAL_SURFACE_AUDIT",
+  "status": "PASS",
+  "scope": "read-only audit plus concept-only assets",
+  "frozenContracts": ["POSITION", "indices", "node transforms", "primitive count", "material slot indices", "NORMAL", "NSS-V1", "collision proxies", "Stage 4A environment", "Stage 4B normal buffers"],
+  "targets": {
+    "core_solar_wolf": {
+      "glb": "public/models/parts/core_solar_wolf.glb",
+      "primitiveCount": 3,
+      "triangleCount": 960,
+      "materials": ["MAT_core_solar_wolf_00_energy_accent", "MAT_core_solar_wolf_01_engineering_plastic"],
+      "texcoord0PrimitiveCount": 0,
+      "texcoord1PrimitiveCount": 0,
+      "imageCount": 0,
+      "textureCount": 0,
+      "candidateSurface": "GEO_core_solar_wolf_BODY upper radial face, central radius approximately 10.8 mm; reserve an 8 mm radius emblem zone and keep a 2.8 mm interface margin.",
+      "occlusion": "The Core centre is visible in top view; blade and assist components can obscure the outer ring in assembled or exploded views, so the mark must stay inside the central safe zone.",
+      "protectedSurface": "NSS_V1 collar and interface-facing underside remain plain material."
+    },
+    "blade_storm_fang": {
+      "glb": "public/models/parts/blade_storm_fang.glb",
+      "primitiveCount": 4,
+      "triangleCount": 1056,
+      "materials": ["MAT_blade_storm_fang_00_painted_metal", "MAT_blade_storm_fang_01_transparent_polycarbonate", "MAT_blade_storm_fang_02_energy_accent"],
+      "texcoord0PrimitiveCount": 0,
+      "texcoord1PrimitiveCount": 0,
+      "imageCount": 0,
+      "textureCount": 0,
+      "candidateSurface": "Three upper radial blade spans from roughly 18 mm to 32 mm radius, aligned with the clockwise sweep; retain the central mount and outer contact edge.",
+      "occlusion": "Top view exposes all three spans; the Core covers the inner radius and the Assist/Tip obscure rear and underside surfaces in exploded view.",
+      "protectedSurface": "Outer contact edge, transparent polycarbonate highlight, energy-accent boundaries, and NSS_V1 collar remain unmarked."
+    }
+  },
+  "routes": {
+    "A_blender_geometry_decal": {"changesGLB": true, "changesPrimitiveCount": true, "webCost": "none", "decision": "REJECTED_FROZEN_CONTRACT"},
+    "B_web_decal_geometry": {"changesGLB": false, "changesPrimitiveCount": false, "webCost": "additional draw call and attachment update", "decision": "NOT_SELECTED"},
+    "C_dynamic_texture": {"changesGLB": false, "changesPrimitiveCount": false, "webCost": "texture allocation and material override", "decision": "NOT_SELECTED"},
+    "D_uv_texture": {"changesGLB": true, "changesPrimitiveCount": false, "webCost": "low runtime cost", "decision": "DEFERRED_REQUIRES_BASELINE_RENEWAL"},
+    "E_svg_badge_attachment": {"changesGLB": false, "changesPrimitiveCount": false, "webCost": "one optional draw call", "decision": "RECOMMENDED_FUTURE_PROTOTYPE"}
+  },
+  "recommendation": "Do not modify official GLBs or Web runtime in Stage 5A. Use reviewed SVG concepts as the source for a later isolated Core badge attachment proof.",
+  "formalFilesModified": [],
+  "texcoordAdded": false,
+  "primitiveCountChanged": false
+}

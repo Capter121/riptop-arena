@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Solar Wolf visual identity concept</title>
+  <desc id="desc">An original mechanical wolf and solar halo emblem for the Nova Spin Solar Wolf core.</desc>
+  <defs>
+    <radialGradient id="solar" cx="50%" cy="43%" r="57%"><stop stop-color="#FFF9D2"/><stop offset=".46" stop-color="#F6B83B"/><stop offset="1" stop-color="#9A4C13"/></radialGradient>
+    <linearGradient id="steel" x1="220" y1="180" x2="790" y2="830" gradientUnits="userSpaceOnUse"><stop stop-color="#343A42"/><stop offset=".5" stop-color="#12171E"/><stop offset="1" stop-color="#46515D"/></linearGradient>
+  </defs>
+  <g stroke-linejoin="round">
+    <circle cx="512" cy="512" r="393" stroke="#B85D18" stroke-width="20" opacity=".9"/>
+    <circle cx="512" cy="512" r="347" stroke="url(#solar)" stroke-width="48"/>
+    <g fill="#F6B83B">
+      <path d="M512 58l31 121h-62L512 58z"/><path d="M512 966l31-121h-62l31 121z"/>
+      <path d="M58 512l121-31v62L58 512z"/><path d="M966 512l-121-31v62l121-31z"/>
+      <path d="M191 191l108 62-44 44-64-106z"/><path d="M833 833l-108-62 44-44 64 106z"/>
+      <path d="M833 191l-62 108-44-44 106-64z"/><path d="M191 833l62-108 44 44-106 64z"/>
+    </g>
+    <circle cx="512" cy="512" r="291" fill="url(#steel)" stroke="#F6B83B" stroke-width="15"/>
+    <path d="M356 332l119 42 37-34 37 34 119-42-42 132 26 207-140 108-140-108 26-207-42-132z" fill="#1A2129" stroke="#F6B83B" stroke-width="22"/>
+    <path d="M357 332l29 167 89-125-119-42zM667 332l-29 167-89-125 118-42z" fill="#C96A1E"/>
+    <path d="M407 498l105 38 105-38-35 140-70 57-70-57-35-140z" fill="#303943" stroke="#F9D66C" stroke-width="13"/>
+    <path d="M423 522l70 22-50 24-20-46zM601 522l-70 22 50 24 20-46z" fill="#D81F35"/>
+    <path d="M471 612l41 31 41-31-41 78-41-78z" fill="#FFF1B0"/>
+    <path d="M340 634l67 32-22 50-63-30 18-52zM684 634l-67 32 22 50 63-30-18-52z" fill="#F6B83B"/>
+  </g>
+</svg>

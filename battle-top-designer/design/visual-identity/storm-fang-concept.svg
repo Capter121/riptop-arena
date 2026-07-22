@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Storm Fang visual identity concept</title>
+  <desc id="desc">An original three-direction storm and fang graphic for the Nova Spin Storm Fang blade.</desc>
+  <defs>
+    <linearGradient id="storm" x1="172" y1="164" x2="845" y2="858" gradientUnits="userSpaceOnUse"><stop stop-color="#E7FBFF"/><stop offset=".38" stop-color="#47DDF2"/><stop offset=".72" stop-color="#1676BE"/><stop offset="1" stop-color="#0A294E"/></linearGradient>
+  </defs>
+  <g stroke-linejoin="round">
+    <circle cx="512" cy="512" r="392" stroke="#163349" stroke-width="34"/>
+    <circle cx="512" cy="512" r="333" stroke="#87F4FF" stroke-width="13" opacity=".82"/>
+    <g fill="url(#storm)" stroke="#BDF8FF" stroke-width="15">
+      <path d="M506 142c126 31 228 130 262 256l-151-54-78-83-33-119z"/>
+      <path d="M831 576c-87 96-224 137-352 105l122-104 117-13 113 12z"/>
+      <path d="M201 762c-39-126-4-262 90-352l30 156-40 113-80 83z"/>
+    </g>
+    <g fill="#10283D" stroke="#55E7F7" stroke-width="12">
+      <path d="M494 273l86 58-69 20-17-78z"/><path d="M700 539l-92 47 35-62 57 15z"/><path d="M342 695l7-103 52 42-59 61z"/>
+    </g>
+    <circle cx="512" cy="512" r="106" fill="#14202D" stroke="#C5F9FF" stroke-width="18"/>
+    <circle cx="512" cy="512" r="60" fill="#39D9EC" stroke="#E9FEFF" stroke-width="10"/>
+    <g stroke="#E7FBFF" stroke-linecap="round" stroke-width="20">
+      <path d="M573 224l-96 162"/><path d="M755 640l-188-57"/><path d="M259 642l130-109"/>
+    </g>
+  </g>
+</svg>
