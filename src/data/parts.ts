@@ -120,6 +120,10 @@ export const PARTS: Record<PartSlot, Part[]> = {
 
 export type BuildSelection = Record<PartSlot, string>;
 
+export type PlayerBuild =
+  | { kind: 'legacy'; build: BuildSelection }
+  | { kind: 'nss-v1'; loadout: import('../nss/types').NssBattleLoadoutV1 };
+
 export const DEFAULT_BUILD: BuildSelection = {
   attackRing: 'round',
   core: 'balanced',

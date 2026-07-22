@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "parts": [
+    { "id": "assist_air", "family": "assist", "stats": { "attack": 1, "defense": 1, "stamina": 2, "mobility": 3, "burstResist": 1 }, "physics": { "weight": 0.28 } },
+    { "id": "assist_guard", "family": "assist", "stats": { "attack": 0, "defense": 4, "stamina": 2, "mobility": 1, "burstResist": 3 }, "physics": { "weight": 0.45 } },
+    { "id": "assist_heavy", "family": "assist", "stats": { "attack": 0, "defense": 3, "stamina": 2, "mobility": 0, "burstResist": 3 }, "physics": { "weight": 0.55 } },
+    { "id": "blade_dual_comet", "family": "blade", "stats": { "attack": 3, "defense": 2, "stamina": 2, "mobility": 2, "burstResist": 1 }, "physics": { "weight": 0.70, "collisionRadius": 0.84 } },
+    { "id": "blade_iron_bastion", "family": "blade", "stats": { "attack": 1, "defense": 5, "stamina": 1, "mobility": 0, "burstResist": 3 }, "physics": { "weight": 0.92, "collisionRadius": 0.86 } },
+    { "id": "blade_orbit_halo", "family": "blade", "stats": { "attack": 1, "defense": 2, "stamina": 4, "mobility": 2, "burstResist": 2 }, "physics": { "weight": 0.65, "collisionRadius": 0.80 } },
+    { "id": "blade_storm_fang", "family": "blade", "stats": { "attack": 4, "defense": 1, "stamina": 1, "mobility": 2, "burstResist": 1 }, "physics": { "weight": 0.72, "collisionRadius": 0.83 } },
+    { "id": "core_solar_wolf", "family": "core", "stats": { "attack": 2, "defense": 2, "stamina": 2, "mobility": 2, "burstResist": 2 }, "physics": { "weight": 0.38 } },
+    { "id": "core_void_falcon", "family": "core", "stats": { "attack": 1, "defense": 2, "stamina": 3, "mobility": 3, "burstResist": 2 }, "physics": { "weight": 0.36 } },
+    { "id": "gear_high", "family": "gear", "stats": { "attack": 0, "defense": 3, "stamina": 3, "mobility": 0, "burstResist": 2 }, "physics": { "weight": 0.38 } },
+    { "id": "gear_low", "family": "gear", "stats": { "attack": 1, "defense": 1, "stamina": 1, "mobility": 3, "burstResist": 1 }, "physics": { "weight": 0.25 } },
+    { "id": "gear_medium", "family": "gear", "stats": { "attack": 0, "defense": 2, "stamina": 2, "mobility": 2, "burstResist": 2 }, "physics": { "weight": 0.30 } },
+    { "id": "tip_ball_defense", "family": "tip", "stats": { "attack": 0, "defense": 3, "stamina": 2, "mobility": 1, "burstResist": 2 }, "physics": { "weight": 0.32 } },
+    { "id": "tip_flat_attack", "family": "tip", "stats": { "attack": 2, "defense": 1, "stamina": 1, "mobility": 3, "burstResist": 1 }, "physics": { "weight": 0.28 } },
+    { "id": "tip_needle_stamina", "family": "tip", "stats": { "attack": 0, "defense": 1, "stamina": 4, "mobility": 0, "burstResist": 1 }, "physics": { "weight": 0.25 } },
+    { "id": "tip_taper_balance", "family": "tip", "stats": { "attack": 1, "defense": 2, "stamina": 2, "mobility": 2, "burstResist": 2 }, "physics": { "weight": 0.28 } }
+  ]
+}

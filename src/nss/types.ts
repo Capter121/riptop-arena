@@ -17,3 +17,19 @@ export type NssPartRecord = {
   heightMm: number;
   specSha256: string;
 };
+
+export type NssBattlePartRecord = {
+  id: string;
+  family: NssFamily;
+  stats: {
+    attack: number;
+    defense: number;
+    stamina: number;
+    mobility: number;
+    burstResist: number;
+  };
+  physics: {
+    weight: number;
+    collisionRadius?: number;
+  };
+};

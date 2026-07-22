@@ -1,0 +1,37 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_2_BATTLE_CATALOG",
+  "status": "PASS_WITH_KNOWN_HISTORICAL_TEST_LIMITATION",
+  "headBeforeCommit": "1f9abe88d80d3bbd85e4bc926460795c532dc514",
+  "catalog": {
+    "schemaVersion": 1,
+    "parts": 16,
+    "combinationsValidated": 288,
+    "battleCatalogSha256": "180ab25494b1f4249644159379202ea8f8a631608d3c804d8c47a2ecac918b1d",
+    "collisionProxy": "blade-only deterministic radius",
+    "collisionRadiusRange": [0.8, 0.86],
+    "specialSkills": false,
+    "randomModifiers": false
+  },
+  "validation": {
+    "rootContractSmoke": "PASS",
+    "rootTypeScript": "PASS",
+    "rootProductionBuild": "PASS",
+    "customizerTargetedUnits": "15/15 PASS",
+    "customizerTypeScript": "PASS",
+    "catalogCheck": "PASS; 16 parts and 2 deterministic outputs",
+    "customizerProductionBuild": "PASS",
+    "customizerAllUnits": "283/284 PASS; only pre-existing Stage 7 Markdown line-ending hash reconstruction failed",
+    "gitDiffCheck": "PASS"
+  },
+  "behavior": {
+    "globalUpgradesApply": true,
+    "legacyPartUpgradesAffectNss": false,
+    "legacyBuildFormulaUnchanged": true
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "mainWorkspaceWrittenByStage": false,
+    "playwrightRun": false,
+    "stage8Run": false
+  }
+}

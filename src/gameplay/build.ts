@@ -1,6 +1,7 @@
 import type { PartUpgradeLevels, UpgradeLevels } from '../app/progression';
-import { DEFAULT_BUILD, PARTS, type BuildSelection, type Part, type PartSlot, type StatBlock } from '../data/parts';
+import { DEFAULT_BUILD, PARTS, type BuildSelection, type Part, type PartSlot, type PlayerBuild, type StatBlock } from '../data/parts';
 import { BASE_COMPONENTS } from '../data/recipes';
+import { buildNssBattleStats } from '../nss/buildStats';
 
 import { type ElementAttribute, TIER_MULTIPLIERS, type InstanceComponent } from '../types/shopItems';
 
@@ -130,4 +131,14 @@ export function buildStats(
     guardCrush: false,
     hasStealthEffect: (attributes['DARK'] || 0) >= 3,
   };
+}
+
+export function buildPlayerStats(
+  playerBuild: PlayerBuild,
+  upgrades: UpgradeLevels = DEFAULT_UPGRADES,
+  partUpgrades?: PartUpgradeLevels,
+): BattleStats {
+  return playerBuild.kind === 'nss-v1'
+    ? buildNssBattleStats(playerBuild.loadout, upgrades)
+    : buildStats(playerBuild.build, upgrades, partUpgrades);
 }
