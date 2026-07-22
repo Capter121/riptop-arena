@@ -5,7 +5,7 @@
   "mesh_count": 2,
   "triangle_count": 1632,
   "material_count": 2,
-  "glb_file_size_bytes": 65232,
+  "glb_file_size_bytes": 65440,
   "mounts_present": [
     "MOUNT_assist_guard_BOTTOM",
     "MOUNT_assist_guard_TOP"

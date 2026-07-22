@@ -43,13 +43,13 @@ def main() -> None:
 
     part_spec = load_json(part_path)
     interface_catalog = load_json(ROOT / "specs" / "interfaces.json")
-    material_catalog = load_json(ROOT / "specs" / "materials.json")
+    visual_profiles = load_json(ROOT / "specs" / "visual-profiles.json")
     interface_by_id = {item["id"]: item for item in interface_catalog["interfaces"]}
 
     clear_scene()
     collection = bpy.data.collections.new(f"PART_{part_spec['id']}")
     bpy.context.scene.collection.children.link(collection)
-    part_materials = materials.build_material_slots(part_spec, material_catalog)
+    part_materials = materials.build_material_slots(part_spec, visual_profiles)
     objects = geometry.create_part(part_spec, collection, part_materials)
     objects += interfaces.create_mounts_and_interface(
         part_spec,
