@@ -7,7 +7,7 @@ export function createArenaLink(
 ): string {
   const target = configuredBase
     ? new URL(configuredBase, currentLocation)
-    : new URL('/arena/', currentLocation.origin);
+    : new URL('../arena/', currentLocation);
   target.search = '';
   target.searchParams.set('combo', combinationId(combination));
   target.searchParams.set('loadoutVersion', '1');

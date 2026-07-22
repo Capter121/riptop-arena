@@ -45,6 +45,8 @@ describe('NSS TopEntity vertical slice', () => {
     expect(controller.resolve('?combo=nss-p2c-0001&combo=nss-p2c-0002&loadoutVersion=1', null)).toMatchObject({ source: 'fallback' });
     expect(controller.customizerLink(saved, new URL('https://example.test/arena/')))
       .toBe(`https://example.test/customizer/?combo=${nssCombinationId(saved.combination)}`);
+    expect(controller.customizerLink(saved, new URL('https://example.test/nova/arena/')))
+      .toBe(`https://example.test/nova/customizer/?combo=${nssCombinationId(saved.combination)}`);
   });
 
   it('waits for all five cached parts before returning an NSS battle top', async () => {

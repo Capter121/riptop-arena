@@ -44,7 +44,7 @@ export class NssLoadoutController {
   customizerLink(loadout: NssBattleLoadoutV1, currentLocation: URL, configuredBase?: string): string {
     const target = configuredBase
       ? new URL(configuredBase, currentLocation)
-      : new URL('/customizer/', currentLocation.origin);
+      : new URL('../customizer/', currentLocation);
     target.search = '';
     target.searchParams.set('combo', nssCombinationId(loadout.combination));
     target.hash = '';

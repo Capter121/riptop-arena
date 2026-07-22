@@ -445,11 +445,13 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
   const ironBastionPatternEnabled = useCustomizer(state => state.ironBastionPatternEnabled);
   const orbitHaloPatternEnabled = useCustomizer(state => state.orbitHaloPatternEnabled);
   const dualCometPatternEnabled = useCustomizer(state => state.dualCometPatternEnabled);
-  const coreGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.core}.glb`);
-  const bladeGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.blade}.glb`);
-  const assistGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.assist}.glb`);
-  const gearGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.gear}.glb`);
-  const tipGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.tip}.glb`);
+  const modelRoot = import.meta.env.VITE_NSS_MODEL_ROOT || import.meta.env.BASE_URL;
+  const normalizedModelRoot = modelRoot.endsWith('/') ? modelRoot : `${modelRoot}/`;
+  const coreGltf = useLoader(GLTFLoader, `${normalizedModelRoot}${combination.core}.glb`);
+  const bladeGltf = useLoader(GLTFLoader, `${normalizedModelRoot}${combination.blade}.glb`);
+  const assistGltf = useLoader(GLTFLoader, `${normalizedModelRoot}${combination.assist}.glb`);
+  const gearGltf = useLoader(GLTFLoader, `${normalizedModelRoot}${combination.gear}.glb`);
+  const tipGltf = useLoader(GLTFLoader, `${normalizedModelRoot}${combination.tip}.glb`);
   markCachedSwitch('cached-switch:cache-hit');
   const scenes = useMemo(() => ({
     core: coreGltf.scene,

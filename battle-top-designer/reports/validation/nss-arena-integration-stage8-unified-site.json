@@ -1,0 +1,35 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_8_UNIFIED_SITE",
+  "status": "PASS",
+  "headBeforeCommit": "bf810a2681ca1eb0e7781a764723dea8222ab683",
+  "output": {
+    "root": "dist/site",
+    "fileCount": 29,
+    "bytes": 3432804,
+    "routes": ["/", "/customizer/", "/arena/"],
+    "modelRoot": "/assets/nss/parts/"
+  },
+  "validation": {
+    "arenaTypeScript": "PASS",
+    "arenaProductionBuild": "PASS",
+    "customizerTypeScript": "PASS",
+    "customizerCatalogCheck": "PASS",
+    "customizerProductionBuild": "PASS",
+    "routeTargetedUnits": "8/8 PASS",
+    "formalGlbCount": 16,
+    "formalGlbHashMismatchCount": 0,
+    "duplicateGlbCount": 0,
+    "developmentEndpointLeakCount": 0,
+    "windowsAbsolutePathLeakCount": 0,
+    "deploymentPrefixPreserved": true
+  },
+  "scripts": {
+    "buildSha256": "32d6a988066201952c89071bfdfd68f6d56737d3e23f976f4fbfe30cfe633e49",
+    "verifySha256": "7b889f1123d10cb227f9ebdfcfcb66c6d338bbf7aa91dcfc44af9527600c8245"
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "playwrightRun": false,
+    "stage8QualityGateRun": false
+  }
+}

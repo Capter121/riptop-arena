@@ -35,4 +35,10 @@ describe('Arena links', () => {
     expect(createArenaLink(combination, new URL('https://demo.example/customizer/'), '../arena/'))
       .toBe('https://demo.example/arena/?combo=nss-p2c-0001&loadoutVersion=1');
   });
+
+  it('preserves a deployment prefix when using the default sibling route', () => {
+    const combination = enumerateCombinations()[0];
+    expect(createArenaLink(combination, new URL('https://demo.example/nova/customizer/')))
+      .toBe('https://demo.example/nova/arena/?combo=nss-p2c-0001&loadoutVersion=1');
+  });
 });

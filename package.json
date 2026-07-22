@@ -7,6 +7,8 @@
     "dev": "vite",
     "dev:lan": "vite --host 0.0.0.0 --port 4176",
     "build": "tsc && vite build",
+    "build:site": "node scripts/build-unified-site.mjs",
+    "verify:site": "node scripts/verify-unified-site.mjs",
     "preview": "vite preview",
     "server": "node server/match-server.mjs",
     "test:server": "node scripts/test-match-server.mjs",

@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: './',
-  publicDir: 'battle-top-designer/public',
+  publicDir: process.env.NSS_UNIFIED_BUILD === '1' ? false : 'battle-top-designer/public',
   build: {
     chunkSizeWarningLimit: 550,
     rollupOptions: {
