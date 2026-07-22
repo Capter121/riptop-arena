@@ -1,0 +1,20 @@
+{
+  "stage": "PHASE3C_STAGE7_FINAL_VISUAL_POLISH",
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "headAtStart": "490f85f064aa55888c259c1ec76a5327551af91e",
+  "scope": {
+    "uiGrouping": true,
+    "lightingChanged": false,
+    "cameraChanged": false,
+    "identityChanged": false,
+    "formalGlbChanged": false,
+    "historicalStage7EvidenceChanged": false,
+    "historicalStage8EvidenceChanged": false
+  },
+  "mobile": {
+    "controlGroupsWrapIndependently": true,
+    "minimumButtonHeightPx": 36,
+    "horizontalOverflowAdded": false
+  },
+  "humanVisualReview": "PENDING"
+}

@@ -296,28 +296,34 @@ export default function App() {
           {state.loadState === 'loading' ? `Loading local assets… ${state.loadProgress}%` : state.loadState === 'error' ? state.error : 'Offline model ready'}
         </div>
         <div className="viewer-tools" aria-label="Camera controls">
-          {!state.showcaseEnabled && (['top', 'perspective', 'side', 'bottom'] as const).map(preset => (
-            <button key={preset} data-testid={`camera-${preset}`} className={state.cameraPreset === preset ? 'active' : ''} onClick={() => state.setCamera(preset)}>{preset === 'perspective' ? '45°' : preset}</button>
-          ))}
-          <button data-testid="showcase" className={state.showcaseEnabled ? 'active' : ''} aria-pressed={state.showcaseEnabled} onClick={() => state.setShowcaseEnabled(!state.showcaseEnabled)}>Showcase</button>
-          {state.showcaseEnabled && <span role="group" aria-label="Showcase controls">
-            {(['hero', 'top', 'side', 'exploded'] as const).map(preset => (
-              <button key={preset} data-testid={`showcase-${preset}`} className={state.showcaseCameraPreset === preset ? 'active' : ''} onClick={() => state.setShowcaseCameraPreset(preset)}>{preset}</button>
+          <div className="viewer-tool-group viewer-tool-group-primary">
+            {!state.showcaseEnabled && (['top', 'perspective', 'side', 'bottom'] as const).map(preset => (
+              <button key={preset} data-testid={`camera-${preset}`} className={state.cameraPreset === preset ? 'active' : ''} onClick={() => state.setCamera(preset)}>{preset === 'perspective' ? '45°' : preset}</button>
             ))}
-            <button data-testid="turntable" className={state.turntableEnabled ? 'active' : ''} aria-pressed={state.turntableEnabled} onClick={() => state.setTurntableEnabled(!state.turntableEnabled)}>Turntable</button>
-            {state.turntableEnabled && (['slow', 'normal'] as const).map(speed => (
-              <button key={speed} data-testid={`turntable-${speed}`} className={state.turntableSpeed === speed ? 'active' : ''} onClick={() => state.setTurntableSpeed(speed)}>{speed}</button>
-            ))}
-          </span>}
-          <button data-testid="reset-view" onClick={state.restorePresentation}>Reset</button>
-          <button data-testid="debug-axis" aria-pressed={state.debugAxis} onClick={() => state.setDebugAxis(!state.debugAxis)}>Axis</button>
-          <button data-testid="low-performance" aria-pressed={state.lowPerformance} onClick={() => state.setLowPerformance(!state.lowPerformance)}>Low performance</button>
-          {state.combination.core === 'core_solar_wolf' && <button data-testid="solar-wolf-badge" aria-pressed={state.solarWolfBadgeEnabled} onClick={() => state.setSolarWolfBadgeEnabled(!state.solarWolfBadgeEnabled)}>Solar badge</button>}
-          {state.combination.core === 'core_void_falcon' && <button data-testid="void-falcon-badge" aria-pressed={state.voidFalconBadgeEnabled} onClick={() => state.setVoidFalconBadgeEnabled(!state.voidFalconBadgeEnabled)}>Void badge</button>}
-          {state.combination.blade === 'blade_storm_fang' && <button data-testid="storm-fang-pattern" aria-pressed={state.stormFangPatternEnabled} onClick={() => state.setStormFangPatternEnabled(!state.stormFangPatternEnabled)}>Storm pattern</button>}
-          {state.combination.blade === 'blade_iron_bastion' && <button data-testid="iron-bastion-pattern" aria-pressed={state.ironBastionPatternEnabled} onClick={() => state.setIronBastionPatternEnabled(!state.ironBastionPatternEnabled)}>Bastion pattern</button>}
-          {state.combination.blade === 'blade_orbit_halo' && <button data-testid="orbit-halo-pattern" aria-pressed={state.orbitHaloPatternEnabled} onClick={() => state.setOrbitHaloPatternEnabled(!state.orbitHaloPatternEnabled)}>Orbit pattern</button>}
-          {state.combination.blade === 'blade_dual_comet' && <button data-testid="dual-comet-pattern" aria-pressed={state.dualCometPatternEnabled} onClick={() => state.setDualCometPatternEnabled(!state.dualCometPatternEnabled)}>Comet pattern</button>}
+            <button data-testid="showcase" className={state.showcaseEnabled ? 'active' : ''} aria-pressed={state.showcaseEnabled} onClick={() => state.setShowcaseEnabled(!state.showcaseEnabled)}>Showcase</button>
+            {state.showcaseEnabled && <div className="showcase-controls" role="group" aria-label="Showcase controls">
+              {(['hero', 'top', 'side', 'exploded'] as const).map(preset => (
+                <button key={preset} data-testid={`showcase-${preset}`} className={state.showcaseCameraPreset === preset ? 'active' : ''} onClick={() => state.setShowcaseCameraPreset(preset)}>{preset}</button>
+              ))}
+              <button data-testid="turntable" className={state.turntableEnabled ? 'active' : ''} aria-pressed={state.turntableEnabled} onClick={() => state.setTurntableEnabled(!state.turntableEnabled)}>Turntable</button>
+              {state.turntableEnabled && (['slow', 'normal'] as const).map(speed => (
+                <button key={speed} data-testid={`turntable-${speed}`} className={state.turntableSpeed === speed ? 'active' : ''} onClick={() => state.setTurntableSpeed(speed)}>{speed}</button>
+              ))}
+            </div>}
+          </div>
+          <div className="viewer-tool-group" aria-label="Viewer utilities">
+            <button data-testid="reset-view" onClick={state.restorePresentation}>Reset</button>
+            <button data-testid="debug-axis" aria-pressed={state.debugAxis} onClick={() => state.setDebugAxis(!state.debugAxis)}>Axis</button>
+            <button data-testid="low-performance" aria-pressed={state.lowPerformance} onClick={() => state.setLowPerformance(!state.lowPerformance)}>Low performance</button>
+          </div>
+          <div className="viewer-tool-group identity-controls" aria-label="Identity controls">
+            {state.combination.core === 'core_solar_wolf' && <button data-testid="solar-wolf-badge" aria-pressed={state.solarWolfBadgeEnabled} onClick={() => state.setSolarWolfBadgeEnabled(!state.solarWolfBadgeEnabled)}>Solar badge</button>}
+            {state.combination.core === 'core_void_falcon' && <button data-testid="void-falcon-badge" aria-pressed={state.voidFalconBadgeEnabled} onClick={() => state.setVoidFalconBadgeEnabled(!state.voidFalconBadgeEnabled)}>Void badge</button>}
+            {state.combination.blade === 'blade_storm_fang' && <button data-testid="storm-fang-pattern" aria-pressed={state.stormFangPatternEnabled} onClick={() => state.setStormFangPatternEnabled(!state.stormFangPatternEnabled)}>Storm pattern</button>}
+            {state.combination.blade === 'blade_iron_bastion' && <button data-testid="iron-bastion-pattern" aria-pressed={state.ironBastionPatternEnabled} onClick={() => state.setIronBastionPatternEnabled(!state.ironBastionPatternEnabled)}>Bastion pattern</button>}
+            {state.combination.blade === 'blade_orbit_halo' && <button data-testid="orbit-halo-pattern" aria-pressed={state.orbitHaloPatternEnabled} onClick={() => state.setOrbitHaloPatternEnabled(!state.orbitHaloPatternEnabled)}>Orbit pattern</button>}
+            {state.combination.blade === 'blade_dual_comet' && <button data-testid="dual-comet-pattern" aria-pressed={state.dualCometPatternEnabled} onClick={() => state.setDualCometPatternEnabled(!state.dualCometPatternEnabled)}>Comet pattern</button>}
+          </div>
         </div>
         {readoutTarget === 'gear' && <FocusReadout testId="gear-height-readout" phase={focusState.phase} sessionId={focusState.sessionId} activeFramePainted={focusState.activeFramePainted} onPresentationComplete={completeFocusPresentation}>Gear {selectedGear.heightMm.toFixed(1)} mm · total height Δ {(selectedGear.heightMm - lowGearHeight).toFixed(1)} mm vs Low</FocusReadout>}
         {readoutTarget === 'tip' && <FocusReadout testId="tip-contact-readout" phase={focusState.phase} sessionId={focusState.sessionId} activeFramePainted={focusState.activeFramePainted} onPresentationComplete={completeFocusPresentation}>Contact focus · {familyParts.tip.find(part => part.id === state.combination.tip)!.displayName}</FocusReadout>}
