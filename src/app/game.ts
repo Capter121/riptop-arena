@@ -43,6 +43,7 @@ import { PickupManager } from '../gameplay/pickups';
 import { createBloomPipeline, type BloomPipeline } from '../scene/postProcessing';
 import { NetworkClient } from '../network/networkClient';
 import { NssLoadoutController } from '../nss/loadoutController';
+import { buildNssBattleStats } from '../nss/buildStats';
 import {
   oppositeRole,
   type LaunchConfig,
@@ -95,6 +96,7 @@ import {
   setUpgradeLevel,
   spendCoins,
   setBuild as setProgressionBuild,
+  setNssLoadout,
   type UpgradeKey,
   unlockPart,
   unlockNextPart,
@@ -194,7 +196,7 @@ export class Game {
   private hitStop = 0;
   private dragDirection = new THREE.Vector2();
   private readonly params = new URLSearchParams(window.location.search);
-  private readonly nssRequest = this.nssLoadouts.resolveVerticalSlice(window.location.search);
+  private readonly nssRequest = this.nssLoadouts.resolve(window.location.search, this.progression.latestNssLoadout);
   private nssBattlePreparing = false;
   private paused = false;
   private readonly camDebugEnabled = this.params.has('camDebug');
@@ -444,8 +446,12 @@ export class Game {
     this.garage.shopButton.addEventListener('click', () => this.showShop());
     this.garage.battleButton.addEventListener('click', () => {
       this.beginSingleSession();
-      this.build = this.garage.readBuild();
-      this.progression = setProgressionBuild(this.progression, this.build);
+      if (this.nssRequest.kind === 'ready') {
+        this.progression = setNssLoadout(this.progression, this.nssRequest.loadout);
+      } else {
+        this.build = this.garage.readBuild();
+        this.progression = setProgressionBuild(this.progression, this.build);
+      }
       saveProgression(this.progression);
       this.enemyPreset = this.mode === 'tournament' ? this.getTournamentEnemy() : pick(ENEMIES);
       this.arena.setTheme(this.garage.stageSelect.value);
@@ -883,7 +889,18 @@ export class Game {
     this.garage.setCoins(this.progression.coins);
     this.garage.setProgress(this.getGarageProgressTextCn());
     this.garage.renderCollection();
-    this.refreshGarageStats();
+    if (this.nssRequest.kind === 'ready') {
+      const stats = buildNssBattleStats(this.nssRequest.loadout, this.progression.upgrades);
+      this.garage.showNssMode(
+        this.nssRequest.loadout,
+        stats,
+        this.nssLoadouts.customizerLink(this.nssRequest.loadout, new URL(window.location.href), import.meta.env.VITE_CUSTOMIZER_URL),
+      );
+      this.garage.setProgress(this.nssRequest.notice ?? `NSS model ready · ${this.nssRequest.source}`);
+    } else {
+      this.garage.showLegacyMode();
+      this.refreshGarageStats();
+    }
     this.menu.root.style.display = 'none';
     this.garage.root.style.display = 'grid';
     this.hud.root.style.display = 'none';
@@ -990,15 +1007,12 @@ export class Game {
   }
 
   private startBattle() {
-    if (this.battleMode === 'single' && this.nssRequest.kind === 'unsupported') {
-      this.showGarage();
-      this.garage.setProgress(this.nssRequest.message);
-      return;
-    }
     if (this.battleMode === 'single' && this.nssRequest.kind === 'ready') {
       if (this.nssBattlePreparing) return;
       this.nssBattlePreparing = true;
       this.garage.setProgress('Loading the approved NSS battle model…');
+      this.progression = setNssLoadout(this.progression, this.nssRequest.loadout);
+      saveProgression(this.progression);
       void this.nssLoadouts.createTop('player', this.nssRequest.loadout, this.progression.upgrades)
         .then(player => {
           this.nssBattlePreparing = false;

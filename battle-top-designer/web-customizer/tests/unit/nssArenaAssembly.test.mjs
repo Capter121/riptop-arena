@@ -6,16 +6,17 @@ import { assembleNssScenes, NSS_ARENA_VISUAL_SCALE } from '../../../../src/nss/a
 import { destroyNssBattleTopVisual } from '../../../../src/nss/battleTopVisual';
 import { NssModelCache } from '../../../../src/nss/modelCache';
 import { createNssBattleLoadout } from '../../../../src/nss/loadout';
+import { enumerateNssCombinations } from '../../../../src/nss/loadout';
 import { NSS_FAMILIES } from '../../../../src/nss/types';
 
 const loadout = createNssBattleLoadout({
   core: 'core_solar_wolf', blade: 'blade_storm_fang', assist: 'assist_heavy', gear: 'gear_low', tip: 'tip_flat_attack',
 });
 
-function scenes() {
+function scenes(targetLoadout = loadout) {
   return Object.fromEntries(NSS_FAMILIES.map((family, index) => {
     const root = new Group();
-    const id = loadout.combination[family];
+    const id = targetLoadout.combination[family];
     const top = new Object3D();
     top.name = `MOUNT_${id}_TOP`; top.position.y = 0.002 + index * 0.0001; top.userData.interface_id = 'NSS-V1';
     const bottom = new Object3D();
@@ -48,6 +49,15 @@ describe('NSS Arena model assembly', () => {
     const wrong = scenes();
     wrong.core.getObjectByName('MOUNT_core_solar_wolf_BOTTOM').userData.interface_id = 'OTHER';
     expect(() => assembleNssScenes(wrong, loadout)).toThrow('Wrong interface');
+  });
+
+  it('assembles the complete 288-combination matrix deterministically', () => {
+    for (const combination of enumerateNssCombinations()) {
+      const targetLoadout = createNssBattleLoadout(combination);
+      const first = assembleNssScenes(scenes(targetLoadout), targetLoadout);
+      const second = assembleNssScenes(scenes(targetLoadout), targetLoadout);
+      expect(first.parts.tip.matrix.toArray()).toEqual(second.parts.tip.matrix.toArray());
+    }
   });
 
   it('deduplicates loads, clones instance transforms, and keeps cache resources alive until cache disposal', async () => {

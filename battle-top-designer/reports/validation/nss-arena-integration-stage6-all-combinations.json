@@ -1,0 +1,28 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_6_ALL_COMBINATIONS",
+  "status": "PASS",
+  "headBeforeCommit": "3ae2e4d272e7f3debaafdb320af7c12bbe4d3bb9",
+  "combinationCount": 288,
+  "resolutionPriority": ["valid URL", "latest NSS loadout", "default NSS fallback"],
+  "legacySaveRewritten": false,
+  "onlineNssEnabled": false,
+  "validation": {
+    "urlResolutionMatrix": "288/288 PASS",
+    "assemblyMatrix": "288/288 deterministic PASS",
+    "nssTargetedUnits": "15/15 PASS",
+    "latestLoadoutPersistence": "PASS",
+    "legacyBuildPersistence": "UNCHANGED",
+    "rootTypeScript": "PASS",
+    "rootProductionBuild": "PASS",
+    "matchServerSmoke": "PASS",
+    "customizerTypeScript": "PASS",
+    "customizerCatalogCheck": "PASS",
+    "customizerProductionBuild": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "playwrightRun": false,
+    "stage8Run": false
+  }
+}

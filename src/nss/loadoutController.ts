@@ -1,7 +1,7 @@
 import type { UpgradeLevels } from '../app/progression';
 import { TopEntity, type TopSide } from '../gameplay/top';
 import { createNssBattleTopVisual } from './battleTopVisual';
-import { createNssBattleLoadout, nssCombinationFromId } from './loadout';
+import { createNssBattleLoadout, nssCombinationFromId, nssCombinationId } from './loadout';
 import { NssModelCache } from './modelCache';
 import type { NssBattleLoadoutV1 } from './types';
 
@@ -10,8 +10,7 @@ export const DEFAULT_NSS_LOADOUT = createNssBattleLoadout(nssCombinationFromId(D
 
 export type NssVerticalSliceRequest =
   | { kind: 'none' }
-  | { kind: 'ready'; loadout: NssBattleLoadoutV1 }
-  | { kind: 'unsupported'; message: string };
+  | { kind: 'ready'; loadout: NssBattleLoadoutV1; source: 'url' | 'local' | 'fallback'; notice: string | null };
 
 export class NssLoadoutController {
   private readonly cache: NssModelCache;
@@ -20,15 +19,36 @@ export class NssLoadoutController {
     this.cache = cache;
   }
 
-  resolveVerticalSlice(search: string): NssVerticalSliceRequest {
+  resolve(search: string, saved: NssBattleLoadoutV1 | null): NssVerticalSliceRequest {
     const parameters = new URLSearchParams(search);
     const combos = parameters.getAll('combo');
     const versions = parameters.getAll('loadoutVersion');
-    if (combos.length === 0 && versions.length === 0) return { kind: 'none' };
-    if (combos.length === 1 && combos[0] === DEFAULT_NSS_COMBINATION_ID && versions.length === 1 && versions[0] === '1') {
-      return { kind: 'ready', loadout: DEFAULT_NSS_LOADOUT };
+    if (combos.length === 0 && versions.length === 0) {
+      return saved
+        ? { kind: 'ready', loadout: saved, source: 'local', notice: null }
+        : { kind: 'none' };
     }
-    return { kind: 'unsupported', message: 'This NSS combination is not enabled in the Arena vertical slice yet.' };
+    const allowedParameters = [...parameters.keys()].every(key => key === 'combo' || key === 'loadoutVersion');
+    const combination = combos.length === 1 ? nssCombinationFromId(combos[0]) : null;
+    if (combination && versions.length === 1 && versions[0] === '1' && allowedParameters) {
+      return { kind: 'ready', loadout: createNssBattleLoadout(combination), source: 'url', notice: null };
+    }
+    return {
+      kind: 'ready',
+      loadout: DEFAULT_NSS_LOADOUT,
+      source: 'fallback',
+      notice: 'Invalid NSS Arena link. The default Storm Attack combination was restored.',
+    };
+  }
+
+  customizerLink(loadout: NssBattleLoadoutV1, currentLocation: URL, configuredBase?: string): string {
+    const target = configuredBase
+      ? new URL(configuredBase, currentLocation)
+      : new URL('/customizer/', currentLocation.origin);
+    target.search = '';
+    target.searchParams.set('combo', nssCombinationId(loadout.combination));
+    target.hash = '';
+    return target.href;
   }
 
   async createTop(side: TopSide, loadout: NssBattleLoadoutV1, upgrades?: UpgradeLevels): Promise<TopEntity> {

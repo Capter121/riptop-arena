@@ -3,6 +3,10 @@ import { RadarChart } from './radar';
 import { type ComponentCategory } from '../types/shopItems';
 import { BASE_COMPONENTS } from '../data/recipes';
 import { globalInventory } from '../data/inventoryManager';
+import type { BattleStats } from '../gameplay/build';
+import { nssPartById } from '../nss/catalog';
+import { nssCombinationId } from '../nss/loadout';
+import { NSS_FAMILIES, type NssBattleLoadoutV1 } from '../nss/types';
 
 const SLOT_NAMES: Record<ComponentCategory, string> = {
   CHIP: '核心晶片 (Chip)',
@@ -25,6 +29,9 @@ export class GaragePanel {
   readonly shopButton = document.createElement('button');
   readonly backButton = document.createElement('button');
   readonly stageSelect = document.createElement('select');
+  readonly nssPanel = document.createElement('section');
+  readonly returnCustomizerLink = document.createElement('a');
+  private readonly legacyFields: HTMLElement[] = [];
 
   constructor() {
     this.root.className = 'card garage';
@@ -54,6 +61,12 @@ export class GaragePanel {
     this.wallet.className = 'garage-wallet';
     this.root.append(this.wallet);
 
+    this.nssPanel.className = 'garage-nss';
+    this.nssPanel.hidden = true;
+    this.returnCustomizerLink.className = 'button';
+    this.returnCustomizerLink.textContent = 'Return to Customizer';
+    this.root.append(this.nssPanel);
+
     (['CHIP', 'LAYER', 'DISC', 'DRIVER', 'LAUNCHER'] as ComponentCategory[]).forEach((slot) => {
       const wrap = document.createElement('label');
       wrap.className = 'field';
@@ -64,6 +77,7 @@ export class GaragePanel {
       this.selects.set(slot, select);
       wrap.append(span, select);
       this.root.appendChild(wrap);
+      this.legacyFields.push(wrap);
     });
 
     this.progress.className = 'garage-progress';
@@ -89,6 +103,36 @@ export class GaragePanel {
     this.battleButton.className = 'button button--primary';
     this.battleButton.textContent = '进入竞技场';
     this.root.append(this.progress, this.stats, this.collection, stageWrap, this.shopButton, this.battleButton);
+  }
+
+  showLegacyMode() {
+    this.nssPanel.hidden = true;
+    this.legacyFields.forEach(field => { field.hidden = false; });
+    this.shopButton.hidden = false;
+    this.collection.hidden = false;
+  }
+
+  showNssMode(loadout: NssBattleLoadoutV1, stats: BattleStats, customizerUrl: string) {
+    this.legacyFields.forEach(field => { field.hidden = true; });
+    this.shopButton.hidden = true;
+    this.collection.hidden = true;
+    this.returnCustomizerLink.href = customizerUrl;
+    this.nssPanel.hidden = false;
+    this.nssPanel.innerHTML = `
+      <div class="garage-summary__title">NSS Battle Loadout · ${nssCombinationId(loadout.combination)}</div>
+      <div class="garage-nss__parts">
+        ${NSS_FAMILIES.map(family => {
+          const part = nssPartById.get(loadout.combination[family])!;
+          return `<div><span>${family}</span><strong>${part.displayName}</strong><code>${part.id}</code></div>`;
+        }).join('')}
+      </div>
+    `;
+    this.nssPanel.append(this.returnCustomizerLink);
+    this.radar.update(stats);
+    this.setSummary('NSS battle stats', [
+      `Attack ${stats.attack}`, `Defense ${stats.defense}`, `Stamina ${stats.stamina}`,
+      `Mobility ${stats.mobility}`, `Burst resist ${stats.burstResist}`, `Weight ${stats.weight.toFixed(2)}`,
+    ]);
   }
 
   refreshOptions(currentBuild: BuildSelection) {

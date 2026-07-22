@@ -376,6 +376,28 @@ select {
   border: 1px solid rgba(255, 209, 102, 0.12);
 }
 
+.garage-nss {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(126, 240, 255, 0.2);
+  border-radius: 14px;
+  background: rgba(6, 15, 24, 0.82);
+}
+
+.garage-nss[hidden] { display: none; }
+
+.garage-nss__parts {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.garage-nss__parts > div { display: grid; gap: 4px; min-width: 0; padding: 9px; border-radius: 9px; background: rgba(255, 255, 255, 0.05); }
+.garage-nss__parts span { color: #8eb3d2; font-size: 10px; text-transform: uppercase; }
+.garage-nss__parts strong { font-size: 12px; }
+.garage-nss__parts code { overflow: hidden; color: #7ef0ff; font-size: 10px; text-overflow: ellipsis; }
+
 .garage-wallet,
 .coin-reward {
   display: grid;
@@ -1336,6 +1358,10 @@ select {
   }
 
   .collection__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .garage-nss__parts {
     grid-template-columns: 1fr;
   }
 

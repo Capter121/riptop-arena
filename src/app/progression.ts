@@ -1,4 +1,6 @@
 import { DEFAULT_BUILD, PARTS, type BuildSelection, type PartSlot } from '../data/parts';
+import { isNssBattleLoadoutV1 } from '../nss/loadout';
+import type { NssBattleLoadoutV1 } from '../nss/types';
 
 const STORAGE_KEY = 'riptop-progression-v1';
 
@@ -15,6 +17,7 @@ type ProgressionData = {
   build: BuildSelection;
   upgrades: UpgradeLevels;
   partUpgrades: PartUpgradeLevels;
+  latestNssLoadout: NssBattleLoadoutV1 | null;
 };
 
 export type ProgressionState = ProgressionData & {
@@ -84,6 +87,7 @@ function fromData(data: ProgressionData): ProgressionState {
     build: sanitizeBuild(data.build),
     upgrades: sanitizeUpgrades(data.upgrades),
     partUpgrades: sanitizePartUpgrades(data.partUpgrades),
+    latestNssLoadout: isNssBattleLoadoutV1(data.latestNssLoadout) ? data.latestNssLoadout : null,
     unlockedSet: new Set(data.unlockedParts),
   };
 }
@@ -98,6 +102,7 @@ function createDefaultState() {
     build: DEFAULT_BUILD,
     upgrades: DEFAULT_UPGRADES,
     partUpgrades: {},
+    latestNssLoadout: null,
   });
 }
 
@@ -116,6 +121,7 @@ export function loadProgression(): ProgressionState {
       build: sanitizeBuild(parsed.build),
       upgrades: sanitizeUpgrades(parsed.upgrades),
       partUpgrades: sanitizePartUpgrades(parsed.partUpgrades),
+      latestNssLoadout: isNssBattleLoadoutV1(parsed.latestNssLoadout) ? parsed.latestNssLoadout : null,
     });
   } catch {
     return createDefaultState();
@@ -132,6 +138,7 @@ export function saveProgression(state: ProgressionState) {
     build: sanitizeBuild(state.build),
     upgrades: sanitizeUpgrades(state.upgrades),
     partUpgrades: sanitizePartUpgrades(state.partUpgrades),
+    latestNssLoadout: isNssBattleLoadoutV1(state.latestNssLoadout) ? state.latestNssLoadout : null,
   };
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 }
@@ -146,11 +153,16 @@ function replaceState(state: ProgressionState, patch: Partial<ProgressionData>):
     build: patch.build ?? state.build,
     upgrades: patch.upgrades ?? state.upgrades,
     partUpgrades: patch.partUpgrades ?? state.partUpgrades,
+    latestNssLoadout: patch.latestNssLoadout ?? state.latestNssLoadout,
   });
 }
 
 export function setBuild(state: ProgressionState, build: BuildSelection): ProgressionState {
   return replaceState(state, { build: sanitizeBuild(build) });
+}
+
+export function setNssLoadout(state: ProgressionState, loadout: NssBattleLoadoutV1): ProgressionState {
+  return replaceState(state, { latestNssLoadout: loadout });
 }
 
 export function awardCoins(state: ProgressionState, amount: number): ProgressionState {
