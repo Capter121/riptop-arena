@@ -44,6 +44,8 @@ import { createBloomPipeline, type BloomPipeline } from '../scene/postProcessing
 import { NetworkClient } from '../network/networkClient';
 import { NssLoadoutController } from '../nss/loadoutController';
 import { buildNssBattleStats } from '../nss/buildStats';
+import { NSS_BATTLE_CATALOG_SHA256 } from '../nss/battleCatalog';
+import { nssCombinationId } from '../nss/loadout';
 import {
   oppositeRole,
   type LaunchConfig,
@@ -175,6 +177,7 @@ export class Game {
   private onlineLaunchConfig: LaunchConfig | null = null;
   private pendingOnlineSnapshot: TurnSnapshot | null = null;
   private onlineOpponentName = 'Online Rival';
+  private onlineLocalLoadout: OnlineLoadout | null = null;
 
   private mode: 'quick' | 'tournament' | 'survival' = 'quick';
   private survivalWave = 1;
@@ -513,26 +516,39 @@ export class Game {
     this.onlineStartAt = null;
     this.onlineLaunchConfig = null;
     this.pendingOnlineSnapshot = null;
+    this.onlineLocalLoadout = null;
   }
 
   private async toggleOnlineQueue() {
     if (['connecting', 'queued', 'matched', 'in_battle'].includes(this.network.state)) {
       this.network.cancelQueue();
+      this.onlineLocalLoadout = null;
       this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', '\u5df2\u53d6\u6d88\u5339\u914d');
       return;
     }
 
     this.battleMode = 'online';
     this.mode = 'quick';
-    const loadout: OnlineLoadout = {
-      build: cloneBuild(this.build),
-      upgrades: { ...this.progression.upgrades },
-      partUpgrades: { ...this.progression.partUpgrades },
-    };
+    const loadout: OnlineLoadout = this.nssRequest.kind === 'ready'
+      ? {
+          kind: 'nss-v1',
+          comboId: nssCombinationId(this.nssRequest.loadout.combination),
+          loadout: this.nssRequest.loadout,
+          upgrades: { ...this.progression.upgrades },
+          catalogSha256: NSS_BATTLE_CATALOG_SHA256,
+        }
+      : {
+          kind: 'legacy',
+          build: cloneBuild(this.build),
+          upgrades: { ...this.progression.upgrades },
+          partUpgrades: { ...this.progression.partUpgrades },
+        };
+    this.onlineLocalLoadout = loadout;
     try {
       await this.network.joinQueue('Player', loadout);
     } catch (error) {
       this.battleMode = 'single';
+      this.onlineLocalLoadout = null;
       this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', error instanceof Error ? error.message : '\u8054\u673a\u670d\u52a1\u4e0d\u53ef\u7528');
     }
   }
@@ -551,7 +567,7 @@ export class Game {
   private handleNetworkMessage(message: ServerMessage) {
     switch (message.type) {
       case 'MATCHED':
-        this.prepareOnlineBattle(message.opponentLoadout, message.opponentName);
+        void this.prepareOnlineBattle(message.opponentLoadout, message.opponentName);
         break;
       case 'ALL_READY':
         if (this.network.role === 'host') {
@@ -613,24 +629,50 @@ export class Game {
     }
   }
 
-  private prepareOnlineBattle(loadout: OnlineLoadout, opponentName: string) {
-    // [ONLINE HOOK] Reuse single-player setup, then replace only the remote combatant.
+  private async prepareOnlineBattle(loadout: OnlineLoadout, opponentName: string) {
+    if (!this.onlineLocalLoadout) {
+      this.handleOnlineAbort('Local online loadout is missing.');
+      return;
+    }
     this.battleMode = 'online';
     this.onlineOpponentName = opponentName;
-    this.startBattle();
-    this.scene.remove(this.enemy.mesh);
-    this.enemy = new TopEntity('enemy', loadout.build, loadout.upgrades, loadout.partUpgrades);
-    this.enemy.reset(6, 0);
-    this.scene.add(this.enemy.mesh);
-    this.phase = 'launch';
-    this.charging = false;
-    this.countdown = COUNTDOWN_SECONDS;
-    this.network.sendReady();
+    const roomId = this.network.roomId;
+    try {
+      const [player, enemy] = await Promise.all([
+        this.createOnlineTop('player', this.onlineLocalLoadout),
+        this.createOnlineTop('enemy', loadout),
+      ]);
+      if (!roomId || this.network.roomId !== roomId || this.network.state !== 'matched') {
+        player.detachNssVisual();
+        enemy.detachNssVisual();
+        return;
+      }
+      this.startBattleWithPlayer(player);
+      this.scene.remove(this.enemy.mesh);
+      this.enemy.detachNssVisual();
+      this.enemy = enemy;
+      this.enemy.reset(6, 0);
+      this.scene.add(this.enemy.mesh);
+      this.phase = 'launch';
+      this.charging = false;
+      this.countdown = COUNTDOWN_SECONDS;
+      this.network.sendReady();
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      this.handleOnlineAbort('Online model load failed: ' + detail);
+    }
+  }
+
+  private createOnlineTop(side: 'player' | 'enemy', loadout: OnlineLoadout): Promise<TopEntity> {
+    return loadout.kind === 'nss-v1'
+      ? this.nssLoadouts.createTop(side, loadout.loadout, loadout.upgrades)
+      : Promise.resolve(new TopEntity(side, loadout.build, loadout.upgrades, loadout.partUpgrades));
   }
 
   private handleOnlineAbort(message: string) {
     this.network.disconnect();
     this.battleMode = 'single';
+    this.onlineLocalLoadout = null;
     this.activeTurnResolution = null;
     this.activeClashQte = null;
     this.clashQtePanel.hide();

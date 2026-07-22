@@ -4,7 +4,38 @@ import WebSocket from 'ws';
 
 const PORT = 8091;
 const URL = `ws://127.0.0.1:${PORT}`;
-const v = 1;
+const v = 2;
+const catalogSha256 = '180ab25494b1f4249644159379202ea8f8a631608d3c804d8c47a2ecac918b1d';
+
+function legacyLoadout() {
+  return {
+    kind: 'legacy',
+    build: { attackRing: 'round', core: 'balanced', driver: 'grip' },
+    upgrades: { attack: 0, defense: 0, stamina: 0 },
+    partUpgrades: {},
+  };
+}
+
+function nssLoadout(overrides = {}) {
+  return {
+    kind: 'nss-v1',
+    comboId: 'nss-p2c-0138',
+    loadout: {
+      schemaVersion: 1,
+      interfaceId: 'NSS-V1',
+      combination: {
+        core: 'core_solar_wolf',
+        blade: 'blade_storm_fang',
+        assist: 'assist_heavy',
+        gear: 'gear_low',
+        tip: 'tip_flat_attack',
+      },
+    },
+    upgrades: { attack: 0, defense: 0, stamina: 0 },
+    catalogSha256,
+    ...overrides,
+  };
+}
 
 class TestClient {
   constructor(ws) {
@@ -55,25 +86,25 @@ function connect() {
   });
 }
 
-function join(client, name) {
+function join(client, name, loadout = legacyLoadout()) {
   client.send({
     type: 'JOIN_QUEUE',
     displayName: name,
-    loadout: { build: { attackRing: 'ring', core: 'core', driver: 'driver' }, upgrades: {}, partUpgrades: {} },
+    loadout,
   });
 }
 
-async function matchedPair(prefix) {
+async function matchedPair(prefix, firstLoadout, secondLoadout) {
   const first = await connect();
   const second = await connect();
-  join(first, `${prefix}-1`);
+  join(first, `${prefix}-1`, firstLoadout);
   await first.waitFor('QUEUED');
-  join(second, `${prefix}-2`);
+  join(second, `${prefix}-2`, secondLoadout);
   const [firstMatch, secondMatch] = await Promise.all([first.waitFor('MATCHED'), second.waitFor('MATCHED')]);
   assert.equal(firstMatch.roomId, secondMatch.roomId);
   const host = firstMatch.role === 'host' ? first : second;
   const guest = host === first ? second : first;
-  return { first, second, host, guest, roomId: firstMatch.roomId };
+  return { first, second, host, guest, roomId: firstMatch.roomId, firstMatch, secondMatch };
 }
 
 const server = spawn(process.execPath, ['server/match-server.mjs'], {
@@ -171,6 +202,42 @@ try {
   const disconnected = await disconnect.host.waitFor('PEER_DISCONNECTED');
   assert.equal(disconnected.roomId, disconnect.roomId);
   disconnect.host.close();
+
+  const mixed = await matchedPair('mixed', nssLoadout(), legacyLoadout());
+  assert.equal(mixed.firstMatch.opponentLoadout.kind, 'legacy');
+  assert.equal(mixed.secondMatch.opponentLoadout.kind, 'nss-v1');
+  mixed.host.send({ type: 'CLIENT_READY', roomId: mixed.roomId });
+  mixed.guest.send({ type: 'CLIENT_READY', roomId: mixed.roomId });
+  await mixed.host.waitFor('ALL_READY');
+  mixed.first.close();
+  mixed.second.close();
+
+  const badHash = await connect();
+  join(badHash, 'bad-hash', nssLoadout({ catalogSha256: '0'.repeat(64) }));
+  assert.equal((await badHash.waitFor('ERROR')).code, 'CATALOG_MISMATCH');
+  badHash.close();
+
+  const badFamily = await connect();
+  const familyMismatch = nssLoadout();
+  familyMismatch.loadout.combination.core = 'blade_storm_fang';
+  join(badFamily, 'bad-family', familyMismatch);
+  assert.equal((await badFamily.waitFor('ERROR')).code, 'INVALID_LOADOUT');
+  badFamily.close();
+
+  const badCombo = await connect();
+  join(badCombo, 'bad-combo', nssLoadout({ comboId: 'nss-p2c-0001' }));
+  assert.equal((await badCombo.waitFor('ERROR')).code, 'INVALID_LOADOUT');
+  badCombo.close();
+
+  const derivedStats = await connect();
+  join(derivedStats, 'derived-stats', nssLoadout({ stats: { attack: 999 } }));
+  assert.equal((await derivedStats.waitFor('ERROR')).code, 'INVALID_LOADOUT');
+  derivedStats.close();
+
+  const oldProtocol = await connect();
+  oldProtocol.ws.send(JSON.stringify({ v: 1, type: 'JOIN_QUEUE', displayName: 'v1', loadout: legacyLoadout() }));
+  assert.equal((await oldProtocol.waitFor('ERROR')).code, 'PROTOCOL_MISMATCH');
+  oldProtocol.close();
 
   console.log('Match server smoke tests passed.');
 } finally {

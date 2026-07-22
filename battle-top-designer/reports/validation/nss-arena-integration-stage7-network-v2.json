@@ -1,0 +1,32 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_7_NETWORK_V2",
+  "status": "PASS",
+  "headBeforeCommit": "6e9a7688722cc2fb56dbb94c472e162c4ea41594",
+  "protocolVersion": 2,
+  "catalogSha256": "180ab25494b1f4249644159379202ea8f8a631608d3c804d8c47a2ecac918b1d",
+  "validation": {
+    "allNssLoadouts": "288/288 PASS",
+    "legacyLoadout": "PASS",
+    "mixedNssLegacyMatch": "PASS",
+    "catalogMismatchRejected": "PASS",
+    "familyMismatchRejected": "PASS",
+    "combinationIdMismatchRejected": "PASS",
+    "derivedStatsRejected": "PASS",
+    "protocolV1Rejected": "PASS",
+    "readyAfterModelLoad": "PASS",
+    "staleAsyncLoadGuard": "PASS",
+    "networkTargetedUnits": "7/7 PASS",
+    "nssBattleStatsUnits": "5/5 PASS",
+    "matchServerSmoke": "PASS",
+    "rootTypeScript": "PASS",
+    "rootProductionBuild": "PASS",
+    "customizerTypeScript": "PASS",
+    "customizerCatalogCheck": "PASS",
+    "customizerProductionBuild": "PASS"
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "playwrightRun": false,
+    "stage8Run": false
+  }
+}

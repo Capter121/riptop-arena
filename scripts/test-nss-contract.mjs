@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 
 const root = new URL('../battle-top-designer/shared/nss/', import.meta.url);
 const catalog = JSON.parse(await readFile(new URL('parts.catalog.json', root), 'utf8'));
 const schema = JSON.parse(await readFile(new URL('loadout.schema.json', root), 'utf8'));
-const battleCatalog = JSON.parse(await readFile(new URL('battle-parts.json', root), 'utf8'));
+const battleCatalogText = await readFile(new URL('battle-parts.json', root), 'utf8');
+const battleCatalog = JSON.parse(battleCatalogText);
 const battleSchema = JSON.parse(await readFile(new URL('battle-parts.schema.json', root), 'utf8'));
 const families = ['core', 'blade', 'assist', 'gear', 'tip'];
 const expectedCounts = { core: 2, blade: 4, assist: 3, gear: 3, tip: 4 };
@@ -29,6 +31,7 @@ assert.deepEqual(
   catalog.parts.map(part => part.id).sort(),
 );
 assert.equal(battleSchema.additionalProperties, false);
+assert.equal(createHash('sha256').update(battleCatalogText.replace(/\r\n/g, '\n')).digest('hex'), '180ab25494b1f4249644159379202ea8f8a631608d3c804d8c47a2ecac918b1d');
 for (const part of battleCatalog.parts) {
   assert.equal(catalog.parts.find(entry => entry.id === part.id)?.family, part.family);
   assert.ok(part.physics.weight > 0);

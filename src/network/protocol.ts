@@ -1,20 +1,53 @@
 import type { PartUpgradeLevels, UpgradeLevels } from '../app/progression';
 import type { BuildSelection } from '../data/parts';
+import type { NssBattleLoadoutV1 } from '../nss/types';
+import { isNssBattleLoadoutV1, nssCombinationId } from '../nss/loadout';
+import { NSS_BATTLE_CATALOG_SHA256 } from '../nss/battleCatalog';
 import type { TurnResolution } from '../gameplay/battlePhysics';
 import type { SkillTier, TurnAction } from '../types/battle';
 
-export const PROTOCOL_VERSION = 1 as const;
+export const PROTOCOL_VERSION = 2 as const;
 export const MAX_MESSAGE_BYTES = 16 * 1024;
 export const STATE_INTERVAL_SECONDS = 0.05;
 
 export type OnlineRole = 'host' | 'guest';
 export type ConnectionState = 'idle' | 'connecting' | 'queued' | 'matched' | 'in_battle' | 'closed';
 
-export type OnlineLoadout = {
-  build: BuildSelection;
-  upgrades: UpgradeLevels;
-  partUpgrades: PartUpgradeLevels;
-};
+export type OnlineLoadout =
+  | { kind: 'legacy'; build: BuildSelection; upgrades: UpgradeLevels; partUpgrades: PartUpgradeLevels }
+  | {
+      kind: 'nss-v1';
+      comboId: string;
+      loadout: NssBattleLoadoutV1;
+      upgrades: UpgradeLevels;
+      catalogSha256: string;
+    };
+
+function validUpgrades(value: unknown): value is UpgradeLevels {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  return Object.keys(record).sort().join(',') === 'attack,defense,stamina'
+    && Object.values(record).every(level => Number.isSafeInteger(level) && Number(level) >= 0 && Number(level) <= 5);
+}
+
+export function isOnlineLoadout(value: unknown): value is OnlineLoadout {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  if (record.kind === 'legacy') {
+    const build = record.build as Record<string, unknown> | undefined;
+    const partUpgrades = record.partUpgrades as Record<string, unknown> | undefined;
+    return Object.keys(record).sort().join(',') === 'build,kind,partUpgrades,upgrades'
+      && Boolean(build && Object.keys(build).sort().join(',') === 'attackRing,core,driver')
+      && Boolean(build && Object.values(build).every(id => typeof id === 'string' && id.length > 0))
+      && validUpgrades(record.upgrades)
+      && Boolean(partUpgrades && !Array.isArray(partUpgrades))
+      && Boolean(partUpgrades && Object.values(partUpgrades).every(level => Number.isSafeInteger(level) && Number(level) >= 0 && Number(level) <= 4));
+  }
+  if (record.kind !== 'nss-v1' || !isNssBattleLoadoutV1(record.loadout) || !validUpgrades(record.upgrades)) return false;
+  return record.comboId === nssCombinationId(record.loadout.combination)
+    && record.catalogSha256 === NSS_BATTLE_CATALOG_SHA256
+    && Object.keys(record).sort().join(',') === 'catalogSha256,comboId,kind,loadout,upgrades';
+}
 
 export type NetworkTopState = {
   seq: number;

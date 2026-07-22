@@ -1,8 +1,10 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
 
-const PROTOCOL_VERSION = 1;
+const PROTOCOL_VERSION = 2;
 const PORT = Number(process.env.PORT || 8080);
 const HOST = process.env.HOST || '0.0.0.0';
 const MAX_MESSAGE_BYTES = 16 * 1024;
@@ -10,6 +12,12 @@ const READY_TIMEOUT_MS = Number(process.env.READY_TIMEOUT_MS || 10_000);
 const TURN_TIMEOUT_MS = Number(process.env.TURN_TIMEOUT_MS || 15_000);
 const HEARTBEAT_INTERVAL_MS = Number(process.env.HEARTBEAT_INTERVAL_MS || 2_000);
 const HEARTBEAT_DEAD_MS = Number(process.env.HEARTBEAT_DEAD_MS || 5_000);
+const families = ['core', 'blade', 'assist', 'gear', 'tip'];
+const battleCatalogText = readFileSync(new URL('../battle-top-designer/shared/nss/battle-parts.json', import.meta.url), 'utf8');
+const battleCatalog = JSON.parse(battleCatalogText);
+const battleCatalogSha256 = createHash('sha256').update(battleCatalogText.replace(/\r\n/g, '\n')).digest('hex');
+const familyParts = Object.fromEntries(families.map(family => [family, battleCatalog.parts.filter(part => part.family === family)]));
+const partById = new Map(battleCatalog.parts.map(part => [part.id, part]));
 
 const wss = new WebSocketServer({ host: HOST, port: PORT, maxPayload: MAX_MESSAGE_BYTES });
 const clients = new Map();
@@ -74,18 +82,55 @@ function requireHost(ws, room) {
   return false;
 }
 
-function validJoin(message) {
+function exactKeys(value, keys) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    && Object.keys(value).sort().join(',') === [...keys].sort().join(',');
+}
+
+function validUpgrades(value) {
+  return exactKeys(value, ['attack', 'defense', 'stamina'])
+    && Object.values(value).every(level => Number.isSafeInteger(level) && level >= 0 && level <= 5);
+}
+
+function validNssCombination(combination) {
+  return exactKeys(combination, families)
+    && families.every(family => partById.get(combination[family])?.family === family);
+}
+
+function combinationId(combination) {
+  const indexes = families.map(family => familyParts[family].findIndex(part => part.id === combination[family]));
+  const [, blades, assists, gears, tips] = families.map(family => familyParts[family].length);
+  const rank = ((((indexes[0] * blades + indexes[1]) * assists + indexes[2]) * gears + indexes[3]) * tips + indexes[4]) + 1;
+  return `nss-p2c-${String(rank).padStart(4, '0')}`;
+}
+
+function validateLoadout(loadout) {
+  if (!loadout || typeof loadout !== 'object' || Array.isArray(loadout)) return { code: 'INVALID_LOADOUT' };
+  if (loadout.kind === 'legacy') {
+    const valid = exactKeys(loadout, ['kind', 'build', 'upgrades', 'partUpgrades'])
+      && exactKeys(loadout.build, ['attackRing', 'core', 'driver'])
+      && Object.values(loadout.build).every(value => typeof value === 'string' && value.length > 0)
+      && validUpgrades(loadout.upgrades)
+      && loadout.partUpgrades && typeof loadout.partUpgrades === 'object' && !Array.isArray(loadout.partUpgrades)
+      && Object.values(loadout.partUpgrades).every(level => Number.isSafeInteger(level) && level >= 0 && level <= 4);
+    return valid ? null : { code: 'INVALID_LOADOUT' };
+  }
+  if (loadout.kind !== 'nss-v1') return { code: 'INVALID_LOADOUT' };
+  if (loadout.catalogSha256 !== battleCatalogSha256) return { code: 'CATALOG_MISMATCH' };
+  const valid = exactKeys(loadout, ['kind', 'comboId', 'loadout', 'upgrades', 'catalogSha256'])
+    && exactKeys(loadout.loadout, ['schemaVersion', 'interfaceId', 'combination'])
+    && loadout.loadout.schemaVersion === 1
+    && loadout.loadout.interfaceId === 'NSS-V1'
+    && validNssCombination(loadout.loadout.combination)
+    && loadout.comboId === combinationId(loadout.loadout.combination)
+    && validUpgrades(loadout.upgrades);
+  return valid ? null : { code: 'INVALID_LOADOUT' };
+}
+
+function validJoinIdentity(message) {
   return typeof message.displayName === 'string'
     && message.displayName.length > 0
-    && message.displayName.length <= 32
-    && message.loadout
-    && typeof message.loadout === 'object'
-    && message.loadout.build
-    && typeof message.loadout.build === 'object'
-    && message.loadout.upgrades
-    && typeof message.loadout.upgrades === 'object'
-    && message.loadout.partUpgrades
-    && typeof message.loadout.partUpgrades === 'object';
+    && message.displayName.length <= 32;
 }
 
 function createRoom(host, guest) {
@@ -154,8 +199,12 @@ function openTurn(room, turnId) {
 
 function handleJoin(ws, message) {
   const meta = clients.get(ws);
-  if (!validJoin(message)) {
-    sendError(ws, 'INVALID_LOADOUT', 'Queue request contains an invalid loadout.');
+  const loadoutError = validateLoadout(message.loadout);
+  if (!validJoinIdentity(message) || loadoutError) {
+    const code = loadoutError?.code ?? 'INVALID_LOADOUT';
+    sendError(ws, code, code === 'CATALOG_MISMATCH'
+      ? 'NSS battle catalog does not match the server.'
+      : 'Queue request contains an invalid loadout.');
     return;
   }
   if (meta.roomId) {

@@ -2,6 +2,8 @@ import battleCatalogJson from '../../battle-top-designer/shared/nss/battle-parts
 import { nssPartById } from './catalog';
 import type { NssBattlePartRecord } from './types';
 
+export const NSS_BATTLE_CATALOG_SHA256 = '180ab25494b1f4249644159379202ea8f8a631608d3c804d8c47a2ecac918b1d';
+
 export const nssBattleParts = battleCatalogJson.parts as NssBattlePartRecord[];
 export const nssBattlePartById = new Map(nssBattleParts.map(part => [part.id, part]));
 
