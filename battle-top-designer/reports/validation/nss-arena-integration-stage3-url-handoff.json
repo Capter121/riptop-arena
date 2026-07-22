@@ -1,0 +1,26 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_3_URL_HANDOFF",
+  "status": "PASS",
+  "headBeforeCommit": "1d49f510efd8f07eef73e913c81e36ff25eb33fe",
+  "contract": {
+    "productionPath": "/arena/",
+    "developmentOverride": "VITE_ARENA_URL",
+    "queryFields": ["combo", "loadoutVersion"],
+    "loadoutVersion": 1,
+    "presentationStateTransferred": false,
+    "combinationsValidated": 288
+  },
+  "validation": {
+    "arenaAndShareUnits": "14/14 PASS",
+    "localLibraryImportQrRegressionUnits": "23/23 PASS",
+    "customizerTypeScript": "PASS",
+    "catalogCheck": "PASS; 16 parts and 2 deterministic outputs",
+    "customizerProductionBuild": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "playwrightRun": false,
+    "stage8Run": false
+  }
+}

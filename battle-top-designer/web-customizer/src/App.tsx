@@ -18,6 +18,7 @@ import { FocusReadout } from './focusPresentationController';
 import { clearFocusDiagnostics, focusDiagnosticEvents, recordFocusDiagnostic, setFocusDiagnostics } from './focusDiagnostics';
 import { createShareLink } from './sharing/combinationUrl';
 import { copyShareLink } from './sharing/shareLink';
+import { createArenaLink } from './integration/arenaLink';
 import { currentSnapshot, useCustomizer } from './store';
 import { emitUsabilityAction } from './usability/events';
 import './styles.css';
@@ -67,6 +68,11 @@ export default function App() {
     state.combination,
     new URL(window.location.href),
     import.meta.env.VITE_SHARE_BASE_URL,
+  ), [state.combination]);
+  const arenaLink = useMemo(() => createArenaLink(
+    state.combination,
+    new URL(window.location.href),
+    import.meta.env.VITE_ARENA_URL,
   ), [state.combination]);
   const currentLibraryEntry = [...library.favorites, ...library.recent].find(entry => entry.id === id);
   const automaticName = combinationName(state.combination);
@@ -363,6 +369,7 @@ export default function App() {
               <button data-testid="export" onClick={exportJson}>Export JSON</button>
               <button data-testid="import" onClick={() => importRef.current?.click()}>Import JSON</button>
               <button data-testid="share" onClick={() => setShareOpen(value => !value)}>Share</button>
+              <button className="primary" data-testid="enter-arena" onClick={() => window.location.assign(arenaLink)}>Enter Arena</button>
               <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? 'Rendering card…' : 'Export PNG card'}</button>
               <button data-testid="library" onClick={() => setLibraryOpen(value => !value)}>Library</button>
               <button data-testid="undo" disabled={!state.canUndo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.undo(); }}>Undo</button>
