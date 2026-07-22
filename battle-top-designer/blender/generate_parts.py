@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from lib import collision, exporter, geometry, interfaces, materials  # noqa: E402
+from postprocess_glb_normals import rewrite_file  # noqa: E402
 
 
 def script_args() -> argparse.Namespace:
@@ -70,6 +71,7 @@ def main() -> None:
 
     output_path = ROOT / "public" / "models" / "parts" / f"{part_spec['id']}.glb"
     exporter.export_collection_glb(collection, output_path)
+    rewrite_file(output_path, output_path)
     blend_path = ROOT / "build" / "blend" / f"{part_spec['id']}.blend"
     blend_path.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))

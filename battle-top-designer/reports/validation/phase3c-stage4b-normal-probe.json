@@ -1,0 +1,370 @@
+{
+  "result": "PASS",
+  "crease_angle_degrees": 30.0,
+  "records": [
+    {
+      "asset": "core_void_falcon",
+      "json_sha256": "51b8c769770b1fbb9a5edf6e64fee4fc8f15bbabf13dc27b0aee44d915dc1c7c",
+      "normal_primitives": [
+        {
+          "mesh_index": 0,
+          "primitive_index": 0,
+          "normal_accessor": 1,
+          "normal_byte_range": {
+            "start": 10368,
+            "end": 20736,
+            "byte_stride": 12,
+            "count": 864
+          },
+          "changed_normal_count": 288,
+          "hard_edge_cluster_count": 288,
+          "ambiguous_vertex_count": 576,
+          "cancelled_cluster_count": 2,
+          "triangle_count": 576,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 1,
+          "primitive_index": 0,
+          "normal_accessor": 4,
+          "normal_byte_range": {
+            "start": 26928,
+            "end": 29664,
+            "byte_stride": 12,
+            "count": 228
+          },
+          "changed_normal_count": 228,
+          "hard_edge_cluster_count": 80,
+          "ambiguous_vertex_count": 0,
+          "cancelled_cluster_count": 0,
+          "triangle_count": 148,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 2,
+          "primitive_index": 0,
+          "normal_accessor": 7,
+          "normal_byte_range": {
+            "start": 33288,
+            "end": 36024,
+            "byte_stride": 12,
+            "count": 228
+          },
+          "changed_normal_count": 228,
+          "hard_edge_cluster_count": 80,
+          "ambiguous_vertex_count": 0,
+          "cancelled_cluster_count": 0,
+          "triangle_count": 148,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 3,
+          "primitive_index": 0,
+          "normal_accessor": 10,
+          "normal_byte_range": {
+            "start": 39648,
+            "end": 42384,
+            "byte_stride": 12,
+            "count": 228
+          },
+          "changed_normal_count": 228,
+          "hard_edge_cluster_count": 80,
+          "ambiguous_vertex_count": 0,
+          "cancelled_cluster_count": 0,
+          "triangle_count": 148,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 4,
+          "primitive_index": 0,
+          "normal_accessor": 13,
+          "normal_byte_range": {
+            "start": 46008,
+            "end": 48744,
+            "byte_stride": 12,
+            "count": 228
+          },
+          "changed_normal_count": 228,
+          "hard_edge_cluster_count": 80,
+          "ambiguous_vertex_count": 0,
+          "cancelled_cluster_count": 0,
+          "triangle_count": 148,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 5,
+          "primitive_index": 0,
+          "normal_accessor": 16,
+          "normal_byte_range": {
+            "start": 58272,
+            "end": 66912,
+            "byte_stride": 12,
+            "count": 720
+          },
+          "changed_normal_count": 240,
+          "hard_edge_cluster_count": 240,
+          "ambiguous_vertex_count": 480,
+          "cancelled_cluster_count": 2,
+          "triangle_count": 480,
+          "degenerate_triangle_count": 0
+        }
+      ],
+      "changed_byte_count": 3984,
+      "all_changed_bytes_subset_of_normal_ranges": true,
+      "input": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\public\\models\\parts\\core_void_falcon.glb",
+      "output": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\build\\phase3c-stage4b-core_void_falcon-normal-probe.glb",
+      "input_sha256": "c30245cbdcc41c9851fc88ce774d26289e1a3f6545f718da6ad841cf4b4645c8",
+      "output_sha256": "78872d2790c088fb6bd4a6ef9375069d22e68f386bee00d7d9b53021cc221e7c",
+      "file_length_identical": true,
+      "json_chunk_byte_identical": true,
+      "position_accessors_identical": true,
+      "index_accessors_identical": true,
+      "determinism_sha256": "78872d2790c088fb6bd4a6ef9375069d22e68f386bee00d7d9b53021cc221e7c",
+      "deterministic": true,
+      "normal_quality": {
+        "min_normal_length": 0.9999999627745091,
+        "max_normal_length": 1.0000001040773174,
+        "mean_normal_length": 1.0000000060219447
+      }
+    },
+    {
+      "asset": "blade_storm_fang",
+      "json_sha256": "0cac627d13b0662660b1978613f22afce9ccd5d715c432b5067a553af5e51a13",
+      "normal_primitives": [
+        {
+          "mesh_index": 0,
+          "primitive_index": 0,
+          "normal_accessor": 1,
+          "normal_byte_range": {
+            "start": 5184,
+            "end": 10368,
+            "byte_stride": 12,
+            "count": 432
+          },
+          "changed_normal_count": 432,
+          "hard_edge_cluster_count": 216,
+          "ambiguous_vertex_count": 0,
+          "cancelled_cluster_count": 0,
+          "triangle_count": 288,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 0,
+          "primitive_index": 1,
+          "normal_accessor": 4,
+          "normal_byte_range": {
+            "start": 15552,
+            "end": 19008,
+            "byte_stride": 12,
+            "count": 288
+          },
+          "changed_normal_count": 288,
+          "hard_edge_cluster_count": 144,
+          "ambiguous_vertex_count": 0,
+          "cancelled_cluster_count": 0,
+          "triangle_count": 144,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 0,
+          "primitive_index": 2,
+          "normal_accessor": 7,
+          "normal_byte_range": {
+            "start": 23328,
+            "end": 26784,
+            "byte_stride": 12,
+            "count": 288
+          },
+          "changed_normal_count": 0,
+          "hard_edge_cluster_count": 144,
+          "ambiguous_vertex_count": 288,
+          "cancelled_cluster_count": 1,
+          "triangle_count": 144,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 1,
+          "primitive_index": 0,
+          "normal_accessor": 10,
+          "normal_byte_range": {
+            "start": 36288,
+            "end": 44928,
+            "byte_stride": 12,
+            "count": 720
+          },
+          "changed_normal_count": 240,
+          "hard_edge_cluster_count": 240,
+          "ambiguous_vertex_count": 480,
+          "cancelled_cluster_count": 2,
+          "triangle_count": 480,
+          "degenerate_triangle_count": 0
+        }
+      ],
+      "changed_byte_count": 5336,
+      "all_changed_bytes_subset_of_normal_ranges": true,
+      "input": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\public\\models\\parts\\blade_storm_fang.glb",
+      "output": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\build\\phase3c-stage4b-blade_storm_fang-normal-probe.glb",
+      "input_sha256": "ace00f7f0fcec143a52b6fd684cf8ebd092b9be0a4b4df62bafc6e8b66b05ef9",
+      "output_sha256": "01674d6837d7439e69faaca4d5d41c38b7e97af70a0d65b25256e9502610d472",
+      "file_length_identical": true,
+      "json_chunk_byte_identical": true,
+      "position_accessors_identical": true,
+      "index_accessors_identical": true,
+      "determinism_sha256": "01674d6837d7439e69faaca4d5d41c38b7e97af70a0d65b25256e9502610d472",
+      "deterministic": true,
+      "normal_quality": {
+        "min_normal_length": 0.9999999627745091,
+        "max_normal_length": 1.0000001040773174,
+        "mean_normal_length": 1.0000000087953878
+      }
+    },
+    {
+      "asset": "gear_high",
+      "json_sha256": "8515db46c74989c688e6adbd6f40949e585d0d8d79164ede7c8e9dd9db979d26",
+      "normal_primitives": [
+        {
+          "mesh_index": 0,
+          "primitive_index": 0,
+          "normal_accessor": 1,
+          "normal_byte_range": {
+            "start": 22464,
+            "end": 44928,
+            "byte_stride": 12,
+            "count": 1872
+          },
+          "changed_normal_count": 1296,
+          "hard_edge_cluster_count": 360,
+          "ambiguous_vertex_count": 576,
+          "cancelled_cluster_count": 1,
+          "triangle_count": 1152,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 0,
+          "primitive_index": 1,
+          "normal_accessor": 4,
+          "normal_byte_range": {
+            "start": 67392,
+            "end": 82944,
+            "byte_stride": 12,
+            "count": 1296
+          },
+          "changed_normal_count": 144,
+          "hard_edge_cluster_count": 216,
+          "ambiguous_vertex_count": 1152,
+          "cancelled_cluster_count": 1,
+          "triangle_count": 1152,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 1,
+          "primitive_index": 0,
+          "normal_accessor": 7,
+          "normal_byte_range": {
+            "start": 98496,
+            "end": 107136,
+            "byte_stride": 12,
+            "count": 720
+          },
+          "changed_normal_count": 240,
+          "hard_edge_cluster_count": 240,
+          "ambiguous_vertex_count": 480,
+          "cancelled_cluster_count": 2,
+          "triangle_count": 480,
+          "degenerate_triangle_count": 0
+        }
+      ],
+      "changed_byte_count": 12672,
+      "all_changed_bytes_subset_of_normal_ranges": true,
+      "input": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\public\\models\\parts\\gear_high.glb",
+      "output": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\build\\phase3c-stage4b-gear_high-normal-probe.glb",
+      "input_sha256": "f420a6c44670f5acc80822aacad555cba596285ee50ea0d8d3309b8ac480537e",
+      "output_sha256": "9213a614d854b2e694d203567b2d359c1cf90b794a1fa30761ba8f072fff1bb1",
+      "file_length_identical": true,
+      "json_chunk_byte_identical": true,
+      "position_accessors_identical": true,
+      "index_accessors_identical": true,
+      "determinism_sha256": "9213a614d854b2e694d203567b2d359c1cf90b794a1fa30761ba8f072fff1bb1",
+      "deterministic": true,
+      "normal_quality": {
+        "min_normal_length": 0.9999999439259735,
+        "max_normal_length": 1.0000001040773174,
+        "mean_normal_length": 1.0000000068828578
+      }
+    },
+    {
+      "asset": "tip_taper_balance",
+      "json_sha256": "b13a99bee0588d5203ae17ae2f60aa02627844a3cc496ba1f5ed447fc71decda",
+      "normal_primitives": [
+        {
+          "mesh_index": 0,
+          "primitive_index": 0,
+          "normal_accessor": 1,
+          "normal_byte_range": {
+            "start": 18432,
+            "end": 36864,
+            "byte_stride": 12,
+            "count": 1536
+          },
+          "changed_normal_count": 1280,
+          "hard_edge_cluster_count": 192,
+          "ambiguous_vertex_count": 256,
+          "cancelled_cluster_count": 1,
+          "triangle_count": 768,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 0,
+          "primitive_index": 1,
+          "normal_accessor": 4,
+          "normal_byte_range": {
+            "start": 43032,
+            "end": 44592,
+            "byte_stride": 12,
+            "count": 130
+          },
+          "changed_normal_count": 130,
+          "hard_edge_cluster_count": 128,
+          "ambiguous_vertex_count": 0,
+          "cancelled_cluster_count": 0,
+          "triangle_count": 128,
+          "degenerate_triangle_count": 0
+        },
+        {
+          "mesh_index": 1,
+          "primitive_index": 0,
+          "normal_accessor": 7,
+          "normal_byte_range": {
+            "start": 54000,
+            "end": 62640,
+            "byte_stride": 12,
+            "count": 720
+          },
+          "changed_normal_count": 240,
+          "hard_edge_cluster_count": 240,
+          "ambiguous_vertex_count": 480,
+          "cancelled_cluster_count": 2,
+          "triangle_count": 480,
+          "degenerate_triangle_count": 0
+        }
+      ],
+      "changed_byte_count": 14048,
+      "all_changed_bytes_subset_of_normal_ranges": true,
+      "input": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\public\\models\\parts\\tip_taper_balance.glb",
+      "output": "E:\\\u6218\u6597\u9640\u87ba\u9879\u76ee\\battle-top-designer\\build\\phase3c-stage4b-tip_taper_balance-normal-probe.glb",
+      "input_sha256": "1a07f4e8c81c00d345d0aed5d389b791e513cb5fb9352a46977c6c93f423b81e",
+      "output_sha256": "bb810feb2121a11e018cd3544349fd45ccbf8cee501c5fc24937e6ed8c93366a",
+      "file_length_identical": true,
+      "json_chunk_byte_identical": true,
+      "position_accessors_identical": true,
+      "index_accessors_identical": true,
+      "determinism_sha256": "bb810feb2121a11e018cd3544349fd45ccbf8cee501c5fc24937e6ed8c93366a",
+      "deterministic": true,
+      "normal_quality": {
+        "min_normal_length": 0.999999962551912,
+        "max_normal_length": 1.0000001040773174,
+        "mean_normal_length": 1.0000000061858276
+      }
+    }
+  ]
+}
