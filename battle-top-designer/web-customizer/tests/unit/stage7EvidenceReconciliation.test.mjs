@@ -12,7 +12,8 @@ const freeze = JSON.parse(readFileSync(resolve(reportRoot, 'phase3b-stage7-exist
 describe('Stage 7 evidence hash reconciliation', () => {
   it('reconstructs both previous Markdown hashes without semantic drift', () => {
     for (const entry of audit.files) {
-      const current = readFileSync(resolve('../', entry.path), 'utf8');
+      const current = readFileSync(resolve('../', entry.path), 'utf8').replaceAll('\r\n', '\n');
+      expect(sha256Buffer(Buffer.from(current))).toBe(entry.currentSha256);
       const previous = entry.path.includes('tip-observation')
         ? current.replace('trace.zip`\n', 'trace.zip`  \n') + '\n'
         : current + '\n';

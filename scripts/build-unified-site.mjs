@@ -1,11 +1,11 @@
-import { copyFile, mkdir, readFile, stat } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const customizerRoot = join(projectRoot, 'battle-top-designer', 'web-customizer');
-const sourceModels = join(projectRoot, 'battle-top-designer', 'public', 'models', 'parts');
+const arenaPublicRoot = join(projectRoot, 'public');
 const siteRoot = join(projectRoot, 'dist', 'site');
 const sharedModels = join(siteRoot, 'assets', 'nss', 'parts');
 const node = process.execPath;
@@ -28,6 +28,16 @@ function run(cwd, args, extraEnv = {}) {
   });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`Command failed with exit ${result.status}: ${args.join(' ')}`);
+}
+
+async function copyTree(source, target) {
+  await mkdir(target, { recursive: true });
+  for (const entry of await readdir(source, { withFileTypes: true })) {
+    const sourcePath = join(source, entry.name);
+    const targetPath = join(target, entry.name);
+    if (entry.isDirectory()) await copyTree(sourcePath, targetPath);
+    else await copyFile(sourcePath, targetPath);
+  }
 }
 
 if (await pathExists(siteRoot)) {
@@ -54,13 +64,8 @@ run(customizerRoot, [
 ], { ...sharedBuildEnv, VITE_ARENA_URL: '../arena/' });
 
 await copyFile(join(projectRoot, 'site', 'index.html'), join(siteRoot, 'index.html'));
-const catalog = JSON.parse(await readFile(
-  join(projectRoot, 'battle-top-designer', 'shared', 'nss', 'parts.catalog.json'),
-  'utf8',
-));
-for (const part of catalog.parts) {
-  await copyFile(join(sourceModels, `${part.id}.glb`), join(sharedModels, `${part.id}.glb`));
-}
+await copyTree(arenaPublicRoot, siteRoot);
+run(projectRoot, [join(projectRoot, 'scripts', 'copy-nss-models.mjs'), sharedModels]);
 
 run(projectRoot, [join(projectRoot, 'scripts', 'verify-unified-site.mjs')]);
 console.log(`Unified NSS site built: ${siteRoot}`);

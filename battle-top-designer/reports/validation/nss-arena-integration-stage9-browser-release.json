@@ -1,0 +1,98 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_9_BROWSER_RELEASE",
+  "status": "PASS_READY_FOR_FORMAL_STAGE8",
+  "headBeforeCommit": "6f30b1999c59f8b19602678b1fa97b5ee56d56a6",
+  "referenceLedger": [
+    { "reference": "threejs-qa-release/references/qa-release-checklists.md", "loaded": true },
+    { "reference": "threejs-qa-release/references/checklists/visual-verification.md", "loaded": true },
+    { "reference": "threejs-qa-release/references/checklists/playtest-qa.md", "loaded": true },
+    { "reference": "threejs-qa-release/references/checklists/release.md", "loaded": true },
+    { "reference": "threejs-game-ui-designer/references/checklists/game-ui-quality.md", "loaded": true },
+    { "reference": "threejs-game-ui-designer/references/checklists/hud-readability.md", "loaded": true },
+    { "reference": "threejs-game-ui-designer/references/checklists/responsive-ui-fit.md", "loaded": true }
+  ],
+  "browser": {
+    "engine": "Chromium",
+    "productionUrl": "http://127.0.0.1:4188/",
+    "customizerCanvasDesktop": { "status": "PASS", "display": "1280x395", "variance": 249, "colorBuckets": 85 },
+    "customizerCanvasMobile": { "status": "PASS", "display": "390x329", "drawingBuffer": "585x493", "variance": 249, "colorBuckets": 117 },
+    "arenaCanvasDesktop": { "status": "PASS", "display": "1280x720", "drawingBuffer": "1280x720" },
+    "arenaCanvasMobile": { "status": "PASS", "display": "390x844", "drawingBuffer": "390x844", "documentHorizontalOverflow": 0 },
+    "combinationHandoff": {
+      "status": "PASS",
+      "customizer": "nss-p2c-0066",
+      "arenaUrl": "nss-p2c-0066",
+      "arenaGarage": "nss-p2c-0066 / blade_iron_bastion",
+      "returnCustomizer": "nss-p2c-0066"
+    },
+    "singlePlayer": {
+      "status": "PASS",
+      "failState": "timeout loss",
+      "retry": "PASS",
+      "inputTransition": "turn 1 awaiting -> resolving"
+    },
+    "mixedOnline": {
+      "status": "PASS",
+      "participants": ["NSS nss-p2c-0066", "legacy"],
+      "bothReadyAndBattleStarted": true,
+      "terminalState": "turn timeout",
+      "nssResult": "loss",
+      "legacyResult": "win",
+      "consoleErrorCount": 0
+    },
+    "finalProductionSmoke": {
+      "status": "PASS",
+      "route": "home -> customizer nss-p2c-0138 -> arena nss-p2c-0138",
+      "consoleErrorCount": 0
+    }
+  },
+  "renderer": {
+    "qaMode": "PASS",
+    "launchGeometries": 67,
+    "postResultGeometries": 69,
+    "textures": 43,
+    "postResultCalls": 1,
+    "postResultTriangles": 1,
+    "note": "Calls and triangles were sampled after the result compositor replaced active play; active-play screenshots are retained separately."
+  },
+  "nonBrowserValidation": {
+    "customizerUnit": "304/304 PASS",
+    "rootTypeScript": "PASS",
+    "customizerTypeScript": "PASS",
+    "sharedContract": "16 parts / 288 combinations PASS",
+    "matchServer": "PASS",
+    "productCatalog": "PASS",
+    "standardArenaBuild": "PASS",
+    "standardCustomizerBuild": "PASS",
+    "unifiedSiteBuild": "PASS",
+    "unifiedFormalGlbCount": 16,
+    "unifiedFormalGlbHashMismatchCount": 0,
+    "unifiedDuplicateGlbCount": 0,
+    "arenaPublicAssetCount": 12,
+    "arenaPublicAssetHashMismatchCount": 0
+  },
+  "issuesFoundAndFixed": [
+    "Unified build now copies Arena public images and videos while retaining a single shared formal GLB set.",
+    "All three entry pages declare an inline favicon, eliminating favicon.ico 404 errors.",
+    "Stage 7 evidence hash reconstruction normalizes CRLF to LF before comparing Git-blob hashes; historical evidence bytes and recorded hashes remain unchanged."
+  ],
+  "artifacts": [
+    "output/playwright/nss-arena-stage9/customizer-canvas/desktop.png",
+    "output/playwright/nss-arena-stage9/customizer-canvas/mobile.png",
+    "output/playwright/nss-arena-stage9/arena-active.png",
+    "output/playwright/nss-arena-stage9/arena-mobile-active.png",
+    "output/playwright/nss-arena-stage9/arena-garage-iron-bastion.png",
+    "output/playwright/nss-arena-stage9/final-production-arena.png"
+  ],
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "partSpecDiffCount": 0,
+    "historicalStage7Stage8EvidenceDiffCount": 0,
+    "mainUserWorktreeWritten": false
+  },
+  "residualRisks": [
+    "Customizer emits an upstream Three.js Clock deprecation warning and a GPU shader precision warning on the tested machine; neither produced page errors or blank output.",
+    "The custom deterministic battle proxy is not triangle-mesh physics; high-speed tunneling was not separately benchmarked in this integration run.",
+    "Formal full Stage 8 has not started on the new integration HEAD."
+  ]
+}
