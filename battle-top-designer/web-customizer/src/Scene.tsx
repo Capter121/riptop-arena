@@ -21,8 +21,17 @@ import { useCustomizer } from './store';
 import { resolveStudioQuality } from './rendering/qualityPolicy';
 import { shouldRenderSolarWolfBadge, solarWolfBadgePolicy } from './rendering/solarWolfBadge';
 import { shouldRenderStormFangPattern, stormFangIdentityPolicy } from './rendering/stormFangIdentity';
+import {
+  dualCometIdentityPolicy, ironBastionIdentityPolicy, orbitHaloIdentityPolicy,
+  shouldRenderDualCometPattern, shouldRenderIronBastionPattern, shouldRenderOrbitHaloPattern,
+  shouldRenderVoidFalconBadge, voidFalconBadgePolicy,
+} from './rendering/remainingVisualIdentities';
 import solarWolfBadgeUrl from '../../design/visual-identity/solar-wolf-concept.svg?url';
 import stormFangIdentityUrl from '../../design/visual-identity/storm-fang-concept.svg?url';
+import voidFalconBadgeUrl from '../../design/visual-identity/void-falcon-concept.svg?url';
+import ironBastionIdentityUrl from '../../design/visual-identity/iron-bastion-concept.svg?url';
+import orbitHaloIdentityUrl from '../../design/visual-identity/orbit-halo-concept.svg?url';
+import dualCometIdentityUrl from '../../design/visual-identity/dual-comet-concept.svg?url';
 
 const cameraPositions = {
   top: new Vector3(0, 0.16, 0.001),
@@ -191,14 +200,86 @@ function StormFangPattern() {
   );
 }
 
-function PresentationPart({ family, scene, permanent, offset, assistFocus, solarWolfBadge, stormFangPattern }: {
+function VoidFalconBadge() {
+  const texture = useLoader(TextureLoader, voidFalconBadgeUrl);
+  useEffect(() => {
+    texture.colorSpace = SRGBColorSpace;
+    texture.needsUpdate = true;
+  }, [texture]);
+  return (
+    <mesh position={[0, voidFalconBadgePolicy.topSurfaceYM, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
+      <circleGeometry args={[voidFalconBadgePolicy.radialRangeM[1], 64]} />
+      <meshBasicMaterial map={texture} transparent alphaTest={0.02} depthWrite={false} polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} toneMapped={false} />
+    </mesh>
+  );
+}
+
+function BladeSectorIdentity({ textureUrl, identity }: { textureUrl: string; identity: typeof ironBastionIdentityPolicy | typeof dualCometIdentityPolicy }) {
+  const texture = useLoader(TextureLoader, textureUrl);
+  const material = useMemo(() => new MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    alphaTest: 0.02,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
+    toneMapped: false,
+  }), [texture]);
+  useEffect(() => {
+    texture.colorSpace = SRGBColorSpace;
+    texture.needsUpdate = true;
+    return () => material.dispose();
+  }, [material, texture]);
+  return (
+    <group>
+      {identity.rotationOffsetsRadians.map(start => (
+        <mesh key={start} position={[0, identity.topSurfaceYM, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
+          <ringGeometry args={[identity.radialRangeM[0], identity.radialRangeM[1], 24, 1, start, 0.48]} />
+          <primitive object={material} attach="material" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function OrbitHaloPattern() {
+  const texture = useLoader(TextureLoader, orbitHaloIdentityUrl);
+  const material = useMemo(() => new MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    alphaTest: 0.02,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
+    toneMapped: false,
+  }), [texture]);
+  useEffect(() => {
+    texture.colorSpace = SRGBColorSpace;
+    texture.needsUpdate = true;
+    return () => material.dispose();
+  }, [material, texture]);
+  return (
+    <mesh position={[0, orbitHaloIdentityPolicy.topSurfaceYM, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
+      <ringGeometry args={[orbitHaloIdentityPolicy.radialRangeM[0], orbitHaloIdentityPolicy.radialRangeM[1], 48]} />
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function PresentationPart({ family, scene, permanent, offset, assistFocus, solarWolfBadge, voidFalconBadge, stormFangPattern, ironBastionPattern, orbitHaloPattern, dualCometPattern }: {
   family: Family;
   scene: Object3D;
   permanent: Matrix4;
   offset: number;
   assistFocus: boolean;
   solarWolfBadge: boolean;
+  voidFalconBadge: boolean;
   stormFangPattern: boolean;
+  ironBastionPattern: boolean;
+  orbitHaloPattern: boolean;
+  dualCometPattern: boolean;
 }) {
   const group = useRef<Group>(null);
   const contentGroup = useRef<Group>(null);
@@ -284,7 +365,11 @@ function PresentationPart({ family, scene, permanent, offset, assistFocus, solar
           </mesh>
         )}
         {family === 'core' && solarWolfBadge && <SolarWolfBadge />}
+        {family === 'core' && voidFalconBadge && <VoidFalconBadge />}
         {family === 'blade' && stormFangPattern && <StormFangPattern />}
+        {family === 'blade' && ironBastionPattern && <BladeSectorIdentity textureUrl={ironBastionIdentityUrl} identity={ironBastionIdentityPolicy} />}
+        {family === 'blade' && orbitHaloPattern && <OrbitHaloPattern />}
+        {family === 'blade' && dualCometPattern && <BladeSectorIdentity textureUrl={dualCometIdentityUrl} identity={dualCometIdentityPolicy} />}
       </group>
     </group>
   );
@@ -309,6 +394,10 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
   const lowPerformance = useCustomizer(state => state.lowPerformance);
   const solarWolfBadgeEnabled = useCustomizer(state => state.solarWolfBadgeEnabled);
   const stormFangPatternEnabled = useCustomizer(state => state.stormFangPatternEnabled);
+  const voidFalconBadgeEnabled = useCustomizer(state => state.voidFalconBadgeEnabled);
+  const ironBastionPatternEnabled = useCustomizer(state => state.ironBastionPatternEnabled);
+  const orbitHaloPatternEnabled = useCustomizer(state => state.orbitHaloPatternEnabled);
+  const dualCometPatternEnabled = useCustomizer(state => state.dualCometPatternEnabled);
   const coreGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.core}.glb`);
   const bladeGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.blade}.glb`);
   const assistGltf = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}${combination.assist}.glb`);
@@ -357,7 +446,11 @@ function Assembly({ combination, onReady }: { combination: Combination; onReady:
           offset={offsets[family]}
           assistFocus={focusState.target === 'assist' && focusState.pulseActive}
           solarWolfBadge={shouldRenderSolarWolfBadge(combination.core, solarWolfBadgeEnabled)}
+          voidFalconBadge={shouldRenderVoidFalconBadge(combination.core, voidFalconBadgeEnabled)}
           stormFangPattern={shouldRenderStormFangPattern(combination.blade, stormFangPatternEnabled)}
+          ironBastionPattern={shouldRenderIronBastionPattern(combination.blade, ironBastionPatternEnabled)}
+          orbitHaloPattern={shouldRenderOrbitHaloPattern(combination.blade, orbitHaloPatternEnabled)}
+          dualCometPattern={shouldRenderDualCometPattern(combination.blade, dualCometPatternEnabled)}
         />
       ))}
       {debugAxis && <axesHelper args={[0.09]} />}

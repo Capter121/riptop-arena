@@ -35,6 +35,10 @@ interface CustomizerState {
   lowPerformance: boolean;
   solarWolfBadgeEnabled: boolean;
   stormFangPatternEnabled: boolean;
+  voidFalconBadgeEnabled: boolean;
+  ironBastionPatternEnabled: boolean;
+  orbitHaloPatternEnabled: boolean;
+  dualCometPatternEnabled: boolean;
   startupNotice: string | null;
   testMode: boolean;
   hydrate: (search: string, savedText?: string | null) => void;
@@ -54,6 +58,10 @@ interface CustomizerState {
   setLowPerformance: (value: boolean) => void;
   setSolarWolfBadgeEnabled: (value: boolean) => void;
   setStormFangPatternEnabled: (value: boolean) => void;
+  setVoidFalconBadgeEnabled: (value: boolean) => void;
+  setIronBastionPatternEnabled: (value: boolean) => void;
+  setOrbitHaloPatternEnabled: (value: boolean) => void;
+  setDualCometPatternEnabled: (value: boolean) => void;
   replaceCombination: (combination: Combination) => void;
   reset: () => void;
   save: () => void;
@@ -85,6 +93,10 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   lowPerformance: false,
   solarWolfBadgeEnabled: true,
   stormFangPatternEnabled: true,
+  voidFalconBadgeEnabled: true,
+  ironBastionPatternEnabled: true,
+  orbitHaloPatternEnabled: true,
+  dualCometPatternEnabled: true,
   startupNotice: null,
   testMode: false,
   hydrate: (search, savedText) => {
@@ -175,6 +187,10 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   },
   setSolarWolfBadgeEnabled: solarWolfBadgeEnabled => set({ solarWolfBadgeEnabled }),
   setStormFangPatternEnabled: stormFangPatternEnabled => set({ stormFangPatternEnabled }),
+  setVoidFalconBadgeEnabled: voidFalconBadgeEnabled => set({ voidFalconBadgeEnabled }),
+  setIronBastionPatternEnabled: ironBastionPatternEnabled => set({ ironBastionPatternEnabled }),
+  setOrbitHaloPatternEnabled: orbitHaloPatternEnabled => set({ orbitHaloPatternEnabled }),
+  setDualCometPatternEnabled: dualCometPatternEnabled => set({ dualCometPatternEnabled }),
   replaceCombination: combination => {
     if (!isCombination(combination)) return set({ loadState: 'error', error: 'Illegal combination.' });
     set(state => ({ combination, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? state.combination }));

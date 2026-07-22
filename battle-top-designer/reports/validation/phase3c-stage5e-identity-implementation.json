@@ -1,0 +1,42 @@
+{
+  "stage": "PHASE3C_STAGE5E_REMAINING_IDENTITIES",
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "headAtStart": "8c90a49ab197eb4c1a90c6582a25bf7cf5570131",
+  "registry": {
+    "identityCount": 6,
+    "runtimeObjectsStored": false,
+    "existingSolarWolfVisualChange": false,
+    "existingStormFangVisualChange": false
+  },
+  "identities": [
+    { "id": "void_falcon", "partId": "core_void_falcon", "renderer": "core-badge", "meshes": 1, "drawCalls": 1, "textures": 1, "materials": 1 },
+    { "id": "iron_bastion", "partId": "blade_iron_bastion", "renderer": "blade-sector", "meshes": 3, "drawCalls": 3, "textures": 1, "materials": 1 },
+    { "id": "orbit_halo", "partId": "blade_orbit_halo", "renderer": "blade-ring", "meshes": 1, "drawCalls": 1, "textures": 1, "materials": 1 },
+    { "id": "dual_comet", "partId": "blade_dual_comet", "renderer": "blade-sector", "meshes": 3, "drawCalls": 3, "textures": 1, "materials": 1 }
+  ],
+  "performance": {
+    "maxVisibleIdentityDrawCalls": 4,
+    "maxVisibleIdentityMeshes": 4,
+    "maxVisibleSvgTextures": 2,
+    "maxVisibleMaterials": 2,
+    "duplicateTextureLoaders": false,
+    "materialDisposedOnUnmount": true
+  },
+  "formalGlb": {
+    "count": 16,
+    "workingTreeChanged": false,
+    "sha256Tree": "74d016d26c59144f6cdc0e6b587b6019863ee6ff05d0fd38477ad161ec3a8573"
+  },
+  "validation": {
+    "focusedIdentityUnits": "6/6 PASS",
+    "allUnitTests": "266/266 PASS",
+    "typescript": "PASS",
+    "productCatalog": "16 parts PASS",
+    "productionBuild": "PASS",
+    "svgXmlAndLocalDependencyCheck": "4/4 PASS",
+    "gitDiffCheck": "PASS",
+    "browserAutomationRun": false,
+    "stage8Run": false,
+    "glbRegenerated": false
+  }
+}

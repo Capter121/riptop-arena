@@ -7,6 +7,12 @@ describe('customizer store and local persistence', () => {
   beforeEach(() => {
     localStorage.clear();
     useCustomizer.getState().reset();
+    useCustomizer.getState().setSolarWolfBadgeEnabled(true);
+    useCustomizer.getState().setStormFangPatternEnabled(true);
+    useCustomizer.getState().setVoidFalconBadgeEnabled(true);
+    useCustomizer.getState().setIronBastionPatternEnabled(true);
+    useCustomizer.getState().setOrbitHaloPatternEnabled(true);
+    useCustomizer.getState().setDualCometPatternEnabled(true);
   });
 
   it('updates the correct family and focus state', () => {
@@ -50,5 +56,20 @@ describe('customizer store and local persistence', () => {
     expect(useCustomizer.getState().loadProgress).toBe(100);
     useCustomizer.getState().setLowPerformance(true);
     expect(localStorage.getItem('nova-spin:phase3b:low-performance:v1')).toBe('true');
+  });
+
+  it('keeps each identity toggle independent across part selection', () => {
+    useCustomizer.getState().setVoidFalconBadgeEnabled(false);
+    useCustomizer.getState().setOrbitHaloPatternEnabled(false);
+    useCustomizer.getState().selectPart('core_void_falcon');
+    useCustomizer.getState().selectPart('blade_orbit_halo');
+    expect(useCustomizer.getState()).toMatchObject({
+      voidFalconBadgeEnabled: false,
+      orbitHaloPatternEnabled: false,
+      solarWolfBadgeEnabled: true,
+      stormFangPatternEnabled: true,
+      ironBastionPatternEnabled: true,
+      dualCometPatternEnabled: true,
+    });
   });
 });
