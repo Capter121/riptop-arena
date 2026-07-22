@@ -1,0 +1,69 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_0",
+  "status": "PASS",
+  "capturedAt": "2026-07-22T17:12:58.9315164+08:00",
+  "implementation": {
+    "head": "226fc8ea1dbd33d53d678528fb61eb4a84371a78",
+    "branch": "codex/nss-arena-integration",
+    "worktree": "E:\\战斗陀螺项目\\nss-arena-integration",
+    "worktreeCleanBeforeCapture": true
+  },
+  "runtime": {
+    "node": "v24.18.0",
+    "npm": "11.16.0",
+    "rootTypeScript": "~6.0.2",
+    "customizerTypeScript": "5.9.2",
+    "rootThree": "^0.185.1",
+    "customizerThree": "0.185.1"
+  },
+  "formalPartGlbs": {
+    "root": "battle-top-designer/public/models/parts",
+    "files": 16,
+    "bytes": 1177260,
+    "treeDigest": "6f6cf35a7b0d53b18fb57ddcc9d9ec8f81db9f7263a2a4a9cc60a3e877054a4e",
+    "entries": [
+      "assist_air.glb|106072|062ef10c99a8cdf4d74d583d627d777a08c2870f4f9bca5011b712f3cc23b4e2",
+      "assist_guard.glb|65440|f9f88694ab03dcc0a4e68e87f52f710c73043c497bf5c4433d1483f4f52faea6",
+      "assist_heavy.glb|68908|20a73e5936ae84a03e96c9ac325f4fc3e259204ac3e912fda9a49e9bdf6ae57a",
+      "blade_dual_comet.glb|73296|65c930d85ff0fb6a1d1cf6d84f69a9baa4391a42448dceaa1569892e3cbd563b",
+      "blade_iron_bastion.glb|85000|194f59c9763e2cda59e4b733e27709d3f334b0222eceac3f93487e84fd7128b8",
+      "blade_orbit_halo.glb|100708|d1b61b880915682b384ac268dde083d6d3841a5daf150b0bd8453056f4b88fca",
+      "blade_storm_fang.glb|52936|01674d6837d7439e69faaca4d5d41c38b7e97af70a0d65b25256e9502610d472",
+      "core_solar_wolf.glb|44184|ea6e67d55ea644da52f1d5aceac4f81d3c0a3f0432a595c70fd21a87520f501f",
+      "core_void_falcon.glb|76836|78872d2790c088fb6bd4a6ef9375069d22e68f386bee00d7d9b53021cc221e7c",
+      "gear_high.glb|114048|9213a614d854b2e694d203567b2d359c1cf90b794a1fa30761ba8f072fff1bb1",
+      "gear_low.glb|44080|0bf265283387b91177799b3cc4e892bdd949055f10bbda8f628a44540c1925ee",
+      "gear_medium.glb|96596|2e57f8e13973c2b4723263675e481ab5a422e6bf32139444e391d66ac2f2082f",
+      "tip_ball_defense.glb|62432|8e02566a6acaf25a835fc457cf99d8366558b6704cdd43832a3a4ff3df6255bd",
+      "tip_flat_attack.glb|47680|85d131d37173542a951e22bdb8fbeb17f66112aad3818ac2b52df42afbf4e8e7",
+      "tip_needle_stamina.glb|69632|8cb71afac7c2826529f934d3e9cc690a69460ec1e377adce2d2a1a4c81cfed5d",
+      "tip_taper_balance.glb|69412|bb810feb2121a11e018cd3544349fd45ccbf8cee501c5fc24937e6ed8c93366a"
+    ]
+  },
+  "protectedPartSpecs": {
+    "root": "battle-top-designer/specs/parts",
+    "files": 16,
+    "bytes": 23927,
+    "treeDigest": "18b1553e023e0320b4ccc4d301ce20dddd137a1da6ca0671ed63631225ec37d9"
+  },
+  "protectedHistoricalEvidence": {
+    "scope": "tracked files below battle-top-designer/reports whose path contains stage7 or stage8",
+    "files": 40,
+    "bytes": 199575,
+    "treeDigest": "3698fc00f75592e22b26e7cef8984d9eb87c98d121cc451847780db8b8de175c"
+  },
+  "userMainWorkspace": {
+    "scope": "git status and tracked binary diff, excluding the newly created nss-arena-integration worktree path",
+    "statusEntries": 55,
+    "statusDigest": "5be7e11a5e73a7dc40c57eec758aee3226791391bb34ec95bd85092a821fb7e6",
+    "trackedDiffDigest": "5b8938f89dd21a0b3e6eee367aeb8f930124e2409fd5b555fcd69fc7ed3271c0"
+  },
+  "constraints": {
+    "externalAssetsGenerated": false,
+    "externalAssetReason": "The approved design requires the existing 16 formal NSS GLBs as the only model source.",
+    "playwrightRun": false,
+    "stage8Run": false,
+    "formalGlbModified": false,
+    "historicalEvidenceModified": false
+  }
+}
