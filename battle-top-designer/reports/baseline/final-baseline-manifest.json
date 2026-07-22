@@ -1,0 +1,37 @@
+{
+  "baselineStatus": "APPROVED",
+  "finalBaselineHead": "94dcdb931fa3f3ab21c1b163509d92a65c23f061",
+  "formalStage8EvidenceHead": "12bd89d9fa21098e30d78c46ea9a02261c973aac",
+  "formalStage8RunId": "stage8-delivery-20260720T152216Z-12bd89d",
+  "formalStage8Status": "PASS",
+  "formalStage8Modes": {
+    "preflight": "PASS",
+    "long": "PASS",
+    "finalize": "PASS"
+  },
+  "formalStage8ArtifactHashMismatches": 0,
+  "postStage8DeltaStatus": "ACCEPTED_WITHOUT_FULL_STAGE8_RERUN",
+  "phase3cStatus": "COMPLETE",
+  "humanVisualReviewStatus": "APPROVED",
+  "unitTestResult": {
+    "targeted": "21/21 PASS",
+    "all": "275/275 PASS"
+  },
+  "typescriptStatus": "PASS",
+  "buildStatus": "PASS",
+  "catalogStatus": "PASS",
+  "formalGlbStatus": {
+    "status": "PASS",
+    "count": 16,
+    "workingTreeChanged": false
+  },
+  "historicalEvidenceStatus": "UNCHANGED",
+  "approvedAt": "2026-07-22T05:56:36Z",
+  "residualRisks": [
+    {
+      "status": "ACCEPTED_LOW_VISUAL_INTEGRATION_RISK",
+      "description": "The final baseline HEAD did not receive a new full Playwright Stage 8 run; the accepted evidence is the scope audit, targeted and full unit validation, TypeScript, catalog, build, SVG and formal GLB integrity checks, approved human visual review, and unchanged historical evidence."
+    }
+  ],
+  "releaseTag": "v0.3.0-final-visual-baseline"
+}
