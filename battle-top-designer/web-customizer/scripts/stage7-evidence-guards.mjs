@@ -7,6 +7,10 @@ export function sha256Buffer(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+export function trackedEvidenceSha256(bytes) {
+  return sha256Buffer(Buffer.from(bytes.toString('utf8').replaceAll('\r\n', '\n'), 'utf8'));
+}
+
 export function readGitBlob(commit, path) {
   const result = spawnSync('git', ['show', `${commit}:${path}`]);
   if (result.status !== 0) throw new Error(result.stderr?.toString() || 'Git blob unavailable');

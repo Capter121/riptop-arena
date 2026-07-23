@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeMarkdownEvidence, sha256Buffer } from '../../scripts/stage7-evidence-guards.mjs';
+import {
+  normalizeMarkdownEvidence, sha256Buffer, trackedEvidenceSha256,
+} from '../../scripts/stage7-evidence-guards.mjs';
 
 const reportRoot = resolve('../reports/validation');
 const audit = JSON.parse(readFileSync(resolve(reportRoot, 'phase3b-stage7-diagnosis-anchor-refresh.json'), 'utf8'));
@@ -10,6 +12,11 @@ const substitute = JSON.parse(substituteText);
 const freeze = JSON.parse(readFileSync(resolve(reportRoot, 'phase3b-stage7-existing-evidence-freeze.json'), 'utf8'));
 
 describe('Stage 7 evidence hash reconciliation', () => {
+  it('hashes tracked evidence identically for LF and CRLF checkouts', () => {
+    expect(trackedEvidenceSha256(Buffer.from('line one\nline two\n')))
+      .toBe(trackedEvidenceSha256(Buffer.from('line one\r\nline two\r\n')));
+  });
+
   it('reconstructs both previous Markdown hashes without semantic drift', () => {
     for (const entry of audit.files) {
       const current = readFileSync(resolve('../', entry.path), 'utf8').replaceAll('\r\n', '\n');

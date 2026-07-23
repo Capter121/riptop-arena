@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { hashFile } from './playwright-artifacts.mjs';
 import {
   FORMAL_STAGE7_SHA256, isFormalStage7Report, normalizeMarkdownEvidence,
-  readGitBlob, sha256Buffer,
+  readGitBlob, sha256Buffer, trackedEvidenceSha256,
 } from './stage7-evidence-guards.mjs';
 
 const root = resolve('..');
@@ -11,7 +11,11 @@ const readJson = path => JSON.parse(readFileSync(resolve(root, path), 'utf8'));
 const errors = [];
 const verifyPath = (path, sha256, label) => {
   if (!path || !existsSync(resolve(root, path))) { errors.push(`${label}: missing ${path}`); return; }
-  if (sha256 && hashFile(resolve(root, path)) !== sha256) errors.push(`${label}: hash mismatch ${path}`);
+  const raw = hashFile(resolve(root, path));
+  const accepted = path.replaceAll('\\', '/').startsWith('reports/')
+    ? new Set([raw, trackedEvidenceSha256(readFileSync(resolve(root, path)))])
+    : new Set([raw]);
+  if (sha256 && !accepted.has(sha256)) errors.push(`${label}: hash mismatch ${path}`);
 };
 
 const originalHash = '69631e615837580df5809fc146698df341c52f3c967d68c56fe1fac810de5e37';
@@ -32,7 +36,7 @@ if (anchorRefresh.changeReason !== 'WHITESPACE_ONLY_PRECOMMIT_NORMALIZATION' || 
 for (const entry of anchorRefresh.files ?? []) {
   verifyPath(entry.path, entry.currentSha256, `diagnosis anchor ${entry.path}`);
   if (!entry.normalizedSemanticEqual || !entry.previousBytesReconstructedAndHashVerified) errors.push(`diagnosis semantics not verified: ${entry.path}`);
-  const current = readFileSync(resolve(root, entry.path), 'utf8');
+  const current = readFileSync(resolve(root, entry.path), 'utf8').replaceAll('\r\n', '\n');
   const reconstructed = entry.path.includes('tip-observation')
     ? current.replace('trace.zip`\n', 'trace.zip`  \n') + '\n'
     : current + '\n';
