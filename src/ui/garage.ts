@@ -63,8 +63,21 @@ export class GaragePanel {
 
     this.nssPanel.className = 'garage-nss';
     this.nssPanel.hidden = true;
-    this.returnCustomizerLink.className = 'button';
-    this.returnCustomizerLink.textContent = 'Return to Customizer';
+    this.returnCustomizerLink.className = 'button button--nss-customizer';
+    this.returnCustomizerLink.textContent = '🛠️ 打开 3D 陀螺组装 (Customizer)';
+    this.returnCustomizerLink.style.background = 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)';
+    this.returnCustomizerLink.style.color = '#000';
+    this.returnCustomizerLink.style.fontWeight = 'bold';
+    this.returnCustomizerLink.style.textDecoration = 'none';
+    this.returnCustomizerLink.style.display = 'inline-block';
+    this.returnCustomizerLink.style.marginTop = '0.8rem';
+    this.returnCustomizerLink.addEventListener('click', (event) => {
+      const url = this.returnCustomizerLink.href;
+      if (url && !url.endsWith('#') && !url.startsWith('javascript:')) {
+        event.preventDefault();
+        window.location.href = url;
+      }
+    });
     this.root.append(this.nssPanel);
 
     (['CHIP', 'LAYER', 'DISC', 'DRIVER', 'LAUNCHER'] as ComponentCategory[]).forEach((slot) => {

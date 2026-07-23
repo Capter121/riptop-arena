@@ -42,7 +42,7 @@ import { ShockwaveFX } from '../fx/shockwave';
 import { PickupManager } from '../gameplay/pickups';
 import { createBloomPipeline, type BloomPipeline } from '../scene/postProcessing';
 import { NetworkClient } from '../network/networkClient';
-import { NssLoadoutController } from '../nss/loadoutController';
+import { DEFAULT_NSS_LOADOUT, NssLoadoutController } from '../nss/loadoutController';
 import { buildNssBattleStats } from '../nss/buildStats';
 import { NSS_BATTLE_CATALOG_SHA256 } from '../nss/battleCatalog';
 import { nssCombinationId } from '../nss/loadout';
@@ -894,12 +894,27 @@ export class Game {
     return snapshot;
   }
 
+  private updateCustomizerLinks() {
+    const currentNssLoadout = this.nssRequest.kind === 'ready'
+      ? this.nssRequest.loadout
+      : (this.progression.latestNssLoadout ?? DEFAULT_NSS_LOADOUT);
+
+    const customizerUrl = this.nssLoadouts.customizerLink(
+      currentNssLoadout,
+      new URL(window.location.href),
+      import.meta.env.VITE_CUSTOMIZER_URL
+    );
+
+    this.menu.setNssCustomizerUrl(customizerUrl);
+  }
+
   private showMenu() {
     this.phase = 'menu';
     this.audio.startMenuAmbience();
     this.arena.setTheme(this.menu.stageSelect.value);
     this.menu.setMeta(this.getMenuMetaCn());
     this.menu.setTrophyShelf(this.getTrophyTitle(), this.getTrophyBody());
+    this.updateCustomizerLinks();
     this.menu.root.style.display = 'grid';
     this.garage.root.style.display = 'none';
     this.shop.root.style.display = 'none';
@@ -2504,7 +2519,7 @@ export class Game {
     const totalEnergy = this.energy.get('player') + this.energy.get('enemy');
     const normalBloom = 0.65 + (totalEnergy / 20) * 1.2;
     const bloomStrength = arenaManager.getTheme() === 'absolute_zero'
-      ? Math.min(normalBloom * 0.62, 1.05)
+      ? Math.min(normalBloom * 0.42, 0.75)
       : normalBloom;
     this.bloom.setBloomStrength(bloomStrength);
     

@@ -1,0 +1,92 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: NOVA SPIN SYSTEM
+      - heading "Internal Customizer" [level=1] [ref=e7]
+    - generic [ref=e8]: PROVISIONAL PROTOTYPE
+  - region "3D customizer viewport" [ref=e9]:
+    - generic [ref=e10]: Loading local 3D runtime…
+    - generic [ref=e11]: Loading local assets… 0%
+    - generic "Camera controls" [ref=e12]:
+      - generic [ref=e13]:
+        - button "top" [ref=e14] [cursor=pointer]
+        - button "45°" [ref=e15] [cursor=pointer]
+        - button "side" [ref=e16] [cursor=pointer]
+        - button "bottom" [ref=e17] [cursor=pointer]
+        - button "Showcase" [ref=e18] [cursor=pointer]
+      - generic "Viewer utilities" [ref=e19]:
+        - button "Reset" [ref=e20] [cursor=pointer]
+        - button "Axis" [ref=e21] [cursor=pointer]
+        - button "Low performance" [ref=e22] [cursor=pointer]
+      - generic "Identity controls" [ref=e23]:
+        - button "Solar badge" [pressed] [ref=e24] [cursor=pointer]
+        - button "Storm pattern" [pressed] [ref=e25] [cursor=pointer]
+  - generic [ref=e26]:
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]: CURRENT COMBINATION
+        - heading "Solar Wolf · Storm Fang · Heavy Assist · Low Height Gear · Flat Attack Tip" [level=2] [ref=e30]
+        - code [ref=e31]: nss-p2c-0138
+      - button "Explode" [ref=e32] [cursor=pointer]
+    - navigation "Part families" [ref=e33]:
+      - button "Core" [ref=e34] [cursor=pointer]
+      - button "Main Blade" [ref=e35] [cursor=pointer]
+      - button "Assist Ring" [ref=e36] [cursor=pointer]
+      - button "Height Gear" [ref=e37] [cursor=pointer]
+      - button "Performance Tip" [ref=e38] [cursor=pointer]
+    - generic "Main Blade choices" [ref=e39]:
+      - button "DU Dual Comet" [ref=e40] [cursor=pointer]:
+        - generic [ref=e41]: DU
+        - generic [ref=e42]: Dual Comet
+      - button "IR Iron Bastion" [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: IR
+        - generic [ref=e45]: Iron Bastion
+      - button "OR Orbit Halo" [ref=e46] [cursor=pointer]:
+        - generic [ref=e47]: OR
+        - generic [ref=e48]: Orbit Halo
+      - button "ST Storm Fang" [ref=e49] [cursor=pointer]:
+        - generic [ref=e50]: ST
+        - generic [ref=e51]: Storm Fang
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - heading "Concept attributes" [level=3] [ref=e55]
+          - generic [ref=e56]: 0—100
+        - generic [ref=e57]:
+          - generic [ref=e58]: attack
+          - strong [ref=e61]: "74"
+        - generic [ref=e62]:
+          - generic [ref=e63]: defense
+          - strong [ref=e66]: "50"
+        - generic [ref=e67]:
+          - generic [ref=e68]: stamina
+          - strong [ref=e71]: "48"
+        - generic [ref=e72]:
+          - generic [ref=e73]: balance
+          - strong [ref=e76]: "56"
+        - generic [ref=e77]:
+          - generic [ref=e78]: 重量倾向
+          - strong [ref=e81]: "61"
+        - generic [ref=e82]:
+          - generic [ref=e83]: 高度倾向
+          - strong [ref=e86]: "42"
+        - paragraph [ref=e87]: Concept attributes for prototype use only.
+      - generic [ref=e88]:
+        - heading "Combination tools" [level=3] [ref=e89]
+        - generic [ref=e90]:
+          - button "Random" [ref=e91] [cursor=pointer]
+          - button "Storm Attack" [ref=e92] [cursor=pointer]
+          - button "Save local" [ref=e93] [cursor=pointer]
+          - button "Restore local" [ref=e94] [cursor=pointer]
+          - button "Export JSON" [ref=e95] [cursor=pointer]
+          - button "Import JSON" [ref=e96] [cursor=pointer]
+          - button "Share" [ref=e97] [cursor=pointer]
+          - button "Enter Arena" [ref=e98] [cursor=pointer]
+          - button "Export PNG card" [disabled] [ref=e99] [cursor=pointer]
+          - button "Library" [ref=e100] [cursor=pointer]
+          - button "Undo" [disabled] [ref=e101] [cursor=pointer]
+          - button "Redo" [disabled] [ref=e102] [cursor=pointer]
+        - status [ref=e103]
+  - generic [ref=e104]:
+    - paragraph [ref=e105]: Human visual review remains pending.
+    - paragraph [ref=e106]: Development continued under a documented provisional internal-prototype decision.

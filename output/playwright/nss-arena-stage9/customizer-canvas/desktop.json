@@ -1,0 +1,25 @@
+{
+  "url": "http://127.0.0.1:4188/customizer/",
+  "mode": "desktop",
+  "screenshotPath": "output\\playwright\\nss-arena-stage9\\customizer-canvas\\desktop.png",
+  "result": {
+    "ok": true,
+    "reason": "nonblank",
+    "rect": {
+      "x": 0,
+      "y": 76,
+      "width": 1280,
+      "height": 395
+    },
+    "drawingBuffer": {
+      "width": 1280,
+      "height": 395
+    },
+    "alphaPixels": 4111,
+    "variance": 249,
+    "colorBuckets": 85,
+    "diagnostics": null
+  },
+  "consoleErrors": [],
+  "pageErrors": []
+}

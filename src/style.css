@@ -694,13 +694,18 @@ select {
 
 .button {
   appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 52px;
+  padding: 0 16px;
   border: 1px solid rgba(153, 209, 255, 0.2);
   border-radius: 16px;
   background: rgba(14, 25, 41, 0.85);
   color: #eef6ff;
   font-size: 15px;
   font-weight: 800;
+  text-decoration: none;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   backdrop-filter: blur(12px);
@@ -723,6 +728,23 @@ select {
   background: linear-gradient(135deg, rgba(255, 123, 91, 0.9), rgba(255, 209, 102, 0.8));
   color: #07131d;
   text-shadow: none;
+}
+
+.button--nss-customizer {
+  border: none !important;
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+  color: #040811 !important;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none !important;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.4);
+  text-shadow: none !important;
+}
+
+.button--nss-customizer:hover {
+  background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%) !important;
+  box-shadow: 0 0 24px rgba(67, 233, 123, 0.6);
+  transform: translateY(-2px);
 }
 
 .button--primary:hover {

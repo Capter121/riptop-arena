@@ -1,0 +1,22 @@
+- generic [ref=e2]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - heading "黑色商城" [level=1]
+          - button [ref=e29] [cursor=pointer]
+          - button "返回大厅" [ref=e30] [cursor=pointer]
+  - generic:
+    - generic [ref=e31]:
+      - generic: 玩家
+      - generic: 1880 / 1880
+      - generic: 爆裂风险 0%
+    - generic [ref=e32]:
+      - generic: "45.0"
+      - generic: 3 秒后发射
+      - generic: 长按蓄力 - 角度 0 度 - 按 Q/E 瞄准
+    - generic [ref=e33]:
+      - generic: 阿特拉斯守卫
+      - generic: 2560 / 2560
+      - generic: 爆裂风险 0%
+  - generic: 新一轮战斗开始

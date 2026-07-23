@@ -1,0 +1,1 @@
+import{a as s,j as t}from"./index-B8tL30Sv.js";import{c as a}from"./qrCode-nGqCQ2Zz.js";function c({content:r,onReady:e}){const o=s.useMemo(()=>a(r),[r]);return s.useEffect(()=>{e?.()},[e,o]),t.jsx("div",{className:"share-qr",role:"img","aria-label":"QR code for the current combination link",dangerouslySetInnerHTML:{__html:o}})}export{c as QrCodeView};

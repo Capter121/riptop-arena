@@ -1,0 +1,12 @@
+- main [ref=e2]:
+  - heading "Nova Spin System" [level=1] [ref=e3]
+  - paragraph [ref=e4]: 设计你的五层陀螺组合，并将同一配置带入 RIPTOP Arena。
+  - navigation "产品入口" [ref=e5]:
+    - link [ref=e6] [cursor=pointer]:
+      - /url: ./customizer/
+      - strong [ref=e7]: 定制陀螺
+      - text: 选择并预览 NSS-V1 零件组合
+    - link [ref=e8] [cursor=pointer]:
+      - /url: ./arena/
+      - strong [ref=e9]: 进入竞技场
+      - text: 使用已保存组合开始战斗

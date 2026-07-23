@@ -23,44 +23,18 @@ export class ArenaVisuals {
       return;
     }
 
-    const isLowEnd = window.innerWidth < 768
-      || window.matchMedia('(pointer: coarse)').matches
-      || navigator.maxTouchPoints > 0;
-    const mirrorDpr = Math.min(window.devicePixelRatio || 1, 1.25);
-    const requestedWidth = window.innerWidth * mirrorDpr;
-    const requestedHeight = window.innerHeight * mirrorDpr;
-    const mirrorScale = Math.min(1, 1024 / requestedWidth, 1024 / requestedHeight);
-    const textureWidth = Math.max(256, Math.floor(requestedWidth * mirrorScale));
-    const textureHeight = Math.max(256, Math.floor(requestedHeight * mirrorScale));
-
     const geo = new THREE.CircleGeometry(this.radius * 0.94, 64);
 
-    if (isLowEnd) {
-      this.createFallback(geo);
-    } else {
-      try {
-        this.reflector = new Reflector(geo, {
-          clipBias: 0.003,
-          textureWidth,
-          textureHeight,
-          color: 0x183c55,
-        });
-        this.reflector.rotation.x = -Math.PI / 2;
-        this.reflector.position.y = 0.29;
-        this.root.add(this.reflector);
-      } catch (error) {
-        console.warn('Absolute Zero reflector unavailable; using fallback.', error);
-        this.createFallback(geo);
-      }
-    }
+    // Completely remove Reflector mirror to eliminate harsh reflections and flare whiteouts
+    this.createFrostedIceFloor(geo);
 
-    // Hologrid overlay
+    // Hologrid overlay with soft opacity
     this.gridHelper = new THREE.GridHelper(this.radius * 2, 20, 0x00f0ff, 0x004488);
     this.gridHelper.position.y = 0.30;
     const gridMat = this.gridHelper.material as THREE.LineBasicMaterial;
     gridMat.transparent = true;
-    gridMat.opacity = 0.4;
-    gridMat.blending = THREE.AdditiveBlending;
+    gridMat.opacity = 0.25;
+    gridMat.blending = THREE.NormalBlending;
     this.root.add(this.gridHelper);
 
     // Ice peaks around the rim
@@ -68,17 +42,14 @@ export class ArenaVisuals {
     this.iceGeometry = new THREE.ConeGeometry(0.6, 2.5, 5);
     this.iceGeometry.translate(0, 1.25, 0);
     
-    // MeshPhysicalMaterial for beautiful glass/ice look
-    this.iceMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x88ccff,
-      transmission: 0.9,
-      opacity: 1,
-      transparent: true,
+    // Frosted ice peak material with high roughness and no glare
+    this.iceMaterial = new THREE.MeshStandardMaterial({
+      color: 0x4a90e2,
       metalness: 0.1,
-      roughness: 0.1,
-      ior: 1.31, // Ice Index of Refraction
-      thickness: 1.5,
-    });
+      roughness: 0.65, // Matte ice feel without specular glare
+      transparent: true,
+      opacity: 0.88,
+    }) as unknown as THREE.MeshPhysicalMaterial;
 
     for (let i = 0; i < 36; i++) {
       const angle = (i / 36) * Math.PI * 2;
@@ -139,15 +110,15 @@ export class ArenaVisuals {
     this.glitchTimer = 0;
   }
 
-  private createFallback(geometry: THREE.CircleGeometry) {
+  private createFrostedIceFloor(geometry: THREE.CircleGeometry) {
     this.fallbackMesh = new THREE.Mesh(
       geometry,
       new THREE.MeshStandardMaterial({
-        color: 0x062b44,
-        metalness: 0.9,
-        roughness: 0.1,
+        color: 0x071e33, // Deep cool frost blue base
+        metalness: 0.1,
+        roughness: 0.70, // Frosted matte ice texture: zero harsh reflections
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.95,
       }),
     );
     this.fallbackMesh.rotation.x = -Math.PI / 2;

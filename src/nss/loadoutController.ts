@@ -42,9 +42,14 @@ export class NssLoadoutController {
   }
 
   customizerLink(loadout: NssBattleLoadoutV1, currentLocation: URL, configuredBase?: string): string {
-    const target = configuredBase
-      ? new URL(configuredBase, currentLocation)
-      : new URL('../customizer/', currentLocation);
+    let target: URL;
+    if (configuredBase) {
+      target = new URL(configuredBase, currentLocation);
+    } else if (typeof import.meta !== 'undefined' && import.meta.env?.DEV && !currentLocation.pathname.includes('/arena')) {
+      target = new URL('http://127.0.0.1:4175/');
+    } else {
+      target = new URL('../customizer/', currentLocation);
+    }
     target.search = '';
     target.searchParams.set('combo', nssCombinationId(loadout.combination));
     target.hash = '';

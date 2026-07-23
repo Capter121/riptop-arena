@@ -8,6 +8,7 @@ export class MenuPanel {
   readonly garage = document.createElement('button');
   readonly forge = document.createElement('button');
   readonly blackMarket = document.createElement('button');
+  readonly nssCustomizer = document.createElement('a');
   readonly meta = document.createElement('div');
   readonly trophyShelf = document.createElement('div');
   readonly stageSelect = document.createElement('select');
@@ -24,6 +25,26 @@ export class MenuPanel {
     this.survival.textContent = '生存模式';
     this.tournament.className = 'button';
     this.tournament.textContent = '锦标赛';
+
+    // 🎨 Nova Spin 3D Assembly Button
+    this.nssCustomizer.className = 'button button--nss-customizer';
+    this.nssCustomizer.textContent = '🎨 3D 陀螺组装 (Nova Spin)';
+    this.nssCustomizer.style.background = 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)';
+    this.nssCustomizer.style.color = '#000';
+    this.nssCustomizer.style.fontWeight = 'bold';
+    this.nssCustomizer.style.boxShadow = '0 0 15px rgba(79, 172, 254, 0.6)';
+    this.nssCustomizer.style.textDecoration = 'none';
+    this.nssCustomizer.style.display = 'inline-block';
+    this.nssCustomizer.style.textAlign = 'center';
+    this.nssCustomizer.style.lineHeight = '2.2rem';
+    this.nssCustomizer.addEventListener('click', (event) => {
+      const url = this.nssCustomizer.href;
+      if (url && !url.endsWith('#') && !url.startsWith('javascript:')) {
+        event.preventDefault();
+        window.location.href = url;
+      }
+    });
+
     this.garage.className = 'button';
     this.garage.textContent = '神级改装库';
     this.forge = document.createElement('button');
@@ -74,9 +95,13 @@ export class MenuPanel {
 
     this.root.append(
       eyebrow, title, intro, stageStrip, stageWrap, 
-      this.start, this.online, this.onlineStatus, this.survival, this.tournament, this.garage, this.forge, this.blackMarket,
+      this.start, this.online, this.onlineStatus, this.nssCustomizer, this.survival, this.tournament, this.garage, this.forge, this.blackMarket,
       this.meta, this.trophyShelf
     );
+  }
+
+  setNssCustomizerUrl(url: string) {
+    this.nssCustomizer.href = url;
   }
 
   setMeta(text: string) {
