@@ -565,38 +565,6 @@ function longGates(run) {
   return summary;
 }
 
-function humanReviewPackage(headCommit) {
-  const specs = readdirSync(resolve(projectRoot, 'specs/parts')).filter(name => name.endsWith('.json')).sort()
-    .map(name => parseJson(resolve(projectRoot, 'specs/parts', name)))
-    .map(spec => ({ id: spec.id, partType: spec.part_type,
-      preview: `reports/renders/human-review/${spec.part_type === 'emblem_core' ? 'core' : spec.part_type === 'main_blade' ? 'blade' : spec.part_type === 'assist_ring' ? 'assist' : spec.part_type === 'height_gear' ? 'gear' : 'tip'}-family/${spec.id}/perspective_45_512.png` }));
-  const assemblies = parseJson(resolve(projectRoot, 'specs/assemblies.json')).assemblies
-    .filter(item => item.purpose === 'phase2b_representative_fixture')
-    .map(item => ({ id: item.id, core: item.core, blade: item.blade, assist: item.assist, gear: item.gear, tip: item.tip,
-      preview: `reports/renders/human-review/assemblies/${item.id}/perspective_45_512.png` }));
-  return {
-    schemaVersion: 'NSS-PHASE3B-HUMAN-VISUAL-REVIEW-V1',
-    headCommit,
-    baseline: { tag: baselineTag, resolvedCommit: baselineCommit, status: 'PROVISIONAL_NOT_FINAL' },
-    parts: specs,
-    representativeAssemblies: assemblies,
-    reviewDimensions: ['family distinctness', 'assembly distinctness', 'material hierarchy', 'normal viewing distance',
-      'Dual Comet balance and rhythm', 'Assist visibility and focus compensation'],
-    scoring: { options: ['PASS', 'LOCAL_REVISION', 'REDESIGN', 'NOT_VISIBLE', 'NEEDS_COMPARISON'],
-      passThresholdPercent: 67, minimumReviewers: 3, maximumReviewers: 5, currentReviewers: 0 },
-    anonymousRecordMethod: 'Use reviewer-01 through reviewer-05; do not record names or contact details.',
-    aggregationMethod: 'Calculate per-item PASS rate from real reviewer records only.',
-    signoffFields: { reviewerId: null, reviewedAt: null, decision: null, notes: null },
-    humanConclusionFieldsMayBeAutofilled: false,
-    waiver: { path: 'reports/validation/phase2b-r1-provisional-review-waiver.csv', expiresOn: '2026-08-14',
-      technicalContinuationOnly: true, visualApprovalGranted: false },
-    reviewerStatus: 'INSUFFICIENT_REVIEWERS',
-    phase3bStatus: 'CHANGES_REQUESTED',
-    humanVisualReview: 'PENDING',
-    auditNote: requiredAuditNote,
-  };
-}
-
 function finalize(run) {
   const preflightSummary = readPreflight(run.runDir);
   const longPath = join(run.runDir, 'long-gates-summary.json');
