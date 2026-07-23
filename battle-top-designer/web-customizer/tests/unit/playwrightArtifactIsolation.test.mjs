@@ -1,6 +1,6 @@
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   artifactReporterName,
@@ -37,6 +37,17 @@ describe('Playwright artifact isolation', () => {
     const b = beginArtifactRun({ artifactRoot: root, runId: 'stage7-smoke-b', ...metadata });
     expect(a.outputDir).not.toBe(b.outputDir);
     expect(a.reporterPath).not.toBe(b.reporterPath);
+  });
+
+  it('honors a caller-provided artifact root in paths and manifest metadata', () => {
+    const root = workspace();
+    const run = beginArtifactRun({ artifactRoot: root, runId: 'stage8-nested-gate', ...metadata });
+    const manifest = JSON.parse(readFileSync(run.manifestPath, 'utf8'));
+    expect(run.runDir).toBe(resolve(root, 'stage8-nested-gate'));
+    expect(manifest.reporterPath).toBe(relative(process.cwd(), run.reporterPath).replaceAll('\\', '/'));
+    const launcher = readFileSync(resolve('scripts/run-playwright-artifact.mjs'), 'utf8');
+    expect(launcher).toContain("const artifactRoot = argument('--artifact-root') ?? resolve('test-artifacts');");
+    expect(launcher).toContain('artifactRoot, runId, gateName, commit, workspaceDigest');
   });
 
   it('does not alter run A when run B begins', () => {

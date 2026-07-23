@@ -14,6 +14,7 @@ const selection = separator === -1 ? [] : process.argv.slice(separator + 1);
 const gateName = argument('--gate-name');
 const runId = argument('--run-id');
 const config = argument('--config');
+const artifactRoot = argument('--artifact-root') ?? resolve('test-artifacts');
 const evidenceType = argument('--evidence-type') ?? 'FORMAL_TEST_EXECUTION';
 if (!gateName || !runId || !config) {
   throw new Error('Usage: node scripts/run-playwright-artifact.mjs --gate-name <name> --run-id <id> --config <path> -- [test selection]');
@@ -36,7 +37,7 @@ const commit = git('rev-parse', '--short=7', 'HEAD');
 const workspaceState = git('status', '--porcelain=v1', '--untracked-files=no');
 const workspaceDigest = createHash('sha256').update(workspaceState).digest('hex');
 const run = beginArtifactRun({
-  artifactRoot: resolve('test-artifacts'), runId, gateName, commit, workspaceDigest,
+  artifactRoot, runId, gateName, commit, workspaceDigest,
   retry: 0, workers: 1, timeoutPolicy: 'CONFIG_DEFAULTS_UNCHANGED', testSelection: selection,
   evidenceType,
 });

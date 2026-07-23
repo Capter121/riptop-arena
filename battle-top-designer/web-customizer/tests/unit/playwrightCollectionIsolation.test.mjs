@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { beginArtifactRun, buildArtifactPaths } from '../../scripts/playwright-artifacts.mjs';
 import {
   FORMAL_STAGE7_SHA256, formalStage7Facts, isFormalStage7Report,
@@ -25,7 +25,8 @@ describe('Playwright collection evidence isolation', () => {
     const root = mkdtempSync(join(tmpdir(), 'nss-collection-'));
     const first = beginArtifactRun({ artifactRoot: root, runId: 'collection-a', evidenceType: 'COLLECTION_ONLY', ...metadata });
     expect(JSON.parse(readFileSync(first.manifestPath, 'utf8'))).toMatchObject({
-      gateName: 'PLAYWRIGHT_COLLECTION', evidenceType: 'COLLECTION_ONLY', reporterPath: 'test-artifacts/collection-a/collection-report.json',
+      gateName: 'PLAYWRIGHT_COLLECTION', evidenceType: 'COLLECTION_ONLY',
+      reporterPath: relative(process.cwd(), first.reporterPath).replaceAll('\\', '/'),
     });
     expect(() => beginArtifactRun({ artifactRoot: root, runId: 'collection-a', evidenceType: 'COLLECTION_ONLY', ...metadata })).toThrow(/already exists/i);
   });

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
-import { join, posix, resolve } from 'node:path';
+import { join, posix, relative, resolve } from 'node:path';
 
 function slash(path) { return path.replaceAll('\\', '/'); }
 
@@ -52,7 +52,7 @@ export function beginArtifactRun({ artifactRoot, runId, gateName, commit, worksp
   if (existsSync(paths.runDir)) throw new Error(`Artifact run already exists: ${runId}`);
   mkdirSync(paths.runDir);
   mkdirSync(paths.outputDir);
-  const relativeRun = posix.join('test-artifacts', runId);
+  const relativeRun = slash(relative(process.cwd(), paths.runDir));
   const manifest = {
     schemaVersion: 'NSS-PLAYWRIGHT-ARTIFACT-RUN-V1', runId, gateName, evidenceType, commit, workspaceDigest,
     startedAt: new Date().toISOString(), completedAt: null, status: 'RUNNING',
