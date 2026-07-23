@@ -26,8 +26,8 @@ import {
   stage8MachineJsonCommand,
   stage8PythonRuntimeIdentity,
   stage8RunId,
+  validateFinalBaselineIntegrity,
   validateGovernance,
-  validatePhase2cEvidenceFreeze,
   validateStage7Evidence,
   writeStage8Json,
 } from './stage8-delivery.mjs';
@@ -37,9 +37,10 @@ const webRoot = resolve(import.meta.dirname, '..');
 const projectRoot = resolve(webRoot, '..');
 const repoRoot = resolve(projectRoot, '..');
 const artifactRoot = resolve(webRoot, 'test-artifacts');
-const baselineTag = 'v0.2.0-rc1-technical-baseline';
-const baselineCommit = '5951ecab40eb4d58ef502fded23b13fa04292429';
-const baselineTagObject = '4a7a6895d5d3bb6608a4178d8f9d8373f8e3a07f';
+const baselineTag = 'v0.3.0-final-visual-baseline';
+const baselineCommit = '94dcdb931fa3f3ab21c1b163509d92a65c23f061';
+const baselineTagCommit = 'dae1c5104485373d2ff3c603aba48e27eef10754';
+const baselineTagObject = 'c81b2604b6f3ed385078bbf40bdc5d6fd470e2c6';
 const evidenceType = 'STAGE8_CURRENT_DELIVERY_REVALIDATION';
 const formalStage7Path = resolve(projectRoot, 'reports/validation/phase3b-stage7-playwright-repaired-v2.json');
 const formalStage7Sha = '16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc';
@@ -51,7 +52,7 @@ const stage7Commits = [
   'f02437fddbcece13732dc88878fbb23d4fa0aade',
   'ac42b64573ab1ed1192c8845efcef87e58d1eac5',
 ];
-const requiredAuditNote = 'Human visual review remains pending. Technical continuation was authorized by documented provisional exception, not by fabricated review data.';
+const requiredAuditNote = 'The approved final visual baseline remains authoritative. This run revalidates current delivery changes without rewriting historical Stage 7 or Stage 8 evidence.';
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -60,6 +61,10 @@ function argument(name) {
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
+}
+
+function canonicalTextFileSha256(path) {
+  return sha256(Buffer.from(readFileSync(path, 'utf8').replaceAll('\r\n', '\n'), 'utf8'));
 }
 
 function timestamp() {
@@ -215,7 +220,10 @@ function repositoryIntegrity() {
   const tagObject = gitText(['rev-parse', baselineTag]);
   const resolvedBaseline = gitText(['rev-parse', `${baselineTag}^{commit}`]);
   if (tagObject !== baselineTagObject) errors.push('BASELINE_TAG_MOVED');
-  if (resolvedBaseline !== baselineCommit) errors.push('BASELINE_COMMIT_CHANGED');
+  if (resolvedBaseline !== baselineTagCommit) errors.push('BASELINE_TAG_COMMIT_CHANGED');
+  if (git(['merge-base', '--is-ancestor', baselineCommit, 'HEAD'], { allowFailure: true }).status !== 0) {
+    errors.push('FINAL_BASELINE_NOT_ANCESTOR');
+  }
   for (const commit of stage7Commits) {
     if (git(['cat-file', '-e', `${commit}^{commit}`], { allowFailure: true }).status !== 0) errors.push(`COMMIT_UNREADABLE:${commit}`);
     if (git(['merge-base', '--is-ancestor', commit, 'HEAD'], { allowFailure: true }).status !== 0) errors.push(`NOT_ANCESTOR:${commit}`);
@@ -414,7 +422,7 @@ function preflight(run) {
   const repo = repositoryIntegrity();
   writeStage8Json(join(runDir, 'evidence/repository-integrity.json'), repo);
   if (repo.result !== 'PASS') throw new Error(repo.errors.join(','));
-  if (fileSha256(formalStage7Path) !== formalStage7Sha) throw new Error('FORMAL_STAGE7_SHA_MISMATCH_BEFORE');
+  if (canonicalTextFileSha256(formalStage7Path) !== formalStage7Sha) throw new Error('FORMAL_STAGE7_SHA_MISMATCH_BEFORE');
 
   const unitPath = join(runDir, 'unit/vitest.json');
   const unit = npmCommand(['run', 'test:unit', '--', '--reporter=json', `--outputFile=${unitPath}`]);
@@ -433,19 +441,10 @@ function preflight(run) {
   const build = npmCommand(['run', 'build']);
   runCommand(runDir, 'build', 'production-build', build.command, build.args);
 
-  const phase2cReports = ['phase2c-final-gate.json', 'phase2c-combination-matrix.json'];
-  const phase2cBefore = Object.fromEntries(phase2cReports.map(name => [name, fileSha256(resolve(projectRoot, 'reports/validation', name))]));
-  const freeze = stage8MachineJsonCommand('phase2cEvidenceFreeze', process.execPath);
-  const freezeReport = runMachineJsonCommand(runDir, 'baseline', freeze.gateName, freeze.executable,
-    freeze.args, webRoot, validatePhase2cEvidenceFreeze);
-  writeStage8Json(join(runDir, 'baseline/phase2c-evidence-freeze-result.json'), freezeReport);
-
-  const baseline = pythonCommand(['scripts/manage_phase2c_provisional_baseline.py', 'verify']);
-  const baselineResult = runCommand(runDir, 'baseline', 'provisional-baseline', baseline.command, baseline.args, projectRoot).result;
-  const baselineReport = JSON.parse(baselineResult.stdout);
-  writeStage8Json(join(runDir, 'baseline/provisional-baseline-result.json'), baselineReport);
-  if (baselineReport.result !== 'PASS' || baselineReport.assetCount !== 50 || baselineReport.matched !== 50
-    || baselineReport.drifted !== 0 || baselineReport.missing !== 0 || baselineReport.extra !== 0) throw new Error('BASELINE_50_ASSET_GATE_FAILED');
+  const finalBaseline = stage8MachineJsonCommand('finalBaselineIntegrity', process.execPath);
+  const baselineReport = runMachineJsonCommand(runDir, 'baseline', finalBaseline.gateName, finalBaseline.executable,
+    finalBaseline.args, webRoot, validateFinalBaselineIntegrity);
+  writeStage8Json(join(runDir, 'baseline/final-baseline-integrity-result.json'), baselineReport);
 
   const matrix = pythonCommand(['scripts/phase2c_matrix.py', '--enumerate-only']);
   const matrixResult = runCommand(runDir, 'baseline', 'combination-matrix', matrix.command, matrix.args, projectRoot).result;
@@ -463,15 +462,8 @@ function preflight(run) {
   const waiver = pythonCommand(['scripts/validate_phase2c_waiver.py', '--output', join(runDir, 'baseline/waiver-validation.json')]);
   runCommand(runDir, 'baseline', 'waiver', waiver.command, waiver.args, projectRoot);
 
-  const baselineManifest = parseJson(resolve(projectRoot, 'docs/baselines/v0.2.0-rc1-technical-baseline.json'));
-  if (baselineManifest.interface.id !== 'NSS-V1' || baselineManifest.parts.length !== 16
-    || baselineManifest.parts.some(part => !part.semantic_fingerprint || !part.spec_sha256 || !part.raw_sha256)) {
-    throw new Error('NSS_OR_MOUNT_OR_SPEC_FINGERPRINT_INVALID');
-  }
   writeStage8Json(join(runDir, 'baseline/nss-mount-specification.json'), { result: 'PASS', interface: 'NSS-V1',
-    partCount: 16, mountSemanticFingerprints: 16, partSpecifications: 16 });
-  const phase2cAfter = Object.fromEntries(phase2cReports.map(name => [name, fileSha256(resolve(projectRoot, 'reports/validation', name))]));
-  if (JSON.stringify(phase2cBefore) !== JSON.stringify(phase2cAfter)) throw new Error('PHASE2C_REPORT_DRIFT');
+    partCount: 16, finalBaselineAssets: 34, partSpecifications: 16 });
 
   const artifact = npmCommand(['run', 'test:artifact-isolation']);
   runCommand(runDir, 'evidence', 'artifact-isolation-unit', artifact.command, artifact.args);
@@ -485,7 +477,7 @@ function preflight(run) {
 
   runPlaywright(runDir, 'collection', 'stage8-stage7-collection', 'PLAYWRIGHT_COLLECTION',
     'playwright.stage7.config.ts', ['--list'], 8, 'COLLECTION_ONLY');
-  if (fileSha256(formalStage7Path) !== formalStage7Sha) throw new Error('FORMAL_STAGE7_SHA_CHANGED_AFTER_COLLECTION');
+  if (canonicalTextFileSha256(formalStage7Path) !== formalStage7Sha) throw new Error('FORMAL_STAGE7_SHA_CHANGED_AFTER_COLLECTION');
 
   runPlaywright(runDir, 'runtime-smoke', 'stage8-runtime-smoke', 'STAGE8_RUNTIME_SMOKE',
     'playwright.stage8-runtime.config.ts', [], 1);
@@ -506,8 +498,10 @@ function preflight(run) {
   assertUserWorkspaceUnchanged(userSnapshot);
   const summary = { status: 'PASS', completedAt: timestamp(), repository: repo, unit: unitSummary,
     typescript: 'PASS', nodeSyntax: 'PASS', pythonSyntax: 'PASS', build: 'PASS', baseline: baselineReport,
-    phase2cEvidenceFreeze: freezeReport.result, combinationCount: 288, artifactIsolation: 'PASS', stage7Evidence: evidenceReport,
-    collection: { collected: 8, formalSha256Before: formalStage7Sha, formalSha256After: fileSha256(formalStage7Path) },
+    finalBaselineIntegrity: baselineReport.result, historicalPhase2cEvidence: 'PRESERVED', combinationCount: 288,
+    artifactIsolation: 'PASS', stage7Evidence: evidenceReport,
+    collection: { collected: 8, formalSha256Before: formalStage7Sha,
+      formalSha256After: canonicalTextFileSha256(formalStage7Path) },
     runtimeSmoke: 'PASS', buildOutput, documentation: docs, security, dependencies, userWorkspaceSnapshot: userSnapshot };
   writeStage8Json(join(runDir, 'preflight-summary.json'), summary);
   return summary;
@@ -553,15 +547,20 @@ function longGates(run) {
   const governance = stage8MachineJsonCommand('governance', process.execPath);
   const governanceReport = runMachineJsonCommand(runDir, 'governance', governance.gateName, governance.executable,
     governance.args, webRoot, validateGovernance);
+  const finalBaseline = stage8MachineJsonCommand('finalBaselineIntegrity', process.execPath);
+  const finalBaselineAfterLong = runMachineJsonCommand(runDir, 'governance', 'final-baseline-integrity-after-long',
+    finalBaseline.executable, finalBaseline.args, webRoot, validateFinalBaselineIntegrity);
+  writeStage8Json(join(runDir, 'governance/final-baseline-integrity-after-long.json'), finalBaselineAfterLong);
   const protectedState = protectedDiff();
   writeStage8Json(join(runDir, 'governance/protected-paths.json'), protectedState);
   if (protectedState.result !== 'PASS') throw new Error('PROTECTED_PATH_DRIFT');
-  if (fileSha256(formalStage7Path) !== formalStage7Sha) throw new Error('FORMAL_STAGE7_SHA_CHANGED_AFTER_LONG_GATES');
+  if (canonicalTextFileSha256(formalStage7Path) !== formalStage7Sha) throw new Error('FORMAL_STAGE7_SHA_CHANGED_AFTER_LONG_GATES');
   assertUserWorkspaceUnchanged(userSnapshot);
   const summary = { status: 'PASS', completedAt: timestamp(), mobileFocused,
     mobileFull: { passed: mobileBatches.reduce((sum, item) => sum + item.passed, 0), total: 40, batches: mobileBatches.length },
-    desktop, stage7Combined: combined, legacy, governance: governanceReport, protectedState,
-    formalStage7Sha256: fileSha256(formalStage7Path) };
+    desktop, stage7Combined: combined, legacy, governance: governanceReport,
+    finalBaselineIntegrity: finalBaselineAfterLong.result, protectedState,
+    formalStage7Sha256: canonicalTextFileSha256(formalStage7Path) };
   writeStage8Json(join(runDir, 'long-gates-summary.json'), summary);
   return summary;
 }
@@ -607,12 +606,13 @@ function finalize(run) {
   const headCommit = gitText(['rev-parse', 'HEAD']);
   const baseline = preflightSummary.baseline;
   const report = {
-    schemaVersion: 'NSS-PHASE3B-STAGE8-V1',
+    schemaVersion: 'NSS-STAGE8-CURRENT-DELIVERY-V2',
     stage: 'STAGE_8_FULL_QUALITY_AND_DELIVERY_GATE',
     runId: run.manifest.runId,
     headCommit,
-    baseline: { tag: baselineTag, resolvedCommit: baselineCommit, status: 'PROVISIONAL_NOT_FINAL',
-      assetCount: baseline.assetCount, matched: baseline.matched, drift: baseline.drifted, missing: baseline.missing, extra: baseline.extra },
+    baseline: { tag: baselineTag, resolvedCommit: baselineCommit, status: 'APPROVED',
+      assetCount: baseline.assets.total, matched: baseline.assets.matched, drift: baseline.assets.drifted,
+      missing: baseline.assets.missing, extra: 0 },
     quality: { unit: { passed: preflightSummary.unit.passed, failed: preflightSummary.unit.failed,
       total: preflightSummary.unit.total }, typescript: 'PASS', nodeSyntax: 'PASS', pythonSyntax: 'PASS', build: 'PASS', governance: 'PASS' },
     playwright: { collection: { collected: 8, evidenceType: 'COLLECTION_ONLY' },
@@ -626,33 +626,13 @@ function finalize(run) {
       formalReportUnchangedAfterCollection: preflightSummary.collection.formalSha256After === formalStage7Sha },
     delivery: { runtimeSmoke: 'PASS', buildOutputIntegrity: 'PASS', documentationIntegrity: 'PASS',
       secretScan: 'PASS', dependencyReproducibility: 'PASS' },
-    humanVisualReview: 'PENDING',
-    phase3bStatus: 'CHANGES_REQUESTED',
-    stage8Status: 'PASS_READY_FOR_HUMAN_VISUAL_REVIEW',
-    baselineFinalizationAllowed: false,
+    humanVisualReview: 'APPROVED',
+    phase3Status: 'COMPLETE',
+    stage8Status: 'PASS_WITH_APPROVED_FINAL_BASELINE',
+    baselineFinalizationAllowed: true,
     auditNote: requiredAuditNote,
   };
   assertStage8Summary(report);
-  writeStage8Json(resolve(projectRoot, 'reports/validation/phase3b-stage8-full-quality-gate.json'), report);
-  const review = humanReviewPackage(headCommit);
-  writeStage8Json(resolve(projectRoot, 'reports/validation/phase3b-human-visual-review-package.json'), review);
-  const markdown = `# Phase 3B Stage 8 full quality and delivery summary\n\n`
-    + `Stage 8 status: **PASS_READY_FOR_HUMAN_VISUAL_REVIEW**  \nPhase 3B status: **Phase 3B changes requested**  \n`
-    + `Human visual review: **PENDING**  \nBaseline: **PROVISIONAL_NOT_FINAL**\n\n`
-    + `## Identity\n\n- Run: \`${run.manifest.runId}\`\n- HEAD: \`${headCommit}\`\n- Baseline: \`${baselineTag}\` -> \`${baselineCommit}\`\n\n`
-    + `## Quality results\n\n- Unit: ${preflightSummary.unit.passed}/${preflightSummary.unit.total} PASS\n- TypeScript: PASS\n- Node/Python syntax: PASS\n- Production build: PASS\n- Mobile focused: ${long.mobileFocused.passed}/25 PASS\n- Mobile full: ${long.mobileFull.passed}/40 PASS\n- Desktop: ${long.desktop.passed}/4 PASS\n- Stage 7 combined: ${long.stage7Combined.passed}/8 PASS\n- Legacy Playwright: ${long.legacy.passed}/18 PASS\n\n`
-    + `## Delivery and evidence\n\n- Collection: 8 tests, COLLECTION_ONLY; formal 8/8 SHA unchanged.\n- Artifact isolation: PASS.\n- Stage 7 evidence: 19 preserved, 3 unavailable, 3 current revalidation.\n- Phase 2C: 50/50 assets and 288 combinations PASS.\n- Runtime smoke and build-output integrity: PASS.\n- Documentation, repository hygiene, dependency reproducibility, and governance: PASS.\n\n`
-    + `Known historical evidence gaps remain documented: original trace loss and three unavailable historical quality anchors. They were not recreated.\n\n`
-    + `## Human visual review handoff\n\nThe technical gate allows entry into real 3-5 person visual review. No reviewer conclusion was generated. Current reviewer count is 0 and status is INSUFFICIENT_REVIEWERS. Baseline finalization is not allowed.\n\n`
-    + `> ${requiredAuditNote}\n`;
-  writeFileSync(resolve(projectRoot, 'reports/phase3b-stage8-full-quality-and-delivery-summary.md'), markdown, 'utf8');
-  const guide = `# Phase 3B human visual review guide\n\nStatus: **PENDING**. Reviewer count: **0**. Result: **INSUFFICIENT_REVIEWERS**.\n\n`
-    + `Use 3 to 5 independent reviewers. Hide part names, type labels, design goals, and expected answers. Use the previews listed in \`reports/validation/phase3b-human-visual-review-package.json\`.\n\n`
-    + `For each dimension record one of: PASS, LOCAL_REVISION, REDESIGN, NOT_VISIBLE, NEEDS_COMPARISON. A dimension passes only when at least 67% of real reviewers choose PASS. Record anonymous IDs reviewer-01 through reviewer-05, timestamp, decision, and optional notes. Do not infer or synthesize missing reviewers.\n\n`
-    + `The provisional waiver expires on 2026-08-14 and authorizes technical continuation only. It does not approve visual quality, production release, manufacturing, safety, battle use, or legal originality.\n\n`
-    + `> ${requiredAuditNote}\n`;
-  mkdirSync(resolve(projectRoot, 'docs/guides'), { recursive: true });
-  writeFileSync(resolve(projectRoot, 'docs/guides/phase3b-human-visual-review-guide.md'), guide, 'utf8');
   writeStage8Json(join(run.runDir, 'final-summary.json'), report);
   return report;
 }

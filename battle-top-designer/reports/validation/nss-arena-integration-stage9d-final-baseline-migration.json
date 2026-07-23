@@ -1,0 +1,57 @@
+{
+  "stage": "NSS_ARENA_INTEGRATION_STAGE_9D_FINAL_BASELINE_MIGRATION",
+  "status": "PASS_READY_FOR_FORMAL_STAGE8",
+  "headBeforeCommit": "e327fef48af6f7655fa377c28ad62276f47d4ec3",
+  "completedAt": "2026-07-23T01:57:17.192Z",
+  "contract": {
+    "releaseTag": "v0.3.0-final-visual-baseline",
+    "releaseTagObject": "c81b2604b6f3ed385078bbf40bdc5d6fd470e2c6",
+    "releaseTagCommit": "dae1c5104485373d2ff3c603aba48e27eef10754",
+    "finalBaselineHead": "94dcdb931fa3f3ab21c1b163509d92a65c23f061",
+    "baselineStatus": "APPROVED",
+    "humanVisualReview": "APPROVED",
+    "protectedAssetCount": 34,
+    "protectedAssetMatched": 34,
+    "formalGlbCount": 16,
+    "catalogPartCount": 16,
+    "combinationCount": 288
+  },
+  "migration": {
+    "currentAssetGate": "FINAL_BASELINE_INTEGRITY",
+    "historicalPhase2cEvidence": "PRESERVED_NOT_REWRITTEN",
+    "formalStage7HashPolicy": "CANONICAL_LF_SHA256",
+    "finalSummarySchema": "NSS-STAGE8-CURRENT-DELIVERY-V2",
+    "finalizeArtifactPolicy": "RUN_DIRECTORY_ONLY",
+    "historicalPhase3bReportOverwrite": false,
+    "playwrightParametersChanged": false,
+    "timeoutChanged": false,
+    "retryChanged": false,
+    "workerChanged": false
+  },
+  "validation": {
+    "finalBaselineIntegrity": "PASS; 34/34 assets, 16/16 normal-repair GLBs, 16 catalog parts",
+    "targetedRunnerAndBaselineUnits": "48/48 PASS",
+    "allCustomizerUnits": "314/314 PASS",
+    "artifactIsolation": "10/10 PASS",
+    "customizerTypeScript": "PASS",
+    "customizerCatalog": "PASS",
+    "customizerProductionBuild": "PASS",
+    "stage8NodeSyntax": "27/27 PASS",
+    "rootTypeScript": "PASS",
+    "rootContract": "16 parts / 288 combinations PASS",
+    "matchServerSmoke": "PASS",
+    "arenaProductionBuild": "PASS",
+    "unifiedSite": "PASS; 16 GLBs, 0 mismatches, 0 duplicates, 12 public assets",
+    "gitDiffCheck": "PASS"
+  },
+  "protection": {
+    "formalGlbDiffCount": 0,
+    "specDiffCount": 0,
+    "historicalStage7CanonicalSha256": "16b74303ffc08a9bc8f9d1c1a0bcc4734d49c154d63e26e7d2771b6a0734c8cc",
+    "phase2cFinalGateSha256": "7887a62f74df180ce8235dc47b7f075c270f185ca8db3b9b13f4093036e7b8f2",
+    "phase2cCombinationMatrixSha256": "ad1bf0235f9b65c31c3aae1bc158b8a368004a5520e225658d745c64458f38c9",
+    "historicalEvidenceModified": false,
+    "browserRun": false,
+    "formalStage8Run": "NOT_RUN_YET"
+  }
+}

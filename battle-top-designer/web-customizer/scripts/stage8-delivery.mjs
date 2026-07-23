@@ -19,6 +19,10 @@ export const STAGE8_MACHINE_ERROR_CODES = Object.freeze({
   MACHINE_OUTPUT_SCHEMA_INVALID: 'STAGE8_MACHINE_OUTPUT_SCHEMA_INVALID',
 });
 export const STAGE8_MACHINE_JSON_COMMANDS = Object.freeze({
+  finalBaselineIntegrity: Object.freeze({
+    gateName: 'final-baseline-integrity',
+    args: Object.freeze(['scripts/check-final-baseline-integrity.mjs']),
+  }),
   phase2cEvidenceFreeze: Object.freeze({
     gateName: 'phase2c-evidence-freeze',
     args: Object.freeze(['scripts/check-phase2c-evidence-freeze.mjs']),
@@ -102,6 +106,22 @@ export function validatePhase2cEvidenceFreeze(payload) {
     && baseline.drifted === 0
     && baseline.missing === 0
     && baseline.extra === 0;
+}
+
+export function validateFinalBaselineIntegrity(payload) {
+  return payload.result === 'PASS'
+    && payload.baseline?.status === 'APPROVED'
+    && payload.baseline?.humanVisualReview === 'APPROVED'
+    && payload.assets?.total === 34
+    && payload.assets?.matched === 34
+    && payload.assets?.drifted === 0
+    && payload.assets?.missing === 0
+    && payload.catalog?.result === 'PASS'
+    && payload.catalog?.partCount === 16
+    && payload.catalog?.combinations === 288
+    && payload.normalRepair?.result === 'PASS'
+    && payload.normalRepair?.partCount === 16
+    && payload.historicalEvidence?.result === 'PASS';
 }
 
 export function validateStage7Evidence(payload) {
@@ -367,15 +387,15 @@ export function inspectBuildOutput(directory) {
 
 export function assertStage8Summary(summary) {
   const errors = [];
-  if (summary.schemaVersion !== 'NSS-PHASE3B-STAGE8-V1') errors.push('invalid schema version');
-  if (!['PASS_READY_FOR_HUMAN_VISUAL_REVIEW', 'FAIL'].includes(summary.stage8Status)) errors.push('invalid Stage 8 status');
-  if (summary.phase3bStatus !== 'CHANGES_REQUESTED') errors.push('Phase 3B status must remain CHANGES_REQUESTED');
-  if (summary.humanVisualReview !== 'PENDING') errors.push('human visual review must remain PENDING');
-  if (summary.baseline?.status !== 'PROVISIONAL_NOT_FINAL') errors.push('baseline must remain PROVISIONAL_NOT_FINAL');
-  if (summary.baselineFinalizationAllowed !== false) errors.push('baseline finalization must remain disallowed');
-  if (summary.baseline?.assetCount !== 50 || summary.baseline?.matched !== 50
+  if (summary.schemaVersion !== 'NSS-STAGE8-CURRENT-DELIVERY-V2') errors.push('invalid schema version');
+  if (!['PASS_WITH_APPROVED_FINAL_BASELINE', 'FAIL'].includes(summary.stage8Status)) errors.push('invalid Stage 8 status');
+  if (summary.phase3Status !== 'COMPLETE') errors.push('Phase 3 must remain COMPLETE');
+  if (summary.humanVisualReview !== 'APPROVED') errors.push('human visual review must remain APPROVED');
+  if (summary.baseline?.status !== 'APPROVED') errors.push('baseline must remain APPROVED');
+  if (summary.baselineFinalizationAllowed !== true) errors.push('baseline finalization must remain allowed');
+  if (summary.baseline?.assetCount !== 34 || summary.baseline?.matched !== 34
     || summary.baseline?.drift !== 0 || summary.baseline?.missing !== 0 || summary.baseline?.extra !== 0) {
-    errors.push('baseline asset result must remain 50/50 with no drift');
+    errors.push('baseline asset result must remain 34/34 with no drift');
   }
   if (errors.length) throw new Error(errors.join('; '));
   return true;

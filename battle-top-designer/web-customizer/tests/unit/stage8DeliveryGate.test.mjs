@@ -19,6 +19,7 @@ import {
   stage8MachineJsonCommand,
   stage8PythonRuntimeIdentity,
   stage8RunId,
+  validateFinalBaselineIntegrity,
   validateGovernance,
   validatePhase2cEvidenceFreeze,
   validateStage7Evidence,
@@ -46,6 +47,17 @@ function phase2cPayload() {
         extra: 0,
       },
     },
+  };
+}
+
+function finalBaselinePayload() {
+  return {
+    result: 'PASS',
+    baseline: { status: 'APPROVED', humanVisualReview: 'APPROVED' },
+    assets: { total: 34, matched: 34, drifted: 0, missing: 0 },
+    catalog: { result: 'PASS', partCount: 16, combinations: 288 },
+    normalRepair: { result: 'PASS', partCount: 16 },
+    historicalEvidence: { result: 'PASS' },
   };
 }
 
@@ -88,6 +100,13 @@ function pythonResolution(overrides = {}) {
 }
 
 describe('Stage 8 machine JSON', () => {
+  it('accepts the final baseline integrity schema', () => {
+    const payload = finalBaselinePayload();
+    expect(classifyStage8MachineOutput({ status: 0, stdout: JSON.stringify(payload), stderr: '' },
+      validateFinalBaselineIntegrity)).toMatchObject({ result: 'PASS', payload });
+    expect(validateFinalBaselineIntegrity({ ...payload, assets: { ...payload.assets, matched: 33 } })).toBe(false);
+  });
+
   it('accepts one valid JSON object and preserves stderr', () => {
     const result = classifyStage8MachineOutput({ status: 0, signal: null,
       stdout: `${JSON.stringify(phase2cPayload())}\n`, stderr: 'diagnostic\n' }, validatePhase2cEvidenceFreeze);
@@ -142,6 +161,9 @@ describe('Stage 8 machine JSON', () => {
 describe('Stage 8 registered machine JSON invocations', () => {
   it('registers only the existing direct Node validator entries', () => {
     expect(STAGE8_MACHINE_JSON_COMMANDS).toEqual({
+      finalBaselineIntegrity: {
+        gateName: 'final-baseline-integrity', args: ['scripts/check-final-baseline-integrity.mjs'],
+      },
       phase2cEvidenceFreeze: {
         gateName: 'phase2c-evidence-freeze', args: ['scripts/check-phase2c-evidence-freeze.mjs'],
       },
@@ -202,13 +224,15 @@ describe('Stage 8 registered machine JSON invocations', () => {
 
   it('keeps registered gate order and prevents npm wrappers in the runner', () => {
     const source = readFileSync(join(import.meta.dirname, '../../scripts/run-stage8-quality-gate.mjs'), 'utf8');
-    const phase2c = source.indexOf("stage8MachineJsonCommand('phase2cEvidenceFreeze'");
+    const finalBaseline = source.indexOf("stage8MachineJsonCommand('finalBaselineIntegrity'");
     const stage7 = source.indexOf("stage8MachineJsonCommand('stage7Evidence'");
     const governance = source.indexOf("stage8MachineJsonCommand('governance'");
-    expect(phase2c).toBeGreaterThan(-1);
-    expect(stage7).toBeGreaterThan(phase2c);
+    expect(finalBaseline).toBeGreaterThan(-1);
+    expect(stage7).toBeGreaterThan(finalBaseline);
     expect(governance).toBeGreaterThan(stage7);
     expect(source).not.toMatch(/npmCommand\(\['run', 'check:(?:phase2c-evidence-freeze|stage7-evidence|governance)'\]\)/);
+    expect(source).not.toMatch(/writeStage8Json\(resolve\(projectRoot, 'reports\/validation\/phase3b-stage8/);
+    expect(source).not.toMatch(/writeStage8Json\(resolve\(projectRoot, 'reports\/validation\/phase3b-human/);
   });
 });
 
@@ -332,17 +356,17 @@ describe('Stage 8 delivery checks', () => {
       .toEqual({ passed: 8, failed: 0, skipped: 0, flaky: 0, total: 8, status: 'PASS' });
   });
 
-  it('requires pending human review and a provisional baseline in the final summary', () => {
+  it('requires the approved human review and final baseline in the V2 summary', () => {
     const summary = {
-      schemaVersion: 'NSS-PHASE3B-STAGE8-V1',
-      stage8Status: 'PASS_READY_FOR_HUMAN_VISUAL_REVIEW',
-      phase3bStatus: 'CHANGES_REQUESTED',
-      humanVisualReview: 'PENDING',
-      baseline: { status: 'PROVISIONAL_NOT_FINAL', assetCount: 50, matched: 50, drift: 0, missing: 0, extra: 0 },
-      baselineFinalizationAllowed: false,
+      schemaVersion: 'NSS-STAGE8-CURRENT-DELIVERY-V2',
+      stage8Status: 'PASS_WITH_APPROVED_FINAL_BASELINE',
+      phase3Status: 'COMPLETE',
+      humanVisualReview: 'APPROVED',
+      baseline: { status: 'APPROVED', assetCount: 34, matched: 34, drift: 0, missing: 0, extra: 0 },
+      baselineFinalizationAllowed: true,
     };
     expect(() => assertStage8Summary(summary)).not.toThrow();
-    expect(() => assertStage8Summary({ ...summary, humanVisualReview: 'PASS' })).toThrow(/human visual review/i);
+    expect(() => assertStage8Summary({ ...summary, humanVisualReview: 'PENDING' })).toThrow(/human visual review/i);
   });
 });
 
