@@ -11,6 +11,7 @@
     "verify:site": "node scripts/verify-unified-site.mjs",
     "preview": "vite preview --outDir dist/site",
     "server": "node server/match-server.mjs",
+    "test:e2e": "playwright test",
     "test:unit": "vitest run",
     "test:server": "node scripts/test-match-server.mjs",
     "test:nss-contract": "node scripts/test-nss-contract.mjs",
