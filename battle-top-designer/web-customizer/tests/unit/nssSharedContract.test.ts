@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import sharedCatalog from '../../../shared/nss/parts.catalog.json';
 import loadoutSchema from '../../../shared/nss/loadout.schema.json';
+import versions from '../../../shared/nss/versions.json';
 import generatedCatalog from '../../src/generated/parts.catalog.json';
 import { combinationId, enumerateCombinations, families, familyParts } from '../../src/domain';
 import {
@@ -9,6 +10,17 @@ import {
 } from '../../../../src/nss/loadout';
 
 describe('shared NSS contract', () => {
+  it('accepts only the supported shared version manifest', () => {
+    expect(versions).toEqual({
+      catalogVersion: 1,
+      affinityRulesVersion: 1,
+      battleRulesVersion: 1,
+      challengeSchemaVersion: 1,
+      saveSchemaVersion: 1,
+    });
+    expect(Object.values(versions).every(version => Number.isInteger(version) && version > 0)).toBe(true);
+  });
+
   it('keeps generated and shared part catalogs byte-equivalent in data', () => {
     expect(sharedCatalog).toEqual(generatedCatalog);
     expect(sharedCatalog.parts).toHaveLength(16);

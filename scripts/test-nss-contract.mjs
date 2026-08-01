@@ -8,8 +8,13 @@ const schema = JSON.parse(await readFile(new URL('loadout.schema.json', root), '
 const battleCatalogText = await readFile(new URL('battle-parts.json', root), 'utf8');
 const battleCatalog = JSON.parse(battleCatalogText);
 const battleSchema = JSON.parse(await readFile(new URL('battle-parts.schema.json', root), 'utf8'));
+const versions = JSON.parse(await readFile(new URL('versions.json', root), 'utf8'));
 const families = ['core', 'blade', 'assist', 'gear', 'tip'];
 const expectedCounts = { core: 2, blade: 4, assist: 3, gear: 3, tip: 4 };
+const versionKeys = ['affinityRulesVersion', 'battleRulesVersion', 'catalogVersion', 'challengeSchemaVersion', 'saveSchemaVersion'];
+
+assert.deepEqual(Object.keys(versions).sort(), versionKeys);
+for (const version of Object.values(versions)) assert.equal(version, 1);
 
 assert.equal(catalog.schemaVersion, 1);
 assert.equal(catalog.parts.length, 16);
