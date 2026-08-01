@@ -17,7 +17,7 @@ describe('shared NSS contract', () => {
       affinityRulesVersion: 1,
       battleRulesVersion: 1,
       challengeSchemaVersion: 1,
-      saveSchemaVersion: 1,
+      saveSchemaVersion: 2,
     });
     expect(Object.values(versions).every(version => Number.isInteger(version) && version > 0)).toBe(true);
   });

@@ -249,8 +249,8 @@ npm run test:unit -- nssSharedContract
 
 - 新增 `src/app/saveMigration.ts`
 - 修改 `src/app/progression.ts`
-- 修改 `src/types/shopItems.ts`
-- 修改 `src/ui/blackMarket.ts`
+- 修改 `battle-top-designer/shared/nss/versions.json`
+- 修改 `battle-top-designer/web-customizer/tests/unit/nssSharedContract.test.ts`
 - 新增 `tests/unit/save-migration.test.ts`
 
 工作：
@@ -258,8 +258,9 @@ npm run test:unit -- nssSharedContract
 1. 将旧 `ROCK` 映射到 `EARTH`。
 2. 将旧 `LIGHTNING` 映射到 `WIND`。
 3. 将旧 `DIVINE` 映射到 `LIGHT`。
-4. 迁移按 `saveSchemaVersion` 只执行一次。
-5. 未知属性使单个物品无效并给出诊断，不随机赋值。
+4. 保存结构升级为 `saveSchemaVersion: 2`，迁移成功后立即回写且只执行一次。
+5. 未知属性使单个 NSS 配装或实例物品无效并给出诊断，不随机赋值。
+6. 提供独立的旧实例物品转换函数，但暂不移除现有 `LIGHTNING`、`DIVINE` 战斗与视觉行为。
 
 验证：`npm run test:unit -- save-migration`
 

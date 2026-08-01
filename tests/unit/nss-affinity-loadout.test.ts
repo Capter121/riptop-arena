@@ -63,7 +63,7 @@ describe('NSS A2 affinity loadouts', () => {
 
   it('migrates a V1 loadout read from the existing local progression save', () => {
     const saved = JSON.stringify({ latestNssLoadout: legacyLoadout('core_void_falcon') });
-    vi.stubGlobal('window', { localStorage: { getItem: () => saved } });
+    vi.stubGlobal('window', { localStorage: { getItem: () => saved, setItem: () => undefined } });
     expect(loadProgression().latestNssLoadout).toMatchObject({
       schemaVersion: 2,
       affinities: { core: 'DARK', blade: 'WIND', assist: 'FIRE', gear: 'WATER', tip: 'EARTH' },

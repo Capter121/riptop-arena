@@ -1,6 +1,7 @@
 import { DEFAULT_BUILD, PARTS, type BuildSelection, type PartSlot } from '../data/parts';
 import { isNssBattleLoadout, migrateNssBattleLoadout } from '../nss/loadout';
 import type { NssBattleLoadoutV2 } from '../nss/types';
+import { CURRENT_SAVE_SCHEMA_VERSION, migrateProgressionSave } from './saveMigration';
 
 const STORAGE_KEY = 'riptop-progression-v1';
 
@@ -9,6 +10,7 @@ export type UpgradeLevels = Record<UpgradeKey, number>;
 export type PartUpgradeLevels = Record<string, number>;
 
 type ProgressionData = {
+  saveSchemaVersion: typeof CURRENT_SAVE_SCHEMA_VERSION;
   unlockedParts: string[];
   ladderIndex: number;
   bestLadder: number;
@@ -98,6 +100,7 @@ function fromData(data: ProgressionData): ProgressionState {
 
 function createDefaultState() {
   return fromData({
+    saveSchemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
     unlockedParts: [...DEFAULT_UNLOCKS],
     ladderIndex: 0,
     bestLadder: 0,
@@ -115,8 +118,11 @@ export function loadProgression(): ProgressionState {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return createDefaultState();
 
-    const parsed = JSON.parse(raw) as Partial<ProgressionData>;
-    return fromData({
+    const migration = migrateProgressionSave(JSON.parse(raw));
+    for (const diagnostic of migration.diagnostics) console.warn(diagnostic);
+    const parsed = migration.data as Partial<ProgressionData>;
+    const state = fromData({
+      saveSchemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
       unlockedParts: Array.isArray(parsed.unlockedParts) ? parsed.unlockedParts.filter((value) => typeof value === 'string') : [...DEFAULT_UNLOCKS],
       ladderIndex: typeof parsed.ladderIndex === 'number' ? Math.max(0, Math.floor(parsed.ladderIndex)) : 0,
       bestLadder: typeof parsed.bestLadder === 'number' ? Math.max(0, Math.floor(parsed.bestLadder)) : 0,
@@ -127,6 +133,14 @@ export function loadProgression(): ProgressionState {
       partUpgrades: sanitizePartUpgrades(parsed.partUpgrades),
       latestNssLoadout: sanitizeNssLoadout(parsed.latestNssLoadout),
     });
+    if (migration.migrated) {
+      try {
+        saveProgression(state);
+      } catch {
+        console.warn('Failed to persist migrated progression save');
+      }
+    }
+    return state;
   } catch {
     return createDefaultState();
   }
@@ -134,6 +148,7 @@ export function loadProgression(): ProgressionState {
 
 export function saveProgression(state: ProgressionState) {
   const payload: ProgressionData = {
+    saveSchemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
     unlockedParts: [...state.unlockedSet],
     ladderIndex: state.ladderIndex,
     bestLadder: state.bestLadder,
@@ -149,6 +164,7 @@ export function saveProgression(state: ProgressionState) {
 
 function replaceState(state: ProgressionState, patch: Partial<ProgressionData>): ProgressionState {
   return fromData({
+    saveSchemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
     unlockedParts: patch.unlockedParts ?? [...state.unlockedSet],
     ladderIndex: patch.ladderIndex ?? state.ladderIndex,
     bestLadder: patch.bestLadder ?? state.bestLadder,

@@ -14,7 +14,13 @@ const expectedCounts = { core: 2, blade: 4, assist: 3, gear: 3, tip: 4 };
 const versionKeys = ['affinityRulesVersion', 'battleRulesVersion', 'catalogVersion', 'challengeSchemaVersion', 'saveSchemaVersion'];
 
 assert.deepEqual(Object.keys(versions).sort(), versionKeys);
-for (const version of Object.values(versions)) assert.equal(version, 1);
+assert.deepEqual(versions, {
+  catalogVersion: 1,
+  affinityRulesVersion: 1,
+  battleRulesVersion: 1,
+  challengeSchemaVersion: 1,
+  saveSchemaVersion: 2,
+});
 
 assert.equal(catalog.schemaVersion, 1);
 assert.equal(catalog.parts.length, 16);

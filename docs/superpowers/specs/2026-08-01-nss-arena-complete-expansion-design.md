@@ -173,7 +173,7 @@ WIND、FIRE、WATER、WOOD、EARTH、LIGHT、DARK
 - `LIGHTNING → WIND`
 - `DIVINE → LIGHT`
 
-雷电和神圣仍可保留为技能或视觉主题，但不扩大基础相克表。
+迁移只处理保存层的 NSS 属性，并提供独立的旧实例物品转换函数。现有运行时 `LIGHTNING`、`DIVINE` 战斗判定、商店生成和视觉效果暂时保留，后续再把技能/视觉标签与基础装配属性分离；它们不扩大基础相克表。
 
 ### 5.2 相克关系
 
