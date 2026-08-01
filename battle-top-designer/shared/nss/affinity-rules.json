@@ -1,0 +1,32 @@
+{
+  "rulesVersion": 1,
+  "affinities": ["WIND", "FIRE", "WATER", "WOOD", "EARTH", "LIGHT", "DARK"],
+  "advantages": [
+    { "attacker": "WIND", "defender": "EARTH" },
+    { "attacker": "EARTH", "defender": "WATER" },
+    { "attacker": "WATER", "defender": "FIRE" },
+    { "attacker": "FIRE", "defender": "WOOD" },
+    { "attacker": "WOOD", "defender": "WIND" },
+    { "attacker": "LIGHT", "defender": "DARK" },
+    { "attacker": "DARK", "defender": "LIGHT" }
+  ],
+  "damage": {
+    "physicalShare": 0.8,
+    "elementalShare": 0.2,
+    "advantageMultiplier": 1.25,
+    "disadvantageMultiplier": 0.8,
+    "neutralMultiplier": 1
+  },
+  "resonance": {
+    "offense": {
+      "3": 0.06,
+      "4": 0.1,
+      "5": 0.15
+    },
+    "harmony": {
+      "2-2-1": { "defense": 0.05, "stability": 0.06 },
+      "2-1-1-1": { "defense": 0.07, "stability": 0.08 },
+      "1-1-1-1-1": { "defense": 0.09, "stability": 0.1 }
+    }
+  }
+}
