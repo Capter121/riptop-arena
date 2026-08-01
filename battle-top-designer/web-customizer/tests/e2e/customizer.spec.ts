@@ -70,7 +70,7 @@ test('complete offline customizer flow', async ({ page }, testInfo) => {
   snapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
   expect(snapshot.focus).toBe('tip');
   expect(snapshot.cameraPreset).toBe('bottom');
-  await expect(page.getByTestId('attribute-disclaimer')).toHaveText('Concept attributes for prototype use only.');
+  await expect(page.getByTestId('attribute-disclaimer')).toHaveText('概念属性仅供原型使用。');
 
   await expect.poll(async () => (await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot())).focus).toBeNull();
 

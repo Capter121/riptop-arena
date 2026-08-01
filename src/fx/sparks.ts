@@ -27,9 +27,9 @@ function createSparkTexture(): THREE.CanvasTexture {
 //    update(dt)                   — per-frame simulation step
 // ─────────────────────────────────────────────────────────────
 
-const MAX_PARTICLES = 200;
-const GRAVITY = -12;
-const DRAG = 0.96;
+const MAX_PARTICLES = 600;
+const GRAVITY = -14;
+const DRAG = 0.95;
 
 interface ParticleState {
   alive: boolean;
@@ -37,6 +37,9 @@ interface ParticleState {
   maxLife: number;
   size: number;
 }
+
+const textureLoader = new THREE.TextureLoader();
+const kenneySparkTexture = textureLoader.load('/textures/vfx/spark_01.png');
 
 export class SparksSystem {
   readonly root = new THREE.Group();
@@ -65,14 +68,14 @@ export class SparksSystem {
     this.geometry.setAttribute('size', new THREE.BufferAttribute(this.sizes, 1));
 
     this.material = new THREE.PointsMaterial({
-      color: 0xffaa44,
-      size: 0.35, // Made slightly larger to accommodate soft gradient
+      color: 0xffdd66,
+      size: 1.4, // Large, impactful sparks
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.92,
+      opacity: 1.0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      map: createSparkTexture(),
+      map: kenneySparkTexture || createSparkTexture(),
     });
 
     const points = new THREE.Points(this.geometry, this.material);
@@ -82,17 +85,17 @@ export class SparksSystem {
 
   // ── Legacy interface (kept for game.ts event compatibility) ───
   emit(x: number, z: number, intensity: number) {
-    const count = Math.floor(5 + intensity * 8);
+    const count = Math.floor(15 + intensity * 25);
     for (let i = 0; i < count; i++) {
       this.spawnOne(
-        x + (Math.random() - 0.5) * 0.25,
-        0.28,
-        z + (Math.random() - 0.5) * 0.25,
-        (Math.random() - 0.5) * 3.5 * intensity,
-        2 + Math.random() * 4 * intensity,
-        (Math.random() - 0.5) * 3.5 * intensity,
-        0.15 + Math.random() * 0.2 * intensity,
-        0.22 + intensity * 0.14,
+        x + (Math.random() - 0.5) * 0.35,
+        0.35,
+        z + (Math.random() - 0.5) * 0.35,
+        (Math.random() - 0.5) * 6.5 * intensity,
+        3 + Math.random() * 7 * intensity,
+        (Math.random() - 0.5) * 6.5 * intensity,
+        0.4 + Math.random() * 0.5 * intensity,
+        0.3 + intensity * 0.25,
       );
     }
   }
@@ -174,26 +177,27 @@ export class SparksSystem {
   }
 
   emitAbsorb(x: number, z: number, intensity: number) {
-    const count = 4 + Math.floor(intensity * 4);
+    const count = Math.floor(12 + intensity * 20);
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const radius = 1.1 + Math.random() * 1.8;
+      const radius = 1.2 + Math.random() * 2.2;
       const px = x + Math.cos(angle) * radius;
       const pz = z + Math.sin(angle) * radius;
-      const inwardX = x - px;
-      const inwardZ = z - pz;
+      // Inward vector with a tangential swirl component
+      const inwardX = (x - px) + Math.sin(angle) * 0.5;
+      const inwardZ = (z - pz) - Math.cos(angle) * 0.5;
       const len = Math.max(0.001, Math.hypot(inwardX, inwardZ));
-      const speed = 2.8 + Math.random() * 2.2 + intensity;
+      const speed = 4.0 + Math.random() * 3.5 + intensity * 2.0;
 
       this.spawnOne(
         px,
-        0.2 + Math.random() * 0.35,
+        0.1 + Math.random() * 0.6,
         pz,
         (inwardX / len) * speed,
-        0.35 + Math.random() * 1.1,
+        (Math.random() - 0.2) * 1.5, // Spiral inward and slightly upward
         (inwardZ / len) * speed,
-        0.09 + Math.random() * 0.08,
-        0.28 + Math.random() * 0.18,
+        0.4 + Math.random() * 0.5 * (1 + intensity),
+        0.2 + Math.random() * 0.25,
       );
     }
   }

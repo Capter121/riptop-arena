@@ -13,15 +13,17 @@ export type ElementAttackSkillId = Exclude<SkillId, 'frost_bite'>;
 export type BattleSide = 'player' | 'enemy';
 export type SkillTier = 1 | 2 | 3 | 4 | 5;
 
-export type TurnActionKind = 'attack' | 'evade' | 'defense' | 'charge';
+export type TurnActionKind = 'attack' | 'evade' | 'defense' | 'charge' | 'light_reflect' | 'heavy_reflect';
 
 export type TurnAction =
   | { kind: 'attack'; skillId: ElementAttackSkillId }
   | { kind: 'evade' }
   | { kind: 'defense' }
-  | { kind: 'charge' };
+  | { kind: 'charge' }
+  | { kind: 'light_reflect' }
+  | { kind: 'heavy_reflect' };
 
-export type TurnVisual = 'attack' | 'evade' | 'defense' | 'charge' | 'hit' | 'clash' | 'idle';
+export type TurnVisual = 'attack' | 'evade' | 'defense' | 'charge' | 'light_reflect' | 'heavy_reflect' | 'hit' | 'clash' | 'idle';
 
 export type ElementAttackMeta = {
   skillId: ElementAttackSkillId;

@@ -28,9 +28,9 @@ const QrCodeView = lazy(() => import('./sharing/QrCodeView').then(module => ({ d
 const TestModePanel = lazy(() => import('./usability/TestModePanel'));
 
 const familyLabels: Record<Family, string> = {
-  core: 'Core', blade: 'Main Blade', assist: 'Assist Ring', gear: 'Height Gear', tip: 'Performance Tip',
+  core: '核心 (Core)', blade: '主刀 (Blade)', assist: '辅助环 (Assist)', gear: '齿轮 (Gear)', tip: '轴尖 (Tip)',
 };
-const attributeLabels = { attack: 'attack', defense: 'defense', stamina: 'stamina', balance: 'balance', weight: '重量倾向', height: '高度倾向' } as const;
+const attributeLabels = { attack: '攻击', defense: '防御', stamina: '持久', balance: '平衡', weight: '重量倾向', height: '高度倾向' } as const;
 
 class SceneErrorBoundary extends Component<{ resetKey: string; children: ReactNode }, { error: string | null }> {
   state = { error: null as string | null };
@@ -339,7 +339,28 @@ export default function App() {
       <section className="control-deck">
         <div className="identity-row">
           <div><span className="eyebrow">CURRENT COMBINATION</span><h2>{currentLibraryEntry?.nickname ?? automaticName}</h2>{currentLibraryEntry?.nickname && <span className="automatic-name">{automaticName}</span>}<code data-testid="combination-id">{id}</code></div>
-          <button className="primary" data-testid="explode" onClick={() => state.setExploded(!state.exploded)}>{state.exploded ? 'Assemble' : 'Explode'}</button>
+          <div className="view-mode-bar" aria-label="展示视角控制">
+            <button
+              className={state.exploded ? 'active' : ''}
+              data-testid="explode"
+              onClick={() => state.setExploded(!state.exploded)}
+            >
+              {state.exploded ? '组合视图' : '爆炸拆解'}
+            </button>
+            <button
+              className={state.showcaseEnabled ? 'active' : ''}
+              data-testid="toggle-showcase"
+              onClick={() => state.setShowcaseEnabled(!state.showcaseEnabled)}
+            >
+              自动旋转
+            </button>
+            <button
+              data-testid="camera-hero"
+              onClick={() => state.restorePresentation()}
+            >
+              主视角
+            </button>
+          </div>
         </div>
 
         <nav className="family-tabs" aria-label="Part families">
@@ -355,51 +376,51 @@ export default function App() {
 
         <div className="lower-grid">
           <section className="attributes">
-            <div className="section-heading"><h3>Concept attributes</h3><span>0—100</span></div>
+            <div className="section-heading"><h3>概念属性</h3><span>0—100</span></div>
             {attributeNames.map(name => <div className="attribute" key={name}><span>{attributeLabels[name]}</span><div><i style={{ width: `${attributes[name]}%` }} /></div><strong>{attributes[name]}</strong></div>)}
-            <p data-testid="attribute-disclaimer">Concept attributes for prototype use only.</p>
+            <p data-testid="attribute-disclaimer">概念属性仅供原型使用。</p>
           </section>
           <section className="actions">
-            <h3>Combination tools</h3>
+            <h3>组合快捷工具</h3>
             <div className="action-grid">
-              <button data-testid="random" onClick={() => state.replaceCombination(randomCombination())}>Random</button>
-              <button data-testid="storm-reset" onClick={state.reset}>Storm Attack</button>
-              <button data-testid="save" onClick={() => { state.save(); setNotice('Saved locally.'); }}>Save local</button>
-              <button data-testid="restore-local" onClick={() => setNotice(state.restoreSaved() ? 'Saved combination restored.' : 'No valid saved combination.')}>Restore local</button>
-              <button data-testid="export" onClick={exportJson}>Export JSON</button>
-              <button data-testid="import" onClick={() => importRef.current?.click()}>Import JSON</button>
-              <button data-testid="share" onClick={() => setShareOpen(value => !value)}>Share</button>
-              <button className="primary" data-testid="enter-arena" onClick={() => window.location.assign(arenaLink)}>Enter Arena</button>
-              <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? 'Rendering card…' : 'Export PNG card'}</button>
-              <button data-testid="library" onClick={() => setLibraryOpen(value => !value)}>Library</button>
-              <button data-testid="undo" disabled={!state.canUndo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.undo(); }}>Undo</button>
-              <button data-testid="redo" disabled={!state.canRedo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.redo(); }}>Redo</button>
+              <button data-testid="random" onClick={() => state.replaceCombination(randomCombination())}>随机组合</button>
+              <button data-testid="storm-reset" onClick={state.reset}>风暴强袭</button>
+              <button data-testid="save" onClick={() => { state.save(); setNotice('已保存到本地。'); }}>保存本地</button>
+              <button data-testid="restore-local" onClick={() => setNotice(state.restoreSaved() ? '已恢复保存的组合。' : '无有效本地组合。')}>恢复本地组合</button>
+              <button data-testid="export" onClick={exportJson}>导出 JSON</button>
+              <button data-testid="import" onClick={() => importRef.current?.click()}>导入 JSON</button>
+              <button data-testid="share" onClick={() => setShareOpen(value => !value)}>分享</button>
+              <button className="primary" data-testid="enter-arena" onClick={() => window.location.assign(arenaLink)}>⚔️ 进入竞技场</button>
+              <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? '正在生成装备卡…' : '导出 PNG 装备卡'}</button>
+              <button data-testid="library" onClick={() => setLibraryOpen(value => !value)}>组合库</button>
+              <button data-testid="undo" disabled={!state.canUndo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.undo(); }}>撤销</button>
+              <button data-testid="redo" disabled={!state.canRedo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.redo(); }}>重做</button>
             </div>
             {shareOpen && (
-              <section className="share-panel" aria-label="Share current combination">
-                <input data-testid="share-link" aria-label="Combination share link" readOnly value={share.url} onFocus={event => event.currentTarget.select()} />
+              <section className="share-panel" aria-label="分享当前组合">
+                <input data-testid="share-link" aria-label="组合分享链接" readOnly value={share.url} onFocus={event => event.currentTarget.select()} />
                 <button data-testid="copy-share-link" onClick={async () => {
                   const copied = await copyShareLink(share.url);
-                  setNotice(copied ? 'Share link copied.' : 'Clipboard unavailable. Select and copy the link manually.');
+                  setNotice(copied ? '分享链接已复制。' : '剪贴板不可用，请手动复制。');
                   if (state.testMode) emitUsabilityAction(copied ? { type: 'SHARE_SUCCEEDED', method: 'link' } : { type: 'SYSTEM_ERROR', code: 'SHARE_FAILED' });
-                }}>Copy link</button>
-                <Suspense fallback={<p>Preparing local QR code…</p>}><QrCodeView content={share.url} onReady={state.testMode ? () => emitUsabilityAction({ type: 'SHARE_SUCCEEDED', method: 'qr' }) : undefined} /></Suspense>
-                {share.deviceOnly && <p data-testid="share-device-warning">This local link works only on this device. Configure VITE_SHARE_BASE_URL for a shareable host.</p>}
+                }}>复制链接</button>
+                <Suspense fallback={<p>正在准备本地二维码…</p>}><QrCodeView content={share.url} onReady={state.testMode ? () => emitUsabilityAction({ type: 'SHARE_SUCCEEDED', method: 'qr' }) : undefined} /></Suspense>
+                {share.deviceOnly && <p data-testid="share-device-warning">此本地链接仅可在本设备使用。</p>}
               </section>
             )}
             {libraryOpen && (
-              <section className="library-panel" aria-label="Local combination library">
+              <section className="library-panel" aria-label="本地组合库">
                 <div className="library-editor">
-                  <input data-testid="nickname-input" aria-label="Combination nickname" maxLength={60} value={nickname} onChange={event => setNickname(event.target.value)} placeholder="Optional local nickname" />
-                  <button data-testid="save-nickname" onClick={() => persistLibrary(setLibraryNickname(library, id, nickname), 'Nickname saved locally.')}>Save nickname</button>
-                  <button data-testid="favorite-current" onClick={toggleCurrentFavorite}>{library.favorites.some(entry => entry.id === id) ? 'Unfavorite current' : 'Favorite current'}</button>
+                  <input data-testid="nickname-input" aria-label="组合昵称" maxLength={60} value={nickname} onChange={event => setNickname(event.target.value)} placeholder="可选本地昵称" />
+                  <button data-testid="save-nickname" onClick={() => persistLibrary(setLibraryNickname(library, id, nickname), '昵称已保存。')}>保存名称</button>
+                  <button data-testid="favorite-current" onClick={toggleCurrentFavorite}>{library.favorites.some(entry => entry.id === id) ? '取消收藏' : '收藏当前组合'}</button>
                 </div>
-                <h4>Favorites</h4>
+                <h4>收藏组合</h4>
                 <div className="library-list">
-                  {library.favorites.map(entry => <div key={entry.id}><button data-testid={`favorite-${entry.id}`} onClick={() => restoreFavorite(entry)}>{entry.nickname ?? combinationName(entry.combination)} <code>{entry.id}</code></button><button data-testid={`remove-favorite-${entry.id}`} aria-label={`Remove ${entry.id} favorite`} onClick={() => persistLibrary(removeFavorite(library, entry.id), 'Favorite removed.')}>×</button></div>)}
-                  {library.favorites.length === 0 && <p>No favorites yet.</p>}
+                  {library.favorites.map(entry => <div key={entry.id}><button data-testid={`favorite-${entry.id}`} onClick={() => restoreFavorite(entry)}>{entry.nickname ?? combinationName(entry.combination)} <code>{entry.id}</code></button><button data-testid={`remove-favorite-${entry.id}`} aria-label={`移除 ${entry.id} 收藏`} onClick={() => persistLibrary(removeFavorite(library, entry.id), '已取消收藏。')}>×</button></div>)}
+                  {library.favorites.length === 0 && <p>暂无收藏组合。</p>}
                 </div>
-                <h4>Recent</h4>
+                <h4>最近使用</h4>
                 <div className="library-list">
                   {library.recent.map(entry => <div key={entry.id}><button data-testid={`recent-${entry.id}`} onClick={() => state.replaceCombination(entry.combination)}>{entry.nickname ?? combinationName(entry.combination)} <code>{entry.id}</code></button></div>)}
                 </div>

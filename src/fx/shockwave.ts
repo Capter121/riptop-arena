@@ -12,15 +12,17 @@ interface ShockwaveState {
   scaleMult: number;
 }
 
+const textureLoader = new THREE.TextureLoader();
+const shockwaveTexture = textureLoader.load('/textures/vfx/circle_03.png');
+
 export class ShockwaveFX {
   readonly root = new THREE.Group();
   private shockwaves: ShockwaveState[] = [];
   private nextSlot = 0;
 
   constructor() {
-    // Create a thin ring geometry
-    const geometry = new THREE.RingGeometry(0.9, 1.0, 32);
-    // Orient it to lay flat on XZ plane
+    // Create a flat plane for full texture rendering
+    const geometry = new THREE.PlaneGeometry(1.6, 1.6);
     geometry.rotateX(-Math.PI / 2);
 
     for (let i = 0; i < MAX_SHOCKWAVES; i++) {
@@ -28,6 +30,7 @@ export class ShockwaveFX {
         color: 0x00ffff,
         transparent: true,
         opacity: 0,
+        map: shockwaveTexture,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         side: THREE.DoubleSide

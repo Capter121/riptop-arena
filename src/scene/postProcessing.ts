@@ -41,7 +41,7 @@ export function createBloomPipeline(
   camera: THREE.PerspectiveCamera,
 ): BloomPipeline {
   const mobile = isMobile();
-  const resScale = mobile ? 0.6 : 1;
+  const resScale = 1.0; // 强制保持 100% 原生超清分辨率，消除移动端/局域网设备画质模糊问题
 
   const size = renderer.getSize(new THREE.Vector2());
   const w = Math.floor(size.x * resScale);

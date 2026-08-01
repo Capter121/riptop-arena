@@ -25,6 +25,9 @@ interface TrailParticle {
   growth: number;
 }
 
+const textureLoader = new THREE.TextureLoader();
+const smokeParticleTexture = textureLoader.load('/textures/vfx/smoke_01.png');
+
 export class TrailsSystem {
   readonly root = new THREE.Group();
   
@@ -49,14 +52,14 @@ export class TrailsSystem {
     this.geometry.setAttribute('size', new THREE.BufferAttribute(this.sizes, 1));
 
     this.material = new THREE.PointsMaterial({
-      size: 1.0,
+      size: 1.2,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.85,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       sizeAttenuation: true,
-      map: createParticleTexture(),
+      map: smokeParticleTexture || createParticleTexture(),
     });
 
     const points = new THREE.Points(this.geometry, this.material);
@@ -130,11 +133,112 @@ export class TrailsSystem {
     }
   }
 
+  // ── Emit continuous Elemental Aura (Water Mist, Lightning Arcs, Fire, Wind) ──
+  emitElementAura(top: TopEntity, isPlayer: boolean, lightningFX?: any, shockwaveFX?: any) {
+    if (!top.alive) return;
+    const spinRatio = top.spin / Math.max(0.1, top.stats.maxSpin);
+    if (spinRatio < 0.05) return;
+
+    const attrs = top.stats.attributes || {};
+    const px = top.position.x;
+    const pz = top.position.y;
+    const py = 0.12;
+
+    // 1. Water Mist / Splash Effect (水雾与水沫飞溅)
+    if ((attrs['WATER'] || 0) > 0 || (isPlayer && !attrs['FIRE'] && !attrs['LIGHTNING'])) {
+      const count = Math.floor(1 + spinRatio * 3);
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const rad = 0.4 + Math.random() * 0.4;
+        const vx = Math.cos(angle) * (1.2 + Math.random() * 1.5);
+        const vz = Math.sin(angle) * (1.2 + Math.random() * 1.5);
+        this.spawnOne(
+          px + Math.cos(angle) * rad,
+          py + Math.random() * 0.15,
+          pz + Math.sin(angle) * rad,
+          vx, 0.6 + Math.random() * 0.8, vz, // floats & splashes outward
+          0.1, 0.67, 1.0, // Aqua Blue water mist color
+          0.6 + Math.random() * 0.5,
+          0.3 + Math.random() * 0.3,
+          0.8 // expands into soft mist
+        );
+      }
+      if (Math.random() < 0.08 * spinRatio && shockwaveFX) {
+        shockwaveFX.trigger(px, 0.1, pz, 0.4, 0x00d5ff);
+      }
+    }
+
+    // 2. Lightning Arcs & Electric Sparks (雷电与高压连体电弧)
+    if ((attrs['LIGHTNING'] || 0) > 0 || spinRatio > 0.8) {
+      if (Math.random() < 0.22 * spinRatio && lightningFX) {
+        lightningFX.strike(px + (Math.random() - 0.5) * 0.4, 0.25, pz + (Math.random() - 0.5) * 0.4, 0x00ffff);
+      }
+      const count = Math.floor(spinRatio * 2);
+      for (let i = 0; i < count; i++) {
+        this.spawnOne(
+          px + (Math.random() - 0.5) * 0.5,
+          py + Math.random() * 0.25,
+          pz + (Math.random() - 0.5) * 0.5,
+          (Math.random() - 0.5) * 2.5,
+          1.5 + Math.random() * 2.0,
+          (Math.random() - 0.5) * 2.5,
+          0.6, 0.9, 1.0, // Bright cyan-electric
+          0.4 + Math.random() * 0.4,
+          0.15 + Math.random() * 0.15,
+          -0.4
+        );
+      }
+    }
+
+    // 3. Fire Flames & Heat Waves (火焰与滚滚烈焰)
+    if ((attrs['FIRE'] || 0) > 0) {
+      const count = Math.floor(1 + spinRatio * 3);
+      for (let i = 0; i < count; i++) {
+        this.spawnOne(
+          px + (Math.random() - 0.5) * 0.4,
+          py,
+          pz + (Math.random() - 0.5) * 0.4,
+          (Math.random() - 0.5) * 0.8,
+          1.2 + Math.random() * 1.8,
+          (Math.random() - 0.5) * 0.8,
+          1.0, 0.4 + Math.random() * 0.4, 0.0, // Red-Orange Flame
+          0.7 + Math.random() * 0.5,
+          0.3 + Math.random() * 0.3,
+          0.6
+        );
+      }
+    }
+
+    // 4. Wind Cyclones & Swirl (暴风气旋)
+    if ((attrs['WIND'] || 0) > 0) {
+      const count = Math.floor(1 + spinRatio * 2);
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const rad = 0.5;
+        this.spawnOne(
+          px + Math.cos(angle) * rad,
+          py + Math.random() * 0.2,
+          pz + Math.sin(angle) * rad,
+          -Math.sin(angle) * 3.0,
+          0.8 + Math.random() * 0.5,
+          Math.cos(angle) * 3.0,
+          0.3, 1.0, 0.6, // Emerald green wind
+          0.5 + Math.random() * 0.4,
+          0.25 + Math.random() * 0.2,
+          -0.2
+        );
+      }
+    }
+  }
+
   // Update called by game.ts every frame
-  update(dt: number, player: TopEntity, enemy: TopEntity) {
-    // Generate trails automatically
-    this.emitTrail(player, 0x00ffff); // cyan
-    this.emitTrail(enemy, 0xff5500);  // orange
+  update(dt: number, player: TopEntity, enemy: TopEntity, lightningFX?: any, shockwaveFX?: any) {
+    // Generate trails & elemental auras continuously
+    this.emitTrail(player, 0x00ffff); // cyan trail
+    this.emitTrail(enemy, 0xff5500);  // orange trail
+
+    this.emitElementAura(player, true, lightningFX, shockwaveFX);
+    this.emitElementAura(enemy, false, lightningFX, shockwaveFX);
 
     let anyAlive = false;
 

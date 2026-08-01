@@ -33,11 +33,30 @@ export class GaragePanel {
   readonly returnCustomizerLink = document.createElement('a');
   private readonly legacyFields: HTMLElement[] = [];
 
+  readonly toggleModeButton = document.createElement('button');
+  private isNssModeActive = false;
+  private currentNssData: { loadout: NssBattleLoadoutV1; stats: BattleStats; customizerUrl: string } | null = null;
+
   constructor() {
     this.root.className = 'card garage';
 
     this.backButton.className = 'button garage-back';
     this.backButton.innerHTML = '&larr; 返回主菜单';
+
+    this.toggleModeButton.className = 'button button--mode-toggle';
+    this.toggleModeButton.style.marginTop = '0.5rem';
+    this.toggleModeButton.style.marginBottom = '0.8rem';
+    this.toggleModeButton.style.background = 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)';
+    this.toggleModeButton.style.color = '#111';
+    this.toggleModeButton.style.fontWeight = 'bold';
+    this.toggleModeButton.textContent = '🔄 切换为经典 5大部件词条改装模式';
+    this.toggleModeButton.addEventListener('click', () => {
+      if (this.isNssModeActive) {
+        this.showLegacyMode();
+      } else if (this.currentNssData) {
+        this.showNssMode(this.currentNssData.loadout, this.currentNssData.stats, this.currentNssData.customizerUrl);
+      }
+    });
 
     const title = document.createElement('h2');
     title.textContent = '神装改装库';
@@ -56,7 +75,7 @@ export class GaragePanel {
       </ul>
     `;
 
-    this.root.append(this.backButton, title, intro, rulesInfo);
+    this.root.append(this.backButton, this.toggleModeButton, title, intro, rulesInfo);
 
     this.wallet.className = 'garage-wallet';
     this.root.append(this.wallet);
@@ -119,18 +138,25 @@ export class GaragePanel {
   }
 
   showLegacyMode() {
+    this.isNssModeActive = false;
     this.nssPanel.hidden = true;
     this.legacyFields.forEach(field => { field.hidden = false; });
     this.shopButton.hidden = false;
     this.collection.hidden = false;
+    this.toggleModeButton.hidden = false;
+    this.toggleModeButton.textContent = '🛠️ 切换至 NSS 3D陀螺组装模式';
   }
 
   showNssMode(loadout: NssBattleLoadoutV1, stats: BattleStats, customizerUrl: string) {
+    this.isNssModeActive = true;
+    this.currentNssData = { loadout, stats, customizerUrl };
     this.legacyFields.forEach(field => { field.hidden = true; });
-    this.shopButton.hidden = true;
-    this.collection.hidden = true;
+    this.shopButton.hidden = false;
+    this.collection.hidden = false;
+    this.toggleModeButton.hidden = false;
     this.returnCustomizerLink.href = customizerUrl;
     this.nssPanel.hidden = false;
+    this.toggleModeButton.textContent = '🔄 切换为经典 5大部件词条改装模式';
     this.nssPanel.innerHTML = `
       <div class="garage-summary__title">NSS Battle Loadout · ${nssCombinationId(loadout.combination)}</div>
       <div class="garage-nss__parts">

@@ -218,67 +218,29 @@ select {
 .card::-webkit-scrollbar-thumb {
   background: rgba(153, 209, 255, 0.4);
   border-radius: 4px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for cards */
+.card::-webkit-scrollbar {
+  width: 6px;
+}
+.card::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+.card::-webkit-scrollbar-thumb {
+  background: rgba(153, 209, 255, 0.4);
+  border-radius: 4px;
 }
 .card::-webkit-scrollbar-thumb:hover {
   background: rgba(153, 209, 255, 0.6);
-}
-
-.menu h1,
-.garage h2,
-.results h2 {
-  margin: 0;
-  font-size: clamp(30px, 4vw, 44px);
-  line-height: 1;
 }
 
 .shop h2 {
   margin: 0;
   font-size: clamp(30px, 4vw, 44px);
   line-height: 1;
-}
-
-.garage-back {
-  align-self: start;
-  justify-self: start;
-  padding: 6px 14px;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 2px;
-}
-.garage-back:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.menu {
-  overflow: hidden;
-}
-
-.menu::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at top left, rgba(126, 240, 255, 0.12), transparent 28%),
-    radial-gradient(circle at 85% 18%, rgba(255, 123, 91, 0.14), transparent 24%);
-  pointer-events: none;
-}
-
-.menu > * {
-  position: relative;
-  z-index: 1;
-}
-
-.menu__eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #8cb9df;
-  opacity: 0;
-  animation: menuReveal 560ms ease-out 220ms forwards;
 }
 
 .menu__title {
@@ -303,7 +265,8 @@ select {
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #ffd27d;  opacity: 0;
+  color: #ffd27d;
+  opacity: 0;
   transform: translateY(14px);
   animation: menuReveal 620ms ease-out 430ms forwards;
 }
@@ -730,21 +693,70 @@ select {
   text-shadow: none;
 }
 
-.button--nss-customizer {
-  border: none !important;
-  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+.button--hero {
+  min-height: 56px;
+  font-size: 17px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ff8c00 0%, #ffa500 50%, #ff4500 100%) !important;
   color: #040811 !important;
+  border: 1px solid rgba(255, 215, 0, 0.8) !important;
+  box-shadow: 0 0 25px rgba(255, 140, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  text-shadow: none !important;
+  letter-spacing: 0.05em;
+}
+
+.button--hero:hover {
+  background: linear-gradient(135deg, #ffa500 0%, #ff4500 100%) !important;
+  box-shadow: 0 0 35px rgba(255, 69, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.menu__tags {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 4px 0 8px 0;
+}
+
+.menu__tags .tag {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: rgba(126, 240, 255, 0.08);
+  border: 1px solid rgba(126, 240, 255, 0.2);
+  color: #9ec3e3;
+  white-space: nowrap;
+}
+
+.button--black-market {
+  border-color: rgba(255, 0, 85, 0.4) !important;
+  color: #ff80a6 !important;
+  background: rgba(255, 0, 85, 0.08) !important;
+}
+
+.button--black-market:hover {
+  background: rgba(255, 0, 85, 0.2) !important;
+  border-color: rgba(255, 0, 85, 0.8) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 85, 0.4) !important;
+}
+
+.button--nss-customizer {
+  border: 1px solid rgba(79, 172, 254, 0.6) !important;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.25) 100%) !important;
+  color: #7ef0ff !important;
   font-size: 15px;
   font-weight: 800;
   text-decoration: none !important;
-  box-shadow: 0 0 16px rgba(0, 242, 254, 0.4);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
   text-shadow: none !important;
 }
 
 .button--nss-customizer:hover {
-  background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%) !important;
-  box-shadow: 0 0 24px rgba(67, 233, 123, 0.6);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.4) 0%, rgba(79, 172, 254, 0.45) 100%) !important;
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+  transform: translateY(-1px);
 }
 
 .button--primary:hover {
@@ -1912,56 +1924,204 @@ body.vignette-active::after {
   transition: width 0.3s ease;
 }
 
-/* Arc Wheel Base Actions */
-.turn-panel__actions {
+/* Arc Wheel Base Actions (MOBA Radial Layout) */
+.turn-panel.moba-style {
+  position: fixed !important;
+  right: 28px !important;
+  bottom: 28px !important;
+  width: 320px !important;
+  height: 320px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  display: block !important;
+  pointer-events: none !important;
+  z-index: 1000 !important;
+}
+
+.turn-panel.moba-style .turn-panel__header {
+  position: absolute;
+  top: -110px;
+  right: 0;
+  background: rgba(8, 14, 24, 0.88);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 12px;
+  padding: 8px 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
   display: flex;
-  gap: 15px;
-  position: relative;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: auto;
 }
-.turn-panel__button {
-  width: 70px;
-  height: 70px;
+
+.turn-panel.moba-style .turn-panel__spirit {
+  position: absolute;
+  top: -45px;
+  right: 0;
+  width: 220px;
+  background: rgba(8, 14, 24, 0.88);
+  border: 1px solid rgba(0, 255, 120, 0.3);
+  border-radius: 10px;
+  padding: 6px 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+}
+
+.turn-panel.moba-style .turn-panel__state {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 12px;
+  color: #a0c0e0;
+  text-shadow: 0 1px 4px #000;
+  pointer-events: auto;
+}
+
+.turn-panel.moba-style .turn-panel__log {
+  display: none !important;
+}
+
+.turn-panel__actions.moba-wheel {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.moba-btn {
+  position: absolute !important;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: rgba(10, 20, 30, 0.8);
-  border: 2px solid #0ff;
-  color: #0ff;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
-  font-weight: bold;
+  padding: 0;
+  border: 2px solid rgba(0, 240, 255, 0.6);
+  background: #090e17;
   cursor: pointer;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-  transition: all 0.2s;
-  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 240, 255, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  overflow: visible;
+  pointer-events: auto !important;
 }
-.turn-panel__button:hover:not(:disabled) {
-  background: rgba(0, 255, 255, 0.2);
-  box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
-  transform: scale(1.1);
+
+.moba-btn__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  pointer-events: none;
 }
-.turn-panel__button:disabled {
-  opacity: 0.4;
-  border-color: #555;
-  color: #888;
-  box-shadow: none;
+
+.moba-btn__key {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: rgba(10, 15, 25, 0.95);
+  color: #ffd700;
+  border: 1px solid #ffd700;
+  font-size: 10px;
+  font-weight: 900;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  z-index: 2;
+}
+
+.moba-btn__label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: #f0f8ff;
+  font-size: 11px;
+  font-weight: 800;
+  text-shadow: 0 1px 5px #000, 0 0 8px rgba(0, 240, 255, 0.5);
+  font-family: 'Space Grotesk', sans-serif;
+  z-index: 2;
+}
+
+.moba-btn__cost {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #00ffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  z-index: 2;
+}
+
+.moba-btn:hover:not(:disabled) {
+  transform: scale(1.15);
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.8), inset 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+.moba-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.moba-btn:disabled {
+  opacity: 0.45;
+  filter: grayscale(85%);
   cursor: not-allowed;
+  box-shadow: none;
 }
-.turn-panel__button--attack {
-  width: 90px;
-  height: 90px;
-  font-size: 20px;
-  border-color: #ff3300;
-  color: #ff3300;
-  box-shadow: 0 0 20px rgba(255, 51, 0, 0.4);
+
+/* RADIAL ARC WHEEL POSITIONS AROUND ATTACK (0,0 bottom-right) */
+.moba-btn--attack {
+  right: 0px !important;
+  bottom: 0px !important;
+  width: 86px !important;
+  height: 86px !important;
+  border-color: #ff4500 !important;
+  box-shadow: 0 0 25px rgba(255, 69, 0, 0.8), inset 0 0 15px rgba(255, 120, 0, 0.6) !important;
+  z-index: 10;
 }
-.turn-panel__button--attack:hover:not(:disabled) {
-  background: rgba(255, 51, 0, 0.2);
-  box-shadow: 0 0 30px rgba(255, 51, 0, 0.8);
+
+.moba-btn--attack:hover:not(:disabled) {
+  box-shadow: 0 0 38px rgba(255, 69, 0, 1), inset 0 0 25px rgba(255, 140, 0, 0.8) !important;
 }
-.turn-panel__button--charge {
-  border-color: #0f0;
-  color: #0f0;
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+
+.moba-btn--charge {
+  right: 225px !important;
+  bottom: 10px !important;
+  border-color: #22c55e !important;
+}
+
+.moba-btn--evade {
+  right: 185px !important;
+  bottom: 65px !important;
+  border-color: #00e5ff !important;
+}
+
+.moba-btn--defense {
+  right: 135px !important;
+  bottom: 115px !important;
+  border-color: #eab308 !important;
+}
+
+.moba-btn--light-reflect {
+  right: 75px !important;
+  bottom: 155px !important;
+  border-color: #a855f7 !important;
+}
+
+.moba-btn--heavy-reflect {
+  right: 10px !important;
+  bottom: 180px !important;
+  border-color: #ec4899 !important;
 }
 
 /* Arc Wheel Skill Expansion */

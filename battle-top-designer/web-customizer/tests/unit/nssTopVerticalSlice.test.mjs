@@ -95,7 +95,7 @@ describe('NSS TopEntity vertical slice', () => {
     expect(restored.partUpgrades).toEqual(before.partUpgrades);
   });
 
-  it('renders five NSS parts and a reversible Customizer link without legacy selectors', async () => {
+  it('renders five NSS parts, keeps progression actions, and switches back to legacy mode', async () => {
     mockCanvas();
     globalThis.requestAnimationFrame = vi.fn(() => 1);
     const [{ GaragePanel }, { buildNssBattleStats }] = await Promise.all([
@@ -108,6 +108,19 @@ describe('NSS TopEntity vertical slice', () => {
     expect(panel.nssPanel.querySelectorAll('.garage-nss__parts > div')).toHaveLength(5);
     expect([...panel.selects.values()].every(select => select.parentElement.hidden)).toBe(true);
     expect(panel.returnCustomizerLink.href).toBe('https://example.test/customizer/?combo=nss-p2c-0138');
-    expect(panel.shopButton.hidden).toBe(true);
+    expect(panel.shopButton.hidden).toBe(false);
+    expect(panel.collection.hidden).toBe(false);
+    expect(panel.toggleModeButton.parentElement).toBe(panel.root);
+
+    panel.toggleModeButton.click();
+
+    expect(panel.nssPanel.hidden).toBe(true);
+    expect([...panel.selects.values()].every(select => !select.parentElement.hidden)).toBe(true);
+    expect(panel.toggleModeButton.parentElement).toBe(panel.root);
+
+    panel.toggleModeButton.click();
+
+    expect(panel.nssPanel.hidden).toBe(false);
+    expect([...panel.selects.values()].every(select => select.parentElement.hidden)).toBe(true);
   });
 });

@@ -33,6 +33,8 @@ export class TurnPanel {
   private readonly attackButton = document.createElement('button');
   private readonly evadeButton = document.createElement('button');
   private readonly defenseButton = document.createElement('button');
+  private readonly lightReflectButton = document.createElement('button');
+  private readonly heavyReflectButton = document.createElement('button');
   private readonly chargeButton = document.createElement('button');
   private readonly skillGrid = document.createElement('div');
   private readonly skillButtons = new Map<ElementAttackSkillId, HTMLButtonElement>();
@@ -51,7 +53,7 @@ export class TurnPanel {
 
   constructor(onAction: (action: TurnAction) => void) {
     this.onAction = onAction;
-    this.root.className = 'turn-panel';
+    this.root.className = 'turn-panel moba-style';
     this.root.dataset.visible = 'false';
 
     const header = document.createElement('div');
@@ -71,29 +73,50 @@ export class TurnPanel {
     spirit.append(this.spiritText, spiritTrack);
 
     const actions = document.createElement('div');
-    actions.className = 'turn-panel__actions';
+    actions.className = 'turn-panel__actions moba-wheel';
 
-    this.attackButton.className = 'turn-panel__button turn-panel__button--attack';
-    this.attackButton.textContent = '进攻';
+    // Helper to create MOBA button structure with icon image
+    const setupMobaBtn = (btn: HTMLButtonElement, btnClass: string, imgSrc: string, keyText: string, label: string) => {
+      btn.className = `turn-panel__button moba-btn ${btnClass}`;
+      btn.innerHTML = `
+        <img src="${imgSrc}" class="moba-btn__img" alt="${label}" />
+        <span class="moba-btn__key">${keyText}</span>
+        <span class="moba-btn__label">${label}</span>
+        <span class="moba-btn__cost"></span>
+      `;
+    };
+
+    setupMobaBtn(this.attackButton, 'moba-btn--attack', '/images/skills/attack.jpg', '普攻', '进攻');
     this.attackButton.addEventListener('click', () => {
       if (this.state.resolving) return;
       this.expanded = !this.expanded;
       this.render();
     });
 
-    this.evadeButton.className = 'turn-panel__button';
-    this.evadeButton.textContent = '回避';
+    setupMobaBtn(this.evadeButton, 'moba-btn--evade', '/images/skills/evade.jpg', 'S', '回避');
     this.evadeButton.addEventListener('click', () => this.submit({ kind: 'evade' }));
 
-    this.defenseButton.className = 'turn-panel__button';
-    this.defenseButton.textContent = '防守';
+    setupMobaBtn(this.defenseButton, 'moba-btn--defense', '/images/skills/defense.jpg', 'D', '防守');
     this.defenseButton.addEventListener('click', () => this.submit({ kind: 'defense' }));
 
-    this.chargeButton.className = 'turn-panel__button turn-panel__button--charge';
-    this.chargeButton.textContent = '蓄能';
+    setupMobaBtn(this.lightReflectButton, 'moba-btn--light-reflect', '/images/skills/reflect.jpg', 'F', '轻反');
+    this.lightReflectButton.addEventListener('click', () => this.submit({ kind: 'light_reflect' }));
+
+    setupMobaBtn(this.heavyReflectButton, 'moba-btn--heavy-reflect', '/images/skills/reflect.jpg', 'R', '重反');
+    this.heavyReflectButton.addEventListener('click', () => this.submit({ kind: 'heavy_reflect' }));
+
+    setupMobaBtn(this.chargeButton, 'moba-btn--charge', '/images/skills/charge.jpg', 'C', '蓄能');
     this.chargeButton.addEventListener('click', () => this.submit({ kind: 'charge' }));
 
-    actions.append(this.attackButton, this.evadeButton, this.defenseButton, this.chargeButton);
+    // Radial fan out buttons around attack
+    actions.append(
+      this.chargeButton,
+      this.evadeButton,
+      this.defenseButton,
+      this.lightReflectButton,
+      this.heavyReflectButton,
+      this.attackButton
+    );
 
     this.skillGrid.className = 'turn-panel__skills';
     for (const skillId of ATTACK_ORDER) {
@@ -106,12 +129,11 @@ export class TurnPanel {
       this.skillGrid.appendChild(button);
     }
 
-    // Add explicit Back button in the skill grid
     const backGridButton = document.createElement('button');
     backGridButton.className = 'turn-panel__skill turn-panel__skill--back';
     backGridButton.style.setProperty('--skill-color', '#888888');
-    backGridButton.style.pointerEvents = 'auto'; // Force clickable
-    backGridButton.type = 'button'; // Prevent form submission
+    backGridButton.style.pointerEvents = 'auto';
+    backGridButton.type = 'button';
     backGridButton.innerHTML = `
       <span class="turn-panel__skill-icon">↩️</span>
       <span class="turn-panel__skill-name">返回</span>
@@ -158,6 +180,12 @@ export class TurnPanel {
       const cost = ELEMENT_ATTACKS[action.skillId].spiritCost;
       if (this.state.spirit < cost) return;
     }
+    if (action.kind === 'light_reflect') {
+      if (this.state.spirit < 10) return;
+    }
+    if (action.kind === 'heavy_reflect') {
+      if (this.state.spirit < 20) return;
+    }
     const evadeDefendCost = this.state.spirit >= 1 ? 1 : 0;
     const outOfFreeMoves = evadeDefendCost === 0 && this.state.freeDefensiveMoves <= 0;
     if ((action.kind === 'evade' || action.kind === 'defense') && (outOfFreeMoves || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost))) return;
@@ -179,25 +207,30 @@ export class TurnPanel {
     this.stateText.textContent = this.state.resolving ? '结算动画中' : `第 ${this.state.turnIndex} 回合 · 请选择行动`;
     this.logText.textContent = this.state.lastLog;
 
-    this.attackButton.textContent = '进攻';
     this.attackButton.disabled = this.state.resolving;
     
     const evadeDefendCost = this.state.spirit >= 1 ? 1 : 0;
-    const hideCost = evadeDefendCost === 0;
     const outOfFreeMoves = evadeDefendCost === 0 && this.state.freeDefensiveMoves <= 0;
     
     this.evadeButton.disabled = this.expanded || this.state.resolving || this.state.guardCrush || outOfFreeMoves || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost);
     this.defenseButton.disabled = this.expanded || this.state.resolving || this.state.guardCrush || outOfFreeMoves || (evadeDefendCost > 0 && this.state.spirit < evadeDefendCost);
     
-    const freeText = `0斗志 <span style="font-size: 0.6em; opacity: 0.8;">(${this.state.freeDefensiveMoves}次)</span>`;
-    this.evadeButton.innerHTML = `回避 <span class="cost">${hideCost ? freeText : `-${evadeDefendCost}斗志`}</span>`;
-    this.defenseButton.innerHTML = `防守 <span class="cost">${hideCost ? freeText : `-${evadeDefendCost}斗志`}</span>`;
-    
-    if (this.state.guardCrush) {
-      this.evadeButton.innerHTML = `<span style="color: #ff3333; text-decoration: line-through;">回避</span>`;
-      this.defenseButton.innerHTML = `<span style="color: #ff3333; text-decoration: line-through;">防守</span>`;
-    }
-    
+    const canLightReflect = this.state.spirit >= 10;
+    this.lightReflectButton.disabled = this.expanded || this.state.resolving || !canLightReflect;
+    const lightCostEl = this.lightReflectButton.querySelector('.moba-btn__cost');
+    if (lightCostEl) lightCostEl.textContent = '-10灵';
+
+    const canHeavyReflect = this.state.spirit >= 20;
+    this.heavyReflectButton.disabled = this.expanded || this.state.resolving || !canHeavyReflect;
+    const heavyCostEl = this.heavyReflectButton.querySelector('.moba-btn__cost');
+    if (heavyCostEl) heavyCostEl.textContent = '-20灵';
+
+    const evadeCostEl = this.evadeButton.querySelector('.moba-btn__cost');
+    if (evadeCostEl) evadeCostEl.textContent = evadeDefendCost > 0 ? `-${evadeDefendCost}` : `0灵`;
+
+    const defenseCostEl = this.defenseButton.querySelector('.moba-btn__cost');
+    if (defenseCostEl) defenseCostEl.textContent = evadeDefendCost > 0 ? `-${evadeDefendCost}` : `0灵`;
+
     this.chargeButton.disabled = this.expanded || this.state.resolving || this.state.spirit >= this.state.maxSpirit;
 
     for (const skillId of ATTACK_ORDER) {

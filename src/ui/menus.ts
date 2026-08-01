@@ -15,28 +15,28 @@ export class MenuPanel {
 
   constructor() {
     this.root.className = 'card menu';
-    this.start.className = 'button button--primary';
+    this.start.className = 'button button--primary button--hero';
+    this.start.textContent = '⚔️ 快速战斗';
     this.online.className = 'button button--online';
-    this.online.textContent = '\u771f\u4eba\u8054\u673a';
+    this.online.textContent = '🌐 真人联机';
     this.onlineStatus.className = 'menu__online-status';
-    this.onlineStatus.textContent = '\u5c40\u57df\u7f51 WebSocket \u53cc\u4eba\u5bf9\u6218';
-    this.start.textContent = '快速战斗';
-    this.survival.className = 'button button--danger';
-    this.survival.textContent = '生存模式';
+    this.onlineStatus.textContent = '局域网 WebSocket 双人对战';
+    this.survival.className = 'button';
+    this.survival.textContent = '🛡️ 生存模式';
     this.tournament.className = 'button';
-    this.tournament.textContent = '锦标赛';
+    this.tournament.textContent = '🏆 锦标赛';
 
-    // 🎨 Nova Spin 3D Assembly Button
+    // 🛠️ Nova Spin 3D Assembly Button
     this.nssCustomizer.className = 'button button--nss-customizer';
-    this.nssCustomizer.textContent = '🎨 3D 陀螺组装 (Nova Spin)';
-    this.nssCustomizer.style.background = 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)';
-    this.nssCustomizer.style.color = '#000';
+    this.nssCustomizer.textContent = '🛠️ 3D 陀螺组装 (Nova Spin)';
+    this.nssCustomizer.style.background = 'linear-gradient(135deg, rgba(0, 242, 254, 0.25) 0%, rgba(79, 172, 254, 0.35) 100%)';
+    this.nssCustomizer.style.border = '1px solid rgba(79, 172, 254, 0.6)';
+    this.nssCustomizer.style.color = '#7ef0ff';
     this.nssCustomizer.style.fontWeight = 'bold';
-    this.nssCustomizer.style.boxShadow = '0 0 15px rgba(79, 172, 254, 0.6)';
     this.nssCustomizer.style.textDecoration = 'none';
     this.nssCustomizer.style.display = 'inline-block';
     this.nssCustomizer.style.textAlign = 'center';
-    this.nssCustomizer.style.lineHeight = '2.2rem';
+    this.nssCustomizer.style.lineHeight = '2.4rem';
     this.nssCustomizer.addEventListener('click', (event) => {
       const url = this.nssCustomizer.href;
       if (url && !url.endsWith('#') && !url.startsWith('javascript:')) {
@@ -46,17 +46,15 @@ export class MenuPanel {
     });
 
     this.garage.className = 'button';
-    this.garage.textContent = '神级改装库';
+    this.garage.textContent = '📦 神装改装库';
     this.forge = document.createElement('button');
-    this.forge.className = 'button button--warning';
-    this.forge.textContent = '铁匠铺 (Forge)';
+    this.forge.className = 'button';
+    this.forge.textContent = '🔨 铁匠铺 (Forge)';
     
     // Add Black Market Button
     this.blackMarket = document.createElement('button');
-    this.blackMarket.className = 'button button--danger';
-    this.blackMarket.textContent = '黑色商城';
-    this.blackMarket.style.boxShadow = '0 0 10px rgba(255, 0, 85, 0.5)';
-    this.blackMarket.style.textShadow = '0 0 5px #ff0055';
+    this.blackMarket.className = 'button button--black-market';
+    this.blackMarket.textContent = '🏪 黑色商城';
 
     this.meta.className = 'menu__meta';
     this.trophyShelf.className = 'trophy-shelf';
@@ -74,18 +72,18 @@ export class MenuPanel {
     intro.textContent = '全力发射，切入碰撞赛场，赢下赏金金币，然后不断调整配置去迎战下一位对手。';
 
     const stageStrip = document.createElement('div');
-    stageStrip.className = 'menu__strip';
+    stageStrip.className = 'menu__tags';
     stageStrip.innerHTML = `
-      <span>发射博弈</span>
-      <span>金币奖励</span>
-      <span>商城养成</span>
+      <span class="tag">🏷️ 发射博弈</span>
+      <span class="tag">💰 金币奖励</span>
+      <span class="tag">⚙️ 组合养成</span>
     `;
 
     const stageWrap = document.createElement('label');
     stageWrap.className = 'field stage-select';
-    stageWrap.style.margin = '1rem 0';
+    stageWrap.style.margin = '0.5rem 0';
     const stageLabel = document.createElement('span');
-    stageLabel.textContent = '场地风格 (Stage Theme)';
+    stageLabel.textContent = '⚙️ 场地风格 (Stage Theme)';
     this.stageSelect.innerHTML = `
       <option value="classic_grid">经典赛博网格 (Classic Grid)</option>
       <option value="neon_magma" selected>霓虹熔岩废土 (Neon Magma)</option>
@@ -94,9 +92,9 @@ export class MenuPanel {
     stageWrap.append(stageLabel, this.stageSelect);
 
     this.root.append(
-      eyebrow, title, intro, stageStrip, stageWrap, 
+      eyebrow, title, intro, stageStrip,
       this.start, this.online, this.onlineStatus, this.nssCustomizer, this.survival, this.tournament, this.garage, this.forge, this.blackMarket,
-      this.meta, this.trophyShelf
+      stageWrap, this.meta, this.trophyShelf
     );
   }
 

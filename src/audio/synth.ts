@@ -163,4 +163,82 @@ export class SynthAudio {
     this.pulse('sawtooth', 784, { attack: 0.02, release: 0.55, gain: 0.08 }, 4, 0.34);
     this.pulse('sine', 988, { attack: 0.04, release: 0.7, gain: 0.04 }, 0, 0.4);
   }
+
+  // ── Voice Analyzer & AI Voice Simulator Integration ──
+  private voiceAnalyzer = new VoiceAnalyzer();
+  private aiSimulator = new AiVoiceSimulator();
+
+  async initVoiceAnalyzer() {
+    await this.voiceAnalyzer.init();
+  }
+
+  getVoiceVolumeLevel(): number {
+    return this.voiceAnalyzer.getVolumeLevel();
+  }
+
+  updateAiVoice(dt: number): number {
+    return this.aiSimulator.update(dt);
+  }
+
+  triggerAiVoiceShout(duration = 1.5) {
+    this.aiSimulator.triggerAiShout(duration);
+  }
+}
+export class VoiceAnalyzer {
+  private micContext: AudioContext | null = null;
+  private analyser: AnalyserNode | null = null;
+  private micStream: MediaStream | null = null;
+  private dataArray: Uint8Array | null = null;
+  public initialized = false;
+
+  async init() {
+    if (this.initialized) return;
+    try {
+      this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      this.micContext = new AudioContext();
+      const source = this.micContext.createMediaStreamSource(this.micStream);
+      this.analyser = this.micContext.createAnalyser();
+      this.analyser.fftSize = 256;
+      source.connect(this.analyser);
+      this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      this.initialized = true;
+    } catch {
+      this.initialized = false;
+    }
+  }
+
+  getVolumeLevel(): number {
+    if (!this.initialized || !this.analyser || !this.dataArray) return 0;
+    this.analyser.getByteFrequencyData(this.dataArray as any);
+    let sum = 0;
+    for (let i = 0; i < this.dataArray.length; i++) {
+      sum += this.dataArray[i];
+    }
+    const avg = sum / this.dataArray.length;
+    return Math.min(1.0, avg / 128);
+  }
+}
+
+export class AiVoiceSimulator {
+  private phase = Math.random() * Math.PI * 2;
+  private targetVolume = 0;
+  private currentVolume = 0;
+  private burstTimer = 0;
+
+  triggerAiShout(durationSec = 1.5) {
+    this.burstTimer = durationSec;
+  }
+
+  update(dt: number): number {
+    this.phase += dt * 8;
+    if (this.burstTimer > 0) {
+      this.burstTimer -= dt;
+      this.targetVolume = 0.68 + Math.sin(this.phase) * 0.22 + (Math.random() - 0.5) * 0.12;
+    } else {
+      const noise = Math.sin(this.phase * 0.5) * 0.2 + Math.cos(this.phase * 1.3) * 0.15;
+      this.targetVolume = Math.max(0.08, Math.min(0.48, noise + 0.18));
+    }
+    this.currentVolume += (this.targetVolume - this.currentVolume) * Math.min(1, dt * 10);
+    return Math.max(0, Math.min(1, this.currentVolume));
+  }
 }

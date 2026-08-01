@@ -19,7 +19,7 @@ type MessageListener = (message: ServerMessage) => void;
 type StateListener = (state: ConnectionState) => void;
 
 export class NetworkClient {
-  private readonly url: string;
+  private url: string;
   private socket: WebSocket | null = null;
   private connectionState: ConnectionState = 'idle';
   private readonly messageListeners = new Set<MessageListener>();
@@ -61,8 +61,11 @@ export class NetworkClient {
     return () => this.stateListeners.delete(listener);
   }
 
-  async joinQueue(displayName: string, loadout: OnlineLoadout) {
-    if (!this.connected) await this.connect();
+  async joinQueue(displayName: string, loadout: OnlineLoadout, customUrl?: string) {
+    if (customUrl) {
+      this.url = customUrl;
+    }
+    if (!this.connected) await this.connect(customUrl);
     this.send({ v: PROTOCOL_VERSION, type: 'JOIN_QUEUE', displayName, loadout });
   }
 
@@ -107,58 +110,38 @@ export class NetworkClient {
     this.send({ v: PROTOCOL_VERSION, type: 'CLASH_QTE_SCORE', roomId, turnId, score, final });
   }
 
-  sendCritTriggered(
-    turnId: number,
-    attacker: OnlineRole,
-    target: OnlineRole,
-    damage: number,
-    skillTier: SkillTier,
-    position: { x: number; z: number },
-  ) {
+  sendCritTriggered(turnId: number, attacker: OnlineRole, target: OnlineRole, damage: number, skillTier: SkillTier, position: { x: number; z: number }) {
     const roomId = this.requireRoom();
-    if (!roomId) return;
-    this.send({
-      v: PROTOCOL_VERSION,
-      type: 'CRIT_TRIGGERED',
-      roomId,
-      eventId: this.createEventId('crit'),
-      turnId,
-      attacker,
-      target,
-      damage,
-      skillTier,
-      position,
-    });
+    if (roomId) this.send({ v: PROTOCOL_VERSION, type: 'CRIT_TRIGGERED', roomId, eventId: this.createEventId('crit'), turnId, attacker, target, damage, skillTier, position });
   }
 
   sendSubstitution(position: { x: number; z: number }) {
     const roomId = this.requireRoom();
     if (!roomId || !this.role) return;
-    this.send({
-      v: PROTOCOL_VERSION,
-      type: 'SUBSTITUTE_HERO',
-      roomId,
-      eventId: this.createEventId('sub'),
-      actor: this.role,
-      position,
-    });
+    this.send({ v: PROTOCOL_VERSION, type: 'SUBSTITUTE_HERO', roomId, eventId: this.createEventId('sub'), actor: this.role, position });
   }
 
-  update(dt: number, stateFactory: () => Omit<NetworkTopState, 'seq'>) {
+  update(dt: number, getSnapshot: () => Omit<NetworkTopState, 'seq'>) {
     if (this.connectionState !== 'in_battle' || !this.connected || !this.roomId) return;
     this.stateAccumulator += Math.max(0, dt);
     if (this.stateAccumulator < STATE_INTERVAL_SECONDS) return;
     this.stateAccumulator %= STATE_INTERVAL_SECONDS;
-    const state = { ...stateFactory(), seq: ++this.localSequence };
-    if (!isFiniteNetworkState(state)) return;
-    this.send({ v: PROTOCOL_VERSION, type: 'STATE', roomId: this.roomId, ...state });
+
+    const payload: NetworkTopState = {
+      ...getSnapshot(),
+      seq: ++this.localSequence,
+    };
+    if (!isFiniteNetworkState(payload)) return;
+    this.send({ v: PROTOCOL_VERSION, type: 'STATE', roomId: this.roomId, ...payload });
     this.sentStatePackets += 1;
   }
 
   disconnect() {
     const socket = this.socket;
     this.socket = null;
-    if (socket && socket.readyState < WebSocket.CLOSING) socket.close(1000, 'Client reset');
+    if (socket && socket.readyState < WebSocket.CLOSING) {
+      socket.close(1000, 'Client reset');
+    }
     this.resetSession();
     this.setState('idle');
   }
@@ -176,7 +159,10 @@ export class NetworkClient {
     };
   }
 
-  private connect() {
+  connect(customUrl?: string) {
+    if (customUrl) {
+      this.url = customUrl;
+    }
     this.setState('connecting');
     return new Promise<void>((resolve, reject) => {
       const socket = new WebSocket(this.url);

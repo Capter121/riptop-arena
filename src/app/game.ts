@@ -22,6 +22,7 @@ import { SkillManager, getSkillLabel } from '../gameplay/skills';
 import { SpiritSystem } from '../gameplay/spirit';
 import { TurnPanel } from '../ui/turnPanel';
 import { ClashQtePanel } from '../ui/clashQtePanel';
+import { VoiceBoostOverlay } from '../ui/voiceBoostOverlay';
 import { FloatingTextManager } from '../ui/floatingTextManager';
 import { MenuPanel } from '../ui/menus';
 import { GaragePanel } from '../ui/garage';
@@ -42,6 +43,7 @@ import { ShockwaveFX } from '../fx/shockwave';
 import { PickupManager } from '../gameplay/pickups';
 import { createBloomPipeline, type BloomPipeline } from '../scene/postProcessing';
 import { NetworkClient } from '../network/networkClient';
+import { LanModal } from '../ui/lanModal';
 import { DEFAULT_NSS_LOADOUT, NssLoadoutController } from '../nss/loadoutController';
 import { buildNssBattleStats } from '../nss/buildStats';
 import { NSS_BATTLE_CATALOG_SHA256 } from '../nss/battleCatalog';
@@ -126,6 +128,7 @@ export class Game {
   private readonly bloom: BloomPipeline;
   private readonly loop = new Loop((dt) => this.update(dt));
   private readonly network = new NetworkClient();
+  private readonly lanModal = new LanModal();
   private readonly nssLoadouts = new NssLoadoutController();
   private readonly overlay = document.createElement('div');
   private phase: Phase = 'menu';
@@ -165,6 +168,11 @@ export class Game {
   private readonly turnArbitrator = new TurnArbitrator();
   private readonly turnPanel = new TurnPanel((action) => this.submitTurnAction(action));
   private readonly clashQtePanel = new ClashQtePanel();
+  private readonly voiceBoostOverlay = new VoiceBoostOverlay();
+  private vKeyHeld = false;
+  private playerDefensiveSuccesses = 0;
+  private enemyDefensiveSuccesses = 0;
+  private voiceAnalyzerRequested = false;
   private turnState: TurnState = 'awaiting';
   private turnTimer = 0;
   private turnIndex = 1;
@@ -338,47 +346,73 @@ export class Game {
     this.events.on('spark', ({ x, z, intensity }) => {
       const isAbsoluteZero = arenaManager.getTheme() === 'absolute_zero';
       const particleIntensity = isAbsoluteZero ? intensity * 0.55 : intensity;
-      this.sparks.emit(x, z, particleIntensity);
-      if (!isAbsoluteZero && intensity > 1.2) {
-        this.lightning.strike(x, 0.4, z, 0x00ffff);
+      // Emit heavy spark particle burst
+      this.sparks.emit(x, z, particleIntensity * 1.5);
+
+      // Trigger shockwave ring on medium-to-strong impact
+      if (intensity > 0.4) {
+        const ringColor = isAbsoluteZero ? 0x00ffff : (intensity > 1.2 ? 0xff4400 : 0xffaa00);
+        this.shockwave.trigger(x, 0.3, z, particleIntensity * 0.8, ringColor);
+      }
+
+      // Trigger lightning bolts and friction smoke on strong collisions
+      if (!isAbsoluteZero && intensity > 0.7) {
+        this.lightning.strike(x, 0.4, z, intensity > 1.2 ? 0xff0055 : 0x00ffff);
+        this.trails.emitSmoke(x, 0.2, z, 0xffaa00, Math.floor(intensity * 12), 0.5);
       }
     });
+
     this.events.on('collision_damage', ({ side, amount, x, z, intensity }) => {
       this.floatingTexts.spawnCollisionDamage(side, amount, x, 0.72, z, intensity);
     });
+
     this.events.on('shield_block', ({ x, z, side, shieldHits }) => {
       const color = side === 'player' ? 0x7ef0ff : 0xffcc66;
-      this.shockwave.trigger(x, 0.35, z, 0.7, color);
+      this.shockwave.trigger(x, 0.35, z, 1.2, color);
       this.lightning.strike(x, 0.28, z, color);
       this.lightning.strike(x, 0.45, z, 0xffffff);
-      this.trails.emitSmoke(x, 0.18, z, color, 10, 0.34);
+      this.trails.emitSmoke(x, 0.18, z, color, 15, 0.5);
       this.audio.clash(0.55);
-      this.hud.combatLog.log(`\u62a4\u76fe\u683c\u6321\uff01\u5269\u4f59 ${shieldHits} \u5c42`, '#7ef0ff');
+      this.hud.combatLog.log(`护盾格挡！剩余 ${shieldHits} 层`, '#7ef0ff');
     });
+
     this.events.on('retreat_reverse_trigger', ({ x, z, side }) => {
       const color = side === 'player' ? 0x7ef0ff : 0xff8844;
-      this.shockwave.trigger(x, 0.4, z, 0.75, color);
+      this.shockwave.trigger(x, 0.4, z, 1.0, color);
       this.lightning.strike(x, 0.32, z, color);
-      this.hud.combatLog.log('\u56de\u65cb\u4f2a\u9000\u53d1\u52a8', '#ffd166');
+      this.hud.combatLog.log('回旋伪退发动', '#ffd166');
     });
+
     this.events.on('spark', ({ intensity }) => this.audio.clash(intensity));
+
     this.events.on('launch', ({ power }) => {
       this.audio.launch(power);
-      this.hud.combatLog.log(`3, 2, 1\uff0c\u53d1\u5c04\uff01(\u529b\u5ea6 ${Math.round(power * 100)}%)`, '#7ef0ff');
+      // Emit launch shockwave & smoke
+      this.shockwave.trigger(-6, 0.3, 0, power * 1.5, 0x00ffff);
+      this.shockwave.trigger(6, 0.3, 0, power * 1.5, 0xff5500);
+      this.trails.emitSmoke(-6, 0.3, 0, 0x00ffff, 20, 0.6);
+      this.trails.emitSmoke(6, 0.3, 0, 0xff5500, 20, 0.6);
+      this.hud.combatLog.log(`3, 2, 1，发射！(力度 ${Math.round(power * 100)}%)`, '#7ef0ff');
     });
+
     this.events.on('dash', () => {
       this.audio.dash();
-      this.hud.combatLog.log('\u95ea\u907f\u51b2\u523a', '#00ccff');
+      this.hud.combatLog.log('闪避冲刺', '#00ccff');
     });
+
     this.events.on('burst', ({ loser }) => {
       const target = loser === 'player' ? this.player : this.enemy;
-      this.sparks.burst(target.position.x, target.position.y);
-      this.lightning.strike(target.position.x, 0.5, target.position.y, 0xffaa00);
-      this.lightning.strike(target.position.x, 0.8, target.position.y, 0xffffff);
+      const tx = target.position.x;
+      const tz = target.position.y;
+      this.sparks.burst(tx, tz);
+      this.shockwave.trigger(tx, 0.4, tz, 2.5, 0xff0033);
+      this.lightning.strike(tx, 0.5, tz, 0xffaa00);
+      this.lightning.strike(tx, 0.8, tz, 0xffffff);
+      this.trails.emitSmoke(tx, 0.3, tz, 0xff3300, 35, 1.0);
       this.audio.burst();
-      this.hitStop = Math.max(this.hitStop, 0.06);
-      this.rig.kickShake(0.9);
-      this.hud.combatLog.log('\u7206\u88c2\u51fb\u7834', '#ff3300');
+      this.hitStop = Math.max(this.hitStop, 0.08);
+      this.rig.kickShake(1.2);
+      this.hud.combatLog.log('爆裂击破', '#ff3300');
     });
 
     this.events.on('impact', ({ intensity }) => {
@@ -403,7 +437,17 @@ export class Game {
       this.enemyPreset = pick(ENEMIES);
       this.startBattle();
     });
-    this.menu.online.addEventListener('click', () => this.toggleOnlineQueue());
+    this.menu.online.addEventListener('click', () => {
+      if (['connecting', 'queued', 'matched', 'in_battle'].includes(this.network.state)) {
+        void this.toggleOnlineQueue();
+      } else {
+        this.lanModal.show();
+      }
+    });
+    this.lanModal.setupCallbacks(
+      (url) => void this.toggleOnlineQueue(url),
+      () => void this.toggleOnlineQueue(),
+    );
     this.menu.survival.addEventListener('click', () => {
       this.beginSingleSession();
       this.mode = 'survival';
@@ -491,6 +535,7 @@ export class Game {
 
     this.network.onStateChange((state) => this.updateOnlineMenuState(state));
     this.network.onMessage((message) => this.handleNetworkMessage(message));
+    this.refreshBlackMarket();
     this.resize();
     this.showMenu();
     window.setTimeout(() => this.introCard.classList.add('intro-card--hidden'), 1800);
@@ -519,11 +564,12 @@ export class Game {
     this.onlineLocalLoadout = null;
   }
 
-  private async toggleOnlineQueue() {
+  private async toggleOnlineQueue(customUrl?: string) {
     if (['connecting', 'queued', 'matched', 'in_battle'].includes(this.network.state)) {
       this.network.cancelQueue();
       this.onlineLocalLoadout = null;
-      this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', '\u5df2\u53d6\u6d88\u5339\u914d');
+      this.menu.setOnlineState('真人联机', '已取消匹配');
+      this.lanModal.updateStatus('idle', '已取消匹配');
       return;
     }
 
@@ -545,22 +591,37 @@ export class Game {
         };
     this.onlineLocalLoadout = loadout;
     try {
-      await this.network.joinQueue('Player', loadout);
+      this.lanModal.updateStatus('connecting', '正在连接局域网匹配服务...');
+      await this.network.joinQueue('Player', loadout, customUrl);
     } catch (error) {
       this.battleMode = 'single';
       this.onlineLocalLoadout = null;
-      this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', error instanceof Error ? error.message : '\u8054\u673a\u670d\u52a1\u4e0d\u53ef\u7528');
+      const msg = error instanceof Error ? error.message : '局域网服务不可用';
+      this.menu.setOnlineState('真人联机', msg);
+      this.lanModal.updateStatus('idle', msg);
     }
   }
 
   private updateOnlineMenuState(state: string) {
-    if (state === 'connecting') this.menu.setOnlineState('\u8fde\u63a5\u4e2d...', '\u6b63\u5728\u8fde\u63a5\u672c\u673a\u5bf9\u6218\u670d\u52a1', true);
-    else if (state === 'queued') this.menu.setOnlineState('\u5339\u914d\u4e2d...\uff08\u70b9\u51fb\u53d6\u6d88\uff09', '\u7b49\u5f85\u7b2c\u4e8c\u4f4d\u73a9\u5bb6', true);
-    else if (state === 'matched') this.menu.setOnlineState('\u5bf9\u624b\u5df2\u627e\u5230', '\u6b63\u5728\u51c6\u5907\u6218\u6597\u573a', true);
-    else if (state === 'in_battle') this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', '\u8054\u673a\u5bf9\u6218\u8fdb\u884c\u4e2d', true);
-    else if (state === 'idle') this.menu.setOnlineState('\u771f\u4eba\u8054\u673a', '\u5c40\u57df\u7f51 WebSocket \u53cc\u4eba\u5bf9\u6218');
-    else if (state === 'closed' && this.battleMode === 'online' && (this.phase === 'launch' || this.phase === 'battle')) {
-      this.handleOnlineAbort('\u8054\u673a\u670d\u52a1\u5df2\u65ad\u5f00');
+    if (state === 'connecting') {
+      this.menu.setOnlineState('连接中...', '正在连接局域网对战服务', true);
+      this.lanModal.updateStatus(state, '正在连接局域网匹配服务...');
+    } else if (state === 'queued') {
+      this.menu.setOnlineState('匹配中...（点击取消）', '等待第二位局域网玩家加入', true);
+      this.lanModal.updateStatus(state, '匹配排队中！请在另一台电脑/手机点击【开始匹配】');
+    } else if (state === 'matched') {
+      this.menu.setOnlineState('对手已找到', '正在准备战斗场地', true);
+      this.lanModal.updateStatus(state, '已匹配同局域网玩家！正在进入赛场...');
+      setTimeout(() => this.lanModal.hide(), 1200);
+    } else if (state === 'in_battle') {
+      this.menu.setOnlineState('真人联机', '联机对战进行中', true);
+      this.lanModal.updateStatus(state, '局域网对战进行中');
+      this.lanModal.hide();
+    } else if (state === 'idle') {
+      this.menu.setOnlineState('真人联机', '局域网 WebSocket 双人对战');
+      this.lanModal.updateStatus(state, '局域网服务就绪');
+    } else if (state === 'closed' && this.battleMode === 'online' && (this.phase === 'launch' || this.phase === 'battle')) {
+      this.handleOnlineAbort('局域网联机服务已断开');
     }
   }
 
@@ -1110,6 +1171,9 @@ export class Game {
     this.activeTurnResolution = null;
     this.activeClashQte = null;
     this.clashQtePanel.hide();
+    this.playerDefensiveSuccesses = 0;
+    this.enemyDefensiveSuccesses = 0;
+    this.voiceBoostOverlay.resetState();
     this.turnPanel.setPanelLock(false);
     this.turnPanel.update({ visible: false, resolving: false, turnIndex: this.turnIndex, lastLog: '发射后进入回合博弈。' });
     this.pickups.reset();
@@ -1260,6 +1324,9 @@ export class Game {
       this.applyOnlineSnapshot(this.pendingOnlineSnapshot);
     }
     this.hud.combatLog.log(resolution.log, resolution.winner === 'player' ? '#ffd166' : resolution.winner === 'enemy' ? '#ff7b5b' : '#7ef0ff');
+    if (resolution.log && resolution.log !== 'Ready') {
+      this.voiceBoostOverlay.triggerFloatingBanner(resolution.log);
+    }
     if (resolution.kind === 'clash_qte') {
       this.beginClashQte(resolution);
       return true;
@@ -1370,6 +1437,12 @@ export class Game {
     const midX = (this.player.position.x + this.enemy.position.x) * 0.5;
     const midZ = (this.player.position.y + this.enemy.position.y) * 0.5;
     this.sparks.emit(midX, midZ, 0.45 + qte.tier * 0.08);
+    this.sparks.emitAbsorb(this.player.position.x, this.player.position.y, 1.0 + qte.tier * 0.2);
+    this.sparks.emitAbsorb(this.enemy.position.x, this.enemy.position.y, 1.0 + qte.tier * 0.2);
+    if (Math.random() < 0.25) {
+      this.lightning.strike(midX, 0.4, midZ, 0xffaa00);
+      this.shockwave.trigger(midX, 0.35, midZ, 0.6, 0xffdd00);
+    }
 
     this.clashQtePanel.update({
       visible: true,
@@ -1604,6 +1677,29 @@ export class Game {
   private applyTurnVisuals(resolution: TurnResolution) {
     this.applyTopTurnVisual(this.player, this.enemy, resolution.playerVisual, resolution.playerAction);
     this.applyTopTurnVisual(this.enemy, this.player, resolution.enemyVisual, resolution.aiAction);
+
+    if (resolution.playerVisual === 'defense' || resolution.playerVisual === 'evade') {
+      this.playerDefensiveSuccesses++;
+    }
+    if (resolution.enemyVisual === 'defense' || resolution.enemyVisual === 'evade') {
+      this.enemyDefensiveSuccesses++;
+    }
+
+    const isStandoff = resolution.kind === 'standoff' || resolution.kind === 'clash_qte';
+
+    // Condition trigger: Floating text banner flies across screen, starting 3.0s countdown window immediately
+    if (this.playerDefensiveSuccesses >= 1 && this.enemyDefensiveSuccesses >= 1 && isStandoff) {
+      this.hud.combatLog.log('🎙️【音爆爆发】3秒限时爆发蓄能开启！对着麦克风喊叫/按 V 键爆发！', '#ff00ff');
+      this.voiceBoostOverlay.startBoostCountdown(3.0);
+      this.voiceBoostOverlay.triggerFloatingBanner(
+        '🎙️【音爆爆发】3秒限时爆发开启！大声叫喊或长按 V 键蓄能！'
+      );
+    }
+
+    // Trigger AI shouting on attacks or standoff
+    if (resolution.aiAction.kind === 'attack' || isStandoff) {
+      this.audio.triggerAiVoiceShout(2.0);
+    }
 
     const midX = (this.player.position.x + this.enemy.position.x) / 2;
     const midZ = (this.player.position.y + this.enemy.position.y) / 2;
@@ -1898,7 +1994,7 @@ export class Game {
     const nextUnlock = getNextUnlock(this.progression);
     const upgradeSummary = `\u6574\u673a\u5f3a\u5316\uff1a\u653b ${this.progression.upgrades.attack} / \u9632 ${this.progression.upgrades.defense} / \u6301 ${this.progression.upgrades.stamina}`;
     return nextUnlock
-      ? `\u5f53\u524d\u76ee\u6807\uff1a${nextEnemy.name}\uff08${nextEnemy.crown}\uff09\u3002\u8d62\u4e0b\u4e0b\u4e00\u573a\u5373\u53ef\u89e3\u9501 ${nextUnlock.name}\u3002${upgradeSummary}\u3002`
+      ? `\u5f53\u524d\u76ee\u6807\uff1a${nextEnemy.name}\uff08${nextEnemy.crown}\uff09\u3002\u8d62\u4e0b\u4e00\u573a\u5373\u53ef\u89e3\u9501 ${nextUnlock.name}\u3002${upgradeSummary}\u3002`
       : `\u5f53\u524d\u76ee\u6807\uff1a${nextEnemy.name}\uff08${nextEnemy.crown}\uff09\u3002\u5168\u90e8\u90e8\u4ef6\u90fd\u5df2\u89e3\u9501\u3002${upgradeSummary}\u3002`;
   }
 
@@ -2167,6 +2263,7 @@ export class Game {
   private resize() {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
@@ -2292,7 +2389,17 @@ export class Game {
       if (lowerKey === 'd') this.submitTurnAction({ kind: 'defense' });
       if (lowerKey === 's') this.submitTurnAction({ kind: 'evade' });
       if (lowerKey === 'c') this.submitTurnAction({ kind: 'charge' });
-      if (skillId || ['d', 's', 'c'].includes(lowerKey)) return;
+      if (lowerKey === 'f') this.submitTurnAction({ kind: 'light_reflect' });
+      if (lowerKey === 'r') this.submitTurnAction({ kind: 'heavy_reflect' });
+      if (lowerKey === 'v') {
+        this.vKeyHeld = true;
+        if (!this.voiceAnalyzerRequested) {
+          this.voiceAnalyzerRequested = true;
+          void this.audio.initVoiceAnalyzer();
+        }
+        return;
+      }
+      if (skillId || ['d', 's', 'c', 'f', 'r'].includes(lowerKey)) return;
     }
 
     if (event.key >= '1' && event.key <= '5') {
@@ -2312,6 +2419,10 @@ export class Game {
   }
 
   private onKeyUp(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'v') {
+      this.vKeyHeld = false;
+      return;
+    }
     if (this.paused) return;
     if (this.phase === 'launch' && event.code === 'Space' && this.charging) {
       this.charging = false;
@@ -2416,6 +2527,38 @@ export class Game {
     const simulationDt = this.hitStop > 0 ? 0 : dt * this.timeScale;
     this.hitStop = Math.max(0, this.hitStop - dt);
 
+    // Audio sampling & AI voice simulation
+    const rawMic = this.audio.getVoiceVolumeLevel();
+    const playerVolume = this.vKeyHeld ? 0.95 : rawMic;
+    const aiVolume = this.audio.updateAiVoice(dt);
+
+    // Update overlay meters & 3-second countdown (only renders during active 3.0s window)
+    this.voiceBoostOverlay.update(playerVolume, aiVolume, dt, this.phase === 'battle');
+
+    // Apply physical & attribute boosts when revealed
+    if (this.phase === 'battle' && this.voiceBoostOverlay.isUnlockedAndRevealed()) {
+      // Player voice boost
+      if (playerVolume > 0.35) {
+        const spinBoost = playerVolume * 450 * simulationDt;
+        const spiritBoost = playerVolume * 35 * simulationDt;
+        this.player.spin = Math.min(this.player.stats.maxSpin * 1.5, this.player.spin + spinBoost);
+        this.player.spirit = Math.min(100, this.player.spirit + spiritBoost);
+        this.shockwave.trigger(this.player.position.x, 0.4, this.player.position.y, 0.8 + playerVolume, 0xffaa00);
+        this.sparks.emit(this.player.position.x, this.player.position.y, playerVolume * 1.5);
+        this.rig.kickShake(0.08 * playerVolume);
+      }
+
+      // AI enemy voice boost
+      if (aiVolume > 0.35) {
+        const aiSpinBoost = aiVolume * 400 * simulationDt;
+        const aiSpiritBoost = aiVolume * 30 * simulationDt;
+        this.enemy.spin = Math.min(this.enemy.stats.maxSpin * 1.5, this.enemy.spin + aiSpinBoost);
+        this.enemy.spirit = Math.min(100, this.enemy.spirit + aiSpiritBoost);
+        this.shockwave.trigger(this.enemy.position.x, 0.4, this.enemy.position.y, 0.8 + aiVolume, 0xff5500);
+        this.sparks.emit(this.enemy.position.x, this.enemy.position.y, aiVolume * 1.5);
+      }
+    }
+
     this.skillManager.update(this.player, dt, this.enemy);
     this.skillManager.update(this.enemy, dt, this.player);
 
@@ -2426,6 +2569,12 @@ export class Game {
       } else {
         if (this.charging) {
           this.launchCharge = Math.min(1, this.launchCharge + dt * 0.45);
+          // Continuous energy gathering particle swirl during launch charge!
+          this.sparks.emitAbsorb(-6, 0, 0.8 + this.launchCharge * 1.5);
+          if (Math.random() < 0.35) {
+            this.lightning.strike(-6, 0.35, 0, 0x00ffff);
+            this.shockwave.trigger(-6, 0.3, 0, 0.4 + this.launchCharge * 0.5, 0x00ffff);
+          }
         }
         this.countdown = Math.max(0, this.countdown - dt);
         if (this.countdown <= 0 && !this.charging && this.launchCharge <= 0.1) {
@@ -2513,7 +2662,7 @@ export class Game {
     this.lightning.update(dt);
     this.shockwave.update(dt);
     this.floatingTexts.update(dt);
-    this.trails.update(dt, this.player, this.enemy);
+    this.trails.update(dt, this.player, this.enemy, this.lightning, this.shockwave);
 
     // 閳光偓閳光偓 Dynamic Visual FX 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
     const totalEnergy = this.energy.get('player') + this.energy.get('enemy');
@@ -2946,5 +3095,3 @@ export class Game {
     this.renderCameraDebug();
   }
 }
-
-

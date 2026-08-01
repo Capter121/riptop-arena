@@ -68,6 +68,18 @@ type TurnSpiritSnapshot = {
   enemySpiritRegenBonus: number;
 };
 
+function scaleDamageResult(result: DamageResult, ratio: number, defender: BattleSide): DamageResult {
+  return {
+    ...result,
+    contextMultiplier: result.contextMultiplier * ratio,
+    rawDamage: result.rawDamage * ratio,
+    finalDamage: Math.round(result.finalDamage * ratio),
+    armorReduced: Math.round(result.armorReduced * ratio),
+    lockDamage: result.lockDamage * ratio,
+    defender,
+  };
+}
+
 export class TurnArbitrator {
   executeTurnResolution(playerAction: TurnAction, aiAction: TurnAction, player: TopEntity, enemy: TopEntity, turnIndex: number): TurnResolution {
     const spirit = {
@@ -244,6 +256,130 @@ export class TurnArbitrator {
       );
     }
 
+    if (defenderAction.kind === 'light_reflect') {
+      const isTier123 = attack.tier >= 1 && attack.tier <= 3;
+      if (isTier123) {
+        const [playerVisual, enemyVisual] = visual('defense');
+        const reboundDmg = calculateTurnDamage({
+          attacker: attackerTop,
+          defender: attackerTop,
+          skillTier: attack.tier,
+          isCounter: false,
+          isClash: false,
+          isBlockOrMiss: false,
+          contextMultiplier: 1.0,
+        });
+
+        // 轻反弹：大幅削弱为 15%~23% 的极低微骚扰反弹伤害
+        const reflectReturnRatio = 0.15 + Math.random() * 0.08;
+        const reflectPercent = Math.round(reflectReturnRatio * 100);
+        const reflectedDamage = scaleDamageResult(reboundDmg, reflectReturnRatio, attacker);
+        const attackerReflectDamage = reflectedDamage.finalDamage;
+
+        // 反弹方承受 15%~25% 的轻微冲击余波
+        const recoilRatio = 0.15 + Math.random() * 0.10;
+        const recoilPercent = Math.round(recoilRatio * 100);
+        const recoilDamage = scaleDamageResult(reboundDmg, reflectReturnRatio * recoilRatio, defender);
+        const defenderSelfDamage = recoilDamage.finalDamage;
+
+        return finish(
+          defender === 'player' ? 'qte_parry' : 'defense_success',
+          null,
+          null,
+          playerVisual,
+          enemyVisual,
+          `🛡️【轻反弹成功】拆解 ${attack.label} (Tier ${attack.tier})！对方仅承受 ${reflectPercent}% (${attackerReflectDamage}点) 战术反弹，${defender === 'player' ? '玩家' : '对手'}承受 ${recoilPercent}% (${defenderSelfDamage}点) 冲击余波！`,
+          true,
+          false,
+          false,
+          1.0,
+          false,
+          [reflectedDamage, recoilDamage]
+        );
+      } else {
+        const [playerVisual, enemyVisual] = visual('hit');
+        const dmg = calculateTurnDamage({
+          attacker: attackerTop,
+          defender: defenderTop,
+          skillTier: attack.tier,
+          isCounter: false,
+          isClash: false,
+          isBlockOrMiss: false,
+        });
+        return finish(
+          'defense_fail',
+          null,
+          null,
+          playerVisual,
+          enemyVisual,
+          `💥【轻反弹碎裂】对方施展了 ${attack.label} (Tier ${attack.tier}) 高阶大招！轻盾被瞬间破开受创！`,
+          false, false, false, 0, false, [dmg]
+        );
+      }
+    }
+
+    if (defenderAction.kind === 'heavy_reflect') {
+      const isTier4or5 = attack.tier === 4 || attack.tier === 5;
+      if (isTier4or5) {
+        const [playerVisual, enemyVisual] = visual('defense');
+        const reboundDmg = calculateTurnDamage({
+          attacker: attackerTop,
+          defender: attackerTop,
+          skillTier: attack.tier,
+          isCounter: false,
+          isClash: false,
+          isBlockOrMiss: false,
+          contextMultiplier: 1.0,
+        });
+
+        // 重反弹：大幅削弱为 25%~35% 的温和反弹伤害（绝对不会一击残血）
+        const reflectReturnRatio = 0.25 + Math.random() * 0.10;
+        const reflectPercent = Math.round(reflectReturnRatio * 100);
+        const reflectedDamage = scaleDamageResult(reboundDmg, reflectReturnRatio, attacker);
+        const attackerReflectDamage = reflectedDamage.finalDamage;
+
+        // 反弹方承受 15%~25% 的轻微冲击余波
+        const recoilRatio = 0.15 + Math.random() * 0.10;
+        const recoilPercent = Math.round(recoilRatio * 100);
+        const recoilDamage = scaleDamageResult(reboundDmg, reflectReturnRatio * recoilRatio, defender);
+        const defenderSelfDamage = recoilDamage.finalDamage;
+
+        return finish(
+          defender === 'player' ? 'qte_parry' : 'defense_success',
+          null,
+          null,
+          playerVisual,
+          enemyVisual,
+          `⚡【重反弹逆转】拦截 ${attack.label} (Tier ${attack.tier}) 终极大招！对方承受 ${reflectPercent}% (${attackerReflectDamage}点) 战术反弹，${defender === 'player' ? '玩家' : '对手'}承受 ${recoilPercent}% (${defenderSelfDamage}点) 冲击余波！`,
+          true,
+          false,
+          false,
+          1.2,
+          false,
+          [reflectedDamage, recoilDamage]
+        );
+      } else {
+        const [playerVisual, enemyVisual] = visual('hit');
+        const dmg = calculateTurnDamage({
+          attacker: attackerTop,
+          defender: defenderTop,
+          skillTier: attack.tier,
+          isCounter: false,
+          isClash: false,
+          isBlockOrMiss: false,
+        });
+        return finish(
+          'defense_fail',
+          null,
+          null,
+          playerVisual,
+          enemyVisual,
+          `⚠️【重反弹空踏】对方仅使用 ${attack.label} (Tier ${attack.tier}) 小型技能！重盾前摇过大未能有效拦截受创！`,
+          false, false, false, 0, false, [dmg]
+        );
+      }
+    }
+
     if (defenderAction.kind === 'defense') {
       const evenTier = attack.tier % 2 === 0;
       const [playerVisual, enemyVisual] = visual(evenTier ? 'defense' : 'hit');
@@ -380,6 +516,8 @@ export class TurnArbitrator {
 
   private getActionCost(action: TurnAction, currentSpirit: number) {
     if (action.kind === 'attack') return -ELEMENT_ATTACKS[action.skillId].spiritCost;
+    if (action.kind === 'light_reflect') return -10; // 1 Spirit bar (10 out of 100)
+    if (action.kind === 'heavy_reflect') return -20; // 2 Spirit bars (20 out of 100)
     if (action.kind === 'defense' || action.kind === 'evade') {
         return currentSpirit >= 1 ? -1 : 0;
     }
