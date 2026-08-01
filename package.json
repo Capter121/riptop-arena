@@ -11,6 +11,7 @@
     "verify:site": "node scripts/verify-unified-site.mjs",
     "preview": "vite preview --outDir dist/site",
     "server": "node server/match-server.mjs",
+    "test:unit": "vitest run",
     "test:server": "node scripts/test-match-server.mjs",
     "test:nss-contract": "node scripts/test-nss-contract.mjs",
     "inspect:canvas": "node scripts/inspect-threejs-canvas.mjs"
@@ -26,7 +27,8 @@
     "@vitejs/plugin-react": "5.0.4",
     "pngjs": "^7.0.0",
     "typescript": "~6.0.2",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vitest": "3.2.4"
   },
   "dependencies": {
     "@react-three/drei": "10.7.6",
