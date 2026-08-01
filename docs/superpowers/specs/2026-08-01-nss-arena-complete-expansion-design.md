@@ -187,7 +187,7 @@ WIND、FIRE、WATER、WOOD、EARTH、LIGHT、DARK
 
 ### 5.3 主属性
 
-系统统计五层属性数量。数量最多者为主属性；若并列，由战魂核心属性裁定。计算不使用随机数。
+系统统计五层属性数量。数量最多者为主属性；若并列且战魂核心属性属于并列候选，由核心裁定；若核心不属于并列候选，则按风、火、水、木、土、光、暗的固定顺序裁定。计算不使用随机数。
 
 ### 5.4 纯属性进攻共鸣
 
@@ -255,7 +255,7 @@ battle-top-designer/shared/nss/
 
 ```ts
 interface AffinityProfile {
-  rulesVersion: string;
+  rulesVersion: number;
   primary: PartAffinity;
   counts: Record<PartAffinity, number>;
   resonance: OffenseResonance | HarmonyResonance | NoResonance;
