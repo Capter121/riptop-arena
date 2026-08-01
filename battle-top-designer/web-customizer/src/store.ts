@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 import {
-  combinationId, isCombination, partById, presentationOffsets, stormAttack,
-  type CameraPreset, type Combination, type Family,
+  isPartAffinity,
+  resolveAffinityProfile,
+  type AffinityProfile,
+  type PartAffinity,
+} from '../../shared/nss/affinity';
+import {
+  combinationId, defaultAffinities, isAffinitySelection, isCombination, partById, presentationOffsets, stormAttack,
+  type AffinitySelection, type CameraPreset, type Combination, type Family,
 } from './domain';
 import { sceneDiagnostics } from './diagnostics';
 import { focusObjectId, recordFocusDiagnostic } from './focusDiagnostics';
@@ -17,8 +23,40 @@ import type { ShowcaseCameraPreset, TurntableSpeed } from './rendering/showcaseP
 export const combinationStorageKey = 'nova-spin:phase3a:combination:v1';
 const lowPerformanceStorageKey = 'nova-spin:phase3b:low-performance:v1';
 
+type BuildSnapshot = { combination: Combination; affinities: AffinitySelection };
+
+function buildSnapshot(state: Pick<CustomizerState, 'combination' | 'affinities'>): BuildSnapshot {
+  return { combination: state.combination, affinities: state.affinities };
+}
+
+function sameBuild(left: BuildSnapshot, right: BuildSnapshot): boolean {
+  return combinationId(left.combination) === combinationId(right.combination)
+    && Object.keys(left.affinities).every(key => (
+      left.affinities[key as Family] === right.affinities[key as Family]
+    ));
+}
+
+function parseSavedBuild(text: string | null): BuildSnapshot | null {
+  if (!text) return null;
+  try {
+    const saved = JSON.parse(text);
+    if (!isCombination(saved?.combination)) return null;
+    if (saved.schemaVersion === 1) {
+      return { combination: saved.combination, affinities: defaultAffinities(saved.combination) };
+    }
+    if (saved.schemaVersion === 2 && isAffinitySelection(saved.affinities)) {
+      return { combination: saved.combination, affinities: saved.affinities };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 interface CustomizerState {
   combination: Combination;
+  affinities: AffinitySelection;
+  affinityProfile: AffinityProfile;
   selectedFamily: Family;
   cameraPreset: CameraPreset;
   focusState: FocusSessionState;
@@ -29,9 +67,9 @@ interface CustomizerState {
   canUndo: boolean;
   canRedo: boolean;
   historyDepth: number;
-  historyPast: Combination[];
-  historyFuture: Combination[];
-  pendingPrevious: Combination | null;
+  historyPast: BuildSnapshot[];
+  historyFuture: BuildSnapshot[];
+  pendingPrevious: BuildSnapshot | null;
   loadProgress: number;
   lowPerformance: boolean;
   showcaseEnabled: boolean;
@@ -50,6 +88,7 @@ interface CustomizerState {
   hydrate: (search: string, savedText?: string | null) => void;
   selectFamily: (family: Family) => void;
   selectPart: (id: string) => void;
+  setAffinity: (family: Family, affinity: PartAffinity) => void;
   setCamera: (preset: CameraPreset) => void;
   setExploded: (value: boolean) => void;
   restorePresentation: () => void;
@@ -87,6 +126,8 @@ function focusFor(family: Family): FocusTarget | null {
 
 export const useCustomizer = create<CustomizerState>((set, get) => ({
   combination: stormAttack,
+  affinities: defaultAffinities(stormAttack),
+  affinityProfile: resolveAffinityProfile(defaultAffinities(stormAttack)),
   selectedFamily: 'blade',
   cameraPreset: 'perspective',
   focusState: idleFocusState(),
@@ -116,9 +157,14 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   startupNotice: null,
   testMode: false,
   hydrate: (search, savedText) => {
-    const resolution = resolveInitialCombination(search, savedText === undefined ? localStorage.getItem(combinationStorageKey) : savedText);
+    const localText = savedText === undefined ? localStorage.getItem(combinationStorageKey) : savedText;
+    const resolution = resolveInitialCombination(search, localText);
+    const savedBuild = resolution.source === 'local' ? parseSavedBuild(localText) : null;
+    const affinities = savedBuild?.affinities ?? defaultAffinities(resolution.combination);
     set({
       combination: resolution.combination,
+      affinities,
+      affinityProfile: resolveAffinityProfile(affinities),
       startupNotice: resolution.invalidUrl ? 'Invalid share link. Storm Attack was restored.' : null,
       testMode: resolution.testMode,
       loadState: 'loading',
@@ -148,9 +194,30 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
       exploded: false,
       loadState: 'loading',
       error: null,
-      pendingPrevious: state.pendingPrevious ?? state.combination,
+      pendingPrevious: state.pendingPrevious ?? buildSnapshot(state),
       loadProgress: 10,
     }));
+  },
+  setAffinity: (family, affinity) => {
+    if (!isPartAffinity(affinity)) return set({ error: `Unknown affinity: ${String(affinity)}` });
+    set(state => {
+      if (state.affinities[family] === affinity) return state;
+      const affinities = { ...state.affinities, [family]: affinity };
+      if (state.pendingPrevious) {
+        return { affinities, affinityProfile: resolveAffinityProfile(affinities), error: null };
+      }
+      const historyPast = [...state.historyPast, buildSnapshot(state)].slice(-50);
+      return {
+        affinities,
+        affinityProfile: resolveAffinityProfile(affinities),
+        historyPast,
+        historyFuture: [],
+        historyDepth: historyPast.length,
+        canUndo: true,
+        canRedo: false,
+        error: null,
+      };
+    });
   },
   setCamera: cameraPreset => set(state => ({ cameraPreset, focusState: cancelFocusSession(state.focusState) })),
   setExploded: exploded => set(state => ({ exploded, focusState: cancelFocusSession(state.focusState) })),
@@ -178,7 +245,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   setDebugAxis: debugAxis => set({ debugAxis }),
   setLoadState: (loadState, error) => set(state => {
     if (loadState === 'ready' && state.pendingPrevious) {
-      const changed = combinationId(state.pendingPrevious) !== combinationId(state.combination);
+      const changed = !sameBuild(state.pendingPrevious, buildSnapshot(state));
       const historyPast = changed ? [...state.historyPast, state.pendingPrevious].slice(-50) : state.historyPast;
       const historyFuture = changed ? [] : state.historyFuture;
       return {
@@ -214,31 +281,54 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   setDualCometPatternEnabled: dualCometPatternEnabled => set({ dualCometPatternEnabled }),
   replaceCombination: combination => {
     if (!isCombination(combination)) return set({ loadState: 'error', error: 'Illegal combination.' });
-    set(state => ({ combination, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? state.combination }));
+    const affinities = defaultAffinities(combination);
+    set(state => ({ combination, affinities, affinityProfile: resolveAffinityProfile(affinities), focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? buildSnapshot(state) }));
   },
-  reset: () => set(state => ({ combination: stormAttack, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? state.combination })),
-  save: () => localStorage.setItem(combinationStorageKey, JSON.stringify({ schemaVersion: 1, combination: get().combination })),
+  reset: () => set(state => {
+    const affinities = defaultAffinities(stormAttack);
+    return { combination: stormAttack, affinities, affinityProfile: resolveAffinityProfile(affinities), focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? buildSnapshot(state) };
+  }),
+  save: () => localStorage.setItem(combinationStorageKey, JSON.stringify({
+    schemaVersion: 2,
+    combination: get().combination,
+    affinities: get().affinities,
+  })),
   restoreSaved: () => {
+    let saved: BuildSnapshot | null;
     try {
-      const saved = JSON.parse(localStorage.getItem(combinationStorageKey) ?? 'null');
-      if (saved?.schemaVersion !== 1 || !isCombination(saved.combination)) return false;
-      get().replaceCombination(saved.combination);
-      return true;
-    } catch { return false; }
+      saved = parseSavedBuild(localStorage.getItem(combinationStorageKey));
+    } catch {
+      return false;
+    }
+    if (!saved) return false;
+    set(state => ({
+      ...saved,
+      affinityProfile: resolveAffinityProfile(saved.affinities),
+      focusState: cancelFocusSession(state.focusState),
+      exploded: false,
+      cameraPreset: 'perspective',
+      loadState: 'loading',
+      loadProgress: 10,
+      error: null,
+      pendingPrevious: state.pendingPrevious ?? buildSnapshot(state),
+    }));
+    return true;
   },
   undo: () => set(state => {
     if (!state.historyPast.length || state.pendingPrevious) return state;
-    const combination = state.historyPast.at(-1)!;
+    const previous = state.historyPast.at(-1)!;
     const historyPast = state.historyPast.slice(0, -1);
-    const historyFuture = [...state.historyFuture, state.combination];
-    return { combination, historyPast, historyFuture, historyDepth: historyPast.length, canUndo: historyPast.length > 0, canRedo: true, loadState: 'loading', loadProgress: 10, error: null, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective' };
+    const historyFuture = [...state.historyFuture, buildSnapshot(state)];
+    const modelChanged = combinationId(previous.combination) !== combinationId(state.combination);
+    return { ...previous, affinityProfile: resolveAffinityProfile(previous.affinities), historyPast, historyFuture, historyDepth: historyPast.length, canUndo: historyPast.length > 0, canRedo: true, loadState: modelChanged ? 'loading' : state.loadState, loadProgress: modelChanged ? 10 : state.loadProgress, error: null, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective' };
   }),
   redo: () => set(state => {
     if (!state.historyFuture.length || state.pendingPrevious) return state;
-    const combination = state.historyFuture.at(-1)!;
+    const next = state.historyFuture.at(-1)!;
     const historyFuture = state.historyFuture.slice(0, -1);
-    const historyPast = [...state.historyPast, state.combination].slice(-50);
-    return { combination, historyPast, historyFuture, historyDepth: historyPast.length, canUndo: true, canRedo: historyFuture.length > 0, loadState: 'loading', loadProgress: 10, error: null, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective' };
+    const historyPast = [...state.historyPast, buildSnapshot(state)].slice(-50);
+    const modelChanged = combinationId(next.combination) !== combinationId(state.combination);
+    return { ...next, affinityProfile: resolveAffinityProfile(next.affinities), historyPast, historyFuture, historyDepth: historyPast.length, canUndo: true, canRedo: historyFuture.length > 0, loadState: modelChanged ? 'loading' : state.loadState, loadProgress: modelChanged ? 10 : state.loadProgress, error: null, focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective' };
   }),
 }));
 
@@ -280,6 +370,8 @@ export function currentSnapshot() {
   const focus = state.focusState;
   return {
     combination: state.combination,
+    affinities: state.affinities,
+    affinityProfile: state.affinityProfile,
     combinationId: combinationId(state.combination),
     selectedFamily: state.selectedFamily,
     cameraPreset: state.cameraPreset,

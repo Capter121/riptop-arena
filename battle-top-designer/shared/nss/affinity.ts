@@ -63,11 +63,21 @@ export const AFFINITY_RESONANCE_RULES = Object.freeze({
   harmony: Object.freeze({ ...rules.resonance.harmony }),
 });
 
-function isAffinityLayers(value: unknown): value is AffinityLayers {
+export function isAffinityLayers(value: unknown): value is AffinityLayers {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const record = value as Record<string, unknown>;
   return Object.keys(record).sort().join(',') === affinityLayerKeys
     && AFFINITY_LAYERS.every(layer => isPartAffinity(record[layer]));
+}
+
+export function createDefaultAffinityLayers(coreId: string): AffinityLayers {
+  return {
+    core: coreId === 'core_void_falcon' ? 'DARK' : 'LIGHT',
+    blade: 'WIND',
+    assist: 'FIRE',
+    gear: 'WATER',
+    tip: 'EARTH',
+  };
 }
 
 export function resolveAffinityProfile(value: unknown): AffinityProfile {

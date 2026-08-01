@@ -278,14 +278,18 @@ npm run test:unit -- nssSharedContract
 
 - 修改 `battle-top-designer/web-customizer/src/domain.ts`
 - 修改 `battle-top-designer/web-customizer/src/store.ts`
+- 修改 `battle-top-designer/web-customizer/src/sharing/combinationUrl.ts`
 - 新增 `battle-top-designer/web-customizer/src/affinity/affinityViewModel.ts`
 - 新增 `battle-top-designer/web-customizer/tests/unit/affinityViewModel.test.ts`
+- 修改定制器状态、历史和 URL 单元测试
 
 工作：
 
-1. 当前组合变化时调用共享 `resolveAffinityProfile()`。
+1. 五层属性变化时调用共享 `resolveAffinityProfile()`；单独更换模型不改变已附加属性。
 2. 状态保存五件零件 ID 和五层属性选择，不持久化派生共鸣。
 3. 生成中文展示模型：主属性、数量、共鸣、克制、弱点和加成。
+4. 模型与属性共同进入撤销/重做历史；纯属性撤销不触发 3D 模型重载。
+5. V1 本地组合补齐兼容默认属性；非法 V2 保存恢复安全默认状态。
 
 验证：定制器单元测试和 TypeScript 构建通过。
 

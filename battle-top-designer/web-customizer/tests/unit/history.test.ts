@@ -48,4 +48,21 @@ describe('successful combination history', () => {
     useCustomizer.getState().setLoadState('ready');
     expect(useCustomizer.getState().canRedo).toBe(false);
   });
+
+  it('undoes and redoes attached affinities without reloading the model', () => {
+    expect(useCustomizer.getState().affinities.blade).toBe('WIND');
+    useCustomizer.getState().setAffinity('blade', 'WOOD');
+    expect(useCustomizer.getState()).toMatchObject({ canUndo: true, loadState: 'ready' });
+    useCustomizer.getState().undo();
+    expect(useCustomizer.getState()).toMatchObject({
+      affinities: { blade: 'WIND' },
+      canRedo: true,
+      loadState: 'ready',
+    });
+    useCustomizer.getState().redo();
+    expect(useCustomizer.getState()).toMatchObject({
+      affinities: { blade: 'WOOD' },
+      loadState: 'ready',
+    });
+  });
 });

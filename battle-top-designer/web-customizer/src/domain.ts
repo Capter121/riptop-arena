@@ -1,8 +1,14 @@
 import catalogJson from '../../shared/nss/parts.catalog.json';
+import {
+  createDefaultAffinityLayers,
+  isAffinityLayers,
+  type AffinityLayers,
+} from '../../shared/nss/affinity';
 
 export const families = ['core', 'blade', 'assist', 'gear', 'tip'] as const;
 export type Family = (typeof families)[number];
 export type Combination = Record<Family, string>;
+export type AffinitySelection = AffinityLayers;
 export type CameraPreset = 'top' | 'perspective' | 'side' | 'bottom';
 export type FocusMode = 'assist' | 'gear' | 'tip' | null;
 
@@ -29,6 +35,14 @@ export const stormAttack: Combination = {
   gear: 'gear_low',
   tip: 'tip_flat_attack',
 };
+
+export function defaultAffinities(combination: Combination): AffinitySelection {
+  return createDefaultAffinityLayers(combination.core);
+}
+
+export function isAffinitySelection(value: unknown): value is AffinitySelection {
+  return isAffinityLayers(value);
+}
 
 export function isCombination(value: unknown): value is Combination {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;

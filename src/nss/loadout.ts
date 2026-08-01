@@ -1,5 +1,5 @@
 import { nssFamilyParts, nssPartById } from './catalog';
-import { isPartAffinity } from '../../battle-top-designer/shared/nss/affinity';
+import { createDefaultAffinityLayers, isAffinityLayers } from '../../battle-top-designer/shared/nss/affinity';
 import {
   NSS_FAMILIES,
   type NssAffinitySelection,
@@ -10,7 +10,6 @@ import {
 } from './types';
 
 const combinationKeys = [...NSS_FAMILIES].sort().join(',');
-const affinityKeys = combinationKeys;
 
 export function isNssCombination(value: unknown): value is NssCombination {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -32,10 +31,7 @@ export function isNssBattleLoadoutV1(value: unknown): value is NssBattleLoadoutV
 }
 
 export function isNssAffinitySelection(value: unknown): value is NssAffinitySelection {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-  const record = value as Record<string, unknown>;
-  return Object.keys(record).sort().join(',') === affinityKeys
-    && NSS_FAMILIES.every(family => isPartAffinity(record[family]));
+  return isAffinityLayers(value);
 }
 
 export function isNssBattleLoadoutV2(value: unknown): value is NssBattleLoadoutV2 {
@@ -54,13 +50,7 @@ export function isNssBattleLoadout(value: unknown): value is NssBattleLoadout {
 
 export function defaultNssAffinities(combination: NssCombination): NssAffinitySelection {
   if (!isNssCombination(combination)) throw new Error('Invalid NSS combination');
-  return {
-    core: combination.core === 'core_void_falcon' ? 'DARK' : 'LIGHT',
-    blade: 'WIND',
-    assist: 'FIRE',
-    gear: 'WATER',
-    tip: 'EARTH',
-  };
+  return createDefaultAffinityLayers(combination.core);
 }
 
 export function createNssBattleLoadout(

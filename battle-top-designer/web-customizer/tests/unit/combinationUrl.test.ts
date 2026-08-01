@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { combinationId, enumerateCombinations, stormAttack } from '../../src/domain';
+import { combinationId, defaultAffinities, enumerateCombinations, stormAttack } from '../../src/domain';
 import {
   combinationFromId, combinationToSearch, createShareLink, resolveInitialCombination,
 } from '../../src/sharing/combinationUrl';
@@ -23,8 +23,10 @@ describe('stable combination URLs', () => {
   it('uses legal URL, then legal local storage, then Storm Attack', () => {
     const target = enumerateCombinations()[137];
     const saved = JSON.stringify({ schemaVersion: 1, combination: target });
+    const savedV2 = JSON.stringify({ schemaVersion: 2, combination: target, affinities: defaultAffinities(target) });
     expect(resolveInitialCombination(`?combo=${combinationId(target)}`, null)).toMatchObject({ source: 'url', combination: target });
     expect(resolveInitialCombination('', saved)).toMatchObject({ source: 'local', combination: target });
+    expect(resolveInitialCombination('', savedV2)).toMatchObject({ source: 'local', combination: target });
     expect(resolveInitialCombination('', '{broken')).toMatchObject({ source: 'fallback', combination: stormAttack });
     expect(resolveInitialCombination('?combo=invalid&test=1', saved)).toMatchObject({ source: 'fallback', invalidUrl: true, testMode: true, combination: stormAttack });
   });

@@ -1,5 +1,5 @@
 import {
-  combinationId, enumerateCombinations, isCombination, stormAttack, type Combination,
+  combinationId, enumerateCombinations, isAffinitySelection, isCombination, stormAttack, type Combination,
 } from '../domain';
 
 const combinationsById = new Map(enumerateCombinations().map(combination => [combinationId(combination), combination]));
@@ -23,7 +23,9 @@ function savedCombination(savedText: string | null): Combination | null {
   if (!savedText) return null;
   try {
     const saved = JSON.parse(savedText);
-    return saved?.schemaVersion === 1 && isCombination(saved.combination) ? saved.combination : null;
+    if (!isCombination(saved?.combination)) return null;
+    if (saved.schemaVersion === 1) return saved.combination;
+    return saved.schemaVersion === 2 && isAffinitySelection(saved.affinities) ? saved.combination : null;
   } catch {
     return null;
   }
