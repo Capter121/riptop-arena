@@ -1,4 +1,7 @@
 import { AFFINITIES, type PartAffinity } from '../../../shared/nss/affinity';
+import { PreviewableButton } from '../comparison/PreviewableButton';
+import type { ComparisonModel } from '../comparison/comparisonModel';
+import { AffinityComparison } from './AffinityComparison';
 import type { AffinityViewModel } from './affinityViewModel';
 import { AffinityBadge } from './AffinityBadge';
 
@@ -7,9 +10,16 @@ type AffinityPanelProps = {
   selectedAffinity: PartAffinity;
   viewModel: AffinityViewModel;
   onSelect: (affinity: PartAffinity) => void;
+  comparison?: ComparisonModel | null;
+  previewedAffinity?: PartAffinity | null;
+  onPreviewStart?: (affinity: PartAffinity) => void;
+  onPreviewEnd?: (affinity: PartAffinity) => void;
 };
 
-export function AffinityPanel({ familyLabel, selectedAffinity, viewModel, onSelect }: AffinityPanelProps) {
+export function AffinityPanel({
+  familyLabel, selectedAffinity, viewModel, onSelect, comparison = null, previewedAffinity = null,
+  onPreviewStart = () => undefined, onPreviewEnd = () => undefined,
+}: AffinityPanelProps) {
   const labelByAffinity = new Map(viewModel.counts.map(entry => [entry.affinity, entry.label]));
   const resonanceLabel = viewModel.resonance.kind === 'none' ? '未形成共鸣' : viewModel.resonance.label;
 
@@ -25,18 +35,24 @@ export function AffinityPanel({ familyLabel, selectedAffinity, viewModel, onSele
 
       <div className="affinity-options" role="group" aria-label={`为${familyLabel}选择附加属性`}>
         {AFFINITIES.map(affinity => (
-          <button
+          <PreviewableButton
             type="button"
             key={affinity}
             data-testid={`affinity-option-${affinity}`}
+            className={previewedAffinity === affinity ? 'previewing' : ''}
             aria-label={`将${familyLabel}设为${labelByAffinity.get(affinity)}属性`}
             aria-pressed={selectedAffinity === affinity}
+            previewDisabled={selectedAffinity === affinity}
+            onPreviewStart={() => onPreviewStart(affinity)}
+            onPreviewEnd={() => onPreviewEnd(affinity)}
             onClick={() => onSelect(affinity)}
           >
             <AffinityBadge affinity={affinity} compact />
-          </button>
+          </PreviewableButton>
         ))}
       </div>
+
+      <AffinityComparison comparison={comparison} />
 
       <div className="affinity-summary">
         <div className="affinity-counts" aria-label="五层属性数量">

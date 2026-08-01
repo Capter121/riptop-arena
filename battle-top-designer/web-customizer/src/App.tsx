@@ -23,7 +23,11 @@ import { currentSnapshot, useCustomizer } from './store';
 import { emitUsabilityAction } from './usability/events';
 import { AffinityBadge } from './affinity/AffinityBadge';
 import { AffinityPanel } from './affinity/AffinityPanel';
+import { AffinityComparison } from './affinity/AffinityComparison';
 import { createAffinityViewModel } from './affinity/affinityViewModel';
+import { PreviewableButton } from './comparison/PreviewableButton';
+import { compareAffinityCandidate, comparePartCandidate } from './comparison/comparisonModel';
+import type { PartAffinity } from '../../shared/nss/affinity';
 import './styles.css';
 
 const CustomizerScene = lazy(() => import('./Scene').then(module => ({ default: module.CustomizerScene })));
@@ -37,6 +41,10 @@ const affinityFamilyLabels: Record<Family, string> = {
   core: '核心', blade: '主刀', assist: '辅助环', gear: '齿轮', tip: '轴尖',
 };
 const attributeLabels = { attack: '攻击', defense: '防御', stamina: '持久', balance: '平衡', weight: '重量倾向', height: '高度倾向' } as const;
+
+type PreviewTarget =
+  | { key: string; kind: 'part'; family: Family; candidateId: string }
+  | { key: string; kind: 'affinity'; family: Family; affinity: PartAffinity };
 
 class SceneErrorBoundary extends Component<{ resetKey: string; children: ReactNode }, { error: string | null }> {
   state = { error: null as string | null };
@@ -60,6 +68,7 @@ export default function App() {
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [library, setLibrary] = useState(readLibrary);
   const [nickname, setNickname] = useState('');
+  const [previewTarget, setPreviewTarget] = useState<PreviewTarget | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
   const lastRecentId = useRef<string | null>(null);
   const pendingFavoriteRestore = useRef<string | null>(null);
@@ -68,6 +77,12 @@ export default function App() {
   const id = combinationId(state.combination);
   const attributes = useMemo(() => conceptAttributes(state.combination), [state.combination]);
   const affinityViewModel = useMemo(() => createAffinityViewModel(state.affinityProfile), [state.affinityProfile]);
+  const comparison = useMemo(() => {
+    if (!previewTarget) return null;
+    return previewTarget.kind === 'part'
+      ? comparePartCandidate(state.combination, previewTarget.family, previewTarget.candidateId)
+      : compareAffinityCandidate(state.affinities, previewTarget.family, previewTarget.affinity);
+  }, [previewTarget, state.affinities, state.combination]);
   const selectedAssist = familyParts.assist.find(part => part.id === state.combination.assist)!;
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
@@ -197,6 +212,17 @@ export default function App() {
   useEffect(() => { setNickname(currentLibraryEntry?.nickname ?? ''); }, [id, currentLibraryEntry?.nickname]);
 
   useEffect(() => {
+    const clearPreview = () => setPreviewTarget(null);
+    const onVisibilityChange = () => { if (document.visibilityState === 'hidden') clearPreview(); };
+    window.addEventListener('blur', clearPreview);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      window.removeEventListener('blur', clearPreview);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!state.testMode || state.loadState !== 'ready' || pendingFavoriteRestore.current !== id) return;
     emitUsabilityAction({ type: 'FAVORITE_RESTORED', combinationId: id });
     pendingFavoriteRestore.current = null;
@@ -211,6 +237,7 @@ export default function App() {
   };
 
   const choosePart = (partId: string) => {
+    setPreviewTarget(null);
     const part = partById.get(partId);
     if (!part) return state.selectPart(partId);
     const nextCombination = { ...state.combination, [part.family]: partId };
@@ -371,22 +398,35 @@ export default function App() {
         </div>
 
         <nav className="family-tabs" aria-label="Part families">
-          {families.map(family => <button key={family} data-testid={`tab-${family}`} className={state.selectedFamily === family ? 'active' : ''} onClick={() => state.selectFamily(family)}>{familyLabels[family]}</button>)}
+          {families.map(family => <button key={family} data-testid={`tab-${family}`} className={state.selectedFamily === family ? 'active' : ''} onClick={() => { setPreviewTarget(null); state.selectFamily(family); }}>{familyLabels[family]}</button>)}
         </nav>
         <div className="part-strip" aria-label={`${familyLabels[state.selectedFamily]} choices`}>
           {familyParts[state.selectedFamily].map(part => (
-            <button key={part.id} data-testid={`part-${part.id}`} className={state.combination[state.selectedFamily] === part.id ? 'selected' : ''} onClick={() => choosePart(part.id)}>
+            <PreviewableButton
+              key={part.id}
+              data-testid={`part-${part.id}`}
+              className={`${state.combination[state.selectedFamily] === part.id ? 'selected' : ''} ${previewTarget?.key === `part:${state.selectedFamily}:${part.id}` ? 'previewing' : ''}`.trim()}
+              previewDisabled={state.combination[state.selectedFamily] === part.id}
+              onPreviewStart={() => setPreviewTarget({ key: `part:${state.selectedFamily}:${part.id}`, kind: 'part', family: state.selectedFamily, candidateId: part.id })}
+              onPreviewEnd={() => setPreviewTarget(current => current?.key === `part:${state.selectedFamily}:${part.id}` ? null : current)}
+              onClick={() => choosePart(part.id)}
+            >
               <span className="part-icon">{part.displayName.slice(0, 2).toUpperCase()}</span>
               <span className="part-copy"><span>{part.displayName}</span><AffinityBadge affinity={state.affinities[state.selectedFamily]} compact /></span>
-            </button>
+            </PreviewableButton>
           ))}
         </div>
+        <AffinityComparison comparison={previewTarget?.kind === 'part' ? comparison : null} />
 
         <AffinityPanel
           familyLabel={affinityFamilyLabels[state.selectedFamily]}
           selectedAffinity={state.affinities[state.selectedFamily]}
           viewModel={affinityViewModel}
-          onSelect={affinity => state.setAffinity(state.selectedFamily, affinity)}
+          comparison={previewTarget?.kind === 'affinity' ? comparison : null}
+          previewedAffinity={previewTarget?.kind === 'affinity' ? previewTarget.affinity : null}
+          onPreviewStart={affinity => setPreviewTarget({ key: `affinity:${state.selectedFamily}:${affinity}`, kind: 'affinity', family: state.selectedFamily, affinity })}
+          onPreviewEnd={affinity => setPreviewTarget(current => current?.key === `affinity:${state.selectedFamily}:${affinity}` ? null : current)}
+          onSelect={affinity => { setPreviewTarget(null); state.setAffinity(state.selectedFamily, affinity); }}
         />
 
         <div className="lower-grid">

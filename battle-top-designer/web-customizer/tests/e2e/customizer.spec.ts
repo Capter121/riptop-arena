@@ -45,6 +45,48 @@ test('complete offline customizer flow', async ({ page }, testInfo) => {
   await expect(page.getByTestId('affinity-panel')).toBeVisible();
   await expect(page.getByTestId('affinity-option-WIND')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.part-strip button [data-affinity="WIND"]')).toHaveCount(4);
+  const previewSnapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  if (testInfo.project.name === 'desktop') {
+    await page.getByTestId('part-blade_orbit_halo').hover();
+    await expect(page.getByTestId('part-comparison')).toContainText('Storm Fang → Orbit Halo');
+    await expect(page.getByTestId('part-comparison')).toContainText('−11');
+    let currentPreviewSnapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+    expect(currentPreviewSnapshot.combination).toEqual(previewSnapshot.combination);
+    expect(currentPreviewSnapshot.affinities).toEqual(previewSnapshot.affinities);
+    expect(currentPreviewSnapshot.historyDepth).toBe(previewSnapshot.historyDepth);
+    await page.getByTestId('part-blade_storm_fang').hover();
+    await expect(page.getByTestId('part-comparison')).toHaveCount(0);
+
+    await page.getByTestId('affinity-option-FIRE').hover();
+    await expect(page.getByTestId('affinity-comparison')).toContainText('风 → 火');
+    currentPreviewSnapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+    expect(currentPreviewSnapshot.combination).toEqual(previewSnapshot.combination);
+    expect(currentPreviewSnapshot.affinities).toEqual(previewSnapshot.affinities);
+    expect(currentPreviewSnapshot.historyDepth).toBe(previewSnapshot.historyDepth);
+    await page.getByTestId('affinity-option-WIND').hover();
+    await expect(page.getByTestId('affinity-comparison')).toHaveCount(0);
+  } else {
+    const candidate = page.getByTestId('affinity-option-FIRE');
+    const candidateBox = await candidate.boundingBox();
+    expect(candidateBox).not.toBeNull();
+    const touch = { pointerId: 41, pointerType: 'touch', clientX: candidateBox!.x + 10, clientY: candidateBox!.y + 10 };
+    await candidate.dispatchEvent('pointerdown', touch);
+    await page.waitForTimeout(360);
+    await expect(page.getByTestId('affinity-comparison')).toBeVisible();
+    const currentPreviewSnapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+    expect(currentPreviewSnapshot.combination).toEqual(previewSnapshot.combination);
+    expect(currentPreviewSnapshot.affinities).toEqual(previewSnapshot.affinities);
+    expect(currentPreviewSnapshot.historyDepth).toBe(previewSnapshot.historyDepth);
+    await candidate.dispatchEvent('pointerup', touch);
+    await expect(page.getByTestId('affinity-comparison')).toHaveCount(0);
+    await expect(candidate).toHaveAttribute('aria-pressed', 'false');
+
+    await candidate.dispatchEvent('pointerdown', { ...touch, pointerId: 42 });
+    await candidate.dispatchEvent('pointermove', { ...touch, pointerId: 42, clientX: touch.clientX + 9 });
+    await page.waitForTimeout(360);
+    await expect(page.getByTestId('affinity-comparison')).toHaveCount(0);
+    await candidate.dispatchEvent('pointerup', { ...touch, pointerId: 42, clientX: touch.clientX + 9 });
+  }
   await page.evaluate(() => {
     const status = document.querySelector('[data-testid="load-status"]')!;
     (window as any).__AFFINITY_LOAD_STATES__ = [];
