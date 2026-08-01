@@ -1,0 +1,67 @@
+{
+  "damageContext": {
+    "defenderCase": "legacy-default",
+    "skillTier": 2,
+    "isCounter": false,
+    "isClash": false,
+    "isBlockOrMiss": false,
+    "random": 0.99
+  },
+  "cases": [
+    {
+      "id": "legacy-default",
+      "kind": "legacy",
+      "build": {
+        "attackRing": "round",
+        "core": "balanced",
+        "driver": "grip"
+      },
+      "expected": {
+        "maxSpin": 152,
+        "maxIntegrity": 2060,
+        "armor": 30,
+        "evasion": 0.18,
+        "weight": 2.72,
+        "damageAgainstLegacy": 403
+      }
+    },
+    {
+      "id": "nss-attack-profile",
+      "kind": "nss-v1",
+      "combination": {
+        "core": "core_solar_wolf",
+        "blade": "blade_storm_fang",
+        "assist": "assist_air",
+        "gear": "gear_low",
+        "tip": "tip_flat_attack"
+      },
+      "expected": {
+        "maxSpin": 142,
+        "maxIntegrity": 1660,
+        "armor": 18,
+        "evasion": 0.26,
+        "weight": 1.91,
+        "damageAgainstLegacy": 415
+      }
+    },
+    {
+      "id": "nss-defense-profile",
+      "kind": "nss-v1",
+      "combination": {
+        "core": "core_void_falcon",
+        "blade": "blade_iron_bastion",
+        "assist": "assist_guard",
+        "gear": "gear_high",
+        "tip": "tip_ball_defense"
+      },
+      "expected": {
+        "maxSpin": 150,
+        "maxIntegrity": 2620,
+        "armor": 46,
+        "evasion": 0.1,
+        "weight": 2.43,
+        "damageAgainstLegacy": 315
+      }
+    }
+  ]
+}
