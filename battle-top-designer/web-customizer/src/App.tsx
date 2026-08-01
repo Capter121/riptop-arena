@@ -21,6 +21,9 @@ import { copyShareLink } from './sharing/shareLink';
 import { createArenaLink } from './integration/arenaLink';
 import { currentSnapshot, useCustomizer } from './store';
 import { emitUsabilityAction } from './usability/events';
+import { AffinityBadge } from './affinity/AffinityBadge';
+import { AffinityPanel } from './affinity/AffinityPanel';
+import { createAffinityViewModel } from './affinity/affinityViewModel';
 import './styles.css';
 
 const CustomizerScene = lazy(() => import('./Scene').then(module => ({ default: module.CustomizerScene })));
@@ -29,6 +32,9 @@ const TestModePanel = lazy(() => import('./usability/TestModePanel'));
 
 const familyLabels: Record<Family, string> = {
   core: '核心 (Core)', blade: '主刀 (Blade)', assist: '辅助环 (Assist)', gear: '齿轮 (Gear)', tip: '轴尖 (Tip)',
+};
+const affinityFamilyLabels: Record<Family, string> = {
+  core: '核心', blade: '主刀', assist: '辅助环', gear: '齿轮', tip: '轴尖',
 };
 const attributeLabels = { attack: '攻击', defense: '防御', stamina: '持久', balance: '平衡', weight: '重量倾向', height: '高度倾向' } as const;
 
@@ -61,6 +67,7 @@ export default function App() {
   appRenderSequence.current += 1;
   const id = combinationId(state.combination);
   const attributes = useMemo(() => conceptAttributes(state.combination), [state.combination]);
+  const affinityViewModel = useMemo(() => createAffinityViewModel(state.affinityProfile), [state.affinityProfile]);
   const selectedAssist = familyParts.assist.find(part => part.id === state.combination.assist)!;
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
@@ -369,10 +376,18 @@ export default function App() {
         <div className="part-strip" aria-label={`${familyLabels[state.selectedFamily]} choices`}>
           {familyParts[state.selectedFamily].map(part => (
             <button key={part.id} data-testid={`part-${part.id}`} className={state.combination[state.selectedFamily] === part.id ? 'selected' : ''} onClick={() => choosePart(part.id)}>
-              <span className="part-icon">{part.displayName.slice(0, 2).toUpperCase()}</span><span>{part.displayName}</span>
+              <span className="part-icon">{part.displayName.slice(0, 2).toUpperCase()}</span>
+              <span className="part-copy"><span>{part.displayName}</span><AffinityBadge affinity={state.affinities[state.selectedFamily]} compact /></span>
             </button>
           ))}
         </div>
+
+        <AffinityPanel
+          familyLabel={affinityFamilyLabels[state.selectedFamily]}
+          selectedAffinity={state.affinities[state.selectedFamily]}
+          viewModel={affinityViewModel}
+          onSelect={affinity => state.setAffinity(state.selectedFamily, affinity)}
+        />
 
         <div className="lower-grid">
           <section className="attributes">

@@ -42,6 +42,42 @@ test('complete offline customizer flow', async ({ page }, testInfo) => {
   expect(ids).toHaveLength(288);
   expect(new Set(ids).size).toBe(288);
 
+  await expect(page.getByTestId('affinity-panel')).toBeVisible();
+  await expect(page.getByTestId('affinity-option-WIND')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.part-strip button [data-affinity="WIND"]')).toHaveCount(4);
+  await page.evaluate(() => {
+    const status = document.querySelector('[data-testid="load-status"]')!;
+    (window as any).__AFFINITY_LOAD_STATES__ = [];
+    (window as any).__AFFINITY_LOAD_OBSERVER__ = new MutationObserver(() => {
+      (window as any).__AFFINITY_LOAD_STATES__.push(status.getAttribute('data-state'));
+    });
+    (window as any).__AFFINITY_LOAD_OBSERVER__.observe(status, { attributes: true, attributeFilter: ['data-state'] });
+  });
+  await page.getByTestId('affinity-option-FIRE').click();
+  await expect(page.getByTestId('affinity-option-FIRE')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.part-strip button [data-affinity="FIRE"]')).toHaveCount(4);
+  await expect(page.getByTestId('affinity-count-FIRE')).toContainText('2');
+  await expect(page.getByTestId('affinity-resonance')).toContainText('协调共鸣');
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+  expect(await page.evaluate(() => (window as any).__AFFINITY_LOAD_STATES__)).toEqual([]);
+  await page.getByTestId('undo').click();
+  await expect(page.getByTestId('affinity-option-WIND')).toHaveAttribute('aria-pressed', 'true');
+  await page.getByTestId('redo').click();
+  await expect(page.getByTestId('affinity-option-FIRE')).toHaveAttribute('aria-pressed', 'true');
+
+  if (testInfo.project.name === 'mobile') {
+    const affinityButtonBox = await page.getByTestId('affinity-option-FIRE').boundingBox();
+    expect(affinityButtonBox).not.toBeNull();
+    expect(affinityButtonBox!.width).toBeGreaterThanOrEqual(44);
+    expect(affinityButtonBox!.height).toBeGreaterThanOrEqual(44);
+    expect(await page.locator('.affinity-options').evaluate(element => element.scrollWidth > element.clientWidth)).toBe(true);
+    const partStripBox = await page.locator('.part-strip').boundingBox();
+    const affinityPanelBox = await page.getByTestId('affinity-panel').boundingBox();
+    expect(partStripBox).not.toBeNull();
+    expect(affinityPanelBox).not.toBeNull();
+    expect(affinityPanelBox!.y).toBeGreaterThanOrEqual(partStripBox!.y + partStripBox!.height - 1);
+  }
+
   await page.getByTestId('tab-core').click();
   await page.getByTestId('part-core_void_falcon').click();
   await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
