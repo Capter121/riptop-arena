@@ -1,12 +1,12 @@
 import type { UpgradeLevels } from '../app/progression';
 import type { BattleStats } from '../gameplay/build';
 import { nssBattlePartById } from './battleCatalog';
-import type { NssBattleLoadoutV1 } from './types';
+import type { NssBattleLoadout } from './types';
 
 export type NssBattleStats = BattleStats & { collisionRadius: number };
 
 export function buildNssBattleStats(
-  loadout: NssBattleLoadoutV1,
+  loadout: NssBattleLoadout,
   upgrades: UpgradeLevels = { attack: 0, defense: 0, stamina: 0 },
 ): NssBattleStats {
   const parts = Object.values(loadout.combination).map(id => {

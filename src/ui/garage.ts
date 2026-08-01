@@ -6,7 +6,7 @@ import { globalInventory } from '../data/inventoryManager';
 import type { BattleStats } from '../gameplay/build';
 import { nssPartById } from '../nss/catalog';
 import { nssCombinationId } from '../nss/loadout';
-import { NSS_FAMILIES, type NssBattleLoadoutV1 } from '../nss/types';
+import { NSS_FAMILIES, type NssBattleLoadoutV2 } from '../nss/types';
 
 const SLOT_NAMES: Record<ComponentCategory, string> = {
   CHIP: '核心晶片 (Chip)',
@@ -35,7 +35,7 @@ export class GaragePanel {
 
   readonly toggleModeButton = document.createElement('button');
   private isNssModeActive = false;
-  private currentNssData: { loadout: NssBattleLoadoutV1; stats: BattleStats; customizerUrl: string } | null = null;
+  private currentNssData: { loadout: NssBattleLoadoutV2; stats: BattleStats; customizerUrl: string } | null = null;
 
   constructor() {
     this.root.className = 'card garage';
@@ -147,7 +147,7 @@ export class GaragePanel {
     this.toggleModeButton.textContent = '🛠️ 切换至 NSS 3D陀螺组装模式';
   }
 
-  showNssMode(loadout: NssBattleLoadoutV1, stats: BattleStats, customizerUrl: string) {
+  showNssMode(loadout: NssBattleLoadoutV2, stats: BattleStats, customizerUrl: string) {
     this.isNssModeActive = true;
     this.currentNssData = { loadout, stats, customizerUrl };
     this.legacyFields.forEach(field => { field.hidden = true; });

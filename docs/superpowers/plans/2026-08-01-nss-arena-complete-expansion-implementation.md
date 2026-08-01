@@ -186,23 +186,24 @@ npm run test:e2e -- baseline.spec.ts
 
 推荐提交：`feat(nss): define seven-affinity rules`
 
-### 任务 1.2：为 16 件 NSS 零件配置属性
+### 任务 1.2：实现 A2 可附加属性配装和 V1 迁移
 
 文件：
 
-- 修改 `battle-top-designer/shared/nss/battle-parts.json`
-- 修改 `battle-top-designer/shared/nss/battle-parts.schema.json`
+- 新增 `battle-top-designer/shared/nss/loadout-v2.schema.json`
 - 修改 `src/nss/types.ts`
-- 修改 `src/nss/battleCatalog.ts`
-- 修改 `scripts/test-nss-contract.mjs`
+- 修改 `src/nss/loadout.ts`
+- 修改配装消费端类型和本地存档读取
+- 新增 `tests/unit/nss-affinity-loadout.test.ts`
 - 修改 `battle-top-designer/web-customizer/tests/unit/nssSharedContract.test.ts`
 
 工作：
 
-1. 每件零件增加且只增加一个 `affinity`。
-2. schema 将 `affinity` 设为必填枚举。
-3. 目录解析拒绝缺失、未知或多属性数据。
-4. 记录属性分配表，保证五个 family 都有多种可选亲和。
+1. 保持 16 件模型目录和 288 个模型组合 ID 不变。
+2. V2 配装为五层分别保存一个七属性枚举；五层均允许全部七属性。
+3. V1 旧配装按核心模型确定光暗，其余四层依次迁移为风、火、水、土。
+4. 缺失、未知或多余属性字段被拒绝，V1 和 V2 均可读取并统一为 V2。
+5. 本任务不把属性接入战斗数值，黄金基础属性必须保持不变。
 
 验证：
 
@@ -213,7 +214,7 @@ Set-Location battle-top-designer\web-customizer
 npm run test:unit -- nssSharedContract
 ```
 
-推荐提交：`feat(nss): assign affinities to battle parts`
+推荐提交：`feat(nss): add attachable affinity loadouts`
 
 ### 任务 1.3：实现主属性和共鸣纯函数
 
@@ -282,7 +283,7 @@ npm run test:unit -- nssSharedContract
 工作：
 
 1. 当前组合变化时调用共享 `resolveAffinityProfile()`。
-2. 状态只保存五件零件 ID，不持久化派生共鸣。
+2. 状态保存五件零件 ID 和五层属性选择，不持久化派生共鸣。
 3. 生成中文展示模型：主属性、数量、共鸣、克制、弱点和加成。
 
 验证：定制器单元测试和 TypeScript 构建通过。
@@ -372,7 +373,7 @@ npm run test:e2e -- customizer.spec.ts
 工作：
 
 1. 分享载荷加入目录、规则和 schema 版本。
-2. 只保存零件 ID 和可选纹章 ID。
+2. 只保存零件 ID、五层属性选择和可选纹章 ID。
 3. 不保存派生属性、流派和共鸣。
 4. 旧链接按明确版本迁移；非法链接显示提示并恢复默认组合。
 

@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import sharedCatalog from '../../../shared/nss/parts.catalog.json';
 import loadoutSchema from '../../../shared/nss/loadout.schema.json';
+import loadoutV2Schema from '../../../shared/nss/loadout-v2.schema.json';
 import versions from '../../../shared/nss/versions.json';
 import generatedCatalog from '../../src/generated/parts.catalog.json';
 import { combinationId, enumerateCombinations, families, familyParts } from '../../src/domain';
 import {
-  createNssBattleLoadout, enumerateNssCombinations, isNssBattleLoadoutV1,
+  createNssBattleLoadout, enumerateNssCombinations, isNssBattleLoadoutV1, isNssBattleLoadoutV2,
   nssCombinationFromId, nssCombinationId,
 } from '../../../../src/nss/loadout';
 
@@ -36,6 +37,15 @@ describe('shared NSS contract', () => {
     expect(loadoutSchema.properties.interfaceId.const).toBe('NSS-V1');
   });
 
+  it('adds one freely selectable affinity to every V2 layer without changing the interface', () => {
+    expect(loadoutV2Schema.additionalProperties).toBe(false);
+    expect(loadoutV2Schema.required).toEqual(['schemaVersion', 'interfaceId', 'combination', 'affinities']);
+    expect(loadoutV2Schema.properties.affinities.additionalProperties).toBe(false);
+    expect(loadoutV2Schema.properties.affinities.required).toEqual(families);
+    expect(loadoutV2Schema.properties.interfaceId.const).toBe('NSS-V1');
+    expect(loadoutV2Schema.$defs.affinity.enum).toEqual(['WIND', 'FIRE', 'WATER', 'WOOD', 'EARTH', 'LIGHT', 'DARK']);
+  });
+
   it('preserves all 288 canonical combination IDs', () => {
     expect(families.map(family => familyParts[family].length)).toEqual([2, 4, 3, 3, 4]);
     const ids = enumerateCombinations().map(combinationId);
@@ -52,15 +62,15 @@ describe('shared NSS contract', () => {
     for (const combination of gameCombinations) {
       const id = nssCombinationId(combination);
       expect(nssCombinationFromId(id)).toEqual(combination);
-      expect(isNssBattleLoadoutV1(createNssBattleLoadout(combination))).toBe(true);
+      expect(isNssBattleLoadoutV2(createNssBattleLoadout(combination))).toBe(true);
     }
   });
 
   it('rejects malformed and family-mismatched root game loadouts', () => {
     const valid = createNssBattleLoadout(enumerateNssCombinations()[0]);
-    expect(isNssBattleLoadoutV1({ ...valid, extra: true })).toBe(false);
-    expect(isNssBattleLoadoutV1({ ...valid, schemaVersion: 2 })).toBe(false);
-    expect(isNssBattleLoadoutV1({ ...valid, combination: { ...valid.combination, core: 'blade_storm_fang' } })).toBe(false);
+    expect(isNssBattleLoadoutV2({ ...valid, extra: true })).toBe(false);
+    expect(isNssBattleLoadoutV1(valid)).toBe(false);
+    expect(isNssBattleLoadoutV2({ ...valid, combination: { ...valid.combination, core: 'blade_storm_fang' } })).toBe(false);
     expect(nssCombinationFromId('NSS-P2C-0001')).toBeNull();
     expect(nssCombinationFromId('nss-p2c-9999')).toBeNull();
   });

@@ -1,6 +1,6 @@
 import { DEFAULT_BUILD, PARTS, type BuildSelection, type PartSlot } from '../data/parts';
-import { isNssBattleLoadoutV1 } from '../nss/loadout';
-import type { NssBattleLoadoutV1 } from '../nss/types';
+import { isNssBattleLoadout, migrateNssBattleLoadout } from '../nss/loadout';
+import type { NssBattleLoadoutV2 } from '../nss/types';
 
 const STORAGE_KEY = 'riptop-progression-v1';
 
@@ -17,7 +17,7 @@ type ProgressionData = {
   build: BuildSelection;
   upgrades: UpgradeLevels;
   partUpgrades: PartUpgradeLevels;
-  latestNssLoadout: NssBattleLoadoutV1 | null;
+  latestNssLoadout: NssBattleLoadoutV2 | null;
 };
 
 export type ProgressionState = ProgressionData & {
@@ -81,13 +81,17 @@ function sanitizePartUpgrades(partUpgrades?: PartUpgradeLevels): PartUpgradeLeve
   return next;
 }
 
+function sanitizeNssLoadout(value: unknown): NssBattleLoadoutV2 | null {
+  return isNssBattleLoadout(value) ? migrateNssBattleLoadout(value) : null;
+}
+
 function fromData(data: ProgressionData): ProgressionState {
   return {
     ...data,
     build: sanitizeBuild(data.build),
     upgrades: sanitizeUpgrades(data.upgrades),
     partUpgrades: sanitizePartUpgrades(data.partUpgrades),
-    latestNssLoadout: isNssBattleLoadoutV1(data.latestNssLoadout) ? data.latestNssLoadout : null,
+    latestNssLoadout: sanitizeNssLoadout(data.latestNssLoadout),
     unlockedSet: new Set(data.unlockedParts),
   };
 }
@@ -121,7 +125,7 @@ export function loadProgression(): ProgressionState {
       build: sanitizeBuild(parsed.build),
       upgrades: sanitizeUpgrades(parsed.upgrades),
       partUpgrades: sanitizePartUpgrades(parsed.partUpgrades),
-      latestNssLoadout: isNssBattleLoadoutV1(parsed.latestNssLoadout) ? parsed.latestNssLoadout : null,
+      latestNssLoadout: sanitizeNssLoadout(parsed.latestNssLoadout),
     });
   } catch {
     return createDefaultState();
@@ -138,7 +142,7 @@ export function saveProgression(state: ProgressionState) {
     build: sanitizeBuild(state.build),
     upgrades: sanitizeUpgrades(state.upgrades),
     partUpgrades: sanitizePartUpgrades(state.partUpgrades),
-    latestNssLoadout: isNssBattleLoadoutV1(state.latestNssLoadout) ? state.latestNssLoadout : null,
+    latestNssLoadout: sanitizeNssLoadout(state.latestNssLoadout),
   };
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 }
@@ -161,7 +165,7 @@ export function setBuild(state: ProgressionState, build: BuildSelection): Progre
   return replaceState(state, { build: sanitizeBuild(build) });
 }
 
-export function setNssLoadout(state: ProgressionState, loadout: NssBattleLoadoutV1): ProgressionState {
+export function setNssLoadout(state: ProgressionState, loadout: NssBattleLoadoutV2): ProgressionState {
   return replaceState(state, { latestNssLoadout: loadout });
 }
 

@@ -1,5 +1,5 @@
 import { Group, Matrix4, Object3D } from 'three';
-import { NSS_FAMILIES, type NssBattleLoadoutV1, type NssFamily } from './types';
+import { NSS_FAMILIES, type NssBattleLoadout, type NssFamily } from './types';
 
 export const NSS_ARENA_VISUAL_SCALE = 20;
 
@@ -13,7 +13,7 @@ function mount(scene: Object3D, id: string, role: 'TOP' | 'BOTTOM'): Object3D {
 
 export function nssAssemblyMatrices(
   scenes: Record<NssFamily, Object3D>,
-  loadout: NssBattleLoadoutV1,
+  loadout: NssBattleLoadout,
 ): Record<NssFamily, Matrix4> {
   const matrices = Object.fromEntries(NSS_FAMILIES.map(family => [family, new Matrix4()])) as Record<NssFamily, Matrix4>;
   for (let index = 1; index < NSS_FAMILIES.length; index += 1) {
@@ -34,7 +34,7 @@ export type NssAssembly = {
 
 export function assembleNssScenes(
   scenes: Record<NssFamily, Object3D>,
-  loadout: NssBattleLoadoutV1,
+  loadout: NssBattleLoadout,
 ): NssAssembly {
   const matrices = nssAssemblyMatrices(scenes, loadout);
   const root = new Group();

@@ -1,7 +1,7 @@
 import type { PartUpgradeLevels, UpgradeLevels } from '../app/progression';
 import type { BuildSelection } from '../data/parts';
-import type { NssBattleLoadoutV1 } from '../nss/types';
-import { isNssBattleLoadoutV1, nssCombinationId } from '../nss/loadout';
+import type { NssBattleLoadout } from '../nss/types';
+import { isNssBattleLoadout, nssCombinationId } from '../nss/loadout';
 import { NSS_BATTLE_CATALOG_SHA256 } from '../nss/battleCatalog';
 import type { TurnResolution } from '../gameplay/battlePhysics';
 import type { SkillTier, TurnAction } from '../types/battle';
@@ -18,7 +18,7 @@ export type OnlineLoadout =
   | {
       kind: 'nss-v1';
       comboId: string;
-      loadout: NssBattleLoadoutV1;
+      loadout: NssBattleLoadout;
       upgrades: UpgradeLevels;
       catalogSha256: string;
     };
@@ -43,7 +43,7 @@ export function isOnlineLoadout(value: unknown): value is OnlineLoadout {
       && Boolean(partUpgrades && !Array.isArray(partUpgrades))
       && Boolean(partUpgrades && Object.values(partUpgrades).every(level => Number.isSafeInteger(level) && Number(level) >= 0 && Number(level) <= 4));
   }
-  if (record.kind !== 'nss-v1' || !isNssBattleLoadoutV1(record.loadout) || !validUpgrades(record.upgrades)) return false;
+  if (record.kind !== 'nss-v1' || !isNssBattleLoadout(record.loadout) || !validUpgrades(record.upgrades)) return false;
   return record.comboId === nssCombinationId(record.loadout.combination)
     && record.catalogSha256 === NSS_BATTLE_CATALOG_SHA256
     && Object.keys(record).sort().join(',') === 'catalogSha256,comboId,kind,loadout,upgrades';

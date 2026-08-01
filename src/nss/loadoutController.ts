@@ -1,16 +1,16 @@
 import type { UpgradeLevels } from '../app/progression';
 import { TopEntity, type TopSide } from '../gameplay/top';
 import { createNssBattleTopVisual } from './battleTopVisual';
-import { createNssBattleLoadout, nssCombinationFromId, nssCombinationId } from './loadout';
+import { createNssBattleLoadout, migrateNssBattleLoadout, nssCombinationFromId, nssCombinationId } from './loadout';
 import { NssModelCache } from './modelCache';
-import type { NssBattleLoadoutV1 } from './types';
+import type { NssBattleLoadout, NssBattleLoadoutV2 } from './types';
 
 export const DEFAULT_NSS_COMBINATION_ID = 'nss-p2c-0138';
 export const DEFAULT_NSS_LOADOUT = createNssBattleLoadout(nssCombinationFromId(DEFAULT_NSS_COMBINATION_ID)!);
 
 export type NssVerticalSliceRequest =
   | { kind: 'none' }
-  | { kind: 'ready'; loadout: NssBattleLoadoutV1; source: 'url' | 'local' | 'fallback'; notice: string | null };
+  | { kind: 'ready'; loadout: NssBattleLoadoutV2; source: 'url' | 'local' | 'fallback'; notice: string | null };
 
 export class NssLoadoutController {
   private readonly cache: NssModelCache;
@@ -19,7 +19,7 @@ export class NssLoadoutController {
     this.cache = cache;
   }
 
-  resolve(search: string, saved: NssBattleLoadoutV1 | null): NssVerticalSliceRequest {
+  resolve(search: string, saved: NssBattleLoadoutV2 | null): NssVerticalSliceRequest {
     const parameters = new URLSearchParams(search);
     const combos = parameters.getAll('combo');
     const versions = parameters.getAll('loadoutVersion');
@@ -41,7 +41,7 @@ export class NssLoadoutController {
     };
   }
 
-  customizerLink(loadout: NssBattleLoadoutV1, currentLocation: URL, configuredBase?: string): string {
+  customizerLink(loadout: NssBattleLoadoutV2, currentLocation: URL, configuredBase?: string): string {
     let target: URL;
     if (configuredBase) {
       target = new URL(configuredBase, currentLocation);
@@ -56,9 +56,10 @@ export class NssLoadoutController {
     return target.href;
   }
 
-  async createTop(side: TopSide, loadout: NssBattleLoadoutV1, upgrades?: UpgradeLevels): Promise<TopEntity> {
-    const visual = await createNssBattleTopVisual(this.cache, loadout);
-    const top = new TopEntity(side, { kind: 'nss-v1', loadout }, upgrades);
+  async createTop(side: TopSide, loadout: NssBattleLoadout, upgrades?: UpgradeLevels): Promise<TopEntity> {
+    const currentLoadout = migrateNssBattleLoadout(loadout);
+    const visual = await createNssBattleTopVisual(this.cache, currentLoadout);
+    const top = new TopEntity(side, { kind: 'nss-v1', loadout: currentLoadout }, upgrades);
     top.attachNssVisual(visual);
     return top;
   }
