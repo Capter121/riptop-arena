@@ -34,13 +34,14 @@ export function buildNssBattleStats(
   combined.mobility += upgrades.stamina * 0.5;
 
   const blade = nssBattlePartById.get(loadout.combination.blade)!;
+  const affinity = resolveNssBattleAffinity(loadout);
   return {
     ...combined,
     maxSpin: 74 + combined.stamina * 6 + combined.mobility * 2,
     maxIntegrity: 1000 + combined.defense * 60 + combined.burstResist * 50,
     weight: parts.reduce((total, part) => total + part.physics.weight, 0),
     collisionRadius: blade.physics.collisionRadius!,
-    armor: combined.defense * 2 + combined.burstResist,
+    armor: (combined.defense * 2 + combined.burstResist) * affinity.modifiers.defenseMultiplier,
     evasion: Math.min(0.4, combined.mobility * 0.02),
     critChance: Math.min(0.5, combined.attack * 0.02 + combined.mobility * 0.005),
     critMultiplier: 1.5 + combined.attack * 0.05,
@@ -50,6 +51,6 @@ export function buildNssBattleStats(
     guardStamina: 3,
     guardCrush: false,
     hasStealthEffect: false,
-    affinity: resolveNssBattleAffinity(loadout),
+    affinity,
   };
 }

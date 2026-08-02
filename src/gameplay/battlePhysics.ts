@@ -15,6 +15,11 @@ import type { EventBus } from '../utils/events';
 import { clamp } from '../utils/math';
 import { resolveModifiers } from './modifiers';
 import { SkillManager } from './skills';
+import {
+  calculateCollisionTiltGain,
+  calculateLowSpinTiltDelta,
+  calculateNaturalSpinLoss,
+} from './affinityPhysics';
 import type { TopEntity } from './top';
 import {
   ELEMENT_ATTACKS,
@@ -689,13 +694,17 @@ export class BattlePhysicsSystem {
 
     // Apply spin loss with angular damping multiplier
     const baseSpinLoss = 5.0 * dt; // Give top a natural spin loss so the damping multiplier works
-    const spinLoss = baseSpinLoss * arenaManager.getAngularDampingMultiplier();
+    const spinLoss = calculateNaturalSpinLoss(
+      baseSpinLoss,
+      arenaManager.getAngularDampingMultiplier(),
+      top.stats.affinity,
+    );
     top.spin = Math.max(0, top.spin - spinLoss);
     top.stamina = Math.max(0, top.stamina - spinLoss * 0.86);
 
     const tiltTarget = clamp(1 - top.spin / top.stats.maxSpin, 0, 1);
     top.tilt = clamp(
-      top.tilt + (tiltTarget * TUNING.tiltGainScale - top.tilt * TUNING.tiltRecoverScale) * dt * 7,
+      top.tilt + calculateLowSpinTiltDelta(top.tilt, tiltTarget, dt, top.stats.affinity),
       0,
       1.3,
     );
@@ -807,6 +816,17 @@ export class BattlePhysicsSystem {
       this.applyLockStabilityDamage(a, b, relativeVelocity.length(), modifiersB.damageMultiplier, modifiersA.lockStabilityLossMultiplier);
       this.applyLockStabilityDamage(b, a, relativeVelocity.length(), modifiersA.damageMultiplier, modifiersB.lockStabilityLossMultiplier);
     }
+
+    a.tilt = clamp(
+      a.tilt + calculateCollisionTiltGain(impulseMagnitude, a.stats.affinity, shieldedA, suppressDamage),
+      0,
+      1.3,
+    );
+    b.tilt = clamp(
+      b.tilt + calculateCollisionTiltGain(impulseMagnitude, b.stats.affinity, shieldedB, suppressDamage),
+      0,
+      1.3,
+    );
 
     const overlap = minDistance - distance;
     if (!shieldedA) a.position.addScaledVector(normal, -overlap * 0.5);

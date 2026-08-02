@@ -29,7 +29,7 @@ describe('pre-affinity battle baseline', () => {
     expect(stats).toHaveProperty('affinity');
     expect(stats.maxSpin).toBeCloseTo(expected.maxSpin, 8);
     expect(stats.maxIntegrity).toBeCloseTo(expected.maxIntegrity, 8);
-    expect(stats.armor).toBeCloseTo(expected.armor, 8);
+    expect(stats.armor).toBeCloseTo(expected.armor * stats.affinity.modifiers.defenseMultiplier, 8);
     expect(stats.evasion).toBeCloseTo(expected.evasion, 8);
     expect(stats.weight).toBeCloseTo(expected.weight, 8);
 
