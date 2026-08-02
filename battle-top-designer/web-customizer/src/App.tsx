@@ -2,7 +2,7 @@ import { Component, lazy, Suspense, type ErrorInfo, type ReactNode, useEffect, u
 import { conceptAttributes, attributeNames } from './attributes';
 import {
   combinationId, combinationName, enumerateCombinations, families, familyParts, parseCombinationJson,
-  partById, randomCombination, serializeCombination, type Family,
+  partById, serializeCombination, type Family,
 } from './domain';
 import {
   addRecent, readLibrary, removeFavorite, setNickname as setLibraryNickname, toggleFavorite, writeLibrary,
@@ -29,7 +29,11 @@ import { PreviewableButton } from './comparison/PreviewableButton';
 import { compareAffinityCandidate, comparePartCandidate } from './comparison/comparisonModel';
 import type { PartAffinity } from '../../shared/nss/affinity';
 import { resolveBuildProfile } from '../../shared/nss/build-profile';
+import {
+  buildWeight, randomBuild, validateBuild, type BuildRulePresetId, type BuildRuleSelection,
+} from '../../shared/nss/build-rules';
 import { BuildProfilePanel } from './build/BuildProfilePanel';
+import { BuildRulesPanel } from './build/BuildRulesPanel';
 import './styles.css';
 
 const CustomizerScene = lazy(() => import('./Scene').then(module => ({ default: module.CustomizerScene })));
@@ -71,6 +75,9 @@ export default function App() {
   const [library, setLibrary] = useState(readLibrary);
   const [nickname, setNickname] = useState('');
   const [previewTarget, setPreviewTarget] = useState<PreviewTarget | null>(null);
+  const [rulePreset, setRulePreset] = useState<BuildRulePresetId>('FREE');
+  const [ruleAffinity, setRuleAffinity] = useState<PartAffinity>('FIRE');
+  const [randomFailure, setRandomFailure] = useState<string | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
   const lastRecentId = useRef<string | null>(null);
   const pendingFavoriteRestore = useRef<string | null>(null);
@@ -92,6 +99,14 @@ export default function App() {
       return null;
     }
   }, [attributes, state.affinityProfile]);
+  const ruleSelection = useMemo<BuildRuleSelection>(() => (
+    rulePreset === 'ELEMENT_SPECIALIST' ? { preset: rulePreset, affinity: ruleAffinity } : { preset: rulePreset }
+  ), [ruleAffinity, rulePreset]);
+  const ruleViolations = useMemo(() => validateBuild({
+    combination: state.combination,
+    affinities: state.affinities,
+  }, ruleSelection), [ruleSelection, state.affinities, state.combination]);
+  const currentBuildWeight = useMemo(() => buildWeight(state.combination), [state.combination]);
   const selectedAssist = familyParts.assist.find(part => part.id === state.combination.assist)!;
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
@@ -129,6 +144,8 @@ export default function App() {
     activeFramePainted: focusActiveFramePainted,
     presentationCompleteRequested: focusPresentationComplete,
   }), [focusActiveFramePainted, focusModelReady, focusPartId, focusPhase, focusPresentationComplete, focusPulseActive, focusReadoutCommitted, focusRevision, focusSessionId, focusTarget]);
+
+  useEffect(() => setRandomFailure(null), [ruleAffinity, rulePreset, state.affinities, state.combination]);
   const readoutTarget = focusReadoutTarget(focusState);
 
   useLayoutEffect(() => {
@@ -261,6 +278,28 @@ export default function App() {
     markCachedSwitch('cached-switch:store-start');
     if (state.testMode) emitUsabilityAction({ type: 'PART_SELECTED', partId, combinationId: combinationId(nextCombination) });
     state.selectPart(partId);
+  };
+
+  const chooseRulePreset = (preset: BuildRulePresetId) => {
+    setRandomFailure(null);
+    setRulePreset(preset);
+  };
+
+  const chooseRuleAffinity = (affinity: PartAffinity) => {
+    setRandomFailure(null);
+    setRuleAffinity(affinity);
+  };
+
+  const randomizeByRule = () => {
+    if (state.loadState !== 'ready') return;
+    const result = randomBuild(ruleSelection);
+    if (!result.ok) {
+      setRandomFailure('当前规则没有合法组合。');
+      return;
+    }
+    setRandomFailure(null);
+    beginPartSwitch();
+    state.replaceBuild(result.build);
   };
 
   const toggleCurrentFavorite = () => {
@@ -448,8 +487,19 @@ export default function App() {
           </section>
           <section className="actions">
             <h3>组合快捷工具</h3>
+            <BuildRulesPanel
+              preset={rulePreset}
+              elementAffinity={ruleAffinity}
+              violations={ruleViolations}
+              weight={currentBuildWeight}
+              affinityCount={state.affinityProfile.counts[ruleAffinity]}
+              randomFailure={randomFailure}
+              randomDisabled={state.loadState !== 'ready'}
+              onPresetChange={chooseRulePreset}
+              onElementAffinityChange={chooseRuleAffinity}
+              onRandom={randomizeByRule}
+            />
             <div className="action-grid">
-              <button data-testid="random" onClick={() => state.replaceCombination(randomCombination())}>随机组合</button>
               <button data-testid="storm-reset" onClick={state.reset}>风暴强袭</button>
               <button data-testid="save" onClick={() => { state.save(); setNotice('已保存到本地。'); }}>保存本地</button>
               <button data-testid="restore-local" onClick={() => setNotice(state.restoreSaved() ? '已恢复保存的组合。' : '无有效本地组合。')}>恢复本地组合</button>

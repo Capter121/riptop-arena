@@ -153,6 +153,59 @@ test('complete offline customizer flow', async ({ page }, testInfo) => {
   }
   await expect(page.getByTestId('build-profile-panel')).toHaveAttribute('data-profile', 'ASSAULT');
 
+  const beforeRules = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  await expect(page.getByTestId('build-rules-panel')).toHaveAttribute('data-preset', 'FREE');
+  await page.getByTestId('rule-preset-LIGHTWEIGHT').click();
+  await expect(page.getByTestId('rule-status')).toContainText('总重量 2.18');
+  await expect(page.getByTestId('rule-status')).toContainText('超过上限 0.08');
+  expect((await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot())).historyDepth).toBe(beforeRules.historyDepth);
+  await expect(page.getByTestId('enter-arena')).toBeEnabled();
+
+  await page.getByTestId('rule-preset-ELEMENT_SPECIALIST').click();
+  await expect(page.getByTestId('rule-affinities')).toBeVisible();
+  await expect(page.locator('[data-testid^="rule-affinity-"]')).toHaveCount(7);
+  await page.getByTestId('rule-affinity-FIRE').click();
+  const beforeSpecialistRandom = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  await page.getByTestId('rule-random').click();
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+  await expect(page.getByTestId('rule-status')).toContainText('符合元素专精');
+  const specialistRandom = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  expect(Object.values(specialistRandom.affinities).filter(value => value === 'FIRE').length).toBeGreaterThanOrEqual(3);
+  expect(specialistRandom.historyDepth).toBe(beforeSpecialistRandom.historyDepth + 1);
+  await page.getByTestId('undo').click();
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+  const afterSpecialistUndo = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  expect(afterSpecialistUndo.combination).toEqual(beforeSpecialistRandom.combination);
+  expect(afterSpecialistUndo.affinities).toEqual(beforeSpecialistRandom.affinities);
+
+  await page.getByTestId('rule-preset-BASIC_PARTS_CUP').click();
+  const historyBeforeBasicPreset = (await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot())).historyDepth;
+  await page.getByTestId('rule-random').click();
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+  await expect(page.getByTestId('rule-status')).toContainText('符合基础零件杯');
+  const basicRandom = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  expect(Object.values(basicRandom.combination)).not.toEqual(expect.arrayContaining([
+    'blade_storm_fang', 'blade_iron_bastion', 'assist_heavy',
+  ]));
+  expect(basicRandom.historyDepth).toBe(historyBeforeBasicPreset + 1);
+  await page.getByTestId('undo').click();
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+  await page.getByTestId('rule-preset-FREE').click();
+
+  if (testInfo.project.name === 'mobile') {
+    await page.getByTestId('rule-preset-ELEMENT_SPECIALIST').click();
+    const panelBox = await page.getByTestId('build-rules-panel').boundingBox();
+    expect(panelBox).not.toBeNull();
+    expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(testInfo.project.use.viewport!.width + 1);
+    for (const button of await page.locator('[data-testid^="rule-affinity-"]').all()) {
+      const buttonBox = await button.boundingBox();
+      expect(buttonBox).not.toBeNull();
+      expect(buttonBox!.height).toBeGreaterThanOrEqual(44);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.getByTestId('rule-preset-FREE').click();
+  }
+
   await page.getByTestId('tab-core').click();
   await page.getByTestId('part-core_void_falcon').click();
   await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');

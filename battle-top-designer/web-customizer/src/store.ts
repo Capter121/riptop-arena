@@ -113,6 +113,7 @@ interface CustomizerState {
   setOrbitHaloPatternEnabled: (value: boolean) => void;
   setDualCometPatternEnabled: (value: boolean) => void;
   replaceCombination: (combination: Combination) => void;
+  replaceBuild: (build: BuildSnapshot) => void;
   reset: () => void;
   save: () => void;
   restoreSaved: () => boolean;
@@ -283,6 +284,38 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
     if (!isCombination(combination)) return set({ loadState: 'error', error: 'Illegal combination.' });
     const affinities = defaultAffinities(combination);
     set(state => ({ combination, affinities, affinityProfile: resolveAffinityProfile(affinities), focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? buildSnapshot(state) }));
+  },
+  replaceBuild: build => {
+    if (!isCombination(build.combination) || !isAffinitySelection(build.affinities)) return;
+    const next = { combination: { ...build.combination }, affinities: { ...build.affinities } };
+    set(state => {
+      if (sameBuild(state, next)) return state;
+      const modelChanged = combinationId(state.combination) !== combinationId(next.combination);
+      if (modelChanged || state.pendingPrevious) {
+        return {
+          ...next,
+          affinityProfile: resolveAffinityProfile(next.affinities),
+          focusState: cancelFocusSession(state.focusState),
+          exploded: false,
+          cameraPreset: 'perspective',
+          loadState: modelChanged ? 'loading' : state.loadState,
+          loadProgress: modelChanged ? 10 : state.loadProgress,
+          error: null,
+          pendingPrevious: state.pendingPrevious ?? buildSnapshot(state),
+        };
+      }
+      const historyPast = [...state.historyPast, buildSnapshot(state)].slice(-50);
+      return {
+        ...next,
+        affinityProfile: resolveAffinityProfile(next.affinities),
+        historyPast,
+        historyFuture: [],
+        historyDepth: historyPast.length,
+        canUndo: true,
+        canRedo: false,
+        error: null,
+      };
+    });
   },
   reset: () => set(state => {
     const affinities = defaultAffinities(stormAttack);

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
-import { defaultAffinities, enumerateCombinations, stormAttack } from '../../src/domain';
+import { defaultAffinities, enumerateCombinations, stormAttack, type AffinitySelection } from '../../src/domain';
 import { useCustomizer } from '../../src/store';
 
 describe('customizer store and local persistence', () => {
@@ -141,5 +141,59 @@ describe('customizer store and local persistence', () => {
     expect(useCustomizer.getState().turntableEnabled).toBe(true);
     useCustomizer.getState().setShowcaseEnabled(false);
     expect(useCustomizer.getState()).toMatchObject({ showcaseEnabled: false, turntableEnabled: false });
+  });
+
+  it('replaces a complete build as one undoable history entry', () => {
+    useCustomizer.getState().hydrate('', null);
+    useCustomizer.getState().setLoadState('ready');
+    const before = {
+      combination: useCustomizer.getState().combination,
+      affinities: useCustomizer.getState().affinities,
+    };
+    const target = enumerateCombinations().at(-1)!;
+    const affinities: AffinitySelection = { core: 'FIRE', blade: 'FIRE', assist: 'FIRE', gear: 'WATER', tip: 'EARTH' };
+
+    useCustomizer.getState().replaceBuild({ combination: target, affinities });
+    useCustomizer.getState().setLoadState('ready');
+    expect(useCustomizer.getState()).toMatchObject({ combination: target, affinities, historyDepth: 1, canUndo: true });
+
+    useCustomizer.getState().undo();
+    expect(useCustomizer.getState()).toMatchObject(before);
+    useCustomizer.getState().redo();
+    expect(useCustomizer.getState()).toMatchObject({ combination: target, affinities });
+  });
+
+  it('does not create history for an identical complete build', () => {
+    useCustomizer.getState().hydrate('', null);
+    useCustomizer.getState().setLoadState('ready');
+    const state = useCustomizer.getState();
+    state.replaceBuild({ combination: state.combination, affinities: state.affinities });
+    expect(useCustomizer.getState()).toMatchObject({ historyDepth: 0, canUndo: false, loadState: 'ready' });
+  });
+
+  it('replaces affinities without forcing a model reload', () => {
+    useCustomizer.getState().hydrate('', null);
+    useCustomizer.getState().setLoadState('ready');
+    const combination = useCustomizer.getState().combination;
+    const affinities: AffinitySelection = { core: 'WOOD', blade: 'WOOD', assist: 'WOOD', gear: 'WATER', tip: 'EARTH' };
+    useCustomizer.getState().replaceBuild({ combination, affinities });
+    expect(useCustomizer.getState()).toMatchObject({ affinities, loadState: 'ready', historyDepth: 1, canUndo: true });
+  });
+
+  it('ignores an invalid complete build without changing state', () => {
+    useCustomizer.getState().hydrate('', null);
+    useCustomizer.getState().setLoadState('ready');
+    const before = useCustomizer.getState();
+    useCustomizer.getState().replaceBuild({
+      combination: { ...before.combination, tip: 'unknown' },
+      affinities: before.affinities,
+    });
+    expect(useCustomizer.getState()).toMatchObject({
+      combination: before.combination,
+      affinities: before.affinities,
+      historyDepth: before.historyDepth,
+      loadState: before.loadState,
+      error: before.error,
+    });
   });
 });
