@@ -1,10 +1,14 @@
 import type { TopEntity } from './top';
 import { SKILL_BASE_DAMAGE, type SkillTier } from '../types/battle';
+import {
+  calculateAffinityDamage,
+  calculateArmoredDamage,
+  emptyAffinityDamage,
+} from './affinityDamage';
+import type { AffinityRelation, PartAffinity } from '../../battle-top-designer/shared/nss/affinity';
 
-const ARMOR_K = 30;
 const ATTACK_DAMAGE_FACTOR = 25;
 const COUNTER_MULTIPLIER = 1.75;
-const DAMAGE_ROUND_EPSILON = 1e-9;
 
 export type DamageResult = {
   skillTier: SkillTier;
@@ -14,6 +18,13 @@ export type DamageResult = {
   rawDamage: number;
   finalDamage: number;
   armorReduced: number;
+  physicalDamage: number;
+  elementalDamage: number;
+  attackerAffinity: PartAffinity | null;
+  defenderAffinity: PartAffinity | null;
+  affinityRelation: AffinityRelation;
+  resonanceContribution: number;
+  relationContribution: number;
   didCrit: boolean;
   didMiss: boolean;
   lockDamage: number;
@@ -47,6 +58,7 @@ export function calculateTurnDamage(ctx: DamageContext): DamageResult {
   const skillBaseDamage = SKILL_BASE_DAMAGE[skillTier];
   const attackBonus = attacker.stats.attack * ATTACK_DAMAGE_FACTOR;
   const effectiveContextMultiplier = isCounter ? COUNTER_MULTIPLIER : contextMultiplier;
+  const emptyDamage = emptyAffinityDamage(attacker.stats.affinity, defender.stats.affinity);
 
   const result: DamageResult = {
     skillTier,
@@ -54,8 +66,7 @@ export function calculateTurnDamage(ctx: DamageContext): DamageResult {
     attackBonus,
     contextMultiplier: effectiveContextMultiplier,
     rawDamage: 0,
-    finalDamage: 0,
-    armorReduced: 0,
+    ...emptyDamage,
     didCrit: false,
     didMiss: false,
     lockDamage: 0,
@@ -99,13 +110,65 @@ export function calculateTurnDamage(ctx: DamageContext): DamageResult {
   }
 
   result.rawDamage = rawDamage;
-
-  const armor = Math.max(0, defender.stats.armor);
-  const damageReduction = armor / (armor + ARMOR_K);
-  result.finalDamage = Math.max(1, Math.round(rawDamage * (1 - damageReduction) + DAMAGE_ROUND_EPSILON));
-  result.armorReduced = Math.max(0, Math.round(result.rawDamage - result.finalDamage));
+  Object.assign(result, calculateAffinityDamage(
+    rawDamage,
+    attacker.stats.affinity,
+    defender.stats.affinity,
+    defender.stats.armor,
+  ));
 
   return result;
+}
+
+export function scaleDamageResult(
+  result: DamageResult,
+  ratio: number,
+  defender: 'player' | 'enemy',
+): DamageResult {
+  const finalDamage = Math.max(0, Math.round(result.finalDamage * ratio));
+  const physicalDamage = Math.min(finalDamage, Math.max(0, Math.round(result.physicalDamage * ratio)));
+  const totalContribution = Math.round((result.resonanceContribution + result.relationContribution) * ratio);
+  const resonanceContribution = Math.round(result.resonanceContribution * ratio);
+  return {
+    ...result,
+    contextMultiplier: result.contextMultiplier * ratio,
+    rawDamage: result.rawDamage * ratio,
+    finalDamage,
+    armorReduced: Math.max(0, Math.round(result.armorReduced * ratio)),
+    physicalDamage,
+    elementalDamage: finalDamage - physicalDamage,
+    resonanceContribution,
+    relationContribution: totalContribution - resonanceContribution,
+    lockDamage: result.lockDamage * ratio,
+    defender,
+  };
+}
+
+export function createNeutralRecoilDamage(
+  result: DamageResult,
+  ratio: number,
+  defender: TopEntity,
+): DamageResult {
+  const rawDamage = result.rawDamage * ratio;
+  const armored = calculateArmoredDamage(rawDamage, defender.stats.armor);
+  return {
+    ...result,
+    contextMultiplier: result.contextMultiplier * ratio,
+    rawDamage,
+    ...armored,
+    physicalDamage: armored.finalDamage,
+    elementalDamage: 0,
+    attackerAffinity: null,
+    defenderAffinity: defender.stats.affinity.primary,
+    affinityRelation: 'neutral',
+    resonanceContribution: 0,
+    relationContribution: 0,
+    didCrit: false,
+    didMiss: false,
+    lockDamage: result.lockDamage * ratio,
+    tags: ['hit'],
+    defender: defender.side === 'player' ? 'player' : 'enemy',
+  };
 }
 
 export function applyDamageResult(defender: TopEntity, result: DamageResult) {

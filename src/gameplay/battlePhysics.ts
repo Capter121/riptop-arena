@@ -24,7 +24,12 @@ import {
   type TurnAction,
   type TurnVisual,
 } from '../types/battle';
-import { type DamageResult, calculateTurnDamage } from './damage';
+import {
+  type DamageResult,
+  calculateTurnDamage,
+  createNeutralRecoilDamage,
+  scaleDamageResult,
+} from './damage';
 
 export type TurnResolutionKind =
   | 'same_attack_cancel'
@@ -67,18 +72,6 @@ type TurnSpiritSnapshot = {
   playerSpiritRegenBonus: number;
   enemySpiritRegenBonus: number;
 };
-
-function scaleDamageResult(result: DamageResult, ratio: number, defender: BattleSide): DamageResult {
-  return {
-    ...result,
-    contextMultiplier: result.contextMultiplier * ratio,
-    rawDamage: result.rawDamage * ratio,
-    finalDamage: Math.round(result.finalDamage * ratio),
-    armorReduced: Math.round(result.armorReduced * ratio),
-    lockDamage: result.lockDamage * ratio,
-    defender,
-  };
-}
 
 export class TurnArbitrator {
   executeTurnResolution(playerAction: TurnAction, aiAction: TurnAction, player: TopEntity, enemy: TopEntity, turnIndex: number): TurnResolution {
@@ -279,7 +272,7 @@ export class TurnArbitrator {
         // 反弹方承受 15%~25% 的轻微冲击余波
         const recoilRatio = 0.15 + Math.random() * 0.10;
         const recoilPercent = Math.round(recoilRatio * 100);
-        const recoilDamage = scaleDamageResult(reboundDmg, reflectReturnRatio * recoilRatio, defender);
+        const recoilDamage = createNeutralRecoilDamage(reboundDmg, reflectReturnRatio * recoilRatio, defenderTop);
         const defenderSelfDamage = recoilDamage.finalDamage;
 
         return finish(
@@ -341,7 +334,7 @@ export class TurnArbitrator {
         // 反弹方承受 15%~25% 的轻微冲击余波
         const recoilRatio = 0.15 + Math.random() * 0.10;
         const recoilPercent = Math.round(recoilRatio * 100);
-        const recoilDamage = scaleDamageResult(reboundDmg, reflectReturnRatio * recoilRatio, defender);
+        const recoilDamage = createNeutralRecoilDamage(reboundDmg, reflectReturnRatio * recoilRatio, defenderTop);
         const defenderSelfDamage = recoilDamage.finalDamage;
 
         return finish(
