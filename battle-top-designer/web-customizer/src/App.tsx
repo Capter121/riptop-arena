@@ -28,6 +28,8 @@ import { createAffinityViewModel } from './affinity/affinityViewModel';
 import { PreviewableButton } from './comparison/PreviewableButton';
 import { compareAffinityCandidate, comparePartCandidate } from './comparison/comparisonModel';
 import type { PartAffinity } from '../../shared/nss/affinity';
+import { resolveBuildProfile } from '../../shared/nss/build-profile';
+import { BuildProfilePanel } from './build/BuildProfilePanel';
 import './styles.css';
 
 const CustomizerScene = lazy(() => import('./Scene').then(module => ({ default: module.CustomizerScene })));
@@ -83,6 +85,13 @@ export default function App() {
       ? comparePartCandidate(state.combination, previewTarget.family, previewTarget.candidateId)
       : compareAffinityCandidate(state.affinities, previewTarget.family, previewTarget.affinity);
   }, [previewTarget, state.affinities, state.combination]);
+  const buildProfile = useMemo(() => {
+    try { return resolveBuildProfile(attributes, state.affinityProfile); }
+    catch (error) {
+      console.error('BUILD_PROFILE_ERROR', error);
+      return null;
+    }
+  }, [attributes, state.affinityProfile]);
   const selectedAssist = familyParts.assist.find(part => part.id === state.combination.assist)!;
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
@@ -428,6 +437,8 @@ export default function App() {
           onPreviewEnd={affinity => setPreviewTarget(current => current?.key === `affinity:${state.selectedFamily}:${affinity}` ? null : current)}
           onSelect={affinity => { setPreviewTarget(null); state.setAffinity(state.selectedFamily, affinity); }}
         />
+
+        <BuildProfilePanel profile={buildProfile} />
 
         <div className="lower-grid">
           <section className="attributes">

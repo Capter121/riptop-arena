@@ -45,6 +45,19 @@ test('complete offline customizer flow', async ({ page }, testInfo) => {
   await expect(page.getByTestId('affinity-panel')).toBeVisible();
   await expect(page.getByTestId('affinity-option-WIND')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.part-strip button [data-affinity="WIND"]')).toHaveCount(4);
+  await expect(page.getByTestId('build-profile-panel')).toHaveAttribute('data-profile', 'ASSAULT');
+  await expect(page.getByTestId('build-profile-primary')).toHaveText('强袭');
+  await expect(page.getByTestId('build-profile-panel')).toContainText('不提供额外加成');
+  await expect(page.getByTestId('build-profile-panel').locator('button')).toHaveCount(0);
+
+  await page.getByTestId('part-blade_orbit_halo').click();
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+  await expect(page.getByTestId('build-profile-panel')).toHaveAttribute('data-profile', 'BALANCED');
+  await expect(page.getByTestId('build-profile-reasons')).toContainText('四项最大差值 8');
+  await page.getByTestId('undo').click();
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+  await expect(page.getByTestId('build-profile-panel')).toHaveAttribute('data-profile', 'ASSAULT');
+
   const previewSnapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
   if (testInfo.project.name === 'desktop') {
     await page.getByTestId('part-blade_orbit_halo').hover();
@@ -119,6 +132,26 @@ test('complete offline customizer flow', async ({ page }, testInfo) => {
     expect(affinityPanelBox).not.toBeNull();
     expect(affinityPanelBox!.y).toBeGreaterThanOrEqual(partStripBox!.y + partStripBox!.height - 1);
   }
+
+  const beforeBurst = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  for (const family of ['core', 'gear', 'tip']) {
+    await page.getByTestId(`tab-${family}`).click();
+    await page.getByTestId('affinity-option-FIRE').click();
+  }
+  await expect(page.getByTestId('build-profile-panel')).toHaveAttribute('data-profile', 'BURST');
+  await expect(page.getByTestId('build-profile-primary')).toHaveText('爆裂');
+  await expect(page.getByTestId('build-profile-reasons')).toContainText('5 件火属性');
+  await expect(page.getByTestId('build-profile-reasons')).toContainText('元素进攻共鸣 +15%');
+  const burstSnapshot = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
+  expect(burstSnapshot.combination).toEqual(beforeBurst.combination);
+  expect(burstSnapshot.historyDepth).toBe(beforeBurst.historyDepth + 3);
+  await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready');
+
+  for (const [family, affinity] of [['core', 'LIGHT'], ['gear', 'WATER'], ['tip', 'EARTH']] as const) {
+    await page.getByTestId(`tab-${family}`).click();
+    await page.getByTestId(`affinity-option-${affinity}`).click();
+  }
+  await expect(page.getByTestId('build-profile-panel')).toHaveAttribute('data-profile', 'ASSAULT');
 
   await page.getByTestId('tab-core').click();
   await page.getByTestId('part-core_void_falcon').click();
