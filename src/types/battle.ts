@@ -9,6 +9,7 @@ export type SkillId =
   | 'phantom_clone';
 
 export type ElementAttackSkillId = Exclude<SkillId, 'frost_bite'>;
+export type SkillVisualSchool = 'wind' | 'water' | 'frost' | 'lightning' | 'fire' | 'phantom';
 
 export type BattleSide = 'player' | 'enemy';
 export type SkillTier = 1 | 2 | 3 | 4 | 5;
@@ -32,6 +33,7 @@ export type ElementAttackMeta = {
   tier: SkillTier;
   spiritCost: number;
   color: string;
+  visualSchool: Exclude<SkillVisualSchool, 'frost'>;
 };
 
 export const MAX_SPIRIT = 100;
@@ -53,6 +55,7 @@ export const ELEMENT_ATTACKS: Record<ElementAttackSkillId, ElementAttackMeta> = 
     tier: 1,
     spiritCost: 20,
     color: '#7ef0ff',
+    visualSchool: 'wind',
   },
   aqua_surge: {
     skillId: 'aqua_surge',
@@ -61,6 +64,7 @@ export const ELEMENT_ATTACKS: Record<ElementAttackSkillId, ElementAttackMeta> = 
     tier: 2,
     spiritCost: 40,
     color: '#32b8ff',
+    visualSchool: 'water',
   },
   lightning_bolt: {
     skillId: 'lightning_bolt',
@@ -69,6 +73,7 @@ export const ELEMENT_ATTACKS: Record<ElementAttackSkillId, ElementAttackMeta> = 
     tier: 3,
     spiritCost: 60,
     color: '#f7fbff',
+    visualSchool: 'lightning',
   },
   blazing_meteor: {
     skillId: 'blazing_meteor',
@@ -77,6 +82,7 @@ export const ELEMENT_ATTACKS: Record<ElementAttackSkillId, ElementAttackMeta> = 
     tier: 4,
     spiritCost: 80,
     color: '#ff7b3d',
+    visualSchool: 'fire',
   },
   phantom_clone: {
     skillId: 'phantom_clone',
@@ -85,6 +91,7 @@ export const ELEMENT_ATTACKS: Record<ElementAttackSkillId, ElementAttackMeta> = 
     tier: 5,
     spiritCost: 100,
     color: '#b78cff',
+    visualSchool: 'phantom',
   },
 };
 

@@ -1806,7 +1806,8 @@ export class Game {
     top.beginTurnMotion(visual, target, element);
 
     if (action.kind === 'attack') {
-      this.skillManager.applyElementSkillVisual(top, target, action.skillId);
+      const attack = ELEMENT_ATTACKS[action.skillId];
+      this.skillManager.applyElementSkillVisual(top, target, action.skillId, attack.visualSchool);
     }
 
     if (visual === 'defense') {

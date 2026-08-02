@@ -1,5 +1,10 @@
 import * as THREE from 'three';
-import { ELEMENT_ATTACKS, type SkillId, type TimedStatusEffect } from '../types/battle';
+import {
+  ELEMENT_ATTACKS,
+  type SkillId,
+  type SkillVisualSchool,
+  type TimedStatusEffect,
+} from '../types/battle';
 import type { TopEntity } from './top';
 import { SpiritSystem } from './spirit';
 
@@ -58,6 +63,10 @@ export function getSkillLabel(skillId: SkillId) {
   }
 }
 
+export function getSkillVisualSchool(skillId: SkillId): SkillVisualSchool {
+  return skillId === 'frost_bite' ? 'frost' : ELEMENT_ATTACKS[skillId].visualSchool;
+}
+
 export class SkillManager {
   private readonly spirit: SpiritSystem;
 
@@ -75,31 +84,31 @@ export class SkillManager {
       return { ok: false, skillId, reason: 'insufficient_spirit' };
     }
 
-    this.applyElementSkillVisual(caster, target, skillId);
+    this.applyElementSkillVisual(caster, target, skillId, getSkillVisualSchool(skillId));
 
     return { ok: true, skillId };
   }
 
-  applyElementSkillVisual(caster: TopEntity, target: TopEntity, skillId: SkillId) {
+  applyElementSkillVisual(caster: TopEntity, target: TopEntity, skillId: SkillId, visualSchool: SkillVisualSchool) {
     upsertEffect(caster, createEffect(skillId));
 
-    switch (skillId) {
-      case 'wind_blade':
+    switch (visualSchool) {
+      case 'wind':
         this.initWindBlade(caster);
         break;
-      case 'aqua_surge':
+      case 'water':
         this.initAquaSurge(caster);
         break;
-      case 'frost_bite':
+      case 'frost':
         caster.flags.armedFrostBite = true;
         break;
-      case 'lightning_bolt':
+      case 'lightning':
         caster.flags.armedLightningBolt = true;
         break;
-      case 'blazing_meteor':
+      case 'fire':
         this.initBlazingMeteor(caster, target);
         break;
-      case 'phantom_clone':
+      case 'phantom':
         this.initPhantomClone(caster);
         break;
     }

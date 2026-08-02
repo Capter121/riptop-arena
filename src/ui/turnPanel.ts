@@ -123,6 +123,7 @@ export class TurnPanel {
       const meta = ELEMENT_ATTACKS[skillId];
       const button = document.createElement('button');
       button.className = 'turn-panel__skill';
+      button.dataset.visualSchool = meta.visualSchool;
       button.style.setProperty('--skill-color', meta.color);
       button.addEventListener('click', () => this.submit({ kind: 'attack', skillId }));
       this.skillButtons.set(skillId, button);
