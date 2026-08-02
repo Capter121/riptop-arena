@@ -1,5 +1,6 @@
 import type { UpgradeLevels } from '../app/progression';
 import type { BattleStats } from '../gameplay/build';
+import { resolveNssBattleAffinity } from '../gameplay/battleAffinity';
 import { nssBattlePartById } from './battleCatalog';
 import type { NssBattleLoadout } from './types';
 
@@ -49,5 +50,6 @@ export function buildNssBattleStats(
     guardStamina: 3,
     guardCrush: false,
     hasStealthEffect: false,
+    affinity: resolveNssBattleAffinity(loadout),
   };
 }

@@ -2,6 +2,7 @@ import type { PartUpgradeLevels, UpgradeLevels } from '../app/progression';
 import { DEFAULT_BUILD, PARTS, type BuildSelection, type Part, type PartSlot, type PlayerBuild, type StatBlock } from '../data/parts';
 import { BASE_COMPONENTS } from '../data/recipes';
 import { buildNssBattleStats } from '../nss/buildStats';
+import { resolveLegacyBattleAffinity, type BattleAffinityProfile } from './battleAffinity';
 
 import { type ElementAttribute, TIER_MULTIPLIERS, type InstanceComponent } from '../types/shopItems';
 
@@ -19,6 +20,7 @@ export type BattleStats = StatBlock & {
   guardStamina: number;
   guardCrush: boolean;
   hasStealthEffect?: boolean;
+  affinity: BattleAffinityProfile;
 };
 
 const DEFAULT_UPGRADES: UpgradeLevels = {
@@ -130,6 +132,7 @@ export function buildStats(
     guardStamina: 3,
     guardCrush: false,
     hasStealthEffect: (attributes['DARK'] || 0) >= 3,
+    affinity: resolveLegacyBattleAffinity(attributes),
   };
 }
 

@@ -26,6 +26,7 @@ describe('pre-affinity battle baseline', () => {
     const stats = statsFor(testCase);
     const expected = testCase.expected;
 
+    expect(stats).toHaveProperty('affinity');
     expect(stats.maxSpin).toBeCloseTo(expected.maxSpin, 8);
     expect(stats.maxIntegrity).toBeCloseTo(expected.maxIntegrity, 8);
     expect(stats.armor).toBeCloseTo(expected.armor, 8);

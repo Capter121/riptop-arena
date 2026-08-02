@@ -15,7 +15,7 @@ describe('shared NSS contract', () => {
     expect(versions).toEqual({
       catalogVersion: 1,
       affinityRulesVersion: 1,
-      battleRulesVersion: 1,
+      battleRulesVersion: 2,
       challengeSchemaVersion: 1,
       saveSchemaVersion: 2,
       shareSchemaVersion: 2,

@@ -24,6 +24,7 @@ describe('NSS battle stats', () => {
       expect(Object.values(first).filter(value => typeof value === 'number').every(Number.isFinite)).toBe(true);
       expect(first.weight).toBeGreaterThan(0);
       expect(first.collisionRadius).toBeGreaterThan(0);
+      expect(first.affinity.source).toBe('nss');
     }
   });
 

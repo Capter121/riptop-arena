@@ -17,7 +17,7 @@ assert.deepEqual(Object.keys(versions).sort(), versionKeys);
 assert.deepEqual(versions, {
   catalogVersion: 1,
   affinityRulesVersion: 1,
-  battleRulesVersion: 1,
+  battleRulesVersion: 2,
   challengeSchemaVersion: 1,
   saveSchemaVersion: 2,
   shareSchemaVersion: 2,
