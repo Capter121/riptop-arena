@@ -111,10 +111,10 @@ export default function App() {
   const selectedGear = familyParts.gear.find(part => part.id === state.combination.gear)!;
   const lowGearHeight = familyParts.gear.find(part => part.id === 'gear_low')!.heightMm;
   const share = useMemo(() => createShareLink(
-    state.combination,
+    { combination: state.combination, affinities: state.affinities, emblemId: state.shareEmblemId },
     new URL(window.location.href),
     import.meta.env.VITE_SHARE_BASE_URL,
-  ), [state.combination]);
+  ), [state.affinities, state.combination, state.shareEmblemId]);
   const arenaLink = useMemo(() => createArenaLink(
     state.combination,
     new URL(window.location.href),
@@ -348,6 +348,7 @@ export default function App() {
       const { renderCombinationCard } = await import('./sharing/cardRenderer');
       const blob = await renderCombinationCard({
         combination: state.combination,
+        affinities: state.affinities,
         shareUrl: share.url,
         sceneWidth: capture.width,
         sceneHeight: capture.height,
@@ -545,7 +546,7 @@ export default function App() {
             <input ref={importRef} data-testid="import-file" hidden type="file" accept="application/json,.json" onChange={event => importJson(event.target.files?.[0])} />
             <p className="notice" role="status">
               {notice}
-              {state.startupNotice && notice && (
+              {state.startupNotice === 'Invalid share link. Storm Attack was restored.' && notice && (
                 <button data-testid="clear-invalid-url" onClick={() => {
                   const clean = new URL(window.location.href);
                   clean.search = state.testMode ? '?test=1' : '';

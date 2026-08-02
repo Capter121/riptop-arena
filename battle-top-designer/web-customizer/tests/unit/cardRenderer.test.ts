@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { flipPixelsVertically, validateCardInput } from '../../src/sharing/cardRenderer';
-import { stormAttack } from '../../src/domain';
+import { defaultAffinities, stormAttack } from '../../src/domain';
+import { buildToSearch } from '../../src/sharing/combinationUrl';
 
 describe('combination card renderer', () => {
   it('flips WebGL rows without changing channel order', () => {
@@ -15,7 +16,10 @@ describe('combination card renderer', () => {
   });
 
   it('requires exact scene pixels and a canonical share URL', () => {
-    expect(validateCardInput({ combination: stormAttack, shareUrl: 'https://example.test/?combo=nss-p2c-0138', sceneWidth: 2, sceneHeight: 2, pixels: new Uint8Array(16) })).toEqual([]);
-    expect(validateCardInput({ combination: stormAttack, shareUrl: 'https://example.test/', sceneWidth: 2, sceneHeight: 2, pixels: new Uint8Array(15) })).toEqual(['PIXEL_LENGTH', 'SHARE_URL']);
+    const affinities = defaultAffinities(stormAttack);
+    const shareUrl = `https://example.test/${buildToSearch({ combination: stormAttack, affinities, emblemId: 'emblem_solar-wolf' })}`;
+    expect(validateCardInput({ combination: stormAttack, affinities, shareUrl, sceneWidth: 2, sceneHeight: 2, pixels: new Uint8Array(16) })).toEqual([]);
+    expect(validateCardInput({ combination: stormAttack, affinities, shareUrl: 'https://example.test/?combo=nss-p2c-0138', sceneWidth: 2, sceneHeight: 2, pixels: new Uint8Array(15) })).toEqual(['PIXEL_LENGTH', 'SHARE_URL']);
+    expect(validateCardInput({ combination: stormAttack, affinities: { ...affinities, tip: 'WOOD' }, shareUrl, sceneWidth: 2, sceneHeight: 2, pixels: new Uint8Array(16) })).toEqual(['SHARE_URL']);
   });
 });

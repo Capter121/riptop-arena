@@ -56,6 +56,7 @@ function parseSavedBuild(text: string | null): BuildSnapshot | null {
 interface CustomizerState {
   combination: Combination;
   affinities: AffinitySelection;
+  shareEmblemId: string | null;
   affinityProfile: AffinityProfile;
   selectedFamily: Family;
   cameraPreset: CameraPreset;
@@ -128,6 +129,7 @@ function focusFor(family: Family): FocusTarget | null {
 export const useCustomizer = create<CustomizerState>((set, get) => ({
   combination: stormAttack,
   affinities: defaultAffinities(stormAttack),
+  shareEmblemId: null,
   affinityProfile: resolveAffinityProfile(defaultAffinities(stormAttack)),
   selectedFamily: 'blade',
   cameraPreset: 'perspective',
@@ -160,13 +162,15 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   hydrate: (search, savedText) => {
     const localText = savedText === undefined ? localStorage.getItem(combinationStorageKey) : savedText;
     const resolution = resolveInitialCombination(search, localText);
-    const savedBuild = resolution.source === 'local' ? parseSavedBuild(localText) : null;
-    const affinities = savedBuild?.affinities ?? defaultAffinities(resolution.combination);
+    const affinities = resolution.affinities;
     set({
       combination: resolution.combination,
       affinities,
+      shareEmblemId: resolution.emblemId,
       affinityProfile: resolveAffinityProfile(affinities),
-      startupNotice: resolution.invalidUrl ? 'Invalid share link. Storm Attack was restored.' : null,
+      startupNotice: resolution.invalidUrl
+        ? 'Invalid share link. Storm Attack was restored.'
+        : resolution.legacyUrl ? '旧版分享链接已按默认属性载入；重新分享可生成完整属性链接。' : null,
       testMode: resolution.testMode,
       loadState: 'loading',
       error: null,
@@ -283,7 +287,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   replaceCombination: combination => {
     if (!isCombination(combination)) return set({ loadState: 'error', error: 'Illegal combination.' });
     const affinities = defaultAffinities(combination);
-    set(state => ({ combination, affinities, affinityProfile: resolveAffinityProfile(affinities), focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? buildSnapshot(state) }));
+    set(state => ({ combination, affinities, shareEmblemId: null, affinityProfile: resolveAffinityProfile(affinities), focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? buildSnapshot(state) }));
   },
   replaceBuild: build => {
     if (!isCombination(build.combination) || !isAffinitySelection(build.affinities)) return;
@@ -319,7 +323,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
   },
   reset: () => set(state => {
     const affinities = defaultAffinities(stormAttack);
-    return { combination: stormAttack, affinities, affinityProfile: resolveAffinityProfile(affinities), focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? buildSnapshot(state) };
+    return { combination: stormAttack, affinities, shareEmblemId: null, affinityProfile: resolveAffinityProfile(affinities), focusState: cancelFocusSession(state.focusState), exploded: false, cameraPreset: 'perspective', loadState: 'loading', loadProgress: 10, error: null, pendingPrevious: state.pendingPrevious ?? buildSnapshot(state) };
   }),
   save: () => localStorage.setItem(combinationStorageKey, JSON.stringify({
     schemaVersion: 2,
@@ -336,6 +340,7 @@ export const useCustomizer = create<CustomizerState>((set, get) => ({
     if (!saved) return false;
     set(state => ({
       ...saved,
+      shareEmblemId: null,
       affinityProfile: resolveAffinityProfile(saved.affinities),
       focusState: cancelFocusSession(state.focusState),
       exploded: false,

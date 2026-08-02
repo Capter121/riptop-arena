@@ -3,5 +3,6 @@
   "affinityRulesVersion": 1,
   "battleRulesVersion": 1,
   "challengeSchemaVersion": 1,
-  "saveSchemaVersion": 2
+  "saveSchemaVersion": 2,
+  "shareSchemaVersion": 2
 }

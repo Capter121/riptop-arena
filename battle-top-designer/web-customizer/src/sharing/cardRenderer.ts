@@ -1,9 +1,11 @@
 import { conceptAttributes } from '../attributes';
-import { combinationId, families, partById, type Combination } from '../domain';
+import { combinationId, families, partById, type AffinitySelection, type Combination } from '../domain';
+import { parseShareSearch } from './combinationUrl';
 import { createQrMatrix } from './qrCode';
 
 export interface CardInput {
   combination: Combination;
+  affinities: AffinitySelection;
   shareUrl: string;
   sceneWidth: number;
   sceneHeight: number;
@@ -24,7 +26,12 @@ export function validateCardInput(input: CardInput): string[] {
   if (input.pixels.length !== input.sceneWidth * input.sceneHeight * 4) errors.push('PIXEL_LENGTH');
   try {
     const url = new URL(input.shareUrl);
-    if (url.searchParams.get('combo') !== combinationId(input.combination)) errors.push('SHARE_URL');
+    const parsed = parseShareSearch(url.search);
+    if (parsed.kind !== 'current'
+      || combinationId(parsed.combination) !== combinationId(input.combination)
+      || families.some(family => parsed.affinities[family] !== input.affinities[family])) {
+      errors.push('SHARE_URL');
+    }
   } catch {
     errors.push('SHARE_URL');
   }

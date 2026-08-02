@@ -13,7 +13,7 @@ test('exports a local 1200x630 PNG card without changing assembly state', async 
     if (!['127.0.0.1', 'localhost'].includes(hostname)) errors.external.push(request.url());
   });
 
-  await page.goto('/?combo=nss-p2c-0138');
+  await page.goto('/?sv=2&cv=1&rv=1&combo=nss-p2c-0138&a=LIGHT,FIRE,FIRE,WATER,EARTH');
   await expect(page.getByTestId('load-status')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
   const before = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
   const downloadPromise = page.waitForEvent('download');
@@ -27,7 +27,8 @@ test('exports a local 1200x630 PNG card without changing assembly state', async 
   const png = PNG.sync.read(bytes);
   expect({ width: png.width, height: png.height }).toEqual({ width: 1200, height: 630 });
   expect(new Set(png.data).size).toBeGreaterThan(32);
-  expect(jsQR(new Uint8ClampedArray(png.data), png.width, png.height)?.data).toMatch(/\?combo=nss-p2c-0138$/);
+  expect(jsQR(new Uint8ClampedArray(png.data), png.width, png.height)?.data)
+    .toMatch(/\?sv=2&cv=1&rv=1&combo=nss-p2c-0138&a=LIGHT%2CFIRE%2CFIRE%2CWATER%2CEARTH$/);
   const after = await page.evaluate(() => (window as any).__NSS_CUSTOMIZER__.snapshot());
   expect(after.permanentMatrices).toEqual(before.permanentMatrices);
   expect(after.cameraPreset).toBe(before.cameraPreset);

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 import { defaultAffinities, enumerateCombinations, stormAttack, type AffinitySelection } from '../../src/domain';
+import { buildToSearch } from '../../src/sharing/combinationUrl';
 import { useCustomizer } from '../../src/store';
 
 describe('customizer store and local persistence', () => {
@@ -85,7 +86,11 @@ describe('customizer store and local persistence', () => {
     const target = enumerateCombinations()[10];
     localStorage.setItem('nova-spin:phase3a:combination:v1', JSON.stringify({ schemaVersion: 1, combination: target }));
     useCustomizer.getState().hydrate('?combo=nss-p2c-0138&test=1');
-    expect(useCustomizer.getState()).toMatchObject({ combination: stormAttack, startupNotice: null, testMode: true });
+    expect(useCustomizer.getState()).toMatchObject({
+      combination: stormAttack,
+      startupNotice: '旧版分享链接已按默认属性载入；重新分享可生成完整属性链接。',
+      testMode: true,
+    });
     useCustomizer.getState().hydrate('?combo=INVALID');
     expect(useCustomizer.getState()).toMatchObject({ combination: stormAttack, startupNotice: 'Invalid share link. Storm Attack was restored.', testMode: false });
   });
@@ -141,6 +146,42 @@ describe('customizer store and local persistence', () => {
     expect(useCustomizer.getState().turntableEnabled).toBe(true);
     useCustomizer.getState().setShowcaseEnabled(false);
     expect(useCustomizer.getState()).toMatchObject({ showcaseEnabled: false, turntableEnabled: false });
+  });
+
+  it('hydrates and preserves V2 share-session emblem through manual edits and history', () => {
+    const affinities: AffinitySelection = { core: 'LIGHT', blade: 'FIRE', assist: 'FIRE', gear: 'WATER', tip: 'EARTH' };
+    useCustomizer.getState().hydrate(buildToSearch({ combination: stormAttack, affinities, emblemId: 'emblem_solar-wolf' }), null);
+    expect(useCustomizer.getState()).toMatchObject({ affinities, shareEmblemId: 'emblem_solar-wolf', startupNotice: null });
+
+    useCustomizer.getState().setAffinity('tip', 'WOOD');
+    useCustomizer.getState().replaceBuild({
+      combination: stormAttack,
+      affinities: { ...affinities, tip: 'WOOD' },
+    });
+    useCustomizer.getState().selectPart('blade_orbit_halo');
+    useCustomizer.getState().setLoadState('ready');
+    useCustomizer.getState().undo();
+    useCustomizer.getState().redo();
+    expect(useCustomizer.getState().shareEmblemId).toBe('emblem_solar-wolf');
+  });
+
+  it('keeps share-session emblem out of saves and clears it on external-source replacement paths', () => {
+    const affinities = defaultAffinities(stormAttack);
+    const shareSearch = buildToSearch({ combination: stormAttack, affinities, emblemId: 'emblem_solar-wolf' });
+    useCustomizer.getState().hydrate(shareSearch, null);
+    useCustomizer.getState().save();
+    expect(JSON.parse(localStorage.getItem('nova-spin:phase3a:combination:v1')!)).not.toHaveProperty('shareEmblemId');
+
+    useCustomizer.getState().replaceBuild({ combination: stormAttack, affinities });
+    expect(useCustomizer.getState().shareEmblemId).toBe('emblem_solar-wolf');
+    useCustomizer.getState().replaceCombination(stormAttack);
+    expect(useCustomizer.getState().shareEmblemId).toBeNull();
+    useCustomizer.getState().hydrate(shareSearch, null);
+    expect(useCustomizer.getState().restoreSaved()).toBe(true);
+    expect(useCustomizer.getState().shareEmblemId).toBeNull();
+    useCustomizer.getState().hydrate(shareSearch, null);
+    useCustomizer.getState().reset();
+    expect(useCustomizer.getState().shareEmblemId).toBeNull();
   });
 
   it('replaces a complete build as one undoable history entry', () => {
