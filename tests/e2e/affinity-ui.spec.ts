@@ -17,7 +17,7 @@ for (const viewport of viewports) {
     const pageErrors: string[] = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
-    await page.goto('/?qa=1');
+    await page.goto('/arena/?qa=1');
     await expect(page.locator('canvas[data-engine^="three.js"]')).toBeVisible({ timeout: 30_000 });
     await page.evaluate(() => {
       const qa = (window as Window & { __RIPTOP_QA__?: { startBattle?: () => void } }).__RIPTOP_QA__;
