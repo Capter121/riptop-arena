@@ -1,7 +1,7 @@
 # 邀请制统一门户设计
 
 日期：2026-08-08
-状态：已批准，待书面复核
+状态：规格已批准
 对应总规格：`docs/superpowers/specs/2026-08-01-nss-arena-complete-expansion-design.md`
 对应总计划：`docs/superpowers/plans/2026-08-01-nss-arena-complete-expansion-implementation.md` 任务 4.4
 
