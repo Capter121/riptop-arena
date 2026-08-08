@@ -66,9 +66,21 @@ try {
   assert.equal(portal.status, 200);
   assert.equal(await portal.text(), '<!doctype html><title>NSS Portal</title>');
 
+  const join = await fetch(`${URL}/join`);
+  assert.equal(join.status, 200);
+  assert.equal(await join.text(), '<!doctype html><title>NSS Portal</title>');
+
+  const joinHead = await fetch(`${URL}/join/`, { method: 'HEAD' });
+  assert.equal(joinHead.status, 200);
+  assert.equal(await joinHead.text(), '');
+
   const arena = await fetch(`${URL}/arena/`);
   assert.equal(arena.status, 200);
   assert.equal(await arena.text(), '<!doctype html><title>RIPTOP Arena</title>');
+
+  const unknown = await fetch(`${URL}/unknown-route`);
+  assert.equal(unknown.status, 404);
+  assert.equal((await unknown.json()).error.code, 'NOT_FOUND');
 
   console.log('HTTP server smoke tests passed.');
 } finally {

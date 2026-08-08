@@ -153,7 +153,10 @@ export function createArenaHttpServer(options = {}) {
       }
 
       if (production && (request.method === 'GET' || request.method === 'HEAD')) {
-        if (await serveStatic(request, response, siteRoot, url.pathname)) return;
+        const staticPathname = url.pathname === '/join' || url.pathname === '/join/'
+          ? '/index.html'
+          : url.pathname;
+        if (await serveStatic(request, response, siteRoot, staticPathname)) return;
       }
       sendError(response, 404, 'NOT_FOUND', 'Resource not found.');
     } catch (error) {
