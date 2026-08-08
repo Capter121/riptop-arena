@@ -1,7 +1,7 @@
 # 邀请制统一门户实施计划
 
 日期：2026-08-08
-状态：待实施
+状态：已完成
 对应设计：`docs/superpowers/specs/2026-08-08-invite-gated-unified-portal-design.md`
 对应总计划：`docs/superpowers/plans/2026-08-01-nss-arena-complete-expansion-implementation.md` 任务 4.4
 
