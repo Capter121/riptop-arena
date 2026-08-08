@@ -13,7 +13,8 @@
     "server": "node server/match-server.mjs",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
-    "test:server": "node scripts/test-match-server.mjs",
+    "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs",
+    "test:http": "node scripts/test-http-server.mjs",
     "test:nss-contract": "node scripts/test-nss-contract.mjs",
     "inspect:canvas": "node scripts/inspect-threejs-canvas.mjs"
   },

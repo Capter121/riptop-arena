@@ -131,6 +131,10 @@ try {
     server.once('exit', (code) => reject(new Error(`Server exited early with ${code}.`)));
   });
 
+  const health = await fetch(`http://127.0.0.1:${PORT}/health`);
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), { status: 'ok' });
+
   const battle = await matchedPair('battle');
   battle.host.send({ type: 'CLIENT_READY', roomId: battle.roomId });
   battle.guest.send({ type: 'CLIENT_READY', roomId: battle.roomId });

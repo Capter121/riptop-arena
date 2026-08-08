@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
+import { createArenaHttpServer } from './http-server.mjs';
 
 const PROTOCOL_VERSION = 2;
 const PORT = Number(process.env.PORT || 8080);
@@ -19,7 +20,8 @@ const battleCatalogSha256 = createHash('sha256').update(battleCatalogText.replac
 const familyParts = Object.fromEntries(families.map(family => [family, battleCatalog.parts.filter(part => part.family === family)]));
 const partById = new Map(battleCatalog.parts.map(part => [part.id, part]));
 
-const wss = new WebSocketServer({ host: HOST, port: PORT, maxPayload: MAX_MESSAGE_BYTES });
+const server = createArenaHttpServer();
+const wss = new WebSocketServer({ server, maxPayload: MAX_MESSAGE_BYTES });
 const clients = new Map();
 const rooms = new Map();
 let waitingPlayer = null;
@@ -393,7 +395,7 @@ const heartbeat = setInterval(() => {
 
 wss.on('close', () => clearInterval(heartbeat));
 
-wss.on('listening', () => {
+server.listen(PORT, HOST, () => {
   console.log(`Match server listening on ws://${HOST}:${PORT}`);
   for (const addresses of Object.values(networkInterfaces())) {
     for (const address of addresses ?? []) {
