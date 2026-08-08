@@ -1,6 +1,7 @@
 import { DEFAULT_BUILD, PARTS, type BuildSelection, type PartSlot } from '../data/parts';
 import { isNssBattleLoadout, migrateNssBattleLoadout } from '../nss/loadout';
 import type { NssBattleLoadoutV2 } from '../nss/types';
+import { recordWalletObservation } from '../progression/progressionClient';
 import { CURRENT_SAVE_SCHEMA_VERSION, migrateProgressionSave } from './saveMigration';
 
 const STORAGE_KEY = 'riptop-progression-v1';
@@ -9,18 +10,19 @@ export type UpgradeKey = 'attack' | 'defense' | 'stamina';
 export type UpgradeLevels = Record<UpgradeKey, number>;
 export type PartUpgradeLevels = Record<string, number>;
 
-type ProgressionData = {
+export type ProgressionSnapshotData = {
   saveSchemaVersion: typeof CURRENT_SAVE_SCHEMA_VERSION;
   unlockedParts: string[];
   ladderIndex: number;
   bestLadder: number;
   championshipCount: number;
-  coins: number;
   build: BuildSelection;
   upgrades: UpgradeLevels;
   partUpgrades: PartUpgradeLevels;
   latestNssLoadout: NssBattleLoadoutV2 | null;
 };
+
+type ProgressionData = ProgressionSnapshotData & { coins: number };
 
 export type ProgressionState = ProgressionData & {
   unlockedSet: Set<string>;
@@ -146,7 +148,7 @@ export function loadProgression(): ProgressionState {
   }
 }
 
-export function saveProgression(state: ProgressionState) {
+export function saveProgression(state: ProgressionState, options: { trackWallet?: boolean } = {}) {
   const payload: ProgressionData = {
     saveSchemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
     unlockedParts: [...state.unlockedSet],
@@ -160,6 +162,22 @@ export function saveProgression(state: ProgressionState) {
     latestNssLoadout: sanitizeNssLoadout(state.latestNssLoadout),
   };
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  if (options.trackWallet !== false) recordWalletObservation(payload.coins);
+}
+
+export function progressionFromServer(snapshot: ProgressionSnapshotData, coins: number) {
+  return fromData({
+    saveSchemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
+    unlockedParts: Array.isArray(snapshot.unlockedParts) ? snapshot.unlockedParts : [...DEFAULT_UNLOCKS],
+    ladderIndex: snapshot.ladderIndex,
+    bestLadder: snapshot.bestLadder,
+    championshipCount: snapshot.championshipCount,
+    coins,
+    build: snapshot.build,
+    upgrades: snapshot.upgrades,
+    partUpgrades: snapshot.partUpgrades,
+    latestNssLoadout: snapshot.latestNssLoadout,
+  });
 }
 
 function replaceState(state: ProgressionState, patch: Partial<ProgressionData>): ProgressionState {
