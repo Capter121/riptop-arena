@@ -136,3 +136,56 @@ test('retries a failed identity save without redeeming twice', async ({ page }) 
   await expect(page.getByRole('heading', { name: '私人竞技据点' })).toBeVisible();
   expect(redeemCount).toBe(1);
 });
+
+test('renders the authenticated player summary and six mode states', async ({ page }) => {
+  await seedIdentity(page);
+  await page.route('**/api/me', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ player: { playerId: identity.playerId, displayName: identity.displayName } }),
+  }));
+
+  await page.goto('/');
+  await expect(page.getByText('Nova Spin System', { exact: true })).toBeVisible();
+  await expect(page.getByText('本地身份已验证', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('玩家摘要')).toContainText('金币');
+  await expect(page.getByLabel('玩家摘要')).toContainText('当前配装');
+
+  const modes = page.getByLabel('游戏模式').locator('.portal-mode');
+  await expect(modes).toHaveCount(6);
+  const openModes = page.locator('a.portal-mode--open');
+  await expect(openModes).toHaveCount(2);
+  expect(await openModes.nth(0).getAttribute('href')).toBe('./customizer/');
+  expect(await openModes.nth(1).getAttribute('href')).toBe('./arena/');
+
+  const lockedModes = page.locator('.portal-mode--locked');
+  await expect(lockedModes).toHaveCount(4);
+  expect(await lockedModes.evaluateAll(entries => entries.every(entry => (
+    entry.getAttribute('aria-disabled') === 'true' && entry.tagName !== 'A'
+  )))).toBe(true);
+  const beforeClick = page.url();
+  await lockedModes.first().click();
+  expect(page.url()).toBe(beforeClick);
+});
+
+test('fits the authenticated portal at 390 by 844 with touch-sized entries', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedIdentity(page);
+  await page.route('**/api/me', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ player: { playerId: identity.playerId, displayName: identity.displayName } }),
+  }));
+
+  await page.goto('/');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  const modeEntries = page.locator('.portal-mode');
+  await expect(modeEntries).toHaveCount(6);
+  for (const box of await modeEntries.evaluateAll(entries => entries.map(entry => entry.getBoundingClientRect()))) {
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.left).toBeGreaterThanOrEqual(0);
+    expect(box.right).toBeLessThanOrEqual(390);
+  }
+  expect((await page.getByLabel('游戏模式').evaluate(element => getComputedStyle(element).gridTemplateColumns)).split(' '))
+    .toHaveLength(1);
+});

@@ -61,8 +61,15 @@ function renderAuthenticated(mount: HTMLElement, player: PublicPlayer) {
   mount.innerHTML = `
     <main class="portal-shell">
       <header class="portal-header">
-        <div><p class="portal-eyebrow">PRIVATE SERVER</p><h1>私人竞技据点</h1></div>
-        <strong class="portal-player-name"></strong>
+        <div>
+          <p class="portal-eyebrow">PRIVATE SERVER</p>
+          <p class="portal-product">Nova Spin System</p>
+          <h1>私人竞技据点</h1>
+        </div>
+        <div class="portal-identity">
+          <span>本地身份已验证</span>
+          <strong class="portal-player-name"></strong>
+        </div>
       </header>
       <section class="portal-summary" aria-label="玩家摘要">
         <div><span>金币</span><strong class="portal-coins"></strong></div>

@@ -33,18 +33,42 @@ html[data-app-mode='portal'] #app {
   overflow-y: auto;
 }
 
+html[data-app-mode='portal'] body {
+  background:
+    radial-gradient(circle at 82% 8%, rgba(126, 240, 255, 0.13), transparent 30%),
+    radial-gradient(circle at 12% 78%, rgba(255, 209, 102, 0.08), transparent 34%),
+    linear-gradient(150deg, #04070d 0%, #081522 55%, #03070d 100%);
+}
+
 .invite-gate,
 .portal-state,
 .portal-shell {
-  width: min(960px, calc(100% - 32px));
+  width: min(1080px, 100%);
   margin: 0 auto;
-  padding: 48px 0;
+  padding:
+    max(48px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(48px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+
+.invite-gate,
+.portal-state {
+  min-height: 100svh;
+  align-content: center;
 }
 
 .invite-gate__form {
   display: grid;
   max-width: 420px;
   gap: 10px;
+}
+
+.invite-gate__lead,
+.portal-state p {
+  max-width: 620px;
+  color: #a9bfd2;
+  line-height: 1.65;
 }
 
 .invite-gate__form input,
@@ -62,7 +86,33 @@ html[data-app-mode='portal'] #app {
   padding: 11px 14px;
 }
 
+.invite-gate__form input,
+.invite-gate__form button,
+.invite-gate > button,
+.portal-state button {
+  border: 1px solid rgba(126, 240, 255, 0.32);
+  border-radius: 8px;
+  background: rgba(5, 17, 29, 0.94);
+  color: #eef6ff;
+}
+
+.invite-gate__form button,
+.invite-gate > button,
+.portal-state button {
+  cursor: pointer;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgba(34, 125, 159, 0.9), rgba(12, 66, 95, 0.95));
+}
+
+.invite-gate__form button:disabled,
+.invite-gate > button:disabled,
+.portal-state button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
 .invite-gate__error {
+  min-height: 24px;
   color: #ff8d8d;
 }
 
@@ -76,6 +126,38 @@ html[data-app-mode='portal'] #app {
 .portal-header {
   grid-template-columns: 1fr auto;
   align-items: end;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(126, 240, 255, 0.24);
+}
+
+.portal-header h1,
+.portal-product {
+  margin: 0;
+}
+
+.portal-product {
+  color: #b7cddd;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+.portal-identity {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 209, 102, 0.3);
+  border-radius: 8px;
+  background: rgba(27, 23, 13, 0.55);
+}
+
+.portal-identity span {
+  color: #d8c389;
+  font-size: 12px;
+}
+
+.portal-player-name {
+  font-size: 18px;
 }
 
 .portal-summary {
@@ -90,6 +172,10 @@ html[data-app-mode='portal'] #app {
   background: rgba(6, 17, 28, 0.88);
 }
 
+.portal-summary > div {
+  border-left: 3px solid rgba(255, 209, 102, 0.64);
+}
+
 .portal-summary span,
 .portal-summary strong,
 .portal-mode strong,
@@ -102,12 +188,40 @@ html[data-app-mode='portal'] #app {
 }
 
 .portal-mode {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  gap: 18px;
   color: inherit;
   text-decoration: none;
+  transition: border-color 140ms ease, transform 140ms ease, background-color 140ms ease;
+}
+
+.portal-mode--open {
+  border-color: rgba(126, 240, 255, 0.46);
+  background:
+    linear-gradient(135deg, rgba(16, 53, 72, 0.88), rgba(6, 17, 28, 0.94));
+}
+
+.portal-mode--open:hover {
+  transform: translateY(-2px);
+  border-color: rgba(126, 240, 255, 0.82);
 }
 
 .portal-mode--locked {
   color: #8292a3;
+  border-style: dashed;
+}
+
+.portal-mode--locked span {
+  color: #d5bd7c;
+}
+
+.invite-gate :focus-visible,
+.portal-state :focus-visible,
+.portal-mode--open:focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: 3px;
 }
 
 .portal-eyebrow,
@@ -121,6 +235,27 @@ html[data-app-mode='portal'] #app {
   .portal-summary,
   .portal-modes {
     grid-template-columns: 1fr;
+  }
+
+  .invite-gate,
+  .portal-state,
+  .portal-shell {
+    padding-top: max(28px, env(safe-area-inset-top));
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
+  }
+
+  .portal-header {
+    align-items: start;
+  }
+
+  .portal-identity {
+    justify-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-mode {
+    transition: none;
   }
 }
 
