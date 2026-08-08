@@ -3,6 +3,7 @@ import {
   LOCAL_IDENTITY_STORAGE_KEY,
   clearLocalIdentity,
   loadLocalIdentity,
+  probeIdentityStorage,
   saveLocalIdentity,
   type LocalIdentity,
 } from '../../src/auth/localIdentity';
@@ -49,5 +50,20 @@ describe('local invite identity', () => {
     expect(loadLocalIdentity(unavailable)).toBeNull();
     expect(saveLocalIdentity(identity, unavailable)).toBe(false);
     expect(clearLocalIdentity(unavailable)).toBe(false);
+  });
+
+  it('probes storage without changing the saved identity', () => {
+    const storage = memoryStorage(JSON.stringify(identity));
+    expect(probeIdentityStorage(storage)).toBe(true);
+    expect(loadLocalIdentity(storage)).toEqual(identity);
+  });
+
+  it('reports that storage is unavailable when a probe write fails', () => {
+    const unavailable = {
+      getItem: () => null,
+      setItem: () => { throw new Error('blocked'); },
+      removeItem: () => undefined,
+    };
+    expect(probeIdentityStorage(unavailable)).toBe(false);
   });
 });

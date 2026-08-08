@@ -11,6 +11,7 @@ type IdentityStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 const PLAYER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const DEVICE_TOKEN = /^[A-Za-z0-9_-]{43}$/;
+const STORAGE_PROBE_KEY = `${LOCAL_IDENTITY_STORAGE_KEY}.probe`;
 
 export function isLocalIdentity(value: unknown): value is LocalIdentity {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -63,6 +64,22 @@ export function clearLocalIdentity(storage: IdentityStorage = window.localStorag
     storage.removeItem(LOCAL_IDENTITY_STORAGE_KEY);
     return true;
   } catch {
+    return false;
+  }
+}
+
+export function probeIdentityStorage(storage: IdentityStorage = window.localStorage): boolean {
+  try {
+    storage.setItem(STORAGE_PROBE_KEY, '1');
+    const available = storage.getItem(STORAGE_PROBE_KEY) === '1';
+    storage.removeItem(STORAGE_PROBE_KEY);
+    return available;
+  } catch {
+    try {
+      storage.removeItem(STORAGE_PROBE_KEY);
+    } catch {
+      // A blocked storage implementation may reject cleanup as well.
+    }
     return false;
   }
 }
