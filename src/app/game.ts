@@ -59,6 +59,7 @@ import { NSS_BATTLE_CATALOG_SHA256 } from '../nss/battleCatalog';
 import { nssCombinationId } from '../nss/loadout';
 import {
   oppositeRole,
+  mirrorTurnResolutionForGuest,
   type LaunchConfig,
   type NetworkTopState,
   type OnlineLoadout,
@@ -830,35 +831,16 @@ export class Game {
 
   private beginOnlineGuestTurn(hostResolution: TurnResolution, snapshot: TurnSnapshot) {
     if (hostResolution.kind === 'clash_qte' || this.turnState === 'clash_qte') {
-      this.completeOnlineGuestClashQte(this.mirrorHostResolution(hostResolution), snapshot);
+      this.completeOnlineGuestClashQte(mirrorTurnResolutionForGuest(hostResolution), snapshot);
       return;
     }
     this.pendingOnlineSnapshot = snapshot;
-    this.startTurnPresentation(this.mirrorHostResolution(hostResolution));
+    this.startTurnPresentation(mirrorTurnResolutionForGuest(hostResolution));
   }
 
   private beginOnlineGuestClashQte(hostResolution: TurnResolution) {
     this.pendingOnlineSnapshot = null;
-    this.startTurnPresentation(this.mirrorHostResolution(hostResolution));
-  }
-
-  private mirrorHostResolution(resolution: TurnResolution): TurnResolution {
-    const swapSide = (side: 'player' | 'enemy' | null) => side === 'player' ? 'enemy' : side === 'enemy' ? 'player' : null;
-    return {
-      ...resolution,
-      playerAction: resolution.aiAction,
-      aiAction: resolution.playerAction,
-      winner: swapSide(resolution.winner),
-      loser: swapSide(resolution.loser),
-      playerSpiritDelta: resolution.enemySpiritDelta,
-      enemySpiritDelta: resolution.playerSpiritDelta,
-      playerVisual: resolution.enemyVisual,
-      enemyVisual: resolution.playerVisual,
-      damageResults: resolution.damageResults?.map((damage) => ({
-        ...damage,
-        defender: damage.defender === 'player' ? 'enemy' : 'player',
-      })),
-    };
+    this.startTurnPresentation(mirrorTurnResolutionForGuest(hostResolution));
   }
 
   private projectOnlineSnapshot(resolution: TurnResolution): TurnSnapshot {

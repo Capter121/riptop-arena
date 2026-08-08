@@ -213,3 +213,22 @@ export function isFiniteNetworkState(state: NetworkTopState) {
 export function oppositeRole(role: OnlineRole): OnlineRole {
   return role === 'host' ? 'guest' : 'host';
 }
+
+export function mirrorTurnResolutionForGuest(resolution: TurnResolution): TurnResolution {
+  const swapSide = (side: 'player' | 'enemy' | null) => side === 'player' ? 'enemy' : side === 'enemy' ? 'player' : null;
+  return {
+    ...resolution,
+    playerAction: resolution.aiAction,
+    aiAction: resolution.playerAction,
+    winner: swapSide(resolution.winner),
+    loser: swapSide(resolution.loser),
+    playerSpiritDelta: resolution.enemySpiritDelta,
+    enemySpiritDelta: resolution.playerSpiritDelta,
+    playerVisual: resolution.enemyVisual,
+    enemyVisual: resolution.playerVisual,
+    damageResults: resolution.damageResults?.map(damage => ({
+      ...damage,
+      defender: damage.defender === 'player' ? 'enemy' : 'player',
+    })),
+  };
+}
