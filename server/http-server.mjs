@@ -4,6 +4,7 @@ import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { authenticateRequest } from './auth/auth-middleware.mjs';
 import { AuthError, redeemInvite } from './auth/invite-service.mjs';
+import { ProgressionError, syncProgression } from './progression/progression-service.mjs';
 
 const DEFAULT_JSON_BODY_BYTES = 64 * 1024;
 const DEFAULT_SITE_ROOT = fileURLToPath(new URL('../dist/site/', import.meta.url));
@@ -144,6 +145,13 @@ export function createArenaHttpServer(options = {}) {
         return;
       }
 
+      if (request.method === 'POST' && url.pathname === '/api/progression/sync') {
+        if (!database) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Identity database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 200, syncProgression(database, player.playerId, await readJsonBody(request, maxJsonBodyBytes)));
+        return;
+      }
+
       if (url.pathname.startsWith('/api/')) {
         if (request.method !== 'GET' && request.method !== 'HEAD') {
           await readJsonBody(request, maxJsonBodyBytes);
@@ -166,6 +174,21 @@ export function createArenaHttpServer(options = {}) {
       }
       if (error instanceof HttpError) {
         sendError(response, error.status, error.code, error.message);
+        return;
+      }
+      if (error instanceof ProgressionError) {
+        if (error.status === 409 && error.details?.progression) {
+          sendJson(response, 409, {
+            error: {
+              code: error.code,
+              message: error.message,
+              rejectedEventId: error.details.rejectedEventId,
+            },
+            progression: error.details.progression,
+          });
+        } else {
+          sendError(response, error.status, error.code, error.message);
+        }
         return;
       }
       console.error('HTTP request failed.', error);

@@ -8,6 +8,8 @@ import {
 } from '../server/progression/progression-service.mjs';
 import { openDatabase } from '../server/storage/database.mjs';
 import { migrateDatabase } from '../server/storage/migrate.mjs';
+import { redeemInvite } from '../server/auth/invite-service.mjs';
+import { createArenaHttpServer } from '../server/http-server.mjs';
 
 const VALID_EVENT_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -176,6 +178,7 @@ assert.deepEqual(createDefaultProgressionSnapshot(), validSnapshot({
 }));
 
 const database = openDatabase(':memory:');
+let server;
 try {
   await migrateDatabase(database);
   database.prepare('INSERT INTO invites (code, max_uses) VALUES (?, ?)').run('PROGRESS', 3);
@@ -318,7 +321,96 @@ try {
   assert.deepEqual(firstSyncConflict.details.progression.snapshot, createDefaultProgressionSnapshot());
   assert.equal(database.prepare('SELECT COUNT(*) AS count FROM player_progression WHERE player_id = ?').get('player-2').count, 0);
 
-  console.log('Progression validation, merge, and transaction tests passed.');
+  database.prepare('INSERT INTO invites (code, max_uses) VALUES (?, ?)').run('HTTPPROG', 1);
+  const identity = redeemInvite(database, { inviteCode: 'HTTPPROG', displayName: 'Mika' });
+  server = createArenaHttpServer({ database });
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', resolve);
+  });
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+  const httpRequest = validInput({ initialCoins: 40 });
+  const unauthorized = await fetch(`${baseUrl}/api/progression/sync`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(httpRequest),
+  });
+  assert.equal(unauthorized.status, 401);
+  assert.equal((await unauthorized.json()).error.code, 'AUTH_REQUIRED');
+
+  const mismatched = await fetch(`${baseUrl}/api/progression/sync`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${identity.deviceToken}`,
+      'x-player-id': 'player-1',
+    },
+    body: JSON.stringify(httpRequest),
+  });
+  assert.equal(mismatched.status, 401);
+  assert.equal((await mismatched.json()).error.code, 'AUTH_INVALID');
+
+  const syncHeaders = {
+    'content-type': 'application/json',
+    authorization: `Bearer ${identity.deviceToken}`,
+    'x-player-id': identity.playerId,
+  };
+  const success = await fetch(`${baseUrl}/api/progression/sync`, {
+    method: 'POST',
+    headers: syncHeaders,
+    body: JSON.stringify(httpRequest),
+  });
+  assert.equal(success.status, 200);
+  const successBody = await success.json();
+  assert.equal(successBody.progression.coins, 40);
+  assert.equal(successBody.progression.revision, 1);
+  assert.deepEqual(successBody.acknowledgedEventIds, []);
+
+  const duplicateIds = await fetch(`${baseUrl}/api/progression/sync`, {
+    method: 'POST',
+    headers: syncHeaders,
+    body: JSON.stringify(validInput({ walletEvents: [validEvent, validEvent] })),
+  });
+  assert.equal(duplicateIds.status, 400);
+  assert.equal((await duplicateIds.json()).error.code, 'DUPLICATE_EVENT_ID');
+
+  const tooMany = await fetch(`${baseUrl}/api/progression/sync`, {
+    method: 'POST',
+    headers: syncHeaders,
+    body: JSON.stringify(validInput({
+      walletEvents: Array.from({ length: 401 }, (_, index) => ({
+        ...validEvent,
+        eventId: `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`,
+      })),
+    })),
+  });
+  assert.equal(tooMany.status, 400);
+  assert.equal((await tooMany.json()).error.code, 'TOO_MANY_WALLET_EVENTS');
+
+  const conflictResponse = await fetch(`${baseUrl}/api/progression/sync`, {
+    method: 'POST',
+    headers: syncHeaders,
+    body: JSON.stringify(validInput({
+      initialCoins: 0,
+      walletEvents: [{
+        eventId: '88888888-8888-4888-8888-888888888888',
+        kind: 'debit',
+        delta: -100,
+        source: 'local_progression',
+        createdAt: '2026-08-09T10:06:00.000Z',
+      }],
+    })),
+  });
+  assert.equal(conflictResponse.status, 409);
+  const conflictBody = await conflictResponse.json();
+  assert.equal(conflictBody.error.code, 'INSUFFICIENT_COINS');
+  assert.equal(conflictBody.error.rejectedEventId, '88888888-8888-4888-8888-888888888888');
+  assert.equal(conflictBody.progression.coins, 40);
+  assert.equal(conflictBody.progression.revision, 1);
+
+  console.log('Progression validation, merge, transaction, and HTTP tests passed.');
 } finally {
+  if (server?.listening) await new Promise(resolve => server.close(resolve));
   database.close();
 }
