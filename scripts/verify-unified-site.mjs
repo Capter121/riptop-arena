@@ -30,7 +30,16 @@ for (const required of ['index.html', 'customizer/index.html', 'arena/index.html
   assert.equal((await stat(join(siteRoot, required))).isFile(), true, `Missing ${required}`);
 }
 
+const portalHtml = await readFile(join(siteRoot, 'index.html'), 'utf8');
+assert.match(portalHtml, /<script\s+type="module"[^>]+src="\.\/assets\/[^"']+\.js"/i, 'Portal is not a Vite module entry');
+assert.equal(portalHtml.includes('href="./customizer/"'), false, 'Legacy static portal was copied into the build');
+
 const files = await filesBelow(siteRoot);
+const rootScripts = files.filter(path => /^assets\/[^/]+\.js$/.test(relative(siteRoot, path).replaceAll('\\', '/')));
+assert.equal(rootScripts.some(path => /^three-/.test(path.split(/[\\/]/).at(-1))), false, 'Portal emitted a Three.js chunk');
+for (const path of rootScripts) {
+  assert.equal((await stat(path)).size > 1, true, `Portal emitted an empty script chunk: ${path}`);
+}
 const glbs = files.filter(path => path.toLowerCase().endsWith('.glb'));
 assert.equal(glbs.length, 16, `Expected one set of 16 GLBs, received ${glbs.length}`);
 assert.equal(glbs.every(path => relative(siteRoot, path).replaceAll('\\', '/').startsWith('assets/nss/parts/')), true);

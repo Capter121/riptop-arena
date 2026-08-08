@@ -44,8 +44,6 @@ if (await pathExists(siteRoot)) {
   throw new Error(`Unified site output already exists and was not modified: ${siteRoot}`);
 }
 
-await mkdir(sharedModels, { recursive: true });
-
 run(projectRoot, [join(projectRoot, 'node_modules', 'typescript', 'bin', 'tsc')]);
 run(customizerRoot, [join(customizerRoot, 'scripts', 'build-product-catalog.mjs'), '--check']);
 run(customizerRoot, [join(customizerRoot, 'node_modules', 'typescript', 'bin', 'tsc'), '--noEmit']);
@@ -56,15 +54,19 @@ const sharedBuildEnv = {
 };
 run(projectRoot, [
   join(projectRoot, 'node_modules', 'vite', 'bin', 'vite.js'),
+  'build', '--outDir', siteRoot,
+], { ...sharedBuildEnv, VITE_APP_MODE: 'portal' });
+run(projectRoot, [
+  join(projectRoot, 'node_modules', 'vite', 'bin', 'vite.js'),
   'build', '--outDir', join(siteRoot, 'arena'),
-], { ...sharedBuildEnv, VITE_CUSTOMIZER_URL: '../customizer/' });
+], { ...sharedBuildEnv, VITE_APP_MODE: 'arena', VITE_CUSTOMIZER_URL: '../customizer/' });
 run(customizerRoot, [
   join(customizerRoot, 'node_modules', 'vite', 'bin', 'vite.js'),
   'build', '--outDir', join(siteRoot, 'customizer'),
 ], { ...sharedBuildEnv, VITE_ARENA_URL: '../arena/' });
 
-await copyFile(join(projectRoot, 'site', 'index.html'), join(siteRoot, 'index.html'));
 await copyTree(arenaPublicRoot, siteRoot);
+await mkdir(sharedModels, { recursive: true });
 run(projectRoot, [join(projectRoot, 'scripts', 'copy-nss-models.mjs'), sharedModels]);
 
 run(projectRoot, [join(projectRoot, 'scripts', 'verify-unified-site.mjs')]);
