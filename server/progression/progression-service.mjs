@@ -230,3 +230,130 @@ export function mergeProgressionSnapshots(serverValue, localValue) {
         },
   };
 }
+
+function progressionFromRow(row) {
+  if (!row) {
+    return {
+      schemaVersion: 1,
+      revision: 0,
+      coins: 0,
+      snapshot: createDefaultProgressionSnapshot(),
+    };
+  }
+  return {
+    schemaVersion: 1,
+    revision: row.revision,
+    coins: row.coins,
+    snapshot: normalizeSnapshot(JSON.parse(row.snapshot_json)),
+  };
+}
+
+function readProgression(database, playerId) {
+  return progressionFromRow(database.prepare(`
+    SELECT snapshot_json, coins, revision
+    FROM player_progression
+    WHERE player_id = ?
+  `).get(playerId));
+}
+
+export function syncProgression(database, playerId, value) {
+  const input = validateProgressionSyncInput(value);
+  database.exec('BEGIN IMMEDIATE');
+  try {
+    let row = database.prepare(`
+      SELECT snapshot_json, coins, initial_coins_imported, revision
+      FROM player_progression
+      WHERE player_id = ?
+    `).get(playerId);
+    if (!row) {
+      database.prepare(`
+        INSERT INTO player_progression (player_id, snapshot_json)
+        VALUES (?, ?)
+      `).run(playerId, JSON.stringify(createDefaultProgressionSnapshot()));
+      row = {
+        snapshot_json: JSON.stringify(createDefaultProgressionSnapshot()),
+        coins: 0,
+        initial_coins_imported: 0,
+        revision: 0,
+      };
+    }
+
+    let coins = row.coins;
+    let initialCoinsImported = row.initial_coins_imported;
+    let changed = false;
+    if (initialCoinsImported === 0) {
+      coins = input.initialCoins;
+      initialCoinsImported = 1;
+      changed = true;
+    }
+
+    const acknowledgedEventIds = [];
+    const findEvent = database.prepare(`
+      SELECT 1 FROM wallet_events WHERE player_id = ? AND event_id = ?
+    `);
+    const insertEvent = database.prepare(`
+      INSERT INTO wallet_events (player_id, event_id, kind, delta, metadata_json)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    for (const event of input.walletEvents) {
+      if (findEvent.get(playerId, event.eventId)) {
+        acknowledgedEventIds.push(event.eventId);
+        continue;
+      }
+      const nextCoins = coins + event.delta;
+      if (nextCoins < 0) {
+        throw new ProgressionError(409, 'INSUFFICIENT_COINS', 'Coin balance would become negative.', {
+          rejectedEventId: event.eventId,
+        });
+      }
+      insertEvent.run(
+        playerId,
+        event.eventId,
+        event.kind,
+        event.delta,
+        JSON.stringify({ source: event.source, createdAt: event.createdAt }),
+      );
+      coins = nextCoins;
+      changed = true;
+      acknowledgedEventIds.push(event.eventId);
+    }
+
+    const storedSnapshot = normalizeSnapshot(JSON.parse(row.snapshot_json));
+    const mergedSnapshot = mergeProgressionSnapshots(storedSnapshot, input.snapshot);
+    const snapshotJson = JSON.stringify(mergedSnapshot);
+    if (snapshotJson !== JSON.stringify(storedSnapshot)) changed = true;
+
+    const revision = changed ? row.revision + 1 : row.revision;
+    if (changed) {
+      database.prepare(`
+        UPDATE player_progression
+        SET snapshot_json = ?, coins = ?, initial_coins_imported = ?, revision = ?,
+            updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+        WHERE player_id = ?
+      `).run(snapshotJson, coins, initialCoinsImported, revision, playerId);
+    }
+    database.exec('COMMIT');
+    return {
+      progression: {
+        schemaVersion: 1,
+        revision,
+        coins,
+        snapshot: mergedSnapshot,
+      },
+      acknowledgedEventIds,
+    };
+  } catch (error) {
+    try {
+      database.exec('ROLLBACK');
+    } catch {
+      // Preserve the original transaction error.
+    }
+    if (error instanceof ProgressionError && error.code === 'INSUFFICIENT_COINS') {
+      throw new ProgressionError(409, error.code, error.message, {
+        rejectedEventId: error.details.rejectedEventId,
+        progression: readProgression(database, playerId),
+      });
+    }
+    throw error;
+  }
+}
