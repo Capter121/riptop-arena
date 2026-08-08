@@ -1,7 +1,15 @@
-import type { ProgressionState } from '../app/progression';
-import { InviteApiError } from '../auth/inviteClient';
+import { loadProgression, type ProgressionState } from '../app/progression';
+import { InviteApiError, fetchCurrentPlayer, redeemInvite, type PublicPlayer } from '../auth/inviteClient';
+import {
+  clearLocalIdentity,
+  loadLocalIdentity,
+  probeIdentityStorage,
+  saveLocalIdentity,
+  type LocalIdentity,
+} from '../auth/localIdentity';
 import { PARTS, type PartSlot } from '../data/parts';
 import { nssCombinationId } from '../nss/loadout';
+import { InviteGate } from './inviteGate';
 
 export interface PortalMode {
   readonly id: string;
@@ -36,4 +44,125 @@ export function classifyPortalFailure(error: unknown): 'invalid-identity' | 'off
     return 'invalid-identity';
   }
   return 'offline';
+}
+
+function inviteCodeFromLocation() {
+  return new URLSearchParams(window.location.search).get('invite')?.trim() ?? '';
+}
+
+function removeInviteParameter() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('invite');
+  window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+}
+
+function renderAuthenticated(mount: HTMLElement, player: PublicPlayer) {
+  const progression = loadProgression();
+  mount.innerHTML = `
+    <main class="portal-shell">
+      <header class="portal-header">
+        <div><p class="portal-eyebrow">PRIVATE SERVER</p><h1>私人竞技据点</h1></div>
+        <strong class="portal-player-name"></strong>
+      </header>
+      <section class="portal-summary" aria-label="玩家摘要">
+        <div><span>金币</span><strong class="portal-coins"></strong></div>
+        <div><span>当前配装</span><strong class="portal-build"></strong></div>
+      </section>
+      <section class="portal-modes" aria-label="游戏模式"></section>
+    </main>
+  `;
+  const playerName = mount.querySelector<HTMLElement>('.portal-player-name');
+  const coins = mount.querySelector<HTMLElement>('.portal-coins');
+  const build = mount.querySelector<HTMLElement>('.portal-build');
+  const modes = mount.querySelector<HTMLElement>('.portal-modes');
+  if (!playerName || !coins || !build || !modes) throw new Error('Portal mount failed');
+  playerName.textContent = player.displayName;
+  coins.textContent = String(progression.coins);
+  build.textContent = createBuildSummary(progression);
+
+  for (const mode of PORTAL_MODES) {
+    const entry = document.createElement(mode.status === 'open' ? 'a' : 'div');
+    entry.className = `portal-mode portal-mode--${mode.status}`;
+    if (mode.href && entry instanceof HTMLAnchorElement) entry.href = mode.href;
+    if (mode.status === 'locked') entry.setAttribute('aria-disabled', 'true');
+    const title = document.createElement('strong');
+    title.textContent = mode.title;
+    const detail = document.createElement('span');
+    detail.textContent = mode.status === 'open' ? '进入' : mode.unlockCondition ?? '';
+    entry.append(title, detail);
+    modes.append(entry);
+  }
+  mount.removeAttribute('aria-busy');
+}
+
+function renderOffline(mount: HTMLElement, retry: () => void) {
+  mount.innerHTML = `
+    <main class="portal-state" role="status">
+      <p class="portal-eyebrow">CONNECTION INTERRUPTED</p>
+      <h1>暂时无法连接私人服务器</h1>
+      <p>本地身份仍保留在这台浏览器中。</p>
+      <button type="button">重试连接</button>
+    </main>
+  `;
+  mount.querySelector('button')?.addEventListener('click', retry);
+  mount.removeAttribute('aria-busy');
+}
+
+function renderGuest(mount: HTMLElement, initialError = '') {
+  const gate = new InviteGate({
+    inviteCode: inviteCodeFromLocation(),
+    onSubmit: async (input, currentGate) => {
+      if (!probeIdentityStorage()) {
+        currentGate.setError('浏览器无法保存身份，请允许本地存储后重试。');
+        return;
+      }
+      try {
+        const identity = await redeemInvite(input);
+        const complete = () => {
+          removeInviteParameter();
+          renderAuthenticated(mount, identity);
+        };
+        if (!saveLocalIdentity(identity)) {
+          currentGate.showSaveRetry(() => {
+            if (!saveLocalIdentity(identity)) return false;
+            complete();
+            return true;
+          });
+          return;
+        }
+        complete();
+      } catch (error) {
+        currentGate.setError(error instanceof InviteApiError
+          ? error.message
+          : '暂时无法验证邀请，请稍后重试。');
+      }
+    },
+  });
+  mount.replaceChildren(gate.element);
+  if (initialError) gate.setError(initialError);
+  mount.removeAttribute('aria-busy');
+}
+
+async function restoreIdentity(mount: HTMLElement, identity: LocalIdentity) {
+  mount.setAttribute('aria-busy', 'true');
+  mount.innerHTML = '<main class="portal-state"><p role="status">正在验证本地身份…</p></main>';
+  try {
+    renderAuthenticated(mount, await fetchCurrentPlayer(identity));
+  } catch (error) {
+    if (classifyPortalFailure(error) === 'invalid-identity') {
+      clearLocalIdentity();
+      renderGuest(mount, '本地身份已失效，请使用新的邀请码。');
+      return;
+    }
+    renderOffline(mount, () => { void restoreIdentity(mount, identity); });
+  }
+}
+
+export async function startPortal(mount: HTMLElement) {
+  const identity = loadLocalIdentity();
+  if (!identity) {
+    renderGuest(mount);
+    return;
+  }
+  await restoreIdentity(mount, identity);
 }
