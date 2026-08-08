@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CURRENT_SAVE_SCHEMA_VERSION } from '../../src/app/saveMigration';
 import type { ProgressionState } from '../../src/app/progression';
 import { InviteApiError } from '../../src/auth/inviteClient';
+import { ProgressionSyncError } from '../../src/progression/progressionClient';
 import { createNssBattleLoadout, nssCombinationFromId } from '../../src/nss/loadout';
 import {
   PORTAL_MODES,
@@ -62,6 +63,8 @@ describe('portal read model', () => {
     expect(classifyPortalFailure(new InviteApiError(401, 'INVALID_IDENTITY', 'Invalid identity.')))
       .toBe('invalid-identity');
     expect(classifyPortalFailure(new InviteApiError(403, 'INVALID_IDENTITY', 'Invalid identity.')))
+      .toBe('invalid-identity');
+    expect(classifyPortalFailure(new ProgressionSyncError(401, 'AUTH_INVALID', 'Invalid identity.')))
       .toBe('invalid-identity');
     expect(classifyPortalFailure(new InviteApiError(503, 'UNAVAILABLE', 'Try again.')))
       .toBe('offline');

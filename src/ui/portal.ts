@@ -1,4 +1,9 @@
-import { loadProgression, type ProgressionState } from '../app/progression';
+import {
+  loadProgression,
+  progressionFromServer,
+  saveProgression,
+  type ProgressionState,
+} from '../app/progression';
 import { InviteApiError, fetchCurrentPlayer, redeemInvite, type PublicPlayer } from '../auth/inviteClient';
 import {
   clearLocalIdentity,
@@ -9,6 +14,11 @@ import {
 } from '../auth/localIdentity';
 import { PARTS, type PartSlot } from '../data/parts';
 import { nssCombinationId } from '../nss/loadout';
+import {
+  ProgressionSyncError,
+  commitProgressionSync,
+  syncPlayerProgression,
+} from '../progression/progressionClient';
 import { InviteGate } from './inviteGate';
 
 export interface PortalMode {
@@ -40,7 +50,8 @@ export function createBuildSummary(progression: ProgressionState): string {
 }
 
 export function classifyPortalFailure(error: unknown): 'invalid-identity' | 'offline' {
-  if (error instanceof InviteApiError && (error.status === 401 || error.status === 403)) {
+  if ((error instanceof InviteApiError || error instanceof ProgressionSyncError)
+    && (error.status === 401 || error.status === 403)) {
     return 'invalid-identity';
   }
   return 'offline';
@@ -56,8 +67,21 @@ function removeInviteParameter() {
   window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
-function renderAuthenticated(mount: HTMLElement, player: PublicPlayer) {
-  const progression = loadProgression();
+type PortalSyncStatus = 'synced' | 'pending' | 'conflict' | 'error';
+
+const SYNC_STATUS_LABELS: Record<PortalSyncStatus, string> = {
+  synced: '进度已同步',
+  pending: '进度待同步',
+  conflict: '金币冲突已恢复',
+  error: '进度同步错误',
+};
+
+function renderAuthenticated(
+  mount: HTMLElement,
+  player: PublicPlayer,
+  progression: ProgressionState,
+  syncStatus: PortalSyncStatus,
+) {
   mount.innerHTML = `
     <main class="portal-shell">
       <header class="portal-header">
@@ -69,6 +93,7 @@ function renderAuthenticated(mount: HTMLElement, player: PublicPlayer) {
         <div class="portal-identity">
           <span>本地身份已验证</span>
           <strong class="portal-player-name"></strong>
+          <span class="portal-sync-status"></span>
         </div>
       </header>
       <section class="portal-summary" aria-label="玩家摘要">
@@ -81,11 +106,13 @@ function renderAuthenticated(mount: HTMLElement, player: PublicPlayer) {
   const playerName = mount.querySelector<HTMLElement>('.portal-player-name');
   const coins = mount.querySelector<HTMLElement>('.portal-coins');
   const build = mount.querySelector<HTMLElement>('.portal-build');
+  const sync = mount.querySelector<HTMLElement>('.portal-sync-status');
   const modes = mount.querySelector<HTMLElement>('.portal-modes');
-  if (!playerName || !coins || !build || !modes) throw new Error('Portal mount failed');
+  if (!playerName || !coins || !build || !sync || !modes) throw new Error('Portal mount failed');
   playerName.textContent = player.displayName;
   coins.textContent = String(progression.coins);
   build.textContent = createBuildSummary(progression);
+  sync.textContent = SYNC_STATUS_LABELS[syncStatus];
 
   for (const mode of PORTAL_MODES) {
     const entry = document.createElement(mode.status === 'open' ? 'a' : 'div');
@@ -100,6 +127,31 @@ function renderAuthenticated(mount: HTMLElement, player: PublicPlayer) {
     modes.append(entry);
   }
   mount.removeAttribute('aria-busy');
+}
+
+async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity: LocalIdentity) {
+  const localProgression = loadProgression();
+  mount.setAttribute('aria-busy', 'true');
+  try {
+    const result = await syncPlayerProgression(identity, localProgression);
+    const authoritative = progressionFromServer(result.progression.snapshot, result.progression.coins);
+    saveProgression(authoritative, { trackWallet: false });
+    commitProgressionSync(identity, result);
+    renderAuthenticated(mount, player, authoritative, result.status === 'conflict' ? 'conflict' : 'synced');
+  } catch (error) {
+    if (classifyPortalFailure(error) === 'invalid-identity') {
+      clearLocalIdentity();
+      renderGuest(mount, '本地身份已失效，请使用新的邀请码。');
+      return;
+    }
+    const fallback = loadProgression();
+    renderAuthenticated(
+      mount,
+      player,
+      fallback,
+      error instanceof ProgressionSyncError && error.status === 400 ? 'error' : 'pending',
+    );
+  }
 }
 
 function renderOffline(mount: HTMLElement, retry: () => void) {
@@ -127,7 +179,7 @@ function renderGuest(mount: HTMLElement, initialError = '') {
         const identity = await redeemInvite(input);
         const complete = () => {
           removeInviteParameter();
-          renderAuthenticated(mount, identity);
+          void syncAndRender(mount, identity, identity);
         };
         if (!saveLocalIdentity(identity)) {
           currentGate.showSaveRetry(() => {
@@ -154,7 +206,7 @@ async function restoreIdentity(mount: HTMLElement, identity: LocalIdentity) {
   mount.setAttribute('aria-busy', 'true');
   mount.innerHTML = '<main class="portal-state"><p role="status">正在验证本地身份…</p></main>';
   try {
-    renderAuthenticated(mount, await fetchCurrentPlayer(identity));
+    await syncAndRender(mount, await fetchCurrentPlayer(identity), identity);
   } catch (error) {
     if (classifyPortalFailure(error) === 'invalid-identity') {
       clearLocalIdentity();
