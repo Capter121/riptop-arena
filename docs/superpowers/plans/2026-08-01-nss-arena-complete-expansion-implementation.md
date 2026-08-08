@@ -621,9 +621,11 @@ npm run test:e2e -- customizer.spec.ts
 文件：
 
 - 新增 `server/progression/progression-service.mjs`
-- 新增 `server/storage/migrations/003_campaign_and_scores.sql`
+- 新增 `server/storage/migrations/003_player_progression.sql`
 - 新增 `src/progression/progressionClient.ts`
 - 修改 `src/app/progression.ts`
+- 修改 `src/ui/portal.ts`
+- 修改 `server/http-server.mjs`
 - 新增进度合并测试
 
 工作：
@@ -632,9 +634,10 @@ npm run test:e2e -- customizer.spec.ts
 2. 解锁集合取并集，最佳成绩取更高值。
 3. 当前配装以本机为准。
 4. 金币首次迁移后以服务端为准，禁止重复累加。
-5. 后续每次奖励由服务端幂等记录。
+5. 断网期间继续允许奖励和消费，使用玩家级 UUID 事件在恢复连接后幂等同步。
+6. 余额冲突时整次请求回滚，并恢复服务端权威状态。
 
-验证：首次迁移、重复迁移、断网恢复和冲突测试通过。
+验证：首次迁移、重复迁移、长离线队列、断网恢复和负余额回滚测试通过。
 
 推荐提交：`feat(progression): sync invited player progress`
 
@@ -795,7 +798,7 @@ npm run test:e2e -- customizer.spec.ts
 文件：
 
 - 新增 `server/progression/campaign-service.mjs`
-- 完成 `003_campaign_and_scores.sql`
+- 新增 `server/storage/migrations/004_campaign_progress.sql`，不得修改已部署的 `003_player_progression.sql`
 - 新增 `src/campaign/campaignClient.ts`
 - 新增服务测试
 
@@ -914,6 +917,7 @@ npm run test:e2e -- customizer.spec.ts
 
 - 新增 `src/gameplay/survival/survivalScoring.ts`
 - 新增 `server/progression/score-service.mjs`
+- 新增 `server/storage/migrations/005_scores.sql`
 - 新增 `src/ui/survivalResults.ts`
 - 新增服务和 UI 测试
 
