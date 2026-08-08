@@ -29,6 +29,15 @@ import { GaragePanel } from '../ui/garage';
 import { ResultPanel } from '../ui/results';
 import { ShopPanel } from '../ui/shop';
 import { Hud } from '../ui/hud';
+import {
+  accumulateAffinityDamageSummary,
+  createAffinityMatchupPresentation,
+  createEmptyAffinityDamageSummary,
+  formatAffinityDamageLog,
+  getResonanceLabel,
+  renderAffinityMatchup,
+  type AffinityDamageSummary,
+} from '../ui/affinityPresentation';
 import { CutinPanel } from '../ui/cutinPanel';
 import { ForgePanel } from '../ui/forgePanel';
 import { BlackMarketPanel } from '../ui/blackMarket';
@@ -66,6 +75,7 @@ import {
   type TacticalMode,
   type TurnAction,
 } from '../types/battle';
+import { resolveBattleAffinityRelation } from '../gameplay/affinityDamage';
 
 type TurnState = 'awaiting' | 'approaching' | 'clash_qte' | 'resolving' | 'cutin';
 
@@ -158,6 +168,8 @@ export class Game {
   private readonly launchFlash = document.createElement('div');
   private readonly cameraDebug = document.createElement('div');
   private readonly introCard = document.createElement('div');
+  private readonly affinityVersus = document.createElement('div');
+  private affinityVersusTimer: number | null = null;
   private readonly touchMode = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 
   private enemy = new TopEntity('enemy', this.enemyPreset.build);
@@ -201,6 +213,7 @@ export class Game {
   private featuredUnlockPart: Part | null = null;
   private featuredGarageUnlockId: string | null = null;
   private championMoment: { title: string; body: string } | null = null;
+  private affinityDamageSummary: AffinityDamageSummary = createEmptyAffinityDamageSummary();
   private shopNotice = '\u91d1\u5e01\u53ef\u7528\u4e8e\u8d2d\u4e70\u65b0\u90e8\u4ef6\u548c\u5f3a\u5316\u5f53\u524d\u914d\u7f6e\u3002\u80dc\u5229\u540e\u56de\u6765\u5347\u7ea7\uff0c\u4e0b\u4e00\u573a\u6218\u6597\u4f1a\u7acb\u5373\u751f\u6548\u3002';
   private time = 0;
   private timeScale = 1;
@@ -314,6 +327,7 @@ export class Game {
     this.launchFlash.className = 'launch-flash';
     this.cameraDebug.className = 'camera-debug';
     this.introCard.className = 'intro-card';
+    this.affinityVersus.className = 'affinity-versus affinity-versus--hidden';
     this.introCard.innerHTML = `
       <div class="intro-card__crest"></div>
       <div class="intro-card__eyebrow">鏂伴挗閾佽仈鐩?/div>
@@ -321,7 +335,7 @@ export class Game {
       <div class="intro-card__subtitle">鐐圭噧鏃嬭浆锛岄攣瀹氳妭濂忥紝缁熸不璧涘満</div>
     `;
     this.mount.innerHTML = '';
-    this.mount.append(this.renderer.domElement, this.overlay, this.launchFlash, this.introCard);
+    this.mount.append(this.renderer.domElement, this.overlay, this.launchFlash, this.introCard, this.affinityVersus);
     this.overlay.append(this.menu.root, this.garage.root, this.shop.root, this.results.root, this.cutinPanel.root, this.forgePanel.root, this.blackMarket.root);
     if (this.camDebugEnabled) {
       this.mount.append(this.cameraDebug);
@@ -1113,6 +1127,7 @@ export class Game {
         enemyName: this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
         growthTitle: '本局成长变化',
         growthLines: this.battleMode === 'online' ? ['\u8054\u673a\u5bf9\u6218\u4e0d\u4fee\u6539\u5355\u673a\u6210\u957f\u6570\u636e'] : this.getResultGrowthLines(progressionBefore),
+        affinitySummary: this.affinityDamageSummary,
       },
     );
     this.menu.root.style.display = 'none';
@@ -1149,6 +1164,7 @@ export class Game {
   private startBattleWithPlayer(nextPlayer: TopEntity) {
     this.audio.stopMenuAmbience();
     this.floatingTexts.clear();
+    this.affinityDamageSummary = createEmptyAffinityDamageSummary();
     this.currentResult = null;
     this.resultRewardText = '';
     this.lastCoinReward = 0;
@@ -1205,7 +1221,35 @@ export class Game {
     this.physics.reset();
     this.rules.reset();
     this.hud.combatLog.clear();
+    this.showAffinityMatchup();
+    this.logHarmonyResonance('我方', this.player.stats.affinity);
+    this.logHarmonyResonance('敌方', this.enemy.stats.affinity);
     this.hud.combatLog.log('新一轮战斗开始', '#0ff');
+  }
+
+  private showAffinityMatchup() {
+    const playerAffinity = this.player.stats.affinity;
+    const enemyAffinity = this.enemy.stats.affinity;
+    renderAffinityMatchup(this.affinityVersus, createAffinityMatchupPresentation(
+      playerAffinity,
+      enemyAffinity,
+      resolveBattleAffinityRelation(playerAffinity, enemyAffinity),
+      resolveBattleAffinityRelation(enemyAffinity, playerAffinity),
+    ));
+    this.affinityVersus.classList.remove('affinity-versus--hidden', 'affinity-versus--active');
+    void this.affinityVersus.offsetWidth;
+    this.affinityVersus.classList.add('affinity-versus--active');
+    if (this.affinityVersusTimer !== null) window.clearTimeout(this.affinityVersusTimer);
+    this.affinityVersusTimer = window.setTimeout(() => {
+      this.affinityVersus.classList.add('affinity-versus--hidden');
+      this.affinityVersus.classList.remove('affinity-versus--active');
+      this.affinityVersusTimer = null;
+    }, 2200);
+  }
+
+  private logHarmonyResonance(sideLabel: string, profile: TopEntity['stats']['affinity']) {
+    if (profile.resonance.kind !== 'harmony') return;
+    this.hud.combatLog.log(`${sideLabel}：${getResonanceLabel(profile)}`, '#7ef0ff');
   }
 
   private refreshGarageStats() {
@@ -1749,10 +1793,12 @@ export class Game {
           this.hud.combatLog.log(blocked ? `${dmg.defender === 'player' ? '玩家' : '敌方'} BLOCK` : `${dmg.defender === 'player' ? '玩家' : '敌方'} MISS`, blocked ? '#7ef0ff' : '#aaaaaa');
         } else {
           applyDamageResult(target, dmg);
+          this.affinityDamageSummary = accumulateAffinityDamageSummary(this.affinityDamageSummary, dmg);
           const label = dmg.defender === 'player' ? '玩家' : '敌方';
           const isCounter = dmg.tags.includes('counter');
           const impactTag = isCounter ? ' 反击!' : dmg.didCrit ? ' 暴击!' : '';
           const remoteCritPresentation = this.battleMode === 'online' && this.network.role === 'guest' && dmg.didCrit;
+          const affinityDetail = formatAffinityDamageLog(dmg);
           if (!remoteCritPresentation) {
             const damagePrefix = isCounter ? `COUNTER T${dmg.skillTier}` : dmg.didCrit ? `CRIT T${dmg.skillTier}` : `T${dmg.skillTier}`;
             this.floatingTexts.spawn(
@@ -1764,6 +1810,9 @@ export class Game {
               isCounter || dmg.didCrit || dmg.skillTier >= 4,
             );
             this.hud.combatLog.log(`${label} T${dmg.skillTier} -${dmg.finalDamage} HP${impactTag}${dmg.armorReduced > 0 ? ` (${dmg.armorReduced} 减伤)` : ''}`, isCounter ? '#ff9f1c' : dmg.didCrit ? '#ff3300' : (dmg.defender === 'player' ? '#ff7b5b' : '#ffffff'));
+          }
+          if (affinityDetail && !remoteCritPresentation) {
+            this.hud.combatLog.log(affinityDetail, dmg.affinityRelation === 'advantage' ? '#ffd166' : '#c6a7ff');
           }
           if (dmg.didCrit && this.battleMode === 'online' && this.network.role === 'host') {
             const targetRole: OnlineRole = dmg.defender === 'player' ? 'host' : 'guest';
@@ -1964,6 +2013,7 @@ export class Game {
     }
 
     this.hud.combatLog.log('接力完成！新陀螺已上场。', '#7ef0ff');
+    this.logHarmonyResonance('我方属性变更', this.player.stats.affinity);
     this.rig.kickShake(0.35);
   }
 
@@ -2517,6 +2567,10 @@ export class Game {
         mode: this.mode,
         wave: this.survivalWave,
         score: this.survivalScore,
+        playerAttributes: this.player.stats.attributes,
+        enemyAttributes: this.enemy.stats.attributes,
+        playerAffinity: this.player.stats.affinity,
+        enemyAffinity: this.enemy.stats.affinity,
       });
       this.exposeDiagnostics();
       clearTransientFlags(this.player);
@@ -2726,6 +2780,10 @@ export class Game {
       mode: this.mode,
       wave: this.survivalWave,
       score: this.survivalScore,
+      playerAttributes: this.player.stats.attributes,
+      enemyAttributes: this.enemy.stats.attributes,
+      playerAffinity: this.player.stats.affinity,
+      enemyAffinity: this.enemy.stats.affinity,
     });
     if (this.camDebugEnabled) {
       this.renderCameraDebug();
@@ -2814,6 +2872,7 @@ export class Game {
           : null,
       },
       paused: this.paused,
+      affinityDamageSummary: this.affinityDamageSummary,
       camera: this.rig.getDebugState(),
       renderer: {
         calls: this.renderer.info.render.calls,

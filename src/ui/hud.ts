@@ -1,6 +1,8 @@
 import type { BattleResult } from '../gameplay/rules';
 import type { Phase } from '../utils/state';
 import { CombatLog } from './combatLog';
+import { getAffinityBadge, renderAffinityBadge } from './affinityPresentation';
+import type { BattleAffinityProfile } from '../gameplay/battleAffinity';
 
 export type RoundHud = {
   playerSpin: number;
@@ -30,6 +32,8 @@ export type RoundHud = {
   score?: number;
   playerAttributes?: Record<string, number>;
   enemyAttributes?: Record<string, number>;
+  playerAffinity?: BattleAffinityProfile;
+  enemyAffinity?: BattleAffinityProfile;
 };
 
 type HudControls = {
@@ -76,7 +80,7 @@ export class Hud {
     this.root.className = 'hud';
     this.root.innerHTML = `
       <div class="status status-player">
-        <div class="status__title">玩家 <div class="status__attributes js-player-attributes"></div></div>
+        <div class="status__title"><span>玩家</span><div class="status__attributes js-player-attributes"></div></div>
         <div class="bar"><div class="bar__fill js-player-spin"></div></div>
         <div class="bar bar--integrity">
           <div class="bar__fill js-player-integrity"></div>
@@ -93,7 +97,7 @@ export class Hud {
         <div class="launch-meter"><div class="launch-meter__fill js-launch"></div></div>
       </div>
       <div class="status status-enemy">
-        <div class="status__title js-enemy-name">对手 <div class="status__attributes js-enemy-attributes"></div></div>
+        <div class="status__title"><span class="js-enemy-name">对手</span><div class="status__attributes js-enemy-attributes"></div></div>
         <div class="bar"><div class="bar__fill js-enemy-spin"></div></div>
         <div class="bar bar--integrity">
           <div class="bar__fill js-enemy-integrity"></div>
@@ -173,11 +177,26 @@ export class Hud {
     this.dashCenter.addEventListener('click', () => controls.onDashCenter());
   }
 
-  private renderAttributes(attributes?: Record<string, number>) {
-    if (!attributes) return '';
-    return Object.entries(attributes)
-      .map(([attr, count]) => `<span class="attr-badge attr-${attr.toLowerCase()}">${attr} x${count}</span>`)
-      .join(' ');
+  private renderAttributes(
+    container: HTMLElement,
+    affinity?: BattleAffinityProfile,
+    attributes?: Record<string, number>,
+  ) {
+    const renderKey = `${affinity?.primary ?? 'NEUTRAL'}:${JSON.stringify(attributes ?? {})}`;
+    if (container.dataset.statusRenderKey === renderKey) return;
+    container.dataset.statusRenderKey = renderKey;
+    container.replaceChildren();
+    if (affinity) {
+      const affinityHost = document.createElement('span');
+      renderAffinityBadge(affinityHost, getAffinityBadge(affinity.primary));
+      container.append(affinityHost.firstElementChild!);
+    }
+    for (const [attribute, count] of Object.entries(attributes ?? {})) {
+      const badge = document.createElement('span');
+      badge.className = `attr-badge attr-${attribute.toLowerCase()}`;
+      badge.textContent = `${attribute} x${count}`;
+      container.append(badge);
+    }
   }
 
   update(state: RoundHud) {
@@ -192,8 +211,8 @@ export class Hud {
     this.enemyEnergyFill.style.width = `${state.enemyEnergy}%`;
     this.playerBurst.textContent = `${Math.round(state.playerBurst)}%`;
     this.enemyBurst.textContent = `${Math.round(state.enemyBurst)}%`;
-    this.playerAttributesText.innerHTML = this.renderAttributes(state.playerAttributes);
-    this.enemyAttributesText.innerHTML = this.renderAttributes(state.enemyAttributes);
+    this.renderAttributes(this.playerAttributesText, state.playerAffinity, state.playerAttributes);
+    this.renderAttributes(this.enemyAttributesText, state.enemyAffinity, state.enemyAttributes);
 
     if (state.mode === 'survival') {
       this.timer.style.display = 'none';

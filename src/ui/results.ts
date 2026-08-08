@@ -1,5 +1,6 @@
 import type { Part } from '../data/parts';
 import type { BattleResult } from '../gameplay/rules';
+import type { AffinityDamageSummary } from './affinityPresentation';
 
 const RARITY_NAMES: Record<Part['rarity'], string> = {
   starter: '初始',
@@ -18,6 +19,7 @@ export interface ResultRenderMeta {
   enemyName?: string;
   growthTitle?: string;
   growthLines?: string[];
+  affinitySummary?: AffinityDamageSummary;
 }
 
 export class ResultPanel {
@@ -29,6 +31,7 @@ export class ResultPanel {
   readonly coins = document.createElement('div');
   readonly summary = document.createElement('div');
   readonly growth = document.createElement('div');
+  readonly affinitySummary = document.createElement('div');
   readonly reward = document.createElement('p');
   readonly champion = document.createElement('div');
   readonly unlockCard = document.createElement('div');
@@ -42,6 +45,7 @@ export class ResultPanel {
     this.coins.className = 'coin-reward';
     this.summary.className = 'results__summary';
     this.growth.className = 'results__growth';
+    this.affinitySummary.className = 'results__affinity-summary';
     this.reward.className = 'results__reward';
     this.champion.className = 'champion-panel';
     this.unlockCard.className = 'unlock-card';
@@ -56,6 +60,7 @@ export class ResultPanel {
       this.body,
       this.coins,
       this.summary,
+      this.affinitySummary,
       this.growth,
       this.reward,
       this.champion,
@@ -113,6 +118,39 @@ export class ResultPanel {
         `,
       )
       .join('');
+
+    const affinitySummary = meta.affinitySummary;
+    this.affinitySummary.style.display = affinitySummary ? 'grid' : 'none';
+    this.affinitySummary.replaceChildren();
+    if (affinitySummary) {
+      const heading = document.createElement('div');
+      const values = document.createElement('div');
+      const taken = document.createElement('div');
+      heading.className = 'results__affinity-title';
+      heading.textContent = '本局属性伤害';
+      values.className = 'results__affinity-values';
+      const metrics = [
+        ['物理输出', affinitySummary.dealt.physical],
+        ['元素输出', affinitySummary.dealt.elemental],
+        ['共鸣贡献', affinitySummary.dealt.resonance],
+        ['克制影响', affinitySummary.dealt.relation],
+      ] as const;
+      for (const [label, value] of metrics) {
+        const item = document.createElement('div');
+        const name = document.createElement('span');
+        const amount = document.createElement('strong');
+        item.className = 'results__affinity-item';
+        name.textContent = label;
+        amount.textContent = label === '共鸣贡献' || label === '克制影响'
+          ? `${value >= 0 ? '+' : ''}${value}`
+          : String(value);
+        item.append(name, amount);
+        values.append(item);
+      }
+      taken.className = 'results__affinity-taken';
+      taken.textContent = `我方承受：物理 ${affinitySummary.taken.physical} · 元素 ${affinitySummary.taken.elemental}`;
+      this.affinitySummary.append(heading, values, taken);
+    }
 
     this.growth.style.display = growthLines.length > 0 ? 'grid' : 'none';
     this.growth.innerHTML = growthLines.length > 0
