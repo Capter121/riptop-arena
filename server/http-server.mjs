@@ -2,6 +2,8 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { authenticateRequest } from './auth/auth-middleware.mjs';
+import { AuthError, redeemInvite } from './auth/invite-service.mjs';
 
 const DEFAULT_JSON_BODY_BYTES = 64 * 1024;
 const DEFAULT_SITE_ROOT = fileURLToPath(new URL('../dist/site/', import.meta.url));
@@ -119,12 +121,26 @@ export function createArenaHttpServer(options = {}) {
   const production = options.production ?? process.env.NODE_ENV === 'production';
   const siteRoot = options.siteRoot ?? process.env.SITE_ROOT ?? DEFAULT_SITE_ROOT;
   const maxJsonBodyBytes = options.maxJsonBodyBytes ?? DEFAULT_JSON_BODY_BYTES;
+  const database = options.database;
 
   return createServer(async (request, response) => {
     try {
       const url = new URL(request.url ?? '/', 'http://localhost');
       if (request.method === 'GET' && url.pathname === '/health') {
         sendJson(response, 200, { status: 'ok' });
+        return;
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/invites/redeem') {
+        if (!database) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Identity database is unavailable.');
+        const identity = redeemInvite(database, await readJsonBody(request, maxJsonBodyBytes));
+        sendJson(response, 201, { identity });
+        return;
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/me') {
+        if (!database) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Identity database is unavailable.');
+        sendJson(response, 200, { player: authenticateRequest(database, request) });
         return;
       }
 
@@ -141,6 +157,10 @@ export function createArenaHttpServer(options = {}) {
       }
       sendError(response, 404, 'NOT_FOUND', 'Resource not found.');
     } catch (error) {
+      if (error instanceof AuthError) {
+        sendError(response, error.status, error.code, error.message);
+        return;
+      }
       if (error instanceof HttpError) {
         sendError(response, error.status, error.code, error.message);
         return;

@@ -13,9 +13,10 @@
     "server": "node server/match-server.mjs",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
-    "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs && node scripts/test-database.mjs",
+    "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs && node scripts/test-database.mjs && node scripts/test-auth.mjs",
     "test:http": "node scripts/test-http-server.mjs",
     "test:database": "node scripts/test-database.mjs",
+    "test:auth": "node scripts/test-auth.mjs",
     "test:nss-contract": "node scripts/test-nss-contract.mjs",
     "inspect:canvas": "node scripts/inspect-threejs-canvas.mjs"
   },

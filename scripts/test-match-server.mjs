@@ -112,6 +112,7 @@ const server = spawn(process.execPath, ['server/match-server.mjs'], {
   env: {
     ...process.env,
     PORT: String(PORT),
+    DATABASE_PATH: ':memory:',
     READY_TIMEOUT_MS: '300',
     TURN_TIMEOUT_MS: '500',
     HEARTBEAT_INTERVAL_MS: '100',

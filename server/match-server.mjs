@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
 import { createArenaHttpServer } from './http-server.mjs';
+import { openDatabase } from './storage/database.mjs';
+import { migrateDatabase } from './storage/migrate.mjs';
 
 const PROTOCOL_VERSION = 2;
 const PORT = Number(process.env.PORT || 8080);
@@ -20,7 +22,9 @@ const battleCatalogSha256 = createHash('sha256').update(battleCatalogText.replac
 const familyParts = Object.fromEntries(families.map(family => [family, battleCatalog.parts.filter(part => part.family === family)]));
 const partById = new Map(battleCatalog.parts.map(part => [part.id, part]));
 
-const server = createArenaHttpServer();
+const database = openDatabase();
+await migrateDatabase(database);
+const server = createArenaHttpServer({ database });
 const wss = new WebSocketServer({ server, maxPayload: MAX_MESSAGE_BYTES });
 const clients = new Map();
 const rooms = new Map();

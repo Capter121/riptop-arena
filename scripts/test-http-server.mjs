@@ -20,6 +20,7 @@ const server = spawn(process.execPath, ['server/match-server.mjs'], {
     PORT: String(PORT),
     NODE_ENV: 'production',
     SITE_ROOT: siteRoot,
+    DATABASE_PATH: ':memory:',
   },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
