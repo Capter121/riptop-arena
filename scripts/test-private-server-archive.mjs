@@ -8,6 +8,7 @@ import {
   readdir,
   rmdir,
   stat,
+  symlink,
   unlink,
   writeFile,
 } from 'node:fs/promises';
@@ -63,8 +64,19 @@ const failedDatabasePath = join(root, 'invalid.sqlite');
 const failedBackupRoot = join(root, 'failed-backups');
 const failedNow = new Date('2026-08-09T01:02:05.006Z');
 const failedBackupPath = join(failedBackupRoot, 'nss-private-20260809T010205006Z');
+const uploadBackupRoot = join(root, 'upload-backups');
+const uploadNow = new Date('2026-08-09T01:02:06.007Z');
+const uploadBackupPath = join(uploadBackupRoot, 'nss-private-20260809T010206007Z');
+const uploadNestedPath = join(uploadsPath, 'badges');
+const uploadBadgePath = join(uploadNestedPath, 'badge..v1.txt');
+const uploadEmblemPath = join(uploadsPath, 'emblem.webp');
+const uploadLinkPath = join(uploadsPath, 'linked.webp');
+const linkBackupRoot = join(root, 'link-backups');
+const linkNow = new Date('2026-08-09T01:02:07.008Z');
+const linkBackupPath = join(linkBackupRoot, 'nss-private-20260809T010207008Z');
 
 let liveDatabase;
+let uploadLinkCreated = false;
 
 try {
   await writeFile(databasePath, 'step-one-database', 'utf8');
@@ -188,6 +200,73 @@ try {
     snapshot.close();
   }
 
+  await assert.rejects(
+    () => backupPrivateServer({
+      databasePath: liveDatabasePath,
+      backupRoot: uploadBackupRoot,
+      uploadsPath: databasePath,
+      dryRun: true,
+      now: uploadNow,
+    }),
+    /uploads path must reference a directory/i,
+  );
+
+  await mkdir(uploadNestedPath);
+  await writeFile(uploadBadgePath, 'badge recipe', 'utf8');
+  await writeFile(uploadEmblemPath, Buffer.from([0, 1, 2, 3, 4]));
+  const uploadBackup = await backupPrivateServer({
+    databasePath: liveDatabasePath,
+    backupRoot: uploadBackupRoot,
+    uploadsPath,
+    now: uploadNow,
+  });
+  const uploadManifest = JSON.parse(await readFile(join(uploadBackupPath, 'manifest.json'), 'utf8'));
+  assert.equal(uploadBackup.uploadsIncluded, true);
+  assert.equal(uploadBackup.fileCount, 3);
+  assert.deepEqual(uploadManifest.uploads, {
+    included: true,
+    files: [
+      {
+        path: 'uploads/badges/badge..v1.txt',
+        bytes: (await stat(uploadBadgePath)).size,
+        sha256: await sha256(uploadBadgePath),
+      },
+      {
+        path: 'uploads/emblem.webp',
+        bytes: (await stat(uploadEmblemPath)).size,
+        sha256: await sha256(uploadEmblemPath),
+      },
+    ],
+  });
+  assert.equal(
+    uploadBackup.totalBytes,
+    uploadManifest.database.bytes + uploadManifest.uploads.files.reduce((sum, file) => sum + file.bytes, 0),
+  );
+  assert.equal(await readFile(join(uploadBackupPath, 'uploads', 'badges', 'badge..v1.txt'), 'utf8'), 'badge recipe');
+  assert.deepEqual(
+    await readFile(join(uploadBackupPath, 'uploads', 'emblem.webp')),
+    Buffer.from([0, 1, 2, 3, 4]),
+  );
+
+  try {
+    await symlink(uploadEmblemPath, uploadLinkPath, 'file');
+    uploadLinkCreated = true;
+  } catch (error) {
+    if (error?.code !== 'EPERM' && error?.code !== 'EACCES') throw error;
+  }
+  if (uploadLinkCreated) {
+    await assert.rejects(
+      () => backupPrivateServer({
+        databasePath: liveDatabasePath,
+        backupRoot: linkBackupRoot,
+        uploadsPath,
+        now: linkNow,
+      }),
+      /symbolic links.*not supported/i,
+    );
+    await assert.rejects(() => access(linkBackupPath), error => error?.code === 'ENOENT');
+  }
+
   await writeFile(failedDatabasePath, 'not a sqlite database', 'utf8');
   await assert.rejects(
     () => backupPrivateServer({
@@ -198,9 +277,14 @@ try {
   );
   await assert.rejects(() => access(join(failedBackupPath, 'manifest.json')), error => error?.code === 'ENOENT');
 
-  console.log('Private server archive boundary and SQLite snapshot tests passed.');
+  console.log('Private server archive boundary, SQLite snapshot, and upload tests passed.');
 } finally {
   liveDatabase?.close();
+  if (uploadLinkCreated) await unlinkIfPresent(uploadLinkPath);
+  await unlinkIfPresent(join(linkBackupPath, 'manifest.json'));
+  await unlinkIfPresent(join(linkBackupPath, 'arena.sqlite'));
+  await rmdirIfPresent(linkBackupPath);
+  await rmdirIfPresent(linkBackupRoot);
   await unlinkIfPresent(join(failedBackupPath, 'manifest.json'));
   await unlinkIfPresent(join(failedBackupPath, 'arena.sqlite'));
   await rmdirIfPresent(failedBackupPath);
@@ -215,8 +299,19 @@ try {
   await unlinkIfPresent(`${liveDatabasePath}-shm`);
   await unlinkIfPresent(`${liveDatabasePath}-wal`);
   await unlinkIfPresent(liveDatabasePath);
+  await unlinkIfPresent(join(uploadBackupPath, 'manifest.json'));
+  await unlinkIfPresent(join(uploadBackupPath, 'uploads', 'badges', 'badge..v1.txt'));
+  await rmdirIfPresent(join(uploadBackupPath, 'uploads', 'badges'));
+  await unlinkIfPresent(join(uploadBackupPath, 'uploads', 'emblem.webp'));
+  await rmdirIfPresent(join(uploadBackupPath, 'uploads'));
+  await unlinkIfPresent(join(uploadBackupPath, 'arena.sqlite'));
+  await rmdirIfPresent(uploadBackupPath);
+  await rmdirIfPresent(uploadBackupRoot);
   await rmdirIfPresent(expectedBackupPath);
   await rmdirIfPresent(backupRoot);
+  await unlinkIfPresent(uploadBadgePath);
+  await rmdirIfPresent(uploadNestedPath);
+  await unlinkIfPresent(uploadEmblemPath);
   await rmdirIfPresent(uploadsPath);
   await rmdirIfPresent(databaseDirectory);
   await unlinkIfPresent(databasePath);
