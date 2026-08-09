@@ -4,5 +4,6 @@
   "battleRulesVersion": 2,
   "challengeSchemaVersion": 1,
   "saveSchemaVersion": 2,
-  "shareSchemaVersion": 2
+  "shareSchemaVersion": 2,
+  "simulationVersion": 1
 }
