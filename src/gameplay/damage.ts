@@ -6,6 +6,7 @@ import {
   emptyAffinityDamage,
 } from './affinityDamage';
 import type { AffinityRelation, PartAffinity } from '../../battle-top-designer/shared/nss/affinity';
+import type { RandomSource } from '../sim/rng';
 
 const ATTACK_DAMAGE_FACTOR = 25;
 const COUNTER_MULTIPLIER = 1.75;
@@ -40,7 +41,7 @@ export type DamageContext = {
   isBlockOrMiss: boolean;
   skillTier: SkillTier;
   contextMultiplier?: number;
-  random?: () => number;
+  random: RandomSource;
 };
 
 export function calculateTurnDamage(ctx: DamageContext): DamageResult {
@@ -52,7 +53,7 @@ export function calculateTurnDamage(ctx: DamageContext): DamageResult {
     isBlockOrMiss,
     skillTier,
     contextMultiplier = 1,
-    random = Math.random,
+    random,
   } = ctx;
 
   const skillBaseDamage = SKILL_BASE_DAMAGE[skillTier];
@@ -83,14 +84,14 @@ export function calculateTurnDamage(ctx: DamageContext): DamageResult {
   let rawDamage = (skillBaseDamage + attackBonus) * effectiveContextMultiplier;
 
   if (!isCounter && !isClash) {
-    if (random() < defender.stats.evasion) {
+    if (random.nextFloat() < defender.stats.evasion) {
       result.didMiss = true;
       result.tags.push('miss');
       return result;
     }
   }
 
-  const isCrit = !isCounter && !isClash && random() < attacker.stats.critChance;
+  const isCrit = !isCounter && !isClash && random.nextFloat() < attacker.stats.critChance;
 
   if (isCounter) {
     result.tags.push('counter');

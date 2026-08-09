@@ -76,7 +76,17 @@ describe('NSS TopEntity vertical slice', () => {
     ]);
     const enemy = new TopEntity('enemy', DEFAULT_BUILD);
     const damage = calculateTurnDamage({
-      attacker: top, defender: enemy, skillTier: 2, isCounter: false, isClash: false, isBlockOrMiss: false, random: () => 0.99,
+      attacker: top,
+      defender: enemy,
+      skillTier: 2,
+      isCounter: false,
+      isClash: false,
+      isBlockOrMiss: false,
+      random: {
+        nextFloat: () => 0.99,
+        nextUint32: () => 0xfd70_a3d7,
+        nextInt: (min, maxExclusive) => min + Math.floor(0.99 * (maxExclusive - min)),
+      },
     });
     expect(damage.finalDamage).toBeGreaterThan(0);
     top.detachNssVisual();

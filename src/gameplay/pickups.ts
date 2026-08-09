@@ -2,6 +2,13 @@ import * as THREE from 'three';
 import { ARENA_RADIUS } from '../app/config';
 import type { TopEntity } from './top';
 import { ArenaScene } from '../scene/arena';
+import type { RandomSource } from '../sim/rng';
+
+export function createPickupSpawnPosition(random: RandomSource) {
+  const angle = random.nextFloat() * Math.PI * 2;
+  const radius = 2.0 + random.nextFloat() * (ARENA_RADIUS - 4.0);
+  return { x: Math.cos(angle) * radius, z: Math.sin(angle) * radius };
+}
 
 export class PickupManager {
   readonly root = new THREE.Group();
@@ -47,12 +54,12 @@ export class PickupManager {
     this.mesh.visible = false;
   }
 
-  update(dt: number, time: number, player: TopEntity, autoRespawn: boolean = true): boolean {
+  update(dt: number, time: number, player: TopEntity, random: RandomSource, autoRespawn: boolean = true): boolean {
     if (!this.active) {
       if (autoRespawn) {
         this.respawnTimer -= dt;
         if (this.respawnTimer <= 0) {
-          this.spawn();
+          this.spawn(random);
         }
       }
       return false;
@@ -90,11 +97,10 @@ export class PickupManager {
     return false;
   }
 
-  private spawn() {
+  private spawn(random: RandomSource) {
     // Random position in the arena (avoiding exact center and extreme edges)
-    const angle = Math.random() * Math.PI * 2;
-    const radius = 2.0 + Math.random() * (ARENA_RADIUS - 4.0);
-    this.spawnAt(Math.cos(angle) * radius, Math.sin(angle) * radius);
+    const position = createPickupSpawnPosition(random);
+    this.spawnAt(position.x, position.z);
   }
 
   spawnAt(x: number, z: number, lifespan: number = 8.0) {

@@ -77,6 +77,25 @@ import {
   type TurnAction,
 } from '../types/battle';
 import { resolveBattleAffinityRelation } from '../gameplay/affinityDamage';
+import {
+  createBattleSeed,
+  createBattleSimulationContext,
+  type BattleSeed,
+  type BattleSimulationContext,
+} from '../sim/battleSeed';
+import type { RandomSource } from '../sim/rng';
+
+const QA_HIT_RANDOM: RandomSource = {
+  nextFloat: () => 1,
+  nextUint32: () => 0xffff_ffff,
+  nextInt: (_min, maxExclusive) => maxExclusive - 1,
+};
+
+const QA_CRIT_RANDOM: RandomSource = {
+  nextFloat: () => 0,
+  nextUint32: () => 0,
+  nextInt: (min) => min,
+};
 
 type TurnState = 'awaiting' | 'approaching' | 'clash_qte' | 'resolving' | 'cutin';
 
@@ -182,6 +201,7 @@ export class Game {
   private readonly turnPanel = new TurnPanel((action) => this.submitTurnAction(action));
   private readonly clashQtePanel = new ClashQtePanel();
   private readonly voiceBoostOverlay = new VoiceBoostOverlay();
+  private battleSimulation: BattleSimulationContext | null = null;
   private vKeyHeld = false;
   private playerDefensiveSuccesses = 0;
   private enemyDefensiveSuccesses = 0;
@@ -579,6 +599,16 @@ export class Game {
     this.onlineLocalLoadout = null;
   }
 
+  private battleRandom() {
+    if (!this.battleSimulation) throw new Error('Battle simulation context is not initialized.');
+    return this.battleSimulation.random;
+  }
+
+  private turnRandomSources() {
+    const random = this.battleRandom();
+    return { combat: random.combat, physics: random.physics };
+  }
+
   private async toggleOnlineQueue(customUrl?: string) {
     if (['connecting', 'queued', 'matched', 'in_battle'].includes(this.network.state)) {
       this.network.cancelQueue();
@@ -800,7 +830,14 @@ export class Game {
 
   private resolveOnlineHostTurn(hostAction: TurnAction, guestAction: TurnAction, turnId: number) {
     // [ONLINE HOOK] Host is the only client that invokes random turn arbitration.
-    const rawResolution = this.turnArbitrator.executeTurnResolution(hostAction, guestAction, this.player, this.enemy, turnId);
+    const rawResolution = this.turnArbitrator.executeTurnResolution(
+      hostAction,
+      guestAction,
+      this.player,
+      this.enemy,
+      turnId,
+      this.turnRandomSources(),
+    );
     const resolution = rawResolution.kind === 'clash_qte'
       ? this.createOnlineSafeClashResolution(rawResolution)
       : rawResolution;
@@ -1121,9 +1158,10 @@ export class Game {
     this.results.root.style.display = 'grid';
   }
 
-  private startBattle() {
+  private startBattle(seed?: BattleSeed) {
+    if (this.battleMode === 'single' && this.nssRequest.kind === 'ready' && this.nssBattlePreparing) return;
+    const battleSeed = seed ?? createBattleSeed();
     if (this.battleMode === 'single' && this.nssRequest.kind === 'ready') {
-      if (this.nssBattlePreparing) return;
       this.nssBattlePreparing = true;
       this.garage.setProgress('Loading the approved NSS battle model…');
       this.progression = setNssLoadout(this.progression, this.nssRequest.loadout);
@@ -1131,7 +1169,7 @@ export class Game {
       void this.nssLoadouts.createTop('player', this.nssRequest.loadout, this.progression.upgrades)
         .then(player => {
           this.nssBattlePreparing = false;
-          this.startBattleWithPlayer(player);
+          this.startBattleWithPlayer(player, battleSeed);
         })
         .catch(error => {
           this.nssBattlePreparing = false;
@@ -1140,10 +1178,11 @@ export class Game {
         });
       return;
     }
-    this.startBattleWithPlayer(new TopEntity('player', this.build, this.progression.upgrades, this.progression.partUpgrades));
+    this.startBattleWithPlayer(new TopEntity('player', this.build, this.progression.upgrades, this.progression.partUpgrades), battleSeed);
   }
 
-  private startBattleWithPlayer(nextPlayer: TopEntity) {
+  private startBattleWithPlayer(nextPlayer: TopEntity, seed = createBattleSeed()) {
+    this.battleSimulation = createBattleSimulationContext(seed);
     this.audio.stopMenuAmbience();
     this.floatingTexts.clear();
     this.affinityDamageSummary = createEmptyAffinityDamageSummary();
@@ -1296,7 +1335,8 @@ export class Game {
           aiAction,
           this.player,
           this.enemy,
-          this.turnIndex
+          this.turnIndex,
+          this.turnRandomSources(),
         );
         this.startTurnPresentation(resolution);
     };
@@ -1558,8 +1598,8 @@ export class Game {
 
     if (margin < 1) {
       damageResults.push(
-        calculateTurnDamage({ attacker: this.enemy, defender: this.player, skillTier: qte.tier, isCounter: false, isClash: true, isBlockOrMiss: false, contextMultiplier: 0.5 }),
-        calculateTurnDamage({ attacker: this.player, defender: this.enemy, skillTier: qte.tier, isCounter: false, isClash: true, isBlockOrMiss: false, contextMultiplier: 0.5 }),
+        calculateTurnDamage({ attacker: this.enemy, defender: this.player, skillTier: qte.tier, isCounter: false, isClash: true, isBlockOrMiss: false, contextMultiplier: 0.5, random: this.battleRandom().combat }),
+        calculateTurnDamage({ attacker: this.player, defender: this.enemy, skillTier: qte.tier, isCounter: false, isClash: true, isBlockOrMiss: false, contextMultiplier: 0.5, random: this.battleRandom().combat }),
       );
     } else {
       const playerWins = diff > 0;
@@ -1574,6 +1614,7 @@ export class Game {
           isClash: true,
           isBlockOrMiss: false,
           contextMultiplier: 0.5,
+          random: this.battleRandom().combat,
         }),
       );
       playerVisual = playerWins ? 'attack' : 'hit';
@@ -2596,8 +2637,12 @@ export class Game {
       }
     }
 
-    this.skillManager.update(this.player, dt, this.enemy);
-    this.skillManager.update(this.enemy, dt, this.player);
+    if (this.battleSimulation) {
+      this.skillManager.updateSimulation(this.player, dt, this.enemy, this.battleSimulation.random.physics);
+      this.skillManager.updateSimulation(this.enemy, dt, this.player, this.battleSimulation.random.physics);
+    }
+    this.skillManager.updateVisual(this.player, dt, this.enemy);
+    this.skillManager.updateVisual(this.enemy, dt, this.player);
 
     if (this.phase === 'launch') {
       if (this.battleMode === 'online' && this.onlineStartAt && this.onlineLaunchConfig) {
@@ -2938,7 +2983,14 @@ export class Game {
         this.spirit.set(this.player, this.player.maxSpirit);
         this.spirit.set(this.enemy, this.enemy.maxSpirit);
         const action: TurnAction = { kind: 'attack', skillId };
-        const resolution = this.turnArbitrator.executeTurnResolution(action, action, this.player, this.enemy, this.turnIndex);
+        const resolution = this.turnArbitrator.executeTurnResolution(
+          action,
+          action,
+          this.player,
+          this.enemy,
+          this.turnIndex,
+          this.turnRandomSources(),
+        );
         this.startTurnPresentation(resolution);
         return resolution.kind;
       },
@@ -3006,7 +3058,7 @@ export class Game {
             isClash: options.clash ?? false,
             isBlockOrMiss: false,
             contextMultiplier: options.multiplier ?? 1,
-            random: () => 1,
+            random: QA_HIT_RANDOM,
           });
           Object.assign(this.player.stats, { critChance: 1, critMultiplier: 3 });
           const counterCritCheck = calculateTurnDamage({
@@ -3016,7 +3068,7 @@ export class Game {
             isCounter: true,
             isClash: false,
             isBlockOrMiss: false,
-            random: () => 0,
+            random: QA_CRIT_RANDOM,
           });
           Object.assign(this.player.stats, { critChance: 0, critMultiplier: 2 });
           return {
@@ -3051,7 +3103,7 @@ export class Game {
           isCounter: counter,
           isClash: false,
           isBlockOrMiss: false,
-          random: () => 1,
+          random: QA_HIT_RANDOM,
         });
         this.enemy.integrity = this.enemy.stats.maxIntegrity;
         this.enemy.alive = true;

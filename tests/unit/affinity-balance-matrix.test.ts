@@ -12,6 +12,13 @@ import type { BattleStats } from '../../src/gameplay/build';
 import type { TopEntity } from '../../src/gameplay/top';
 import { buildNssBattleStats } from '../../src/nss/buildStats';
 import { createNssBattleLoadout, enumerateNssCombinations, nssCombinationId } from '../../src/nss/loadout';
+import type { RandomSource } from '../../src/sim/rng';
+
+const HIGH_RANDOM: RandomSource = {
+  nextFloat: () => 1,
+  nextUint32: () => 0xffff_ffff,
+  nextInt: (_min, maxExclusive) => maxExclusive - 1,
+};
 
 const IDENTITY_MODIFIERS = {
   elementalPower: 1,
@@ -43,7 +50,7 @@ function fixedDamage(attacker: BattleStats, defender: BattleStats) {
     isCounter: false,
     isClash: false,
     isBlockOrMiss: false,
-    random: () => 1,
+    random: HIGH_RANDOM,
   }).finalDamage;
 }
 

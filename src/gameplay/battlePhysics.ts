@@ -35,6 +35,12 @@ import {
   createNeutralRecoilDamage,
   scaleDamageResult,
 } from './damage';
+import type { RandomSource } from '../sim/rng';
+
+export type TurnRandomSources = {
+  combat: RandomSource;
+  physics: RandomSource;
+};
 
 export type TurnResolutionKind =
   | 'same_attack_cancel'
@@ -79,7 +85,14 @@ type TurnSpiritSnapshot = {
 };
 
 export class TurnArbitrator {
-  executeTurnResolution(playerAction: TurnAction, aiAction: TurnAction, player: TopEntity, enemy: TopEntity, turnIndex: number): TurnResolution {
+  executeTurnResolution(
+    playerAction: TurnAction,
+    aiAction: TurnAction,
+    player: TopEntity,
+    enemy: TopEntity,
+    turnIndex: number,
+    random: TurnRandomSources,
+  ): TurnResolution {
     const spirit = {
       playerSpirit: player.spirit,
       enemySpirit: enemy.spirit,
@@ -142,10 +155,10 @@ export class TurnArbitrator {
         const eDivine = (spirit.enemyAttributes?.['DIVINE'] || 0) > 0;
         
         if (pDivine && !eDivine) {
-          const dmg = calculateTurnDamage({ attacker: player, defender: enemy, skillTier: playerAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.2 });
+          const dmg = calculateTurnDamage({ attacker: player, defender: enemy, skillTier: playerAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.2, random: random.combat });
           return finish('attack_overpower', null, null, 'attack', 'hit', `${playerAttack.label} 触发神圣裁决(DIVINE)，强制赢得拼刀！`, false, false, false, 0, false, [dmg]);
         } else if (eDivine && !pDivine) {
-          const dmg = calculateTurnDamage({ attacker: enemy, defender: player, skillTier: enemyAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.2 });
+          const dmg = calculateTurnDamage({ attacker: enemy, defender: player, skillTier: enemyAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.2, random: random.combat });
           return finish('attack_overpower', null, null, 'hit', 'attack', `${enemyAttack.label} 触发神圣裁决(DIVINE)，玩家被压制！`, false, false, false, 0, false, [dmg]);
         }
 
@@ -153,20 +166,20 @@ export class TurnArbitrator {
       }
 
       if (playerAttack.tier > enemyAttack.tier) {
-        const dmg = calculateTurnDamage({ attacker: player, defender: enemy, skillTier: playerAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.15 });
+        const dmg = calculateTurnDamage({ attacker: player, defender: enemy, skillTier: playerAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.15, random: random.combat });
         return finish('attack_overpower', null, null, 'attack', 'hit', `${playerAttack.label} 高阶碾压 ${enemyAttack.label}，对手受到重创。`, false, false, false, 0, false, [dmg]);
       }
 
-      const dmg = calculateTurnDamage({ attacker: enemy, defender: player, skillTier: enemyAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.15 });
+      const dmg = calculateTurnDamage({ attacker: enemy, defender: player, skillTier: enemyAttack.tier, isCounter: false, isClash: false, isBlockOrMiss: false, contextMultiplier: 1.15, random: random.combat });
       return finish('attack_overpower', null, null, 'hit', 'attack', `${enemyAttack.label} 高阶碾压 ${playerAttack.label}，玩家受到重创。`, false, false, false, 0, false, [dmg]);
     }
 
     if (playerAction.kind === 'attack') {
-      return this.resolveAttackAgainstDefense('player', playerAction, aiAction, finish, player, enemy, spirit);
+      return this.resolveAttackAgainstDefense('player', playerAction, aiAction, finish, player, enemy, spirit, random);
     }
 
     if (aiAction.kind === 'attack') {
-      return this.resolveAttackAgainstDefense('enemy', aiAction, playerAction, finish, player, enemy, spirit);
+      return this.resolveAttackAgainstDefense('enemy', aiAction, playerAction, finish, player, enemy, spirit, random);
     }
 
     const playerCharges = playerAction.kind === 'charge';
@@ -210,6 +223,7 @@ export class TurnArbitrator {
     player: TopEntity,
     enemy: TopEntity,
     spirit: TurnSpiritSnapshot,
+    random: TurnRandomSources,
   ) {
     const defender: BattleSide = attacker === 'player' ? 'enemy' : 'player';
     const attack = ELEMENT_ATTACKS[attackAction.skillId];
@@ -241,6 +255,7 @@ export class TurnArbitrator {
         isCounter: true,
         isClash: false,
         isBlockOrMiss: false,
+        random: random.combat,
       });
 
       return finish(
@@ -266,16 +281,17 @@ export class TurnArbitrator {
           isClash: false,
           isBlockOrMiss: false,
           contextMultiplier: 1.0,
+          random: random.combat,
         });
 
         // 轻反弹：大幅削弱为 15%~23% 的极低微骚扰反弹伤害
-        const reflectReturnRatio = 0.15 + Math.random() * 0.08;
+        const reflectReturnRatio = 0.15 + random.physics.nextFloat() * 0.08;
         const reflectPercent = Math.round(reflectReturnRatio * 100);
         const reflectedDamage = scaleDamageResult(reboundDmg, reflectReturnRatio, attacker);
         const attackerReflectDamage = reflectedDamage.finalDamage;
 
         // 反弹方承受 15%~25% 的轻微冲击余波
-        const recoilRatio = 0.15 + Math.random() * 0.10;
+        const recoilRatio = 0.15 + random.physics.nextFloat() * 0.10;
         const recoilPercent = Math.round(recoilRatio * 100);
         const recoilDamage = createNeutralRecoilDamage(reboundDmg, reflectReturnRatio * recoilRatio, defenderTop);
         const defenderSelfDamage = recoilDamage.finalDamage;
@@ -303,6 +319,7 @@ export class TurnArbitrator {
           isCounter: false,
           isClash: false,
           isBlockOrMiss: false,
+          random: random.combat,
         });
         return finish(
           'defense_fail',
@@ -328,16 +345,17 @@ export class TurnArbitrator {
           isClash: false,
           isBlockOrMiss: false,
           contextMultiplier: 1.0,
+          random: random.combat,
         });
 
         // 重反弹：大幅削弱为 25%~35% 的温和反弹伤害（绝对不会一击残血）
-        const reflectReturnRatio = 0.25 + Math.random() * 0.10;
+        const reflectReturnRatio = 0.25 + random.physics.nextFloat() * 0.10;
         const reflectPercent = Math.round(reflectReturnRatio * 100);
         const reflectedDamage = scaleDamageResult(reboundDmg, reflectReturnRatio, attacker);
         const attackerReflectDamage = reflectedDamage.finalDamage;
 
         // 反弹方承受 15%~25% 的轻微冲击余波
-        const recoilRatio = 0.15 + Math.random() * 0.10;
+        const recoilRatio = 0.15 + random.physics.nextFloat() * 0.10;
         const recoilPercent = Math.round(recoilRatio * 100);
         const recoilDamage = createNeutralRecoilDamage(reboundDmg, reflectReturnRatio * recoilRatio, defenderTop);
         const defenderSelfDamage = recoilDamage.finalDamage;
@@ -365,6 +383,7 @@ export class TurnArbitrator {
           isCounter: false,
           isClash: false,
           isBlockOrMiss: false,
+          random: random.combat,
         });
         return finish(
           'defense_fail',
@@ -402,6 +421,7 @@ export class TurnArbitrator {
           isCounter: false,
           isClash: false,
           isBlockOrMiss: true,
+          random: random.combat,
         });
 
         return finish(
@@ -427,6 +447,7 @@ export class TurnArbitrator {
         isCounter: false,
         isClash: false,
         isBlockOrMiss: false,
+        random: random.combat,
       });
 
       return finish(
@@ -456,6 +477,7 @@ export class TurnArbitrator {
           isCounter: false,
           isClash: false,
           isBlockOrMiss: true,
+          random: random.combat,
         });
 
         return finish(
@@ -479,6 +501,7 @@ export class TurnArbitrator {
         isCounter: false,
         isClash: false,
         isBlockOrMiss: false,
+        random: random.combat,
       });
 
       return finish(
@@ -500,6 +523,7 @@ export class TurnArbitrator {
       isCounter: false,
       isClash: false,
       isBlockOrMiss: false,
+      random: random.combat,
     });
     return finish(
       'defense_fail',

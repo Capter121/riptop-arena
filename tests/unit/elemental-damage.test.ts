@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   AFFINITIES,
   AFFINITY_DAMAGE_RULES,
@@ -17,6 +17,19 @@ import {
 import type { TopEntity } from '../../src/gameplay/top';
 import { DEFAULT_BUILD } from '../../src/data/parts';
 import { EventBus } from '../../src/utils/events';
+import type { RandomSource } from '../../src/sim/rng';
+
+function constantRandom(value: number): RandomSource {
+  return {
+    nextFloat: () => value,
+    nextUint32: () => Math.floor(value * 0x1_0000_0000) >>> 0,
+    nextInt: (min, maxExclusive) => min + Math.floor(value * (maxExclusive - min)),
+  };
+}
+
+function turnRandom(value: number) {
+  return { combat: constantRandom(value), physics: constantRandom(value) };
+}
 
 const IDENTITY_MODIFIERS = {
   elementalPower: 1,
@@ -73,14 +86,12 @@ function calculate(attacker: TopEntity, defender: TopEntity, overrides: Partial<
     isCounter: false,
     isClash: false,
     isBlockOrMiss: false,
-    random: () => 0.5,
+    random: constantRandom(0.5),
     ...overrides,
   });
 }
 
 describe('elemental active damage', () => {
-  afterEach(() => vi.restoreAllMocks());
-
   it('covers every 7x7 affinity relation with an 80/20 split', () => {
     for (const attackerAffinity of AFFINITIES) {
       for (const defenderAffinity of AFFINITIES) {
@@ -161,7 +172,7 @@ describe('elemental active damage', () => {
   it('keeps crit, counter, and clash rules ahead of affinity calculation', () => {
     const attacker = damageTop('player', affinity('WATER'), { critChance: 1 });
     const defender = damageTop('enemy', affinity('FIRE'));
-    const critical = calculate(attacker, defender, { random: () => 0 });
+    const critical = calculate(attacker, defender, { random: constantRandom(0) });
     const counter = calculate(attacker, defender, { isCounter: true });
     const clash = calculate(attacker, defender, { isClash: true, contextMultiplier: 0.5 });
 
@@ -181,7 +192,7 @@ describe('elemental active damage', () => {
     const attacker = damageTop('player', affinity('FIRE', 1.15));
     const defender = damageTop('enemy', affinity('WOOD'), { evasion: 1 });
     const blocked = calculate(attacker, defender, { isBlockOrMiss: true });
-    const missed = calculate(attacker, defender, { random: () => 0 });
+    const missed = calculate(attacker, defender, { random: constantRandom(0) });
 
     for (const result of [blocked, missed]) {
       expect(result.finalDamage).toBe(0);
@@ -212,7 +223,6 @@ describe('elemental active damage', () => {
     ['wind_blade', 'light_reflect'],
     ['blazing_meteor', 'heavy_reflect'],
   ] as const)('keeps successful %s reflection affinity and makes reflector recoil neutral physical', (skillId, reflectKind) => {
-    vi.spyOn(Math, 'random').mockReturnValue(0);
     const player = turnTop('player', affinity('FIRE', 1.15));
     const enemy = turnTop('enemy', affinity('WOOD'));
     const resolution = new TurnArbitrator().executeTurnResolution(
@@ -221,6 +231,7 @@ describe('elemental active damage', () => {
       player,
       enemy,
       0,
+      turnRandom(0),
     );
     const [reflected, recoil] = resolution.damageResults as [DamageResult, DamageResult];
 
@@ -245,13 +256,13 @@ describe('elemental active damage', () => {
   });
 
   it('uses normal affinity damage when a reflection tier fails', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.5);
     const resolution = new TurnArbitrator().executeTurnResolution(
       { kind: 'attack', skillId: 'blazing_meteor' },
       { kind: 'light_reflect' },
       turnTop('player', affinity('FIRE')),
       turnTop('enemy', affinity('WOOD')),
       0,
+      turnRandom(0.5),
     );
     expect(resolution.kind).toBe('defense_fail');
     expect(resolution.damageResults?.[0]).toMatchObject({

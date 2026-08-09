@@ -4,6 +4,17 @@ import { DEFAULT_BUILD } from '../../../../src/data/parts';
 import { applyDamageResult } from '../../../../src/gameplay/damage';
 import { TurnArbitrator } from '../../../../src/gameplay/battlePhysics';
 import { TopEntity } from '../../../../src/gameplay/top';
+import type { RandomSource } from '../../../../src/sim/rng';
+
+const HIGH_RANDOM: RandomSource = {
+  nextFloat: () => 0.99,
+  nextUint32: () => 0xfd70_a3d7,
+  nextInt: (min, maxExclusive) => min + Math.floor(0.99 * (maxExclusive - min)),
+};
+
+function turnRandom() {
+  return { combat: HIGH_RANDOM, physics: HIGH_RANDOM };
+}
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -34,7 +45,6 @@ function createTops() {
 
 describe('turn reflect actions', () => {
   it('returns scaled light-reflect damage without mutating either top during arbitration', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.99);
     const { player, enemy } = createTops();
     const playerIntegrity = player.integrity;
     const enemyIntegrity = enemy.integrity;
@@ -45,6 +55,7 @@ describe('turn reflect actions', () => {
       player,
       enemy,
       1,
+      turnRandom(),
     );
 
     expect(result.kind).toBe('defense_success');
@@ -63,7 +74,6 @@ describe('turn reflect actions', () => {
   });
 
   it('reflects tier-five attacks only with heavy reflect', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.99);
     const heavy = createTops();
     const heavyResult = new TurnArbitrator().executeTurnResolution(
       { kind: 'attack', skillId: 'phantom_clone' },
@@ -71,6 +81,7 @@ describe('turn reflect actions', () => {
       heavy.player,
       heavy.enemy,
       1,
+      turnRandom(),
     );
     expect(heavyResult.kind).toBe('defense_success');
     expect(heavyResult.enemySpiritDelta).toBe(-20);
@@ -83,6 +94,7 @@ describe('turn reflect actions', () => {
       light.player,
       light.enemy,
       1,
+      turnRandom(),
     );
     expect(lightResult.kind).toBe('defense_fail');
     expect(lightResult.damageResults).toHaveLength(1);

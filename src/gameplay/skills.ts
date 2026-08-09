@@ -7,6 +7,7 @@ import {
 } from '../types/battle';
 import type { TopEntity } from './top';
 import { SpiritSystem } from './spirit';
+import type { RandomSource } from '../sim/rng';
 
 type SkillCastResult =
   | { ok: true; skillId: SkillId }
@@ -63,6 +64,10 @@ export function getSkillLabel(skillId: SkillId) {
   }
 }
 
+export function selectPhantomCloneIndex(cloneCount: number, random: RandomSource) {
+  return random.nextInt(0, cloneCount);
+}
+
 export function getSkillVisualSchool(skillId: SkillId): SkillVisualSchool {
   return skillId === 'frost_bite' ? 'frost' : ELEMENT_ATTACKS[skillId].visualSchool;
 }
@@ -114,7 +119,30 @@ export class SkillManager {
     }
   }
 
-  update(top: TopEntity, dt: number, target: TopEntity) {
+  updateSimulation(top: TopEntity, dt: number, target: TopEntity, random: RandomSource) {
+    if (top.statusEffects.length === 0) return;
+
+    for (const effect of top.statusEffects) {
+      effect.remaining = Math.max(0, effect.remaining - dt);
+      if (effect.id === 'wind_blade') {
+        const dist = top.position.distanceTo(target.position);
+        if (dist < 3.0) {
+          const pull = new THREE.Vector2().subVectors(top.position, target.position).normalize().multiplyScalar(dt * 0.8);
+          target.velocity.add(pull);
+        }
+      }
+      if (effect.id === 'frost_bite') {
+        top.isFrozen = true;
+        top.spin = Math.max(0, top.spin - top.stats.maxSpin * 0.05 * dt);
+      }
+    }
+
+    const expired = top.statusEffects.filter((effect) => effect.remaining <= 0);
+    for (const effect of expired) this.expireEffect(top, effect, random);
+    top.statusEffects = top.statusEffects.filter((effect) => effect.remaining > 0);
+  }
+
+  updateVisual(top: TopEntity, dt: number, target: TopEntity) {
     if (top.lightningLines.length > 0) {
       top.lightningTimer -= dt;
       if (top.lightningTimer <= 0) {
@@ -136,33 +164,16 @@ export class SkillManager {
 
     if (top.statusEffects.length === 0) return;
 
-    for (const effect of top.statusEffects) {
-      effect.remaining = Math.max(0, effect.remaining - dt);
-      this.updateEffect(top, effect, dt, target);
-    }
-
-    const expired = top.statusEffects.filter((effect) => effect.remaining <= 0);
-    if (expired.length > 0) {
-      for (const effect of expired) {
-        this.expireEffect(top, effect);
-      }
-      top.statusEffects = top.statusEffects.filter((effect) => effect.remaining > 0);
-    }
+    for (const effect of top.statusEffects) this.updateEffectVisual(top, effect, dt);
   }
 
-  private updateEffect(top: TopEntity, effect: TimedStatusEffect, dt: number, target: TopEntity) {
+  private updateEffectVisual(top: TopEntity, effect: TimedStatusEffect, dt: number) {
     if (effect.id === 'wind_blade') {
       top.windMeshes.forEach(mesh => {
         if (mesh.material instanceof THREE.ShaderMaterial) {
           mesh.material.uniforms.uTime.value += dt;
         }
       });
-      // Weak suction to enemy
-      const dist = top.position.distanceTo(target.position);
-      if (dist < 3.0) {
-        const pull = new THREE.Vector2().subVectors(top.position, target.position).normalize().multiplyScalar(dt * 0.8);
-        target.velocity.add(pull);
-      }
     }
     if (effect.id === 'aqua_surge' && top.waterRippleMesh) {
       if (top.waterRippleMesh.material instanceof THREE.ShaderMaterial) {
@@ -200,9 +211,6 @@ export class SkillManager {
       });
     }
     if (effect.id === 'frost_bite') {
-      top.isFrozen = true;
-      top.spin = Math.max(0, top.spin - top.stats.maxSpin * 0.05 * dt);
-      
       if (!top.frostGroup) {
         this.initFrostBite(top);
       }
@@ -253,7 +261,7 @@ export class SkillManager {
     }
   }
 
-  private expireEffect(top: TopEntity, effect: TimedStatusEffect) {
+  private expireEffect(top: TopEntity, effect: TimedStatusEffect, random: RandomSource) {
     if (effect.id === 'wind_blade') {
       top.windMeshes.forEach(mesh => {
         if (mesh.parent) mesh.parent.remove(mesh);
@@ -293,7 +301,7 @@ export class SkillManager {
     if (effect.id === 'phantom_clone') {
       if (top.clones.length > 0) {
         // Randomly snap real top to one of the clones
-        const snapClone = top.clones[Math.floor(Math.random() * top.clones.length)];
+        const snapClone = top.clones[selectPhantomCloneIndex(top.clones.length, random)];
         top.position.set(snapClone.position.x, snapClone.position.z);
         
         let glitchMaterial: THREE.Material | null = null;

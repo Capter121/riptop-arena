@@ -7,6 +7,15 @@ import { getSkillVisualSchool } from '../../src/gameplay/skills';
 import type { TopEntity } from '../../src/gameplay/top';
 import { DEFAULT_BUILD } from '../../src/data/parts';
 import { ELEMENT_ATTACKS } from '../../src/types/battle';
+import type { RandomSource } from '../../src/sim/rng';
+
+function constantRandom(value: number): RandomSource {
+  return {
+    nextFloat: () => value,
+    nextUint32: () => Math.floor(value * 0x1_0000_0000) >>> 0,
+    nextInt: (min, maxExclusive) => min + Math.floor(value * (maxExclusive - min)),
+  };
+}
 
 const expectedAttacks = [
   { skillId: 'wind_blade', label: '风刃', icon: '🌪️', tier: 1, spiritCost: 20, color: '#7ef0ff', visualSchool: 'wind' },
@@ -60,7 +69,7 @@ describe('skill visuals and battle affinity', () => {
       isCounter: false,
       isClash: false,
       isBlockOrMiss: false,
-      random: () => 0.5,
+      random: constantRandom(0.5),
     });
     const waterDamage = calculateTurnDamage({
       attacker: top('player', 'WATER'),
@@ -69,7 +78,7 @@ describe('skill visuals and battle affinity', () => {
       isCounter: false,
       isClash: false,
       isBlockOrMiss: false,
-      random: () => 0.5,
+      random: constantRandom(0.5),
     });
 
     expect(ELEMENT_ATTACKS.wind_blade.visualSchool).toBe('wind');

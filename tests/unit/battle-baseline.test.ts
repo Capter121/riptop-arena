@@ -7,6 +7,15 @@ import { buildNssBattleStats } from '../../src/nss/buildStats';
 import { createNssBattleLoadout } from '../../src/nss/loadout';
 import type { BuildSelection } from '../../src/data/parts';
 import type { NssCombination } from '../../src/nss/types';
+import type { RandomSource } from '../../src/sim/rng';
+
+function constantRandom(value: number): RandomSource {
+  return {
+    nextFloat: () => value,
+    nextUint32: () => Math.floor(value * 0x1_0000_0000) >>> 0,
+    nextInt: (min, maxExclusive) => min + Math.floor(value * (maxExclusive - min)),
+  };
+}
 
 function statsFor(testCase: (typeof fixture.cases)[number]): BattleStats {
   return testCase.kind === 'legacy'
@@ -40,7 +49,7 @@ describe('pre-affinity battle baseline', () => {
       isCounter: false,
       isClash: false,
       isBlockOrMiss: false,
-      random: () => fixture.damageContext.random,
+      random: constantRandom(fixture.damageContext.random),
     });
 
     expect(damage.finalDamage).toBe(expected.damageAgainstLegacy);
