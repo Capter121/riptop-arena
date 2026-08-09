@@ -25,3 +25,7 @@ dist-ssr
 
 # Local agent workspace
 .superpowers/
+
+# Private server runtime data
+/data/
+/backups/

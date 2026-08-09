@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   access,
@@ -16,7 +17,7 @@ import {
 import { tmpdir } from 'node:os';
 import { isAbsolute, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   backupPrivateServer,
   restorePrivateServer,
@@ -89,11 +90,33 @@ const oldRestoreDatabasePath = join(root, 'old-restored.sqlite');
 const failedRestoreDatabasePath = join(root, 'failed-restored.sqlite');
 const failedRestoreUploadsPath = join(root, 'failed-restored-uploads');
 const restoreSentinelPath = join(restoreUploadsPath, 'keep.txt');
+const backupCliPath = fileURLToPath(new URL('./backup-private-server.mjs', import.meta.url));
+const restoreCliPath = fileURLToPath(new URL('./restore-private-server.mjs', import.meta.url));
+const cliBackupRoot = join(root, 'cli-backups');
+const cliOverrideRoot = join(root, 'cli-override-backups');
+const cliRestoreDatabasePath = join(root, 'cli-restored.sqlite');
 
 let liveDatabase;
 let oldDatabase;
 let restoredOldDatabase;
 let uploadLinkCreated = false;
+let cliBackupPath;
+
+function cliEnvironment(overrides = {}) {
+  const environment = { ...process.env, ...overrides };
+  if (overrides.BACKUP_ROOT === null) delete environment.BACKUP_ROOT;
+  if (overrides.UPLOAD_ROOT === null) delete environment.UPLOAD_ROOT;
+  return environment;
+}
+
+function runCli(scriptPath, args, environment) {
+  return spawnSync(process.execPath, [scriptPath, ...args], {
+    cwd: fileURLToPath(new URL('../', import.meta.url)),
+    env: environment,
+    encoding: 'utf8',
+    timeout: 30_000,
+  });
+}
 
 try {
   await writeFile(databasePath, 'step-one-database', 'utf8');
@@ -568,6 +591,78 @@ try {
     'badge recipe',
   );
 
+  const backupEnvironment = cliEnvironment({
+    DATABASE_PATH: liveDatabasePath,
+    BACKUP_ROOT: cliBackupRoot,
+    UPLOAD_ROOT: null,
+  });
+  const backupDryRun = runCli(backupCliPath, ['--dry-run'], backupEnvironment);
+  assert.equal(backupDryRun.status, 0, backupDryRun.stderr);
+  const backupDryRunSummary = JSON.parse(backupDryRun.stdout);
+  assert.equal(backupDryRunSummary.dryRun, true);
+  assert.equal(backupDryRunSummary.backupPath.startsWith(cliBackupRoot), true);
+  await assert.rejects(() => access(cliBackupRoot), error => error?.code === 'ENOENT');
+
+  const overrideDryRun = runCli(
+    backupCliPath,
+    ['--output', cliOverrideRoot, '--dry-run'],
+    backupEnvironment,
+  );
+  assert.equal(overrideDryRun.status, 0, overrideDryRun.stderr);
+  assert.equal(JSON.parse(overrideDryRun.stdout).backupPath.startsWith(cliOverrideRoot), true);
+  await assert.rejects(() => access(cliOverrideRoot), error => error?.code === 'ENOENT');
+
+  const missingRoot = runCli(
+    backupCliPath,
+    ['--dry-run'],
+    cliEnvironment({ DATABASE_PATH: liveDatabasePath, BACKUP_ROOT: null, UPLOAD_ROOT: null }),
+  );
+  assert.notEqual(missingRoot.status, 0);
+  assert.match(missingRoot.stderr, /backup root/i);
+  assert.doesNotMatch(missingRoot.stderr, /at file:|BACKUP01|Backup Nova|a{64}/i);
+
+  for (const args of [['--unknown'], ['--output'], ['--dry-run', '--dry-run']]) {
+    const invalid = runCli(backupCliPath, args, backupEnvironment);
+    assert.notEqual(invalid.status, 0);
+    assert.doesNotMatch(invalid.stderr, /at file:|BACKUP01|Backup Nova|a{64}/i);
+  }
+
+  const backupCli = runCli(backupCliPath, [], backupEnvironment);
+  assert.equal(backupCli.status, 0, backupCli.stderr);
+  const backupCliSummary = JSON.parse(backupCli.stdout);
+  cliBackupPath = backupCliSummary.backupPath;
+  assert.equal(backupCliSummary.status, 'complete');
+  assert.doesNotMatch(`${backupCli.stdout}${backupCli.stderr}`, /BACKUP01|Backup Nova|a{64}/i);
+
+  const restoreEnvironment = cliEnvironment({
+    DATABASE_PATH: cliRestoreDatabasePath,
+    UPLOAD_ROOT: null,
+  });
+  const restoreDryRun = runCli(
+    restoreCliPath,
+    ['--backup', cliBackupPath, '--dry-run'],
+    restoreEnvironment,
+  );
+  assert.equal(restoreDryRun.status, 0, restoreDryRun.stderr);
+  assert.equal(JSON.parse(restoreDryRun.stdout).dryRun, true);
+  await assert.rejects(() => access(cliRestoreDatabasePath), error => error?.code === 'ENOENT');
+
+  for (const args of [[], ['--backup'], ['--unknown'], ['--dry-run', '--dry-run']]) {
+    const invalid = runCli(restoreCliPath, args, restoreEnvironment);
+    assert.notEqual(invalid.status, 0);
+    assert.doesNotMatch(invalid.stderr, /at file:|BACKUP01|Backup Nova|a{64}/i);
+  }
+
+  const restoreCli = runCli(
+    restoreCliPath,
+    ['--backup', cliBackupPath],
+    restoreEnvironment,
+  );
+  assert.equal(restoreCli.status, 0, restoreCli.stderr);
+  assert.equal(JSON.parse(restoreCli.stdout).status, 'complete');
+  assert.doesNotMatch(`${restoreCli.stdout}${restoreCli.stderr}`, /BACKUP01|Backup Nova|a{64}/i);
+  assert.equal(await sha256(cliRestoreDatabasePath), (await sha256(join(cliBackupPath, 'arena.sqlite'))));
+
   await writeFile(failedDatabasePath, 'not a sqlite database', 'utf8');
   await assert.rejects(
     () => backupPrivateServer({
@@ -583,6 +678,16 @@ try {
   liveDatabase?.close();
   oldDatabase?.close();
   restoredOldDatabase?.close();
+  await unlinkIfPresent(`${cliRestoreDatabasePath}-shm`);
+  await unlinkIfPresent(`${cliRestoreDatabasePath}-wal`);
+  await unlinkIfPresent(cliRestoreDatabasePath);
+  if (cliBackupPath) {
+    await unlinkIfPresent(join(cliBackupPath, 'manifest.json'));
+    await unlinkIfPresent(join(cliBackupPath, 'arena.sqlite'));
+    await rmdirIfPresent(cliBackupPath);
+  }
+  await rmdirIfPresent(cliBackupRoot);
+  await rmdirIfPresent(cliOverrideRoot);
   await unlinkIfPresent(join(failedRestoreUploadsPath, 'badges', 'badge..v1.txt'));
   await rmdirIfPresent(join(failedRestoreUploadsPath, 'badges'));
   await unlinkIfPresent(join(failedRestoreUploadsPath, 'emblem.webp'));
