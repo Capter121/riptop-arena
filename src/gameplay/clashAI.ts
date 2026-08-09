@@ -1,4 +1,5 @@
 import type { EnemyPreset } from '../data/enemies';
+import type { RandomSource } from '../sim/rng';
 import type { ClashAction } from './clash';
 
 export class ClashAI {
@@ -7,13 +8,18 @@ export class ClashAI {
     this.preset = preset;
   }
 
-  decide(energy: number, playerLastAction: ClashAction | null, hasStealthEffect: boolean = false): ClashAction {
-    const r = Math.random();
+  decide(
+    energy: number,
+    playerLastAction: ClashAction | null,
+    hasStealthEffect: boolean,
+    random: RandomSource,
+  ): ClashAction {
+    const r = random.nextFloat();
 
     if (hasStealthEffect) {
       // Tactical stealth misdirection: 30% chance to completely ignore player's pattern
-      const roll = Math.random();
-      if (roll < 0.25) return { type: 'attack', power: Math.random() > 0.5 ? 2 : 1 };
+      const roll = random.nextFloat();
+      if (roll < 0.25) return { type: 'attack', power: random.nextFloat() > 0.5 ? 2 : 1 };
       if (roll < 0.50) return { type: 'defend' };
       if (roll < 0.75) return { type: 'dodge' };
       return { type: 'charge' };
@@ -45,7 +51,7 @@ export class ClashAI {
     else actionType = 'charge';
 
     if (actionType === 'attack') {
-      if (energy >= 3) return { type: 'attack', power: this.preset.name === 'Rift Drift' ? 1 : (Math.random() > 0.5 ? 2 : 3) };
+      if (energy >= 3) return { type: 'attack', power: this.preset.name === 'Rift Drift' ? 1 : (random.nextFloat() > 0.5 ? 2 : 3) };
       if (energy >= 2) return { type: 'attack', power: 2 };
       if (energy >= 1) return { type: 'attack', power: 1 };
       return { type: 'charge' };
