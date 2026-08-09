@@ -84,9 +84,15 @@ const oldSourcePath = join(root, 'old.sqlite');
 const oldBackupRoot = join(root, 'old-backups');
 const oldNow = new Date('2026-08-09T01:02:08.009Z');
 const oldBackupPath = join(oldBackupRoot, 'nss-private-20260809T010208009Z');
+const uploadRestoreDatabasePath = join(root, 'upload-restored.sqlite');
+const oldRestoreDatabasePath = join(root, 'old-restored.sqlite');
+const failedRestoreDatabasePath = join(root, 'failed-restored.sqlite');
+const failedRestoreUploadsPath = join(root, 'failed-restored-uploads');
+const restoreSentinelPath = join(restoreUploadsPath, 'keep.txt');
 
 let liveDatabase;
 let oldDatabase;
+let restoredOldDatabase;
 let uploadLinkCreated = false;
 
 try {
@@ -466,6 +472,102 @@ try {
   });
   assert.equal(oldRestorePlan.fileCount, 1);
 
+  await writeFile(restoreDatabasePath, 'do not overwrite', 'utf8');
+  await assert.rejects(
+    () => restorePrivateServer({
+      backupPath: liveBackupPath,
+      databasePath: restoreDatabasePath,
+    }),
+    /database target already exists/i,
+  );
+  assert.equal(await readFile(restoreDatabasePath, 'utf8'), 'do not overwrite');
+  await unlink(restoreDatabasePath);
+
+  await mkdir(restoreUploadsPath);
+  await writeFile(restoreSentinelPath, 'do not overwrite uploads', 'utf8');
+  await assert.rejects(
+    () => restorePrivateServer({
+      backupPath: uploadBackupPath,
+      databasePath: uploadRestoreDatabasePath,
+      uploadsPath: restoreUploadsPath,
+    }),
+    /uploads target already exists/i,
+  );
+  assert.equal(await readFile(restoreSentinelPath, 'utf8'), 'do not overwrite uploads');
+  await unlink(restoreSentinelPath);
+  await rmdir(restoreUploadsPath);
+
+  const restoredLive = await restorePrivateServer({
+    backupPath: liveBackupPath,
+    databasePath: restoreDatabasePath,
+    uploadsPath,
+  });
+  assert.equal(restoredLive.status, 'complete');
+  assert.equal(restoredLive.uploadsIncluded, false);
+  assert.equal((await readdir(uploadsPath)).includes('emblem.webp'), true);
+  const restoredLiveDatabase = new DatabaseSync(immutableDatabaseUrl(restoreDatabasePath), { readOnly: true });
+  try {
+    assert.equal(
+      restoredLiveDatabase.prepare('SELECT coins FROM player_progression WHERE player_id = ?')
+        .get('backup-player').coins,
+      275,
+    );
+  } finally {
+    restoredLiveDatabase.close();
+  }
+
+  const restoredUpload = await restorePrivateServer({
+    backupPath: uploadBackupPath,
+    databasePath: uploadRestoreDatabasePath,
+    uploadsPath: restoreUploadsPath,
+  });
+  assert.equal(restoredUpload.status, 'complete');
+  assert.equal(restoredUpload.fileCount, 3);
+  assert.equal(await sha256(uploadRestoreDatabasePath), originalUploadManifest.database.sha256);
+  assert.equal(
+    await sha256(join(restoreUploadsPath, 'badges', 'badge..v1.txt')),
+    originalUploadManifest.uploads.files[0].sha256,
+  );
+  assert.equal(
+    await sha256(join(restoreUploadsPath, 'emblem.webp')),
+    originalUploadManifest.uploads.files[1].sha256,
+  );
+
+  await restorePrivateServer({
+    backupPath: oldBackupPath,
+    databasePath: oldRestoreDatabasePath,
+  });
+  restoredOldDatabase = openDatabase(oldRestoreDatabasePath);
+  assert.deepEqual(await migrateDatabase(restoredOldDatabase), [2, 3]);
+  assert.deepEqual(
+    restoredOldDatabase.prepare('SELECT version FROM schema_migrations ORDER BY version').all()
+      .map(row => row.version),
+    [1, 2, 3],
+  );
+  restoredOldDatabase.close();
+  restoredOldDatabase = null;
+
+  let restoreCopyCount = 0;
+  await assert.rejects(
+    () => restorePrivateServer({
+      backupPath: uploadBackupPath,
+      databasePath: failedRestoreDatabasePath,
+      uploadsPath: failedRestoreUploadsPath,
+      copyFileImpl: async (...args) => {
+        restoreCopyCount += 1;
+        if (restoreCopyCount === 2) throw new Error('simulated upload copy failure');
+        await copyFile(...args);
+      },
+    }),
+    /simulated upload copy failure/i,
+  );
+  assert.equal(restoreCopyCount, 2);
+  await assert.rejects(() => access(failedRestoreDatabasePath), error => error?.code === 'ENOENT');
+  assert.equal(
+    await readFile(join(failedRestoreUploadsPath, 'badges', 'badge..v1.txt'), 'utf8'),
+    'badge recipe',
+  );
+
   await writeFile(failedDatabasePath, 'not a sqlite database', 'utf8');
   await assert.rejects(
     () => backupPrivateServer({
@@ -480,8 +582,24 @@ try {
 } finally {
   liveDatabase?.close();
   oldDatabase?.close();
-  await unlinkIfPresent(restoreDatabasePath);
+  restoredOldDatabase?.close();
+  await unlinkIfPresent(join(failedRestoreUploadsPath, 'badges', 'badge..v1.txt'));
+  await rmdirIfPresent(join(failedRestoreUploadsPath, 'badges'));
+  await unlinkIfPresent(join(failedRestoreUploadsPath, 'emblem.webp'));
+  await rmdirIfPresent(failedRestoreUploadsPath);
+  await unlinkIfPresent(failedRestoreDatabasePath);
+  await unlinkIfPresent(join(restoreUploadsPath, 'badges', 'badge..v1.txt'));
+  await rmdirIfPresent(join(restoreUploadsPath, 'badges'));
+  await unlinkIfPresent(join(restoreUploadsPath, 'emblem.webp'));
+  await unlinkIfPresent(restoreSentinelPath);
   await rmdirIfPresent(restoreUploadsPath);
+  await unlinkIfPresent(`${uploadRestoreDatabasePath}-shm`);
+  await unlinkIfPresent(`${uploadRestoreDatabasePath}-wal`);
+  await unlinkIfPresent(uploadRestoreDatabasePath);
+  await unlinkIfPresent(restoreDatabasePath);
+  await unlinkIfPresent(`${oldRestoreDatabasePath}-shm`);
+  await unlinkIfPresent(`${oldRestoreDatabasePath}-wal`);
+  await unlinkIfPresent(oldRestoreDatabasePath);
   await unlinkIfPresent(unexpectedArchiveFile);
   await unlinkIfPresent(join(futureBackupPath, 'manifest.json'));
   await unlinkIfPresent(`${futureDatabasePath}-shm`);

@@ -1,7 +1,18 @@
-import { createHash } from 'node:crypto';
-import { createReadStream } from 'node:fs';
-import { chmod, copyFile, lstat, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
-import { dirname, isAbsolute, join, posix, relative, resolve, sep } from 'node:path';
+import { createHash, randomUUID } from 'node:crypto';
+import { constants as fsConstants, createReadStream } from 'node:fs';
+import {
+  chmod,
+  copyFile,
+  link,
+  lstat,
+  mkdir,
+  readFile,
+  readdir,
+  stat,
+  unlink,
+  writeFile,
+} from 'node:fs/promises';
+import { basename, dirname, isAbsolute, join, posix, relative, resolve, sep } from 'node:path';
 import { backup as backupDatabase, DatabaseSync } from 'node:sqlite';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -285,6 +296,12 @@ async function inspectArchive(backupPath) {
   };
 }
 
+async function assertRestoredFile(path, expected, label) {
+  const actual = await fileRecord(path);
+  if (actual.bytes !== expected.bytes) throw new Error(`${label} size mismatch after restore.`);
+  if (actual.sha256 !== expected.sha256) throw new Error(`${label} hash mismatch after restore.`);
+}
+
 export async function backupPrivateServer(options = {}) {
   const databasePath = requiredPath(options.databasePath, 'Database path');
   const backupRoot = requiredPath(options.backupRoot, 'Backup root');
@@ -400,12 +417,67 @@ export async function restorePrivateServer(options = {}) {
     if (isWithin(backupPath, uploadsPath)) throw new Error('Restore target cannot be inside the backup archive.');
     if (await pathType(uploadsPath)) throw new Error('Restore uploads target already exists.');
   }
-  if (options.dryRun !== true) throw new Error('Restore creation is not implemented.');
+  if (options.dryRun === true) {
+    return {
+      operation: 'restore',
+      status: 'planned',
+      dryRun: true,
+      backupPath,
+      databasePath,
+      uploadsIncluded: archive.manifest.uploads.included,
+      fileCount: archive.fileCount,
+      totalBytes: archive.totalBytes,
+    };
+  }
+
+  const copyRestoredFile = options.copyFileImpl ?? copyFile;
+  if (typeof copyRestoredFile !== 'function') throw new TypeError('Restore copy implementation must be a function.');
+  if (archive.manifest.uploads.included) {
+    await mkdir(dirname(uploadsPath), { recursive: true, mode: 0o700 });
+    await mkdir(uploadsPath, { mode: 0o700 });
+    for (const upload of archive.manifest.uploads.files) {
+      const relativeUploadPath = upload.path.slice('uploads/'.length);
+      const sourcePath = join(backupPath, ...upload.path.split('/'));
+      const destinationPath = join(uploadsPath, ...relativeUploadPath.split('/'));
+      if (!isWithin(uploadsPath, destinationPath)) throw new Error('Restore upload path escapes its target.');
+      await mkdir(dirname(destinationPath), { recursive: true, mode: 0o700 });
+      await copyRestoredFile(sourcePath, destinationPath, fsConstants.COPYFILE_EXCL);
+      await chmod(destinationPath, 0o600);
+      await assertRestoredFile(destinationPath, upload, `Upload ${upload.path}`);
+    }
+  }
+
+  await mkdir(dirname(databasePath), { recursive: true, mode: 0o700 });
+  const temporaryDatabasePath = join(
+    dirname(databasePath),
+    `.${basename(databasePath)}.restore-${randomUUID()}.tmp`,
+  );
+  await copyRestoredFile(
+    join(backupPath, archive.manifest.database.path),
+    temporaryDatabasePath,
+    fsConstants.COPYFILE_EXCL,
+  );
+  await chmod(temporaryDatabasePath, 0o600);
+  await assertRestoredFile(temporaryDatabasePath, archive.manifest.database, 'Database');
+  const temporaryInspection = inspectDatabase(temporaryDatabasePath);
+  if (temporaryInspection.migrationVersions.join('\0')
+    !== archive.manifest.database.migrationVersions.join('\0')) {
+    throw new Error('Restored database migration versions changed before placement.');
+  }
+  await link(temporaryDatabasePath, databasePath);
+  await unlink(temporaryDatabasePath);
+
+  await assertRestoredFile(databasePath, archive.manifest.database, 'Database');
+  const finalInspection = inspectDatabase(databasePath);
+  if (finalInspection.migrationVersions.join('\0')
+    !== archive.manifest.database.migrationVersions.join('\0')) {
+    throw new Error('Restored database migration versions do not match the backup.');
+  }
 
   return {
     operation: 'restore',
-    status: 'planned',
-    dryRun: true,
+    status: 'complete',
+    dryRun: false,
     backupPath,
     databasePath,
     uploadsIncluded: archive.manifest.uploads.included,
