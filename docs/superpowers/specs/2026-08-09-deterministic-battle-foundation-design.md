@@ -251,6 +251,7 @@ type BattleInputLogV1 = {
   playerVoiceFrames: number[];
   turns: Array<{
     turnIndex: number;
+    decisionTicks: number;
     playerAction: TurnAction;
     enemyAction: TurnAction;
     qteFinal?: {
@@ -268,6 +269,8 @@ type BattleInputLogV1 = {
 - `playerVoiceFrames` 的数组索引对应从零开始的战斗 tick。复验时缺失、额外或超出范围的样本均视为 `INVALID_BATTLE_INPUT`。
 - 语音记录只保存音量等级，不保存麦克风音频、设备信息或墙钟时间。
 - 回合编号从 1 连续递增。
+- `decisionTicks` 从回合进入可操作的 `awaiting` 状态后开始计数，到合法动作被接受时停止；它只记录固定模拟 tick 数，不记录墙钟时间。
+- `decisionTicks` 必须是非负安全整数，且不能超过当前规则允许的回合等待 tick 上限。复验时必须先推进相同数量的等待 tick，再提交该回合动作。
 - 只记录最终采用的动作，不记录点击、悬停或取消。
 - QTE 只记录最终分数，不记录逐次按键或墙钟时间。
 - AI 动作用于战报诊断；复验时必须重新派生并比较，不能直接作为可信输入。
@@ -316,7 +319,7 @@ type BattleOutcomeSummaryV1 = {
 
 - 种子格式非法：`INVALID_BATTLE_SEED`。
 - 模拟版本不支持：`UNSUPPORTED_SIMULATION_VERSION`。
-- 回合、动作、技能、发射值、语音 tick 样本或 QTE 分数非法：`INVALID_BATTLE_INPUT`。
+- 回合、`decisionTicks`、动作、技能、发射值、语音 tick 样本或 QTE 分数非法：`INVALID_BATTLE_INPUT`。
 - 复验时 AI 派生动作不一致：`AI_REPLAY_MISMATCH`。
 - 最终状态包含非有限数字：`INVALID_BATTLE_OUTCOME`。
 
@@ -353,9 +356,11 @@ type BattleOutcomeSummaryV1 = {
 ### 12.4 记录和摘要测试
 
 - 非法版本、回合顺序、动作、数值和种子均被拒绝。
+- 负数、非整数、非安全整数或超过回合上限的 `decisionTicks` 均被拒绝。
 - 缺失、额外、非整数或超出 `0..255` 的语音 tick 样本均被拒绝。
 - 三位小数、`-0` 和字段顺序正确。
 - 相同种子和语义输入重复执行后摘要字符串完全相同。
+- 相同动作但不同 `decisionTicks` 会按现有超时规则产生相应状态差异，记录与复验保持一致。
 - 不同种子至少改变一个结果相关字段。
 
 ### 12.5 浏览器整场回归
