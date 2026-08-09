@@ -79,11 +79,18 @@ import {
 import { resolveBattleAffinityRelation } from '../gameplay/affinityDamage';
 import {
   createBattleSeed,
-  createBattleSimulationContext,
   type BattleSeed,
-  type BattleSimulationContext,
 } from '../sim/battleSeed';
 import type { RandomSource } from '../sim/rng';
+import { BattleRuntime, type BattleTickInput } from '../sim/battleRuntime';
+import { encodePlayerVoiceFrame } from '../sim/voiceBoost';
+import { createBattleOutcomeSummary, type BattleOutcomeSummaryV1 } from '../sim/battleRecord';
+import {
+  advanceAiQteScore,
+  createAiQteRate,
+  pickAiLaunch,
+  pickAiTurnAction as chooseAiTurnAction,
+} from '../gameplay/ai';
 
 const QA_HIT_RANDOM: RandomSource = {
   nextFloat: () => 1,
@@ -201,8 +208,12 @@ export class Game {
   private readonly turnPanel = new TurnPanel((action) => this.submitTurnAction(action));
   private readonly clashQtePanel = new ClashQtePanel();
   private readonly voiceBoostOverlay = new VoiceBoostOverlay();
-  private battleSimulation: BattleSimulationContext | null = null;
+  private battleRuntime: BattleRuntime | null = null;
+  private battleOutcomeSummary: BattleOutcomeSummaryV1 | null = null;
   private vKeyHeld = false;
+  private playerVoiceVolume = 0;
+  private aiVoiceVolume = 0;
+  private voiceBoostActive = false;
   private playerDefensiveSuccesses = 0;
   private enemyDefensiveSuccesses = 0;
   private voiceAnalyzerRequested = false;
@@ -600,8 +611,8 @@ export class Game {
   }
 
   private battleRandom() {
-    if (!this.battleSimulation) throw new Error('Battle simulation context is not initialized.');
-    return this.battleSimulation.random;
+    if (!this.battleRuntime) throw new Error('Battle simulation runtime is not initialized.');
+    return this.battleRuntime.context.random;
   }
 
   private turnRandomSources() {
@@ -830,6 +841,7 @@ export class Game {
 
   private resolveOnlineHostTurn(hostAction: TurnAction, guestAction: TurnAction, turnId: number) {
     // [ONLINE HOOK] Host is the only client that invokes random turn arbitration.
+    this.battleRuntime?.recordTurn(hostAction, guestAction);
     const rawResolution = this.turnArbitrator.executeTurnResolution(
       hostAction,
       guestAction,
@@ -1118,6 +1130,26 @@ export class Game {
   }
 
   private showResult(result: BattleResult) {
+    if (!this.battleOutcomeSummary && this.battleRuntime?.inputLog) {
+      const topState = (top: TopEntity) => ({
+        spin: top.spin,
+        integrity: top.integrity,
+        stamina: top.stamina,
+        spirit: top.spirit,
+        burst: top.burst,
+        tilt: top.tilt,
+        alive: top.alive,
+      });
+      this.battleOutcomeSummary = createBattleOutcomeSummary({
+        seed: this.battleRuntime.context.seed,
+        winner: result.winner,
+        kind: result.kind,
+        turnCount: this.battleRuntime.inputLog.turns.length,
+        tickCount: this.battleRuntime.tickCount,
+        player: topState(this.player),
+        enemy: topState(this.enemy),
+      });
+    }
     this.phase = 'result';
     this.currentResult = result;
     this.activeClashQte = null;
@@ -1182,7 +1214,11 @@ export class Game {
   }
 
   private startBattleWithPlayer(nextPlayer: TopEntity, seed = createBattleSeed()) {
-    this.battleSimulation = createBattleSimulationContext(seed);
+    this.battleRuntime = new BattleRuntime(seed);
+    this.battleOutcomeSummary = null;
+    this.playerVoiceVolume = 0;
+    this.aiVoiceVolume = 0;
+    this.voiceBoostActive = false;
     this.audio.stopMenuAmbience();
     this.floatingTexts.clear();
     this.affinityDamageSummary = createEmptyAffinityDamageSummary();
@@ -1330,6 +1366,7 @@ export class Game {
 
     const proceed = () => {
         const aiAction = this.pickAiTurnAction();
+        this.battleRuntime?.recordTurn(playerAction, aiAction);
         const resolution = this.turnArbitrator.executeTurnResolution(
           playerAction,
           aiAction,
@@ -1417,7 +1454,7 @@ export class Game {
       enemyScore: 50,
       timeLeft: duration,
       duration,
-      aiRate: enemyPressure * (0.88 + Math.random() * 0.24),
+      aiRate: createAiQteRate(enemyPressure, this.battleRandom().ai),
       tapPower: 7 + tier * 1.4 + this.player.stats.attack * 0.18,
       lastScoreSentAt: 0,
       finalScoreSent: false,
@@ -1495,8 +1532,12 @@ export class Game {
     if (this.battleMode === 'online') {
       this.sendOnlineClashQteScore(false);
     } else {
-      const aiSurge = 1 + Math.sin(this.time * 8.5 + qte.tier) * 0.08 + Math.random() * 0.12;
-      qte.enemyScore += qte.aiRate * aiSurge * dt;
+      qte.enemyScore = advanceAiQteScore({
+        score: qte.enemyScore,
+        aiRate: qte.aiRate,
+        tier: qte.tier,
+        tickCount: this.battleRuntime?.tickCount ?? 0,
+      }, this.battleRandom().ai);
     }
     this.physics.update(this.player, this.enemy, simulationDt, true);
 
@@ -1588,6 +1629,10 @@ export class Game {
     const qte = this.activeClashQte;
     if (!qte) return;
 
+    if (this.battleRuntime?.inputLog?.turns[this.turnIndex - 1]) {
+      this.battleRuntime.recordQteFinal(this.turnIndex, qte.playerScore, qte.enemyScore);
+    }
+
     const diff = qte.playerScore - qte.enemyScore;
     const margin = Math.abs(diff);
     const damageResults: DamageResult[] = [];
@@ -1675,54 +1720,11 @@ export class Game {
   }
 
   private pickAiTurnAction(): TurnAction {
-    if (this.player.stats.hasStealthEffect && Math.random() < 0.3) {
-      // Stealth mode: AI guesses blindly
-      const r = Math.random();
-      if (r < 0.25) return { kind: 'charge' };
-      if (r < 0.50) return { kind: 'defense' };
-      if (r < 0.75) return { kind: 'evade' };
-      // Fallback attack if they have energy
-      const affordableAttacks = (Object.keys(ELEMENT_ATTACKS) as ElementAttackSkillId[])
-        .filter((skillId) => this.enemy.spirit >= ELEMENT_ATTACKS[skillId].spiritCost);
-      if (affordableAttacks.length > 0) {
-        return { kind: 'attack', skillId: affordableAttacks[Math.floor(Math.random() * affordableAttacks.length)] };
-      }
-      return { kind: 'charge' };
-    }
-
-    const affordableAttacks = (Object.keys(ELEMENT_ATTACKS) as ElementAttackSkillId[])
-      .filter((skillId) => this.enemy.spirit >= ELEMENT_ATTACKS[skillId].spiritCost);
-
-    const isAssault = this.enemy.tacticalMode === 'assault';
-    const isFortress = this.enemy.tacticalMode === 'fortress';
-
-    if (this.enemy.spirit < 25 || affordableAttacks.length === 0) {
-      if (isFortress) {
-        return Math.random() < 0.4 ? { kind: 'defense' } : Math.random() < 0.6 ? { kind: 'evade' } : { kind: 'charge' };
-      }
-      return Math.random() < 0.72 ? { kind: 'charge' } : Math.random() < 0.5 ? { kind: 'defense' } : { kind: 'evade' };
-    }
-
-    const roll = Math.random();
-    
-    // Assault favors attacking
-    const attackThreshold = isAssault ? 0.75 : 0.58;
-    
-    if (roll < attackThreshold) {
-      const weighted = affordableAttacks.flatMap((skillId) => {
-        const tier = ELEMENT_ATTACKS[skillId].tier;
-        return Array.from({ length: isAssault && tier === 1 ? tier * 3 : tier }, () => skillId);
-      });
-      return { kind: 'attack', skillId: pick(weighted) };
-    }
-    
-    const defenseThreshold = isFortress ? 0.85 : (attackThreshold + 0.16);
-    if (roll < defenseThreshold) return { kind: 'defense' };
-    
-    const evadeThreshold = isFortress ? 0.95 : (defenseThreshold + 0.16);
-    if (roll < evadeThreshold) return { kind: 'evade' };
-    
-    return { kind: 'charge' };
+    return chooseAiTurnAction({
+      playerHasStealthEffect: this.player.stats.hasStealthEffect === true,
+      enemySpirit: this.enemy.spirit,
+      enemyTacticalMode: this.enemy.tacticalMode,
+    }, this.battleRandom().ai);
   }
 
   private applyTurnSpiritDelta(resolution: TurnResolution) {
@@ -1757,6 +1759,7 @@ export class Game {
     // Condition trigger: Floating text banner flies across screen, starting 3.0s countdown window immediately
     if (this.playerDefensiveSuccesses >= 1 && this.enemyDefensiveSuccesses >= 1 && isStandoff) {
       this.hud.combatLog.log('🎙️【音爆爆发】3秒限时爆发蓄能开启！对着麦克风喊叫/按 V 键爆发！', '#ff00ff');
+      this.battleRuntime?.startVoiceBoost();
       this.voiceBoostOverlay.startBoostCountdown(3.0);
       this.voiceBoostOverlay.triggerFloatingBanner(
         '🎙️【音爆爆发】3秒限时爆发开启！大声叫喊或长按 V 键蓄能！'
@@ -1765,7 +1768,7 @@ export class Game {
 
     // Trigger AI shouting on attacks or standoff
     if (resolution.aiAction.kind === 'attack' || isStandoff) {
-      this.audio.triggerAiVoiceShout(2.0);
+      this.battleRuntime?.aiVoice.triggerShout(2.0);
     }
 
     const midX = (this.player.position.x + this.enemy.position.x) / 2;
@@ -2509,8 +2512,15 @@ export class Game {
   }
 
   private doLaunch() {
+    const aiLaunch = pickAiLaunch(this.battleRandom().ai);
     launchTop(this.player, new THREE.Vector2(1, 0), this.launchCharge, THREE.MathUtils.degToRad(this.launchAngleDeg));
-    launchTop(this.enemy, new THREE.Vector2(-1, 0), 0.78 + Math.random() * 0.12, THREE.MathUtils.degToRad((Math.random() - 0.5) * 18));
+    launchTop(this.enemy, new THREE.Vector2(-1, 0), aiLaunch.power, THREE.MathUtils.degToRad(aiLaunch.angleDeg));
+    this.battleRuntime?.beginLaunch({
+      playerPower: this.launchCharge,
+      playerAngleDeg: this.launchAngleDeg,
+      enemyPower: aiLaunch.power,
+      enemyAngleDeg: aiLaunch.angleDeg,
+    });
     this.events.emit('launch', { side: 'player', power: this.launchCharge });
     this.events.emit('launch', { side: 'enemy', power: 0.85 });
     this.triggerLaunchFlash(this.launchCharge);
@@ -2541,6 +2551,12 @@ export class Game {
     this.enemy.reset(remoteX, config.z);
     launchTop(this.player, new THREE.Vector2(isHost ? 1 : -1, 0), isHost ? config.hostPower : config.guestPower, 0);
     launchTop(this.enemy, new THREE.Vector2(isHost ? -1 : 1, 0), isHost ? config.guestPower : config.hostPower, 0);
+    this.battleRuntime?.beginLaunch({
+      playerPower: isHost ? config.hostPower : config.guestPower,
+      playerAngleDeg: 0,
+      enemyPower: isHost ? config.guestPower : config.hostPower,
+      enemyAngleDeg: 0,
+    });
     this.events.emit('launch', { side: 'player', power: isHost ? config.hostPower : config.guestPower });
     this.events.emit('launch', { side: 'enemy', power: isHost ? config.guestPower : config.hostPower });
     this.triggerLaunchFlash(0.82);
@@ -2553,6 +2569,65 @@ export class Game {
     this.turnPanel.setPanelLock(this.onlineTurnId <= 0);
     this.onlineStartAt = null;
     this.onlineLaunchConfig = null;
+  }
+
+  private updateBattleTick(input: BattleTickInput) {
+    this.playerVoiceVolume = input.playerVolume;
+    this.aiVoiceVolume = input.aiVolume;
+    this.voiceBoostActive = input.voiceBoostActive;
+
+    if (this.hitStop > 0) {
+      this.hitStop = Math.max(0, this.hitStop - input.dt);
+      return;
+    }
+
+    const simulationDt = input.dt * this.timeScale;
+    if (input.voiceBoostActive) {
+      if (input.playerVolume > 0.35) {
+        this.player.spin = Math.min(this.player.stats.maxSpin * 1.5, this.player.spin + input.playerVolume * 450 * simulationDt);
+        this.player.spirit = Math.min(100, this.player.spirit + input.playerVolume * 35 * simulationDt);
+      }
+      if (input.aiVolume > 0.35) {
+        this.enemy.spin = Math.min(this.enemy.stats.maxSpin * 1.5, this.enemy.spin + input.aiVolume * 400 * simulationDt);
+        this.enemy.spirit = Math.min(100, this.enemy.spirit + input.aiVolume * 30 * simulationDt);
+      }
+    }
+
+    const random = this.battleRandom();
+    this.skillManager.updateSimulation(this.player, input.dt, this.enemy, random.physics);
+    this.skillManager.updateSimulation(this.enemy, input.dt, this.player, random.physics);
+
+    if (this.turnState === 'awaiting') {
+      this.rules.timeLeft = Math.max(0, this.rules.timeLeft - input.dt);
+      if (this.rules.timeLeft <= 0 && !this.currentResult) {
+        this.rules.timeLeft = 0;
+        this.player.spin = Math.max(0, this.player.spin - this.player.stats.maxSpin * 0.4 * input.dt);
+        if (this.player.spin <= 0) {
+          this.player.alive = false;
+          this.showResult({ winner: 'enemy', loser: 'player', kind: 'timeout', label: '瓒呮椂鍒よ礋' });
+        }
+      }
+    }
+
+    if (this.turnState === 'approaching') {
+      this.turnTimer += input.dt;
+      this.physics.update(this.player, this.enemy, simulationDt, true);
+      if (this.physics.checkClashProximity(this.player, this.enemy) || this.turnTimer > 1.5) this.landTurnResolution();
+    } else if (this.turnState === 'resolving') {
+      this.turnTimer = Math.max(0, this.turnTimer - input.dt);
+      this.physics.update(this.player, this.enemy, simulationDt, true);
+      if (this.turnTimer <= 0) this.completeTurnResolution();
+    } else if (this.turnState === 'clash_qte') {
+      this.updateClashQte(input.dt, simulationDt);
+    } else {
+      this.player.velocity.multiplyScalar(0.9);
+      this.enemy.velocity.multiplyScalar(0.9);
+    }
+
+    this.processTagSubstitution();
+    this.processBackgroundCharging(simulationDt);
+    clearTransientFlags(this.player);
+    clearTransientFlags(this.enemy);
   }
 
   private update(dt: number) {
@@ -2602,44 +2677,34 @@ export class Game {
       return;
     }
 
-    const simulationDt = this.hitStop > 0 ? 0 : dt * this.timeScale;
-    this.hitStop = Math.max(0, this.hitStop - dt);
-
-    // Audio sampling & AI voice simulation
     const rawMic = this.audio.getVoiceVolumeLevel();
-    const playerVolume = this.vKeyHeld ? 0.95 : rawMic;
-    const aiVolume = this.audio.updateAiVoice(dt);
-
-    // Update overlay meters & 3-second countdown (only renders during active 3.0s window)
-    this.voiceBoostOverlay.update(playerVolume, aiVolume, dt, this.phase === 'battle');
-
-    // Apply physical & attribute boosts when revealed
-    if (this.phase === 'battle' && this.voiceBoostOverlay.isUnlockedAndRevealed()) {
-      // Player voice boost
-      if (playerVolume > 0.35) {
-        const spinBoost = playerVolume * 450 * simulationDt;
-        const spiritBoost = playerVolume * 35 * simulationDt;
-        this.player.spin = Math.min(this.player.stats.maxSpin * 1.5, this.player.spin + spinBoost);
-        this.player.spirit = Math.min(100, this.player.spirit + spiritBoost);
-        this.shockwave.trigger(this.player.position.x, 0.4, this.player.position.y, 0.8 + playerVolume, 0xffaa00);
-        this.sparks.emit(this.player.position.x, this.player.position.y, playerVolume * 1.5);
-        this.rig.kickShake(0.08 * playerVolume);
-      }
-
-      // AI enemy voice boost
-      if (aiVolume > 0.35) {
-        const aiSpinBoost = aiVolume * 400 * simulationDt;
-        const aiSpiritBoost = aiVolume * 30 * simulationDt;
-        this.enemy.spin = Math.min(this.enemy.stats.maxSpin * 1.5, this.enemy.spin + aiSpinBoost);
-        this.enemy.spirit = Math.min(100, this.enemy.spirit + aiSpiritBoost);
-        this.shockwave.trigger(this.enemy.position.x, 0.4, this.enemy.position.y, 0.8 + aiVolume, 0xff5500);
-        this.sparks.emit(this.enemy.position.x, this.enemy.position.y, aiVolume * 1.5);
-      }
+    const playerVoiceByte = encodePlayerVoiceFrame(this.vKeyHeld ? 0.95 : rawMic);
+    if (this.phase === 'battle' && this.battleRuntime?.inputLog) {
+      this.battleRuntime.advance(
+        dt,
+        playerVoiceByte,
+        this.turnState === 'awaiting',
+        input => {
+          this.updateBattleTick(input);
+          return this.phase === 'battle';
+        },
+      );
     }
-
-    if (this.battleSimulation) {
-      this.skillManager.updateSimulation(this.player, dt, this.enemy, this.battleSimulation.random.physics);
-      this.skillManager.updateSimulation(this.enemy, dt, this.player, this.battleSimulation.random.physics);
+    this.voiceBoostOverlay.update(
+      this.playerVoiceVolume,
+      this.aiVoiceVolume,
+      dt,
+      this.phase === 'battle',
+      this.battleRuntime?.voiceBoostSecondsRemaining,
+    );
+    if (this.voiceBoostActive && this.playerVoiceVolume > 0.35) {
+      this.shockwave.trigger(this.player.position.x, 0.4, this.player.position.y, 0.8 + this.playerVoiceVolume, 0xffaa00);
+      this.sparks.emit(this.player.position.x, this.player.position.y, this.playerVoiceVolume * 1.5);
+      this.rig.kickShake(0.08 * this.playerVoiceVolume);
+    }
+    if (this.voiceBoostActive && this.aiVoiceVolume > 0.35) {
+      this.shockwave.trigger(this.enemy.position.x, 0.4, this.enemy.position.y, 0.8 + this.aiVoiceVolume, 0xff5500);
+      this.sparks.emit(this.enemy.position.x, this.enemy.position.y, this.aiVoiceVolume * 1.5);
     }
     this.skillManager.updateVisual(this.player, dt, this.enemy);
     this.skillManager.updateVisual(this.enemy, dt, this.player);
@@ -2669,44 +2734,7 @@ export class Game {
     if (this.phase === 'battle') {
       document.body.classList.toggle('vignette-active', this.turnState === 'resolving' || this.turnState === 'clash_qte');
 
-      if (this.turnState === 'awaiting') {
-        this.rules.timeLeft = Math.max(0, this.rules.timeLeft - dt);
-        if (this.rules.timeLeft <= 0 && !this.currentResult) {
-          this.rules.timeLeft = 0;
-          this.player.spin = Math.max(0, this.player.spin - this.player.stats.maxSpin * 0.4 * dt);
-          if (this.player.spin <= 0) {
-            this.player.alive = false;
-            const result: BattleResult = {
-              winner: 'enemy',
-              loser: 'player',
-              kind: 'timeout',
-              label: '超时判负'
-            };
-            this.showResult(result);
-          }
-        }
-      }
-
-      if (this.turnState === 'approaching') {
-        this.turnTimer += dt;
-        this.physics.update(this.player, this.enemy, simulationDt, true);
-        if (this.physics.checkClashProximity(this.player, this.enemy) || this.turnTimer > 1.5) {
-          this.landTurnResolution();
-        }
-      } else if (this.turnState === 'resolving') {
-        this.turnTimer = Math.max(0, this.turnTimer - dt);
-        this.physics.update(this.player, this.enemy, simulationDt, true);
-        this.emitTurnChargeParticles();
-
-        if (this.turnTimer <= 0) {
-          this.completeTurnResolution();
-        }
-      } else if (this.turnState === 'clash_qte') {
-        this.updateClashQte(dt, simulationDt);
-      } else {
-        this.player.velocity.multiplyScalar(0.9);
-        this.enemy.velocity.multiplyScalar(0.9);
-      }
+      if (this.turnState === 'resolving') this.emitTurnChargeParticles();
 
       this.turnPanel.update({
         visible: (this.turnState === 'awaiting' && this.rules.timeLeft > 0) || this.turnState === 'resolving',
@@ -2719,8 +2747,6 @@ export class Game {
 
       this.energy.set('player', this.player.spirit / 10);
       this.energy.set('enemy', this.enemy.spirit / 10);
-      this.processTagSubstitution();
-      this.processBackgroundCharging(simulationDt);
     }
 
     if (this.battleMode === 'online' && this.phase === 'battle') {

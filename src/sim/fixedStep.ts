@@ -16,7 +16,7 @@ export class FixedStepClock {
     this.tickCount = 0;
   }
 
-  advance(frameDt: number, onTick: (dt: number, tick: number) => void) {
+  advance(frameDt: number, onTick: (dt: number, tick: number) => boolean | void) {
     if (!Number.isFinite(frameDt) || frameDt < 0) {
       throw new RangeError('Frame delta must be a finite non-negative number.');
     }
@@ -31,7 +31,7 @@ export class FixedStepClock {
       if (Math.abs(this.accumulator) < TICK_EPSILON) this.accumulator = 0;
       this.tickCount += 1;
       steps += 1;
-      onTick(FIXED_BATTLE_DT, this.tickCount);
+      if (onTick(FIXED_BATTLE_DT, this.tickCount) === false) break;
     }
     return steps;
   }

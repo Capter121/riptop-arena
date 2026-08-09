@@ -304,7 +304,8 @@ export class VoiceBoostOverlay {
   /**
    * 逐帧更新双侧分贝与 3.0s 倒计时状态
    */
-  update(playerVolume: number, aiVolume: number, dt: number, inBattle: boolean) {
+  update(playerVolume: number, aiVolume: number, dt: number, inBattle: boolean, remainingSeconds?: number) {
+    if (remainingSeconds !== undefined) this.boostTimer = Math.max(0, remainingSeconds);
     // 若不在战斗中或倒计时归零，立即关闭音爆 UI 与加成状态！
     if (!inBattle || this.boostTimer <= 0) {
       if (this.unlocked || this.isRevealed) {
@@ -314,7 +315,7 @@ export class VoiceBoostOverlay {
     }
 
     // 倒计时减扣
-    this.boostTimer = Math.max(0, this.boostTimer - dt);
+    if (remainingSeconds === undefined) this.boostTimer = Math.max(0, this.boostTimer - dt);
     if (this.boostTimer <= 0) {
       // 3.0 秒窗口到期，关闭音爆 Overlay！
       this.resetState();

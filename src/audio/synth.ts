@@ -164,9 +164,8 @@ export class SynthAudio {
     this.pulse('sine', 988, { attack: 0.04, release: 0.7, gain: 0.04 }, 0, 0.4);
   }
 
-  // ── Voice Analyzer & AI Voice Simulator Integration ──
+  // ── Voice Analyzer Integration ──
   private voiceAnalyzer = new VoiceAnalyzer();
-  private aiSimulator = new AiVoiceSimulator();
 
   async initVoiceAnalyzer() {
     await this.voiceAnalyzer.init();
@@ -176,13 +175,6 @@ export class SynthAudio {
     return this.voiceAnalyzer.getVolumeLevel();
   }
 
-  updateAiVoice(dt: number): number {
-    return this.aiSimulator.update(dt);
-  }
-
-  triggerAiVoiceShout(duration = 1.5) {
-    this.aiSimulator.triggerAiShout(duration);
-  }
 }
 export class VoiceAnalyzer {
   private micContext: AudioContext | null = null;
@@ -216,29 +208,5 @@ export class VoiceAnalyzer {
     }
     const avg = sum / this.dataArray.length;
     return Math.min(1.0, avg / 128);
-  }
-}
-
-export class AiVoiceSimulator {
-  private phase = Math.random() * Math.PI * 2;
-  private targetVolume = 0;
-  private currentVolume = 0;
-  private burstTimer = 0;
-
-  triggerAiShout(durationSec = 1.5) {
-    this.burstTimer = durationSec;
-  }
-
-  update(dt: number): number {
-    this.phase += dt * 8;
-    if (this.burstTimer > 0) {
-      this.burstTimer -= dt;
-      this.targetVolume = 0.68 + Math.sin(this.phase) * 0.22 + (Math.random() - 0.5) * 0.12;
-    } else {
-      const noise = Math.sin(this.phase * 0.5) * 0.2 + Math.cos(this.phase * 1.3) * 0.15;
-      this.targetVolume = Math.max(0.08, Math.min(0.48, noise + 0.18));
-    }
-    this.currentVolume += (this.targetVolume - this.currentVolume) * Math.min(1, dt * 10);
-    return Math.max(0, Math.min(1, this.currentVolume));
   }
 }
