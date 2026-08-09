@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
   access,
+  copyFile,
   mkdir,
   mkdtemp,
   readFile,
@@ -74,8 +75,18 @@ const uploadLinkPath = join(uploadsPath, 'linked.webp');
 const linkBackupRoot = join(root, 'link-backups');
 const linkNow = new Date('2026-08-09T01:02:07.008Z');
 const linkBackupPath = join(linkBackupRoot, 'nss-private-20260809T010207008Z');
+const restoreDatabasePath = join(root, 'restored.sqlite');
+const restoreUploadsPath = join(root, 'restored-uploads');
+const unexpectedArchiveFile = join(liveBackupPath, 'unexpected.txt');
+const futureBackupPath = join(root, 'future-backup');
+const futureDatabasePath = join(futureBackupPath, 'arena.sqlite');
+const oldSourcePath = join(root, 'old.sqlite');
+const oldBackupRoot = join(root, 'old-backups');
+const oldNow = new Date('2026-08-09T01:02:08.009Z');
+const oldBackupPath = join(oldBackupRoot, 'nss-private-20260809T010208009Z');
 
 let liveDatabase;
+let oldDatabase;
 let uploadLinkCreated = false;
 
 try {
@@ -267,6 +278,194 @@ try {
     await assert.rejects(() => access(linkBackupPath), error => error?.code === 'ENOENT');
   }
 
+  const liveManifestPath = join(liveBackupPath, 'manifest.json');
+  const originalLiveManifestText = await readFile(liveManifestPath, 'utf8');
+  const originalLiveManifest = JSON.parse(originalLiveManifestText);
+  const originalLiveDatabase = await readFile(join(liveBackupPath, 'arena.sqlite'));
+  const liveRestoreOptions = {
+    backupPath: liveBackupPath,
+    databasePath: restoreDatabasePath,
+    uploadsPath,
+    dryRun: true,
+  };
+
+  const liveRestorePlan = await restorePrivateServer(liveRestoreOptions);
+  assert.deepEqual(liveRestorePlan, {
+    operation: 'restore',
+    status: 'planned',
+    dryRun: true,
+    backupPath: liveBackupPath,
+    databasePath: restoreDatabasePath,
+    uploadsIncluded: false,
+    fileCount: 1,
+    totalBytes: originalLiveManifest.database.bytes,
+  });
+  await assert.rejects(() => access(restoreDatabasePath), error => error?.code === 'ENOENT');
+
+  const uploadRestorePlan = await restorePrivateServer({
+    backupPath: uploadBackupPath,
+    databasePath: restoreDatabasePath,
+    uploadsPath: restoreUploadsPath,
+    dryRun: true,
+  });
+  assert.equal(uploadRestorePlan.uploadsIncluded, true);
+  assert.equal(uploadRestorePlan.fileCount, 3);
+  await assert.rejects(() => access(restoreUploadsPath), error => error?.code === 'ENOENT');
+  await assert.rejects(
+    () => restorePrivateServer({
+      backupPath: uploadBackupPath,
+      databasePath: restoreDatabasePath,
+      dryRun: true,
+    }),
+    /uploads path.*provided/i,
+  );
+
+  async function expectManifestRejected(change, pattern) {
+    const changedManifest = structuredClone(originalLiveManifest);
+    change(changedManifest);
+    await writeFile(liveManifestPath, `${JSON.stringify(changedManifest, null, 2)}\n`, 'utf8');
+    try {
+      await assert.rejects(() => restorePrivateServer(liveRestoreOptions), pattern);
+    } finally {
+      await writeFile(liveManifestPath, originalLiveManifestText, 'utf8');
+    }
+  }
+
+  await expectManifestRejected(manifest => { manifest.formatVersion = 2; }, /format version/i);
+  await expectManifestRejected(manifest => { manifest.unexpected = true; }, /manifest keys/i);
+  await expectManifestRejected(manifest => { delete manifest.database.quickCheck; }, /database manifest keys/i);
+  await expectManifestRejected(manifest => { manifest.database.sha256 = '0'.repeat(64); }, /hash mismatch/i);
+  await expectManifestRejected(manifest => {
+    manifest.database.migrationVersions = [1, 2, 999];
+  }, /migration versions.*database/i);
+
+  await writeFile(liveManifestPath, '{', 'utf8');
+  try {
+    await assert.rejects(() => restorePrivateServer(liveRestoreOptions), /manifest is not valid json/i);
+  } finally {
+    await writeFile(liveManifestPath, originalLiveManifestText, 'utf8');
+  }
+
+  await unlink(liveManifestPath);
+  try {
+    await assert.rejects(() => restorePrivateServer(liveRestoreOptions), /manifest must be a regular file/i);
+  } finally {
+    await writeFile(liveManifestPath, originalLiveManifestText, 'utf8');
+  }
+
+  const originalUploadManifestText = await readFile(join(uploadBackupPath, 'manifest.json'), 'utf8');
+  const originalUploadManifest = JSON.parse(originalUploadManifestText);
+  const traversalManifest = structuredClone(originalUploadManifest);
+  traversalManifest.uploads.files[0].path = 'uploads/../outside.txt';
+  await writeFile(
+    join(uploadBackupPath, 'manifest.json'),
+    `${JSON.stringify(traversalManifest, null, 2)}\n`,
+    'utf8',
+  );
+  try {
+    await assert.rejects(
+      () => restorePrivateServer({
+        backupPath: uploadBackupPath,
+        databasePath: restoreDatabasePath,
+        uploadsPath: restoreUploadsPath,
+        dryRun: true,
+      }),
+      /path.*invalid/i,
+    );
+  } finally {
+    await writeFile(join(uploadBackupPath, 'manifest.json'), originalUploadManifestText, 'utf8');
+  }
+
+  const duplicateManifest = structuredClone(originalUploadManifest);
+  duplicateManifest.uploads.files.push(structuredClone(duplicateManifest.uploads.files[0]));
+  await writeFile(
+    join(uploadBackupPath, 'manifest.json'),
+    `${JSON.stringify(duplicateManifest, null, 2)}\n`,
+    'utf8',
+  );
+  try {
+    await assert.rejects(
+      () => restorePrivateServer({
+        backupPath: uploadBackupPath,
+        databasePath: restoreDatabasePath,
+        uploadsPath: restoreUploadsPath,
+        dryRun: true,
+      }),
+      /duplicate paths/i,
+    );
+  } finally {
+    await writeFile(join(uploadBackupPath, 'manifest.json'), originalUploadManifestText, 'utf8');
+  }
+
+  await writeFile(unexpectedArchiveFile, 'not declared', 'utf8');
+  try {
+    await assert.rejects(() => restorePrivateServer(liveRestoreOptions), /archive contents.*manifest/i);
+  } finally {
+    await unlinkIfPresent(unexpectedArchiveFile);
+  }
+
+  await unlink(join(liveBackupPath, 'arena.sqlite'));
+  try {
+    await assert.rejects(() => restorePrivateServer(liveRestoreOptions), /archive contents.*manifest/i);
+  } finally {
+    await writeFile(join(liveBackupPath, 'arena.sqlite'), originalLiveDatabase);
+  }
+
+  const corruptDatabase = Buffer.from('not a sqlite database');
+  const corruptManifest = structuredClone(originalLiveManifest);
+  corruptManifest.database.bytes = corruptDatabase.length;
+  corruptManifest.database.sha256 = createHash('sha256').update(corruptDatabase).digest('hex');
+  await writeFile(join(liveBackupPath, 'arena.sqlite'), corruptDatabase);
+  await writeFile(liveManifestPath, `${JSON.stringify(corruptManifest, null, 2)}\n`, 'utf8');
+  try {
+    await assert.rejects(() => restorePrivateServer(liveRestoreOptions), /sqlite|database/i);
+  } finally {
+    await writeFile(join(liveBackupPath, 'arena.sqlite'), originalLiveDatabase);
+    await writeFile(liveManifestPath, originalLiveManifestText, 'utf8');
+  }
+
+  await mkdir(futureBackupPath);
+  await copyFile(join(liveBackupPath, 'arena.sqlite'), futureDatabasePath);
+  const futureDatabase = new DatabaseSync(futureDatabasePath);
+  futureDatabase.prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)')
+    .run(999, 'future_migration');
+  futureDatabase.close();
+  const futureManifest = structuredClone(originalLiveManifest);
+  futureManifest.database.bytes = (await stat(futureDatabasePath)).size;
+  futureManifest.database.sha256 = await sha256(futureDatabasePath);
+  futureManifest.database.migrationVersions = [1, 2, 3, 999];
+  await writeFile(join(futureBackupPath, 'manifest.json'), `${JSON.stringify(futureManifest, null, 2)}\n`, 'utf8');
+  await assert.rejects(
+    () => restorePrivateServer({
+      backupPath: futureBackupPath,
+      databasePath: restoreDatabasePath,
+      dryRun: true,
+    }),
+    /newer migration/i,
+  );
+
+  oldDatabase = openDatabase(oldSourcePath);
+  oldDatabase.exec(`
+    CREATE TABLE schema_migrations (
+      version INTEGER PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      applied_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    );
+  `);
+  oldDatabase.exec(await readFile(new URL('../server/storage/migrations/001_identity.sql', import.meta.url), 'utf8'));
+  oldDatabase.prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)').run(1, 'identity');
+  await backupPrivateServer({
+    databasePath: oldSourcePath,
+    backupRoot: oldBackupRoot,
+    now: oldNow,
+  });
+  const oldRestorePlan = await restorePrivateServer({
+    backupPath: oldBackupPath,
+    databasePath: restoreDatabasePath,
+    dryRun: true,
+  });
+  assert.equal(oldRestorePlan.fileCount, 1);
+
   await writeFile(failedDatabasePath, 'not a sqlite database', 'utf8');
   await assert.rejects(
     () => backupPrivateServer({
@@ -277,9 +476,25 @@ try {
   );
   await assert.rejects(() => access(join(failedBackupPath, 'manifest.json')), error => error?.code === 'ENOENT');
 
-  console.log('Private server archive boundary, SQLite snapshot, and upload tests passed.');
+  console.log('Private server backup and restore validation tests passed.');
 } finally {
   liveDatabase?.close();
+  oldDatabase?.close();
+  await unlinkIfPresent(restoreDatabasePath);
+  await rmdirIfPresent(restoreUploadsPath);
+  await unlinkIfPresent(unexpectedArchiveFile);
+  await unlinkIfPresent(join(futureBackupPath, 'manifest.json'));
+  await unlinkIfPresent(`${futureDatabasePath}-shm`);
+  await unlinkIfPresent(`${futureDatabasePath}-wal`);
+  await unlinkIfPresent(futureDatabasePath);
+  await rmdirIfPresent(futureBackupPath);
+  await unlinkIfPresent(join(oldBackupPath, 'manifest.json'));
+  await unlinkIfPresent(join(oldBackupPath, 'arena.sqlite'));
+  await rmdirIfPresent(oldBackupPath);
+  await rmdirIfPresent(oldBackupRoot);
+  await unlinkIfPresent(`${oldSourcePath}-shm`);
+  await unlinkIfPresent(`${oldSourcePath}-wal`);
+  await unlinkIfPresent(oldSourcePath);
   if (uploadLinkCreated) await unlinkIfPresent(uploadLinkPath);
   await unlinkIfPresent(join(linkBackupPath, 'manifest.json'));
   await unlinkIfPresent(join(linkBackupPath, 'arena.sqlite'));
