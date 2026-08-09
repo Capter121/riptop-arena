@@ -21,6 +21,8 @@ export type BattleTickInput = {
   voiceBoostActive: boolean;
 };
 
+export type PlayerVoiceInput = number | ((tickIndex: number) => number);
+
 export class BattleRuntime {
   readonly context: BattleSimulationContext;
   readonly clock = new FixedStepClock();
@@ -51,12 +53,15 @@ export class BattleRuntime {
 
   advance(
     frameDt: number,
-    playerVoiceByte: number,
+    playerVoiceInput: PlayerVoiceInput,
     decisionActive: boolean,
     onTick: (input: BattleTickInput) => boolean | void,
   ) {
     if (!this.inputLog) throw new Error('Battle launch must be recorded before simulation advances.');
     return this.clock.advance(frameDt, (_dt, tickCount) => {
+      const playerVoiceByte = typeof playerVoiceInput === 'function'
+        ? playerVoiceInput(tickCount - 1)
+        : playerVoiceInput;
       appendPlayerVoiceFrame(this.inputLog!, playerVoiceByte);
       if (decisionActive) this.decisionTicks += 1;
       const voiceBoostActive = this.voiceBoostTicksRemaining > 0;

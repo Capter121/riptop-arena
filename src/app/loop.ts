@@ -10,7 +10,7 @@ export class Loop {
   start() {
     this.last = performance.now();
     const frame = (now: number) => {
-      const dt = Math.min((now - this.last) / 1000, 0.033);
+      const dt = Math.max(0, Math.min((now - this.last) / 1000, 0.033));
       this.last = now;
       this.tick(dt);
       this.raf = requestAnimationFrame(frame);

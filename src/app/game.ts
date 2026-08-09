@@ -79,12 +79,21 @@ import {
 import { resolveBattleAffinityRelation } from '../gameplay/affinityDamage';
 import {
   createBattleSeed,
+  parseBattleSeed,
   type BattleSeed,
 } from '../sim/battleSeed';
 import type { RandomSource } from '../sim/rng';
 import { BattleRuntime, type BattleTickInput } from '../sim/battleRuntime';
 import { encodePlayerVoiceFrame } from '../sim/voiceBoost';
-import { createBattleOutcomeSummary, type BattleOutcomeSummaryV1 } from '../sim/battleRecord';
+import {
+  BattleReplayCursor,
+  createBattleOutcomeSummary,
+  stringifyBattleOutcomeSummary,
+  validateBattleInputLog,
+  type BattleInputLogV1,
+  type BattleOutcomeSummaryV1,
+  type BattleTurnInputV1,
+} from '../sim/battleRecord';
 import {
   advanceAiQteScore,
   createAiQteRate,
@@ -210,6 +219,8 @@ export class Game {
   private readonly voiceBoostOverlay = new VoiceBoostOverlay();
   private battleRuntime: BattleRuntime | null = null;
   private battleOutcomeSummary: BattleOutcomeSummaryV1 | null = null;
+  private battleReplay: { log: BattleInputLogV1; cursor: BattleReplayCursor } | null = null;
+  private qaVoiceSample: number | null = null;
   private vKeyHeld = false;
   private playerVoiceVolume = 0;
   private aiVoiceVolume = 0;
@@ -1190,8 +1201,9 @@ export class Game {
     this.results.root.style.display = 'grid';
   }
 
-  private startBattle(seed?: BattleSeed) {
+  private startBattle(seed?: BattleSeed, preserveReplay = false) {
     if (this.battleMode === 'single' && this.nssRequest.kind === 'ready' && this.nssBattlePreparing) return;
+    if (!preserveReplay) this.battleReplay = null;
     const battleSeed = seed ?? createBattleSeed();
     if (this.battleMode === 'single' && this.nssRequest.kind === 'ready') {
       this.nssBattlePreparing = true;
@@ -1364,19 +1376,7 @@ export class Game {
       return;
     }
 
-    const proceed = () => {
-        const aiAction = this.pickAiTurnAction();
-        this.battleRuntime?.recordTurn(playerAction, aiAction);
-        const resolution = this.turnArbitrator.executeTurnResolution(
-          playerAction,
-          aiAction,
-          this.player,
-          this.enemy,
-          this.turnIndex,
-          this.turnRandomSources(),
-        );
-        this.startTurnPresentation(resolution);
-    };
+    const proceed = () => this.resolveSinglePlayerTurn(playerAction);
 
     if (playerAction.kind === 'attack') {
         const skillName = getSkillLabel(playerAction.skillId);
@@ -1393,6 +1393,31 @@ export class Game {
     } else {
         proceed();
     }
+  }
+
+  private resolveSinglePlayerTurn(playerAction: TurnAction, replayTurn?: BattleTurnInputV1) {
+    const aiAction = this.pickAiTurnAction();
+    if (replayTurn) this.battleReplay?.cursor.assertAiAction(this.turnIndex, aiAction);
+    this.battleRuntime?.recordTurn(playerAction, aiAction);
+    const resolution = this.turnArbitrator.executeTurnResolution(
+      playerAction,
+      aiAction,
+      this.player,
+      this.enemy,
+      this.turnIndex,
+      this.turnRandomSources(),
+    );
+    this.startTurnPresentation(resolution);
+  }
+
+  private submitReplayTurnIfReady() {
+    const replay = this.battleReplay;
+    if (!replay || this.turnState !== 'awaiting' || this.turnIndex > replay.log.turns.length) return;
+    const turn = replay.cursor.turnAtDecisionTick(this.turnIndex, this.battleRuntime?.decisionTicks ?? 0);
+    if (!turn) return;
+    this.turnState = 'cutin';
+    this.turnPanel.setPanelLock(true);
+    this.resolveSinglePlayerTurn(turn.playerAction, turn);
   }
 
   private startTurnPresentation(resolution: TurnResolution) {
@@ -1589,6 +1614,11 @@ export class Game {
           });
           return;
         }
+      }
+      const replayQte = this.battleReplay?.log.turns[this.turnIndex - 1]?.qteFinal;
+      if (replayQte) {
+        qte.playerScore = replayQte.playerScore;
+        qte.enemyScore = replayQte.enemyScore;
       }
       this.finishClashQte();
     }
@@ -2513,14 +2543,17 @@ export class Game {
 
   private doLaunch() {
     const aiLaunch = pickAiLaunch(this.battleRandom().ai);
-    launchTop(this.player, new THREE.Vector2(1, 0), this.launchCharge, THREE.MathUtils.degToRad(this.launchAngleDeg));
-    launchTop(this.enemy, new THREE.Vector2(-1, 0), aiLaunch.power, THREE.MathUtils.degToRad(aiLaunch.angleDeg));
-    this.battleRuntime?.beginLaunch({
+    this.battleReplay?.cursor.assertAiLaunch(aiLaunch.power, aiLaunch.angleDeg);
+    const launch = this.battleReplay?.log.launch ?? {
       playerPower: this.launchCharge,
       playerAngleDeg: this.launchAngleDeg,
       enemyPower: aiLaunch.power,
       enemyAngleDeg: aiLaunch.angleDeg,
-    });
+    };
+    this.battleRuntime?.beginLaunch({ ...launch });
+    const recordedLaunch = this.battleRuntime?.inputLog?.launch ?? launch;
+    launchTop(this.player, new THREE.Vector2(1, 0), recordedLaunch.playerPower, THREE.MathUtils.degToRad(recordedLaunch.playerAngleDeg));
+    launchTop(this.enemy, new THREE.Vector2(-1, 0), recordedLaunch.enemyPower, THREE.MathUtils.degToRad(recordedLaunch.enemyAngleDeg));
     this.events.emit('launch', { side: 'player', power: this.launchCharge });
     this.events.emit('launch', { side: 'enemy', power: 0.85 });
     this.triggerLaunchFlash(this.launchCharge);
@@ -2541,6 +2574,7 @@ export class Game {
       turnIndex: this.turnIndex,
       lastLog: '选择行动：进攻展开元素技能，或使用回避、防守、蓄能。',
     });
+    this.submitReplayTurnIfReady();
   }
 
   private doOnlineLaunch(config: LaunchConfig) {
@@ -2628,6 +2662,7 @@ export class Game {
     this.processBackgroundCharging(simulationDt);
     clearTransientFlags(this.player);
     clearTransientFlags(this.enemy);
+    this.submitReplayTurnIfReady();
   }
 
   private update(dt: number) {
@@ -2678,11 +2713,14 @@ export class Game {
     }
 
     const rawMic = this.audio.getVoiceVolumeLevel();
-    const playerVoiceByte = encodePlayerVoiceFrame(this.vKeyHeld ? 0.95 : rawMic);
+    const playerVoiceByte = this.qaVoiceSample
+      ?? encodePlayerVoiceFrame(this.vKeyHeld ? 0.95 : rawMic);
     if (this.phase === 'battle' && this.battleRuntime?.inputLog) {
       this.battleRuntime.advance(
         dt,
-        playerVoiceByte,
+        this.battleReplay
+          ? tickIndex => this.battleReplay!.cursor.playerVoiceAtTick(tickIndex)
+          : playerVoiceByte,
         this.turnState === 'awaiting',
         input => {
           this.updateBattleTick(input);
@@ -2847,6 +2885,42 @@ export class Game {
     this.bloom.composer.render();
   }
 
+  private startQaBattleWithSeed(seed: string) {
+    this.startBattle(parseBattleSeed(seed));
+  }
+
+  private setQaVoiceSample(value: number | null) {
+    if (value === null) {
+      this.qaVoiceSample = null;
+      return;
+    }
+    if (!Number.isInteger(value) || value < 0 || value > 255) {
+      throw new RangeError('QA voice sample must be an integer byte or null.');
+    }
+    this.qaVoiceSample = value;
+  }
+
+  private getQaBattleInputLog() {
+    const log = this.battleRuntime?.inputLog;
+    return log ? structuredClone(log) : null;
+  }
+
+  private startQaBattleReplay(input: BattleInputLogV1) {
+    const log = structuredClone(input);
+    validateBattleInputLog(log);
+    this.battleReplay = { log, cursor: new BattleReplayCursor(log) };
+    this.startBattle(log.seed, true);
+    this.launchCharge = log.launch.playerPower;
+    this.launchAngleDeg = log.launch.playerAngleDeg;
+    this.doLaunch();
+  }
+
+  private getQaBattleOutcomeSummary() {
+    return this.battleOutcomeSummary
+      ? stringifyBattleOutcomeSummary(this.battleOutcomeSummary)
+      : null;
+  }
+
   private exposeDiagnostics() {
     const globalWindow = window as Window & {
       __THREE_GAME_DIAGNOSTICS__?: Record<string, unknown>;
@@ -2937,6 +3011,11 @@ export class Game {
 
     globalWindow.__RIPTOP_QA__ = {
       startBattle: () => this.startBattle(),
+      startBattleWithSeed: (seed: string) => this.startQaBattleWithSeed(seed),
+      setVoiceSample: (value: number | null) => this.setQaVoiceSample(value),
+      getBattleInputLog: () => this.getQaBattleInputLog(),
+      startBattleReplay: (log: BattleInputLogV1) => this.startQaBattleReplay(log),
+      getBattleOutcomeSummary: () => this.getQaBattleOutcomeSummary(),
       quickLaunch: () => {
         this.launchCharge = 0.82;
         this.doLaunch();

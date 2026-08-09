@@ -23,6 +23,13 @@ describe('battle simulation boundaries', () => {
     expect(fast.decisionTicks).toBe(60);
   });
 
+  it('samples replay voice independently for every fixed tick in a catch-up frame', () => {
+    const runtime = new BattleRuntime(SEED);
+    runtime.beginLaunch(LAUNCH);
+    runtime.advance(3 / 60, tickIndex => 40 + tickIndex, false, () => undefined);
+    expect(runtime.inputLog?.playerVoiceFrames).toEqual([40, 41, 42]);
+  });
+
   it('records a turn at the current decision tick and resets the counter', () => {
     const runtime = new BattleRuntime(SEED);
     runtime.beginLaunch(LAUNCH);
