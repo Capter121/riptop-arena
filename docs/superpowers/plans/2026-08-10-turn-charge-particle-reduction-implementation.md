@@ -41,7 +41,7 @@
 - 每个逻辑步骤先写会失败的测试，再添加最小实现。
 - 只有当前步骤验证成功后才进入下一步。
 - 不为未来画质设置或其他粒子类型增加通用配置层。
-- 不修改共享材质、全局 Bloom 或粒子池上限。
+- 不修改现有共享材质、全局 Bloom 或 600 粒子池上限。
 - 浏览器截图只作为视觉验收产物，不把随机粒子画面设为脆弱的像素级快照。
 - 每次只暂存计划列出的文件，保留所有无关未跟踪内容。
 
@@ -88,40 +88,42 @@ git diff --check
 
 ---
 
-## 【步骤 2】增加蓄能专用轻量汇聚粒子
+## 【步骤 2】增加蓄能专用小型粒子层
 
 目标：
 
-在共享粒子池内增加一个窄用途发射入口，只降低普通回合蓄能的单批视觉重量。
+增加一个容量约 192、使用固定小尺寸材质的窄用途粒子层，只承担普通回合蓄能表现。
 
 文件：
 
-- 修改 `src/fx/sparks.ts`
+- 新增 `src/fx/turnChargeParticles.ts`
 
 实施前检查：
 
 1. 用 `rg` 固定现有 `emitAbsorb()` 的三个调用位置。
-2. 确认 QTE 和发射蓄力仍需要原效果，不能改为新入口。
+2. 确认现有 `THREE.PointsMaterial` 使用统一点尺寸，几何中的逐粒子尺寸属性不会改变实际显示大小。
+3. 确认 QTE 和发射蓄力仍需要原效果，不能改为新粒子层。
 
 最小实现：
 
-1. 增加 `emitTurnChargeAbsorb(x, z)`，不改变现有 `emitAbsorb(x, z, intensity)`。
-2. 每次循环固定生成 16 个粒子。
-3. 初始半径使用约 `0.7 + random * 1.1`。
-4. 生成位置贴近所属陀螺，运动方向朝核心，并保留轻微切向旋流。
-5. 粒子尺寸控制在能使平均尺寸比当前强度 `1.2` 的吸附粒子小约 45% 的范围。
+1. 增加独立的 `TurnChargeParticles`，容量约为 192。
+2. 使用独立 `THREE.PointsMaterial`，固定点尺寸约为现有 `1.4` 的 55%，并复用同一火花贴图路径、颜色和加色混合风格。
+3. `emit(x, z)` 每次固定生成 16 个粒子。
+4. 初始半径使用约 `0.7 + random * 1.1`。
+5. 生成位置贴近所属陀螺，运动方向朝核心，并保留轻微切向旋流。
 6. 生命周期控制在 `0.20 + random * 0.15` 秒附近。
-7. 继续复用现有 `spawnOne()`、共享缓冲区和材质，不增加第二套粒子池。
+7. 提供与现有粒子系统一致的 `root` 和 `update(dt)` 最小接口，不增加通用配置层。
+8. 不修改现有 `SparksSystem`、600 粒子池、共享材质或 `emitAbsorb()`。
 
 验证：
 
 ```powershell
-rg -n "emitAbsorb|emitTurnChargeAbsorb" src/app/game.ts src/fx/sparks.ts
+rg -n "emitAbsorb|TurnChargeParticles" src/app/game.ts src/fx/sparks.ts src/fx/turnChargeParticles.ts
 npx tsc --noEmit
 git diff --check
 ```
 
-预期：新入口编译成功，原 `emitAbsorb()` 的实现与既有调用未变化。
+预期：专用粒子层编译成功，原 `SparksSystem`、`emitAbsorb()` 的实现与既有调用未变化。
 
 推荐提交：`feat(arena): add lightweight turn charge particles`
 
@@ -149,10 +151,11 @@ git diff --check
 1. 在 `Game` 中增加一个普通回合蓄能粒子累计时间字段，初始为零。
 2. 让 `emitTurnChargeParticles()` 接收当前渲染 `dt`。
 3. 使用步骤 1 的纯函数推进累计时间；只有返回触发时才生成一批粒子。
-4. 玩家视觉为 `charge` 时，在玩家位置调用 `emitTurnChargeAbsorb()`。
-5. 敌方视觉为 `charge` 时，在敌方位置调用 `emitTurnChargeAbsorb()`。
-6. 当状态不是 `resolving` 时把累计时间重置为零。
-7. 不改变 `activeTurnResolution`、回合计时器、战斗输入日志或模拟 tick。
+4. 把专用粒子层的 `root` 加入场景，并在每帧调用其 `update(dt)`。
+5. 玩家视觉为 `charge` 时，在玩家位置调用专用粒子层的 `emit()`。
+6. 敌方视觉为 `charge` 时，在敌方位置调用专用粒子层的 `emit()`。
+7. 当状态不是 `resolving` 时把累计时间重置为零。
+8. 不改变 `activeTurnResolution`、回合计时器、战斗输入日志或模拟 tick。
 
 验证：
 
@@ -213,8 +216,8 @@ git status --short
 ## 5. 完成检查
 
 - [ ] 是否只修改普通回合蓄能粒子？
-- [ ] 是否存在比纯函数加专用发射入口更简单且同样可测试的实现？
-- [ ] 是否保持现有 `emitAbsorb()`、共享材质和 Bloom 不变？
+- [ ] 是否存在比纯函数加专用小型粒子层更简单且同样满足尺寸目标的实现？
+- [ ] 是否保持现有 `SparksSystem`、`emitAbsorb()`、共享材质和 Bloom 不变？
 - [ ] 是否没有增加无关配置、依赖或通用抽象？
 - [ ] 是否在 30Hz、60Hz、144Hz 下验证了发射节奏？
 - [ ] 是否验证了长帧不会补发多批？
@@ -234,7 +237,7 @@ git status --short
 完成后应交付：
 
 - 帧率无关的普通蓄能粒子节流逻辑及单元测试。
-- 普通回合蓄能专用轻量汇聚粒子。
+- 普通回合蓄能专用小型汇聚粒子层。
 - 仅限普通蓄能的游戏接入改动。
 - 自动测试、浏览器视觉验收和完整回归结果。
 - 必要时提供修改前后截图供用户比较。
