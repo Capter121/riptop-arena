@@ -8,12 +8,13 @@ import { fileURLToPath } from 'node:url';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'nss-invite-cli-'));
 const databasePath = join(temporaryRoot, 'arena.sqlite');
+const emptyDatabasePath = join(temporaryRoot, 'empty.sqlite');
 const cliPath = fileURLToPath(new URL('./manage-invites.mjs', import.meta.url));
 
-function runCli(args) {
+function runCli(args, targetDatabasePath = databasePath) {
   return spawnSync(process.execPath, [cliPath, ...args], {
     encoding: 'utf8',
-    env: { ...process.env, DATABASE_PATH: databasePath },
+    env: { ...process.env, DATABASE_PATH: targetDatabasePath },
     windowsHide: true,
   });
 }
@@ -95,8 +96,59 @@ try {
     assert.match(invalid.stderr, /Usage:|must|unknown|requires/i);
   }
 
-  console.log('Invite management CLI creation tests passed.');
+  const group = runCli(['create', '--code', 'GROUP-2026', '--max-uses', '3']);
+  assert.equal(group.status, 0, group.stderr);
+  const writableDatabase = new DatabaseSync(databasePath);
+  try {
+    writableDatabase.prepare(`
+      UPDATE invites SET enabled = 0, use_count = 1, created_at = ? WHERE code = ?
+    `).run('2026-01-01T00:00:00.000Z', 'FRIENDS-2026');
+    writableDatabase.prepare('UPDATE invites SET created_at = ? WHERE code = ?')
+      .run('2026-01-03T00:00:00.000Z', 'GROUP-2026');
+    writableDatabase.prepare(`
+      INSERT INTO players (id, display_name, device_token_hash, invite_code) VALUES (?, ?, ?, ?)
+    `).run('hidden-player', 'Hidden Nova', 'f'.repeat(64), 'FRIENDS-2026');
+  } finally {
+    writableDatabase.close();
+  }
+
+  const maskedList = runCli(['list']);
+  assert.equal(maskedList.status, 0, maskedList.stderr);
+  assert.match(maskedList.stdout, /CODE\s+STATUS\s+USES\s+CREATED_AT/);
+  assert.match(maskedList.stdout, /FR\*{8}26\s+DISABLED\s+1\/1/);
+  assert.match(maskedList.stdout, /GR\*{6}26\s+ENABLED\s+0\/3/);
+  assert.ok(maskedList.stdout.indexOf('GR******26') < maskedList.stdout.indexOf('FR********26'));
+  for (const secret of [generatedCode, sharedCode, 'FRIENDS-2026', 'GROUP-2026', 'Hidden Nova', 'hidden-player', 'f'.repeat(64)]) {
+    assert.ok(!maskedList.stdout.includes(secret), `Masked list leaked ${secret}.`);
+  }
+
+  const revealedList = runCli(['list', '--reveal']);
+  assert.equal(revealedList.status, 0, revealedList.stderr);
+  for (const code of [generatedCode, sharedCode, 'FRIENDS-2026', 'GROUP-2026']) {
+    assert.ok(revealedList.stdout.includes(code));
+  }
+  assert.ok(!revealedList.stdout.includes('Hidden Nova'));
+
+  const emptyList = runCli(['list'], emptyDatabasePath);
+  assert.equal(emptyList.status, 0, emptyList.stderr);
+  assert.match(emptyList.stdout, /No invite codes found/i);
+
+  for (const args of [
+    ['list', '--code', 'FRIENDS-2026'],
+    ['list', '--max-uses', '2'],
+    ['list', '--unknown'],
+    ['list', '--reveal', '--reveal'],
+  ]) {
+    const invalid = runCli(args);
+    assert.notEqual(invalid.status, 0, `Expected list failure for ${JSON.stringify(args)}.`);
+    assert.match(invalid.stderr, /Usage:|unknown/i);
+  }
+
+  console.log('Invite management CLI creation and listing tests passed.');
 } finally {
+  removeIfPresent(`${emptyDatabasePath}-shm`);
+  removeIfPresent(`${emptyDatabasePath}-wal`);
+  removeIfPresent(emptyDatabasePath);
   removeIfPresent(`${databasePath}-shm`);
   removeIfPresent(`${databasePath}-wal`);
   removeIfPresent(databasePath);
