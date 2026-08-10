@@ -412,6 +412,8 @@ export class Game {
     });
 
     this.events.on('spark', ({ x, z, intensity }) => {
+      if (this.isChargeTurnResolving()) return;
+
       const isAbsoluteZero = arenaManager.getTheme() === 'absolute_zero';
       const particleIntensity = isAbsoluteZero ? intensity * 0.55 : intensity;
       // Emit heavy spark particle burst
@@ -2027,10 +2029,17 @@ export class Game {
     }
   }
 
+  private isChargeTurnResolving() {
+    const resolution = this.activeTurnResolution;
+    return this.turnState === 'resolving'
+      && (resolution?.playerVisual === 'charge' || resolution?.enemyVisual === 'charge');
+  }
+
   private emitTurnChargeFeedback() {
     const resolution = this.activeTurnResolution;
     if (!resolution || this.turnChargeFeedbackEmitted) return;
     this.turnChargeFeedbackEmitted = true;
+    this.sparks.clear();
 
     if (resolution.playerVisual === 'charge') {
       this.shockwave.trigger(this.player.position.x, 0.08, this.player.position.y, 0.55, 0xffdd66);

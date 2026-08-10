@@ -62,6 +62,9 @@ export class SparksSystem {
       maxLife: 1,
       size: 0,
     }));
+    for (let i = 0; i < MAX_PARTICLES; i += 1) {
+      this.positions[i * 3 + 1] = -999;
+    }
 
     this.geometry = new THREE.BufferGeometry();
     this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
@@ -200,6 +203,16 @@ export class SparksSystem {
         0.2 + Math.random() * 0.25,
       );
     }
+  }
+
+  clear() {
+    for (let i = 0; i < MAX_PARTICLES; i += 1) {
+      this.particles[i].alive = false;
+      this.positions[i * 3 + 1] = -999;
+      this.sizes[i] = 0;
+    }
+    (this.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;
+    (this.geometry.attributes.size as THREE.BufferAttribute).needsUpdate = true;
   }
 
   update(dt: number) {
