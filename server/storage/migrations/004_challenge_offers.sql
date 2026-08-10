@@ -5,7 +5,7 @@ CREATE TABLE challenge_offers (
   parent_challenge_id TEXT REFERENCES challenges(id) ON DELETE RESTRICT,
   creation_request_id TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'open'
-    CHECK (status IN ('open', 'claimed', 'revoked', 'expired')),
+    CHECK (status IN ('open', 'claimed', 'revoked')),
   offer_json TEXT NOT NULL CHECK (json_valid(offer_json)),
   expires_at TEXT NOT NULL,
   claimed_challenge_id TEXT REFERENCES challenges(id) ON DELETE RESTRICT,

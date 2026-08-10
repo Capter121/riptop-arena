@@ -125,6 +125,16 @@ try {
     '2026-08-11T00:00:00.000Z',
   ));
   assert.throws(() => insertOffer.run(
+    'offer-derived-expired-status',
+    'player-1',
+    null,
+    null,
+    'request-expired',
+    'expired',
+    '{}',
+    '2026-08-11T00:00:00.000Z',
+  ));
+  assert.throws(() => insertOffer.run(
     'offer-invalid-json',
     'player-1',
     null,

@@ -86,7 +86,7 @@ function normalizePartUpgrades(value) {
   return Object.fromEntries(LEGACY_PART_IDS.map(id => [id, value[id] ?? 0]));
 }
 
-function normalizeNssLoadout(value) {
+export function normalizeNssLoadout(value) {
   if (value === null) return null;
   if (!hasExactKeys(value, ['schemaVersion', 'interfaceId', 'combination', 'affinities'])) {
     invalid('Invalid NSS loadout keys.');
@@ -248,7 +248,7 @@ function progressionFromRow(row) {
   };
 }
 
-function readProgression(database, playerId) {
+export function readPlayerProgression(database, playerId) {
   return progressionFromRow(database.prepare(`
     SELECT snapshot_json, coins, revision
     FROM player_progression
@@ -351,7 +351,7 @@ export function syncProgression(database, playerId, value) {
     if (error instanceof ProgressionError && error.code === 'INSUFFICIENT_COINS') {
       throw new ProgressionError(409, error.code, error.message, {
         rejectedEventId: error.details.rejectedEventId,
-        progression: readProgression(database, playerId),
+        progression: readPlayerProgression(database, playerId),
       });
     }
     throw error;

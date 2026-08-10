@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import sharedCatalog from '../../../shared/nss/parts.catalog.json';
 import loadoutSchema from '../../../shared/nss/loadout.schema.json';
 import loadoutV2Schema from '../../../shared/nss/loadout-v2.schema.json';
+import challengeSchema from '../../../shared/nss/challenge.schema.json';
+import challengeFixture from '../../../../tests/fixtures/challenge-contract-v1.json';
 import versions from '../../../shared/nss/versions.json';
 import generatedCatalog from '../../src/generated/parts.catalog.json';
 import { combinationId, enumerateCombinations, families, familyParts } from '../../src/domain';
@@ -22,6 +24,13 @@ describe('shared NSS contract', () => {
       simulationVersion: 1,
     });
     expect(Object.values(versions).every(version => Number.isInteger(version) && version > 0)).toBe(true);
+  });
+
+  it('shares the challenge schema and fixture with the arena server', () => {
+    expect(challengeSchema.additionalProperties).toBe(false);
+    expect(challengeSchema.properties.challengeSchemaVersion.const).toBe(versions.challengeSchemaVersion);
+    expect(challengeFixture.loadout.schemaVersion).toBe(2);
+    expect(challengeFixture.loadout.interfaceId).toBe('NSS-V1');
   });
 
   it('keeps generated and shared part catalogs byte-equivalent in data', () => {

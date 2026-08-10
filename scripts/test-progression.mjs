@@ -3,6 +3,8 @@ import {
   ProgressionError,
   createDefaultProgressionSnapshot,
   mergeProgressionSnapshots,
+  normalizeNssLoadout,
+  readPlayerProgression,
   syncProgression,
   validateProgressionSyncInput,
 } from '../server/progression/progression-service.mjs';
@@ -81,6 +83,7 @@ const nssLoadout = {
 assert.deepEqual(validateProgressionSyncInput(validInput({
   snapshot: validSnapshot({ latestNssLoadout: nssLoadout }),
 })).snapshot.latestNssLoadout, nssLoadout);
+assert.deepEqual(normalizeNssLoadout(nssLoadout), nssLoadout);
 assert.throws(() => validateProgressionSyncInput(validInput({
   snapshot: validSnapshot({
     latestNssLoadout: {
@@ -201,6 +204,7 @@ try {
   assert.equal(first.progression.coins, 100);
   assert.equal(first.progression.revision, 1);
   assert.deepEqual(first.acknowledgedEventIds, []);
+  assert.deepEqual(readPlayerProgression(database, 'player-1'), first.progression);
 
   const firstRow = database.prepare('SELECT * FROM player_progression WHERE player_id = ?').get('player-1');
   assert.equal(firstRow.initial_coins_imported, 1);

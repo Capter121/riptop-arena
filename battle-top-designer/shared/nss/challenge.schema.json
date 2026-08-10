@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nova-spin.local/schemas/challenge-v1.json",
+  "title": "Nova Spin asynchronous challenge input v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "challengeSchemaVersion",
+    "catalogVersion",
+    "catalogSha256",
+    "affinityRulesVersion",
+    "battleRulesVersion",
+    "simulationVersion",
+    "offerId",
+    "parentChallengeId",
+    "seed",
+    "mode",
+    "arena",
+    "aiConfig",
+    "player",
+    "enemy"
+  ],
+  "properties": {
+    "challengeSchemaVersion": { "const": 1 },
+    "catalogVersion": { "const": 1 },
+    "catalogSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "affinityRulesVersion": { "const": 1 },
+    "battleRulesVersion": { "const": 2 },
+    "simulationVersion": { "const": 1 },
+    "offerId": { "$ref": "#/$defs/uuidV4" },
+    "parentChallengeId": {
+      "oneOf": [
+        { "$ref": "#/$defs/uuidV4" },
+        { "type": "null" }
+      ]
+    },
+    "seed": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+    "mode": { "enum": ["fair", "full_power"] },
+    "arena": { "enum": ["classic_grid", "neon_magma", "absolute_zero"] },
+    "aiConfig": { "const": "deterministic-v1" },
+    "player": { "$ref": "#/$defs/participant" },
+    "enemy": { "$ref": "#/$defs/participant" }
+  },
+  "$defs": {
+    "uuidV4": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "participant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["playerId", "displayName", "loadout", "upgrades"],
+      "properties": {
+        "playerId": { "$ref": "#/$defs/uuidV4" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "loadout": { "$ref": "loadout-v2.schema.json" },
+        "upgrades": { "$ref": "#/$defs/upgrades" }
+      }
+    },
+    "upgrades": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["upgrades", "partUpgrades"],
+      "properties": {
+        "upgrades": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attack", "defense", "stamina"],
+          "properties": {
+            "attack": { "type": "integer", "minimum": 0, "maximum": 5 },
+            "defense": { "type": "integer", "minimum": 0, "maximum": 5 },
+            "stamina": { "type": "integer", "minimum": 0, "maximum": 5 }
+          }
+        },
+        "partUpgrades": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["balanced", "bulwark", "drift", "grip", "heavy", "light", "round", "rush", "slash"],
+          "properties": {
+            "balanced": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "bulwark": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "drift": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "grip": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "heavy": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "light": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "round": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "rush": { "type": "integer", "minimum": 0, "maximum": 4 },
+            "slash": { "type": "integer", "minimum": 0, "maximum": 4 }
+          }
+        }
+      }
+    }
+  }
+}
