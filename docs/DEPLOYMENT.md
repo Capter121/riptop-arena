@@ -45,12 +45,35 @@ npm run verify:site
 
 1. 配置 `.env.production.example` 中列出的环境变量。
 2. 确认 `DATABASE_PATH`、`BACKUP_ROOT` 和 `SITE_ROOT` 都是绝对路径。
-3. 运行 `npm start`。服务会创建数据库目录并执行缺失迁移。
-4. 请求 `GET /health`，必须返回 HTTP 200 和 `{ "status": "ok" }`。
-5. 通过 HTTPS 打开 `/`、`/customizer/`、`/arena/` 和一个 `/challenge/<uuid>` 回退路径。
-6. 用两个独立浏览器身份完成一次创建、认领、战斗、结果提交和回挑战。
+3. 使用同一个 `DATABASE_PATH` 运行 `npm run invite -- create`，创建第一个邀请码；该命令会自动执行缺失迁移。
+4. 运行 `npm run invite -- list`，确认邀请码默认显示为脱敏值且状态为 `ENABLED`。
+5. 运行 `npm start`。
+6. 请求 `GET /health`，必须返回 HTTP 200 和 `{ "status": "ok" }`。
+7. 通过 HTTPS 打开 `/`、`/customizer/`、`/arena/` 和一个 `/challenge/<uuid>` 回退路径。
+8. 用两个独立浏览器身份完成一次创建、认领、战斗、结果提交和回挑战。
 
-当前仓库尚无生产邀请码管理 CLI。正式邀请朋友前，需要先完成最小的邀请码创建/停用运维工具；不要通过公开 HTTP 接口或前端 bundle 植入管理员密钥来绕过这一项。
+## 邀请码管理
+
+邀请码管理命令只在可信服务器终端运行，不提供公网管理 API：
+
+```powershell
+# 默认生成仅可认领一次的随机邀请码
+npm run invite -- create
+
+# 创建可供 5 位朋友认领的自定义邀请码
+npm run invite -- create --code FRIENDS-2026 --max-uses 5
+
+# 默认脱敏查看全部邀请码
+npm run invite -- list
+
+# 明确显示完整邀请码
+npm run invite -- list --reveal
+
+# 阻止新的认领，不影响已经认领的玩家
+npm run invite -- disable FRIENDS-2026
+```
+
+所有命令读取与服务相同的 `DATABASE_PATH`。创建成功和 `list --reveal` 会输出完整邀请码，只能在可信终端执行，不要把输出写入公共 CI 或部署日志。`disable` 不删除记录，也不撤销既有玩家身份。
 
 ## 反向代理检查
 
@@ -114,6 +137,5 @@ node scripts/restore-private-server.mjs --backup <生成的备份绝对路径> -
 - 具体主机和生产 URL；
 - TLS 域名与证书；
 - 独立持久卷和异地备份位置；
-- 邀请码创建/停用工具；
 - 反向代理访问日志脱敏；
 - 至少一次真实手机和家庭网络访问测试。

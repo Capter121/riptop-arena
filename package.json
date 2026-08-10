@@ -21,7 +21,7 @@
     "test:invite-management": "node scripts/test-invite-management-cli.mjs",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
-    "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs && node scripts/test-database.mjs && node scripts/test-auth.mjs && node scripts/test-progression.mjs && npm run test:challenge-contract && npm run test:challenges && npm run test:challenge-http && npm run test:backup",
+    "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs && node scripts/test-database.mjs && node scripts/test-auth.mjs && npm run test:invite-management && node scripts/test-progression.mjs && npm run test:challenge-contract && npm run test:challenges && npm run test:challenge-http && npm run test:backup",
     "test:backup": "node scripts/test-private-server-archive.mjs",
     "test:http": "node scripts/test-http-server.mjs",
     "test:database": "node scripts/test-database.mjs",

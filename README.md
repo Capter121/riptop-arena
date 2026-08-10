@@ -66,6 +66,18 @@ The invite, progression, and friend-challenge features require the Node server, 
 
 Use Node.js 24 or newer, run `npm run build`, configure the variables in `.env.production.example`, and start the unified service with `npm start`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for backup, reverse-proxy, health-check, and rollback requirements.
 
+Manage private friend-server invite codes from the trusted server terminal with the same `DATABASE_PATH` used by the service:
+
+```powershell
+npm run invite -- create
+npm run invite -- create --code FRIENDS-2026 --max-uses 5
+npm run invite -- list
+npm run invite -- list --reveal
+npm run invite -- disable FRIENDS-2026
+```
+
+`list` masks codes by default. Creation and `list --reveal` print complete codes, so do not send their output to public logs.
+
 The Cloudflare Pages workflow is manual and provides only a static visual preview. It does not provide identities, progression, challenges, or multiplayer.
 
 ## Stack
@@ -76,4 +88,4 @@ The Cloudflare Pages workflow is manual and provides only a static visual previe
 
 ## Status
 
-This version is a polished private-play prototype. Public friend-server deployment still requires the production checklist in `docs/DEPLOYMENT.md`, including an invite-management operation and persistent off-host backups.
+This version is a polished private-play prototype. Public friend-server deployment still requires the production checklist in `docs/DEPLOYMENT.md`, including TLS, persistent storage, off-host backups, log redaction, and real-device testing.

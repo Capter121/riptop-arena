@@ -13,6 +13,8 @@
 - The playable friend server is a Node.js 24 service, not a static-only deployment.
 - Build output is `dist/site`; `npm start` serves the site, HTTP APIs, and WebSocket endpoint from one origin.
 - Configure persistent `DATABASE_PATH`, a separate `BACKUP_ROOT`, HTTPS, and WebSocket proxying before public access.
+- Create the first invite with `npm run invite -- create`, then verify `npm run invite -- list` masks it by default.
+- Use `npm run invite -- disable CODE` to stop new redemptions without invalidating existing player identities.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the full preflight, backup, health-check, and rollback procedure.
 - `.github/workflows/pages-deployment.yml` is a manual static preview only and cannot run identities, progression, challenges, or multiplayer.
 
