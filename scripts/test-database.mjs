@@ -27,9 +27,9 @@ try {
   assert.equal(database.prepare('PRAGMA busy_timeout').get().timeout, 5_000);
   assert.equal(database.prepare('PRAGMA journal_mode').get().journal_mode, 'wal');
 
-  assert.deepEqual(await migrateDatabase(database), [1, 2, 3]);
+  assert.deepEqual(await migrateDatabase(database), [1, 2, 3, 4]);
   assert.deepEqual(await migrateDatabase(database), []);
-  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 3);
+  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 4);
 
   const tables = database.prepare(`
     SELECT name FROM sqlite_schema
@@ -38,6 +38,7 @@ try {
   `).all().map(row => row.name);
   assert.deepEqual(tables, [
     'builds',
+    'challenge_offers',
     'challenges',
     'invites',
     'player_progression',
@@ -69,6 +70,122 @@ try {
     INSERT INTO challenges (id, creator_player_id, recipient_player_id, input_json)
     VALUES (?, ?, ?, ?)
   `).run('challenge-1', 'player-1', 'player-1', '{"seed":"fixed"}');
+  const legacyChallenge = database.prepare(`
+    SELECT offer_id, parent_challenge_id, result_submission_id
+    FROM challenges WHERE id = ?
+  `).get('challenge-1');
+  assert.equal(legacyChallenge.offer_id, null);
+  assert.equal(legacyChallenge.parent_challenge_id, null);
+  assert.equal(legacyChallenge.result_submission_id, null);
+
+  const insertOffer = database.prepare(`
+    INSERT INTO challenge_offers (
+      id, creator_player_id, target_player_id, parent_challenge_id,
+      creation_request_id, status, offer_json, expires_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  insertOffer.run(
+    'offer-1',
+    'player-1',
+    null,
+    'challenge-1',
+    'request-1',
+    'open',
+    '{"mode":"fair"}',
+    '2026-08-11T00:00:00.000Z',
+  );
+  assert.throws(() => insertOffer.run(
+    'offer-duplicate-request',
+    'player-1',
+    null,
+    null,
+    'request-1',
+    'open',
+    '{}',
+    '2026-08-11T00:00:00.000Z',
+  ));
+  assert.throws(() => insertOffer.run(
+    'offer-duplicate-parent',
+    'player-1',
+    null,
+    'challenge-1',
+    'request-2',
+    'open',
+    '{}',
+    '2026-08-11T00:00:00.000Z',
+  ));
+  assert.throws(() => insertOffer.run(
+    'offer-invalid-status',
+    'player-1',
+    null,
+    null,
+    'request-3',
+    'invalid',
+    '{}',
+    '2026-08-11T00:00:00.000Z',
+  ));
+  assert.throws(() => insertOffer.run(
+    'offer-invalid-json',
+    'player-1',
+    null,
+    null,
+    'request-4',
+    'open',
+    '{',
+    '2026-08-11T00:00:00.000Z',
+  ));
+  assert.throws(() => insertOffer.run(
+    'offer-invalid-player',
+    'missing-player',
+    null,
+    null,
+    'request-5',
+    'open',
+    '{}',
+    '2026-08-11T00:00:00.000Z',
+  ));
+
+  database.prepare(`
+    INSERT INTO challenges (
+      id, creator_player_id, recipient_player_id, status, input_json,
+      offer_id, parent_challenge_id, result_submission_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    'challenge-2',
+    'player-1',
+    'player-1',
+    'pending',
+    '{"seed":"offer-fixed"}',
+    'offer-1',
+    'challenge-1',
+    'submission-1',
+  );
+  database.prepare(`
+    UPDATE challenge_offers SET status = 'claimed', claimed_challenge_id = ? WHERE id = ?
+  `).run('challenge-2', 'offer-1');
+  insertOffer.run(
+    'offer-2',
+    'player-1',
+    null,
+    null,
+    'request-6',
+    'open',
+    '{}',
+    '2026-08-11T00:00:00.000Z',
+  );
+  assert.throws(() => database.prepare(`
+    UPDATE challenge_offers SET claimed_challenge_id = ? WHERE id = ?
+  `).run('challenge-2', 'offer-2'));
+  assert.throws(() => database.prepare(`
+    INSERT INTO challenges (
+      id, creator_player_id, recipient_player_id, input_json, offer_id
+    ) VALUES (?, ?, ?, ?, ?)
+  `).run('challenge-duplicate-offer', 'player-1', 'player-1', '{}', 'offer-1'));
+  assert.throws(() => database.prepare(`
+    INSERT INTO challenges (
+      id, creator_player_id, recipient_player_id, input_json, result_submission_id
+    ) VALUES (?, ?, ?, ?, ?)
+  `).run('challenge-duplicate-result', 'player-1', 'player-1', '{}', 'submission-1'));
   assert.throws(() => database.prepare(`
     INSERT INTO builds (id, player_id, snapshot_json, catalog_sha256, battle_rules_version)
     VALUES (?, ?, ?, ?, ?)
@@ -108,7 +225,7 @@ try {
   database = openDatabase(databasePath);
   assert.deepEqual(await migrateDatabase(database), []);
   assert.equal(database.prepare('SELECT display_name FROM players WHERE id = ?').get('player-1').display_name, 'Nova');
-  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM challenges').get().count, 1);
+  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM challenges').get().count, 2);
 
   await writeFile(join(failureMigrations, '001_stable.sql'), 'CREATE TABLE stable (id TEXT PRIMARY KEY);', 'utf8');
   await writeFile(join(failureMigrations, '002_failure.sql'), `
