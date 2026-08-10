@@ -1,9 +1,6 @@
-name: Deploy to Cloudflare Pages
+name: Legacy static preview
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 concurrency:
@@ -23,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -32,10 +29,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify unified site
+        run: npm run verify:site
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          command: pages deploy dist --project-name=riptop-arena
+          command: pages deploy dist/site --project-name=riptop-arena

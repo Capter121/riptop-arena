@@ -10,9 +10,11 @@
 
 ## Deployment
 
-- Deploy the `dist/` folder to any static host.
-- `vite.config.ts` uses `base: './'`, so relative asset URLs work for subfolder hosting and static file previews.
-- Good targets: Netlify static deploy, Cloudflare Pages static output, GitHub Pages, or any plain CDN/file host.
+- The playable friend server is a Node.js 24 service, not a static-only deployment.
+- Build output is `dist/site`; `npm start` serves the site, HTTP APIs, and WebSocket endpoint from one origin.
+- Configure persistent `DATABASE_PATH`, a separate `BACKUP_ROOT`, HTTPS, and WebSocket proxying before public access.
+- Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the full preflight, backup, health-check, and rollback procedure.
+- `.github/workflows/pages-deployment.yml` is a manual static preview only and cannot run identities, progression, challenges, or multiplayer.
 
 ## Controls
 

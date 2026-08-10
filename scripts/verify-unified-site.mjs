@@ -31,7 +31,7 @@ for (const required of ['index.html', 'customizer/index.html', 'arena/index.html
 }
 
 const portalHtml = await readFile(join(siteRoot, 'index.html'), 'utf8');
-assert.match(portalHtml, /<script\s+type="module"[^>]+src="\.\/assets\/[^"']+\.js"/i, 'Portal is not a Vite module entry');
+assert.match(portalHtml, /<script\s+type="module"[^>]+src="\/assets\/[^"']+\.js"/i, 'Portal is not a root-based Vite module entry');
 assert.equal(portalHtml.includes('href="./customizer/"'), false, 'Legacy static portal was copied into the build');
 
 const files = await filesBelow(siteRoot);

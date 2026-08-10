@@ -55,20 +55,18 @@ npm run preview -- --host 127.0.0.1 --port 4177
 
 ## Project Docs
 
-- Showcase overview: [docs/showcase.md](C:/Users/Terla/Documents/战斗陀螺项目/docs/showcase.md)
-- Release and deployment notes: [docs/RELEASE.md](C:/Users/Terla/Documents/战斗陀螺项目/docs/RELEASE.md)
-- Original design spec: [docs/superpowers/specs/2026-07-04-beyblade-arena-design.md](C:/Users/Terla/Documents/战斗陀螺项目/docs/superpowers/specs/2026-07-04-beyblade-arena-design.md)
+- Showcase overview: [docs/showcase.md](docs/showcase.md)
+- Private friend-server deployment: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+- Release checks: [docs/RELEASE.md](docs/RELEASE.md)
+- Original design spec: [docs/superpowers/specs/2026-07-04-beyblade-arena-design.md](docs/superpowers/specs/2026-07-04-beyblade-arena-design.md)
 
-## Deploy to Cloudflare Pages
+## Deployment
 
-This repository includes a GitHub Actions workflow at `.github/workflows/pages-deployment.yml`.
+The invite, progression, and friend-challenge features require the Node server, WebSocket support, SQLite, and persistent storage. A static host alone cannot run the private friend server.
 
-Create a Cloudflare Pages project named `riptop-arena`, then add these GitHub repository secrets:
+Use Node.js 24 or newer, run `npm run build`, configure the variables in `.env.production.example`, and start the unified service with `npm start`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for backup, reverse-proxy, health-check, and rollback requirements.
 
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
-
-After the secrets are set, every push to `main` will run `npm ci`, `npm run build`, and deploy the `dist/` output to Cloudflare Pages.
+The Cloudflare Pages workflow is manual and provides only a static visual preview. It does not provide identities, progression, challenges, or multiplayer.
 
 ## Stack
 
@@ -78,4 +76,4 @@ After the secrets are set, every push to `main` will run `npm ci`, `npm run buil
 
 ## Status
 
-This version is a polished prototype. It is suitable for local playtests, visual showcase, and static-host deployment of the current slice.
+This version is a polished private-play prototype. Public friend-server deployment still requires the production checklist in `docs/DEPLOYMENT.md`, including an invite-management operation and persistent off-host backups.

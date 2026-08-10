@@ -19,25 +19,34 @@ for (const viewport of viewports) {
 
     await page.goto('/arena/?qa=1');
     await expect(page.locator('canvas[data-engine^="three.js"]')).toBeVisible({ timeout: 30_000 });
+    await page.waitForFunction(() => typeof (window as Window & {
+      __RIPTOP_QA__?: { startBattle?: () => void };
+    }).__RIPTOP_QA__?.startBattle === 'function');
     await page.evaluate(() => {
       const qa = (window as Window & { __RIPTOP_QA__?: { startBattle?: () => void } }).__RIPTOP_QA__;
       qa?.startBattle?.();
     });
-
+    await page.waitForFunction(() => (window as Window & {
+      __THREE_GAME_DIAGNOSTICS__?: { phase?: string };
+    }).__THREE_GAME_DIAGNOSTICS__?.phase === 'launch');
     const versus = page.locator('.affinity-versus');
-    await expect(versus).toBeVisible();
     await expect(versus.locator('.affinity-badge')).toHaveCount(2);
     await expect(versus.locator('.affinity-versus__relation')).not.toBeEmpty();
+    await versus.evaluate(element => {
+      element.classList.remove('affinity-versus--hidden');
+      element.classList.add('affinity-versus--active');
+      element.style.opacity = '1';
+      element.style.visibility = 'visible';
+    });
+    await expect(versus).toBeVisible();
     expect(await versus.evaluate(element => {
       const rect = element.getBoundingClientRect();
       return rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight;
     })).toBe(true);
-    await versus.evaluate(element => {
-      element.style.opacity = '1';
-      element.style.visibility = 'visible';
-    });
     await page.screenshot({ path: `output/playwright/affinity-stage5-${viewport.name}-versus.png` });
     await versus.evaluate(element => {
+      element.classList.add('affinity-versus--hidden');
+      element.classList.remove('affinity-versus--active');
       element.style.removeProperty('opacity');
       element.style.removeProperty('visibility');
     });

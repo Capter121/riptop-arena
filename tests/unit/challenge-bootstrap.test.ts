@@ -73,8 +73,17 @@ describe('challenge Arena bootstrap', () => {
   });
 
   it('rejects invalid, repeated, or additional challenge query parameters', async () => {
-    for (const search of ['', '?challenge=nope', `?challenge=${challengeId}&challenge=${challengeId}`, `?challenge=${challengeId}&qa=1`]) {
+    for (const search of ['', '?challenge=nope', `?challenge=${challengeId}&challenge=${challengeId}`, `?challenge=${challengeId}&qa=2`, `?challenge=${challengeId}&debug=1`]) {
       expect(await bootstrapChallenge(search)).toEqual({ kind: 'invalid_link' });
     }
+  });
+
+  it('allows only the exact qa=1 gate beside a valid challenge id', async () => {
+    const identity = { version: 1 as const, playerId, displayName: 'Responder', deviceToken: 'token' };
+    const result = await bootstrapChallenge(`?challenge=${challengeId}&qa=1`, {
+      loadIdentity: () => identity,
+      createClient: () => ({ getChallenge: vi.fn().mockResolvedValue(view()) }) as never,
+    });
+    expect(result.kind).toBe('ready');
   });
 });

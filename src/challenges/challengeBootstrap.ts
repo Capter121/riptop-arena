@@ -97,7 +97,10 @@ export function parseGameChallengeInput(id: string, value: unknown): Omit<GameCh
 function challengeIdFromSearch(search: string) {
   const parameters = new URLSearchParams(search);
   const ids = parameters.getAll('challenge');
-  return [...parameters.keys()].every(key => key === 'challenge') && ids.length === 1 && UUID_V4.test(ids[0]) ? ids[0] : null;
+  const qa = parameters.getAll('qa');
+  const allowedKeys = [...parameters.keys()].every(key => key === 'challenge' || key === 'qa');
+  const validQa = qa.length === 0 || (qa.length === 1 && qa[0] === '1');
+  return allowedKeys && validQa && ids.length === 1 && UUID_V4.test(ids[0]) ? ids[0] : null;
 }
 
 export async function bootstrapChallenge(
