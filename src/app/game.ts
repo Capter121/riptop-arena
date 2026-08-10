@@ -412,12 +412,11 @@ export class Game {
     });
 
     this.events.on('spark', ({ x, z, intensity }) => {
+      this.sparks.clear();
       if (this.isChargeTurnResolving()) return;
 
       const isAbsoluteZero = arenaManager.getTheme() === 'absolute_zero';
       const particleIntensity = isAbsoluteZero ? intensity * 0.55 : intensity;
-      // Emit heavy spark particle burst
-      this.sparks.emit(x, z, particleIntensity * 1.5);
 
       // Trigger shockwave ring on medium-to-strong impact
       if (intensity > 0.4) {
