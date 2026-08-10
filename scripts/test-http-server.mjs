@@ -74,6 +74,14 @@ try {
   assert.equal(joinHead.status, 200);
   assert.equal(await joinHead.text(), '');
 
+  const challenge = await fetch(`${URL}/challenge/11111111-1111-4111-8111-111111111111`);
+  assert.equal(challenge.status, 200);
+  assert.equal(await challenge.text(), '<!doctype html><title>NSS Portal</title>');
+
+  const challengesHead = await fetch(`${URL}/challenges/`, { method: 'HEAD' });
+  assert.equal(challengesHead.status, 200);
+  assert.equal(await challengesHead.text(), '');
+
   const arena = await fetch(`${URL}/arena/`);
   assert.equal(arena.status, 200);
   assert.equal(await arena.text(), '<!doctype html><title>RIPTOP Arena</title>');

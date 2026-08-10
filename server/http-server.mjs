@@ -5,8 +5,13 @@ import { fileURLToPath } from 'node:url';
 import { authenticateRequest } from './auth/auth-middleware.mjs';
 import { AuthError, redeemInvite } from './auth/invite-service.mjs';
 import { ProgressionError, syncProgression } from './progression/progression-service.mjs';
+import { ChallengeError, createChallengeService } from './challenges/challenge-service.mjs';
 
 const DEFAULT_JSON_BODY_BYTES = 64 * 1024;
+const CHALLENGE_RESULT_BODY_BYTES = 2 * 1024 * 1024;
+const UUID_PATH = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
+const OFFER_PATH = new RegExp(`^/api/challenge-offers/(${UUID_PATH})(?:/(claim|revoke))?$`);
+const CHALLENGE_PATH = new RegExp(`^/api/challenges/(${UUID_PATH})(?:/(results|rematch))?$`);
 const DEFAULT_SITE_ROOT = fileURLToPath(new URL('../dist/site/', import.meta.url));
 const CONTENT_TYPES = {
   '.avif': 'image/avif',
@@ -123,6 +128,9 @@ export function createArenaHttpServer(options = {}) {
   const siteRoot = options.siteRoot ?? process.env.SITE_ROOT ?? DEFAULT_SITE_ROOT;
   const maxJsonBodyBytes = options.maxJsonBodyBytes ?? DEFAULT_JSON_BODY_BYTES;
   const database = options.database;
+  const challengeService = database
+    ? createChallengeService(database, options.challengeServiceOptions)
+    : null;
 
   return createServer(async (request, response) => {
     try {
@@ -152,6 +160,70 @@ export function createArenaHttpServer(options = {}) {
         return;
       }
 
+      if (request.method === 'POST' && url.pathname === '/api/challenge-offers') {
+        if (!challengeService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Challenge database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 201, challengeService.createOffer(
+          player.playerId,
+          await readJsonBody(request, maxJsonBodyBytes),
+        ));
+        return;
+      }
+
+      const offerMatch = OFFER_PATH.exec(url.pathname);
+      if (offerMatch) {
+        if (!challengeService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Challenge database is unavailable.');
+        const player = authenticateRequest(database, request);
+        const [, offerId, action] = offerMatch;
+        if (request.method === 'GET' && action === undefined) {
+          sendJson(response, 200, challengeService.getOffer(offerId, player.playerId));
+          return;
+        }
+        if (request.method === 'POST' && action === 'claim') {
+          sendJson(response, 201, challengeService.claimOffer(offerId, player.playerId));
+          return;
+        }
+        if (request.method === 'POST' && action === 'revoke') {
+          sendJson(response, 200, challengeService.revokeOffer(offerId, player.playerId));
+          return;
+        }
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/challenges') {
+        if (!challengeService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Challenge database is unavailable.');
+        const player = authenticateRequest(database, request);
+        const optionsValue = {
+          group: url.searchParams.get('group') ?? undefined,
+          ...(url.searchParams.has('cursor') ? { cursor: url.searchParams.get('cursor') } : {}),
+          ...(url.searchParams.has('limit') ? { limit: Number(url.searchParams.get('limit')) } : {}),
+        };
+        sendJson(response, 200, challengeService.listChallenges(player.playerId, optionsValue));
+        return;
+      }
+
+      const challengeMatch = CHALLENGE_PATH.exec(url.pathname);
+      if (challengeMatch) {
+        if (!challengeService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Challenge database is unavailable.');
+        const player = authenticateRequest(database, request);
+        const [, challengeId, action] = challengeMatch;
+        if (request.method === 'GET' && action === undefined) {
+          sendJson(response, 200, challengeService.getChallenge(challengeId, player.playerId));
+          return;
+        }
+        if (request.method === 'POST' && action === 'results') {
+          sendJson(response, 200, challengeService.submitChallengeResult(
+            challengeId,
+            player.playerId,
+            await readJsonBody(request, CHALLENGE_RESULT_BODY_BYTES),
+          ));
+          return;
+        }
+        if (request.method === 'POST' && action === 'rematch') {
+          sendJson(response, 201, challengeService.createRematch(challengeId, player.playerId));
+          return;
+        }
+      }
+
       if (url.pathname.startsWith('/api/')) {
         if (request.method !== 'GET' && request.method !== 'HEAD') {
           await readJsonBody(request, maxJsonBodyBytes);
@@ -161,7 +233,12 @@ export function createArenaHttpServer(options = {}) {
       }
 
       if (production && (request.method === 'GET' || request.method === 'HEAD')) {
-        const staticPathname = url.pathname === '/join' || url.pathname === '/join/'
+        const portalFallback = url.pathname === '/join'
+          || url.pathname === '/join/'
+          || url.pathname === '/challenges'
+          || url.pathname === '/challenges/'
+          || new RegExp(`^/challenge/${UUID_PATH}/?$`).test(url.pathname);
+        const staticPathname = portalFallback
           ? '/index.html'
           : url.pathname;
         if (await serveStatic(request, response, siteRoot, staticPathname)) return;
@@ -189,6 +266,10 @@ export function createArenaHttpServer(options = {}) {
         } else {
           sendError(response, error.status, error.code, error.message);
         }
+        return;
+      }
+      if (error instanceof ChallengeError) {
+        sendError(response, error.status, error.code, error.message);
         return;
       }
       console.error('HTTP request failed.', error);
