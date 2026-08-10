@@ -19,6 +19,7 @@ import { clearFocusDiagnostics, focusDiagnosticEvents, recordFocusDiagnostic, se
 import { createShareLink } from './sharing/combinationUrl';
 import { copyShareLink } from './sharing/shareLink';
 import { createArenaLink } from './integration/arenaLink';
+import { createChallengeReturnLink, parseChallengeReturnPath } from './integration/challengeReturn';
 import { currentSnapshot, useCustomizer } from './store';
 import { emitUsabilityAction } from './usability/events';
 import { AffinityBadge } from './affinity/AffinityBadge';
@@ -120,6 +121,11 @@ export default function App() {
     new URL(window.location.href),
     import.meta.env.VITE_ARENA_URL,
   ), [state.combination]);
+  const challengeReturnPath = useMemo(() => parseChallengeReturnPath(window.location.search), []);
+  const challengeReturnLink = useMemo(() => challengeReturnPath ? createChallengeReturnLink(
+    challengeReturnPath,
+    { combination: state.combination, affinities: state.affinities },
+  ) : null, [challengeReturnPath, state.affinities, state.combination]);
   const currentLibraryEntry = [...library.favorites, ...library.recent].find(entry => entry.id === id);
   const automaticName = combinationName(state.combination);
   const focusSessionId = useCustomizer(current => current.focusState.sessionId);
@@ -508,6 +514,7 @@ export default function App() {
               <button data-testid="import" onClick={() => importRef.current?.click()}>导入 JSON</button>
               <button data-testid="share" onClick={() => setShareOpen(value => !value)}>分享</button>
               <button className="primary" data-testid="enter-arena" onClick={() => window.location.assign(arenaLink)}>⚔️ 进入竞技场</button>
+              {challengeReturnLink && <button className="primary" data-testid="return-challenge" onClick={() => window.location.assign(challengeReturnLink)}>返回挑战</button>}
               <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? '正在生成装备卡…' : '导出 PNG 装备卡'}</button>
               <button data-testid="library" onClick={() => setLibraryOpen(value => !value)}>组合库</button>
               <button data-testid="undo" disabled={!state.canUndo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.undo(); }}>撤销</button>

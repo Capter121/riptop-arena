@@ -6,7 +6,7 @@ import versions from '../../../shared/nss/versions.json';
 
 const combinationsById = new Map(enumerateCombinations().map(combination => [combinationId(combination), combination]));
 const v2RequiredParameters = ['sv', 'cv', 'rv', 'combo', 'a'] as const;
-const v2AllowedParameters = new Set([...v2RequiredParameters, 'emblem', 'test']);
+const v2AllowedParameters = new Set([...v2RequiredParameters, 'emblem', 'test', 'returnTo']);
 const legacyAllowedParameters = new Set(['combo', 'test']);
 const emblemPattern = /^emblem_[a-z0-9_-]{1,48}$/;
 

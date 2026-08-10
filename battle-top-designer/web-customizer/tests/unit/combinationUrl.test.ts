@@ -54,6 +54,14 @@ describe('stable combination URLs', () => {
     }
   });
 
+  it('allows one safe challenge return parameter without widening the V2 contract', () => {
+    const current = `${buildToSearch({ combination: stormAttack, affinities })}&returnTo=%2Fchallenge%2F123e4567-e89b-12d3-a456-426614174000`;
+    expect(parseShareSearch(current)).toMatchObject({ kind: 'current', combination: stormAttack, affinities });
+    expect(parseShareSearch(`${current}&returnTo=%2Fchallenge%2F223e4567-e89b-12d3-a456-426614174000`))
+      .toMatchObject({ kind: 'invalid' });
+    expect(parseShareSearch(`${current}&extra=1`)).toMatchObject({ kind: 'invalid' });
+  });
+
   it('uses legal URL, then legal local storage, then Storm Attack', () => {
     const target = enumerateCombinations()[137];
     const saved = JSON.stringify({ schemaVersion: 1, combination: target });

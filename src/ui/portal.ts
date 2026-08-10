@@ -2,6 +2,7 @@ import {
   loadProgression,
   progressionFromServer,
   saveProgression,
+  setNssLoadout,
   type ProgressionState,
 } from '../app/progression';
 import { InviteApiError, fetchCurrentPlayer, redeemInvite, type PublicPlayer } from '../auth/inviteClient';
@@ -23,6 +24,7 @@ import { InviteGate } from './inviteGate';
 import { createChallengeClient } from '../challenges/challengeClient';
 import { renderChallengeCenter } from './challengeCenter';
 import { renderChallengeOffer } from './challengeOffer';
+import { parseChallengeReturn, type ChallengeReturnParseResult } from '../challenges/challengeReturn';
 
 export interface PortalMode {
   readonly id: string;
@@ -89,7 +91,7 @@ function renderAuthenticated(
   const client = createChallengeClient(identity);
   const offerMatch = /^\/challenge\/([0-9a-f-]{36})\/?$/.exec(window.location.pathname);
   if (offerMatch) {
-    void renderChallengeOffer(mount, identity, client, offerMatch[1]);
+    void renderChallengeOffer(mount, identity, client, offerMatch[1], progression);
     return;
   }
   if (window.location.pathname === '/challenges' || window.location.pathname === '/challenges/') {
@@ -154,18 +156,37 @@ function renderAuthenticated(
 }
 
 async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity: LocalIdentity) {
-  const localProgression = loadProgression();
+  let localProgression = loadProgression();
+  const isChallengeOffer = /^\/challenge\/[0-9a-f-]{36}\/?$/.test(window.location.pathname);
+  const challengeReturn: ChallengeReturnParseResult = isChallengeOffer
+    ? parseChallengeReturn(window.location.search)
+    : { kind: 'none' };
   mount.setAttribute('aria-busy', 'true');
+  if (challengeReturn.kind === 'invalid') {
+    renderChallengeReturnPending(mount, '返回参数无效，请从挑战页重新进入定制器。');
+    return;
+  }
+  if (challengeReturn.kind === 'ready') {
+    localProgression = setNssLoadout(localProgression, challengeReturn.loadout);
+    saveProgression(localProgression, { trackWallet: false });
+  }
   try {
     const result = await syncPlayerProgression(identity, localProgression);
     const authoritative = progressionFromServer(result.progression.snapshot, result.progression.coins);
     saveProgression(authoritative, { trackWallet: false });
     commitProgressionSync(identity, result);
+    if (challengeReturn.kind === 'ready') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
     renderAuthenticated(mount, player, authoritative, result.status === 'conflict' ? 'conflict' : 'synced', identity);
   } catch (error) {
     if (classifyPortalFailure(error) === 'invalid-identity') {
       clearLocalIdentity();
       renderGuest(mount, '本地身份已失效，请使用新的邀请码。');
+      return;
+    }
+    if (challengeReturn.kind === 'ready') {
+      renderChallengeReturnPending(mount, '新装配尚未同步，认领已暂停。请联网后重试。');
       return;
     }
     const fallback = loadProgression();
@@ -177,6 +198,21 @@ async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity:
       identity,
     );
   }
+}
+
+function renderChallengeReturnPending(mount: HTMLElement, message: string) {
+  mount.innerHTML = `
+    <main class="portal-state" role="status">
+      <p class="portal-eyebrow">LOADOUT SYNC REQUIRED</p>
+      <h1>暂时不能认领挑战</h1>
+      <p></p>
+      <button type="button">重新同步装配</button>
+    </main>
+  `;
+  const text = mount.querySelector('p:last-of-type');
+  if (text) text.textContent = message;
+  mount.querySelector('button')?.addEventListener('click', () => window.location.reload());
+  mount.removeAttribute('aria-busy');
 }
 
 function renderOffline(mount: HTMLElement, retry: () => void) {

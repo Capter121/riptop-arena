@@ -1,5 +1,7 @@
 import type { ChallengeClient, ChallengeOfferView } from '../challenges/challengeClient';
 import type { LocalIdentity } from '../auth/localIdentity';
+import type { ProgressionState } from '../app/progression';
+import { buildChallengeCustomizerPath } from '../challenges/challengeReturn';
 
 function element<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string) {
   const node = document.createElement(tag);
@@ -43,6 +45,7 @@ export async function renderChallengeOffer(
   identity: LocalIdentity,
   client: ChallengeClient,
   offerId: string,
+  progression: ProgressionState,
 ) {
   mount.replaceChildren(element('main', 'portal-state', '正在读取挑战邀请…'));
   try {
@@ -77,14 +80,16 @@ export async function renderChallengeOffer(
         revoke.type = 'button';
         revoke.addEventListener('click', async () => {
           revoke.disabled = true;
-          try { await client.revokeOffer(view.id); await renderChallengeOffer(mount, identity, client, offerId); }
+          try { await client.revokeOffer(view.id); await renderChallengeOffer(mount, identity, client, offerId, progression); }
           catch { feedback.textContent = '撤销失败，请稍后重试'; revoke.disabled = false; }
         });
         actions.append(revoke);
       }
     } else if (view.actions.canClaim) {
       const adjust = element('a', 'challenge-secondary', '调整我的装配');
-      adjust.href = '/customizer/';
+      adjust.href = progression.latestNssLoadout
+        ? buildChallengeCustomizerPath(view.id, progression.latestNssLoadout)
+        : '/customizer/';
       const claim = element('button', 'challenge-primary', '认领并应战');
       claim.type = 'button';
       claim.addEventListener('click', async () => {
@@ -112,7 +117,7 @@ export async function renderChallengeOffer(
     state.append(element('h1', undefined, '无法打开挑战邀请'), element('p', undefined, '邀请不存在、无权查看、版本不支持或网络已断开。'));
     const retry = element('button', undefined, '重试');
     retry.type = 'button';
-    retry.addEventListener('click', () => { void renderChallengeOffer(mount, identity, client, offerId); });
+    retry.addEventListener('click', () => { void renderChallengeOffer(mount, identity, client, offerId, progression); });
     state.append(retry);
     mount.replaceChildren(state);
   }
