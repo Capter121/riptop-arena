@@ -20,7 +20,7 @@ export class MenuPanel {
     this.online.className = 'button button--online';
     this.online.textContent = '🌐 真人联机';
     this.onlineStatus.className = 'menu__online-status';
-    this.onlineStatus.textContent = '局域网 WebSocket 双人对战';
+    this.onlineStatus.textContent = '随机匹配或指定好友房间';
     this.survival.className = 'button';
     this.survival.textContent = '🛡️ 生存模式';
     this.tournament.className = 'button';

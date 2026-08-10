@@ -38,6 +38,7 @@ export class NetworkClient {
   role: OnlineRole | null = null;
   opponentLoadout: OnlineLoadout | null = null;
   opponentName = 'Online Rival';
+  privateRoomToken: string | null = null;
 
   constructor(url = import.meta.env.VITE_WS_URL || deriveWebSocketUrl(window.location.href)) {
     this.url = url;
@@ -67,6 +68,18 @@ export class NetworkClient {
     }
     if (!this.connected) await this.connect(customUrl);
     this.send({ v: PROTOCOL_VERSION, type: 'JOIN_QUEUE', displayName, loadout });
+  }
+
+  async createPrivateRoom(displayName: string, loadout: OnlineLoadout, customUrl?: string) {
+    if (customUrl) this.url = customUrl;
+    if (!this.connected) await this.connect(customUrl);
+    this.send({ v: PROTOCOL_VERSION, type: 'CREATE_PRIVATE_ROOM', displayName, loadout });
+  }
+
+  async joinPrivateRoom(roomToken: string, displayName: string, loadout: OnlineLoadout, customUrl?: string) {
+    if (customUrl) this.url = customUrl;
+    if (!this.connected) await this.connect(customUrl);
+    this.send({ v: PROTOCOL_VERSION, type: 'JOIN_PRIVATE_ROOM', roomToken, displayName, loadout });
   }
 
   cancelQueue() {
@@ -189,7 +202,11 @@ export class NetworkClient {
     if (message.type === 'QUEUED') {
       this.peerId = message.peerId;
       this.setState('queued');
+    } else if (message.type === 'PRIVATE_ROOM_CREATED') {
+      this.privateRoomToken = message.roomToken;
+      this.setState('private_waiting');
     } else if (message.type === 'MATCHED') {
+      this.privateRoomToken = null;
       this.roomId = message.roomId;
       this.peerId = message.peerId;
       this.role = message.role;
@@ -245,6 +262,7 @@ export class NetworkClient {
     this.role = null;
     this.opponentLoadout = null;
     this.opponentName = 'Online Rival';
+    this.privateRoomToken = null;
     this.stateAccumulator = 0;
     this.localSequence = 0;
     this.remoteSequence = -1;
@@ -258,8 +276,9 @@ export class NetworkClient {
 
 export function deriveWebSocketUrl(pageUrl: string) {
   const url = new URL(pageUrl);
-  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-  url.port = '8080';
+  const secure = url.protocol === 'https:';
+  url.protocol = secure ? 'wss:' : 'ws:';
+  if (!secure) url.port = '8080';
   url.pathname = '/';
   url.search = '';
   url.hash = '';

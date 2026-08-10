@@ -60,6 +60,7 @@ import { nssCombinationId } from '../nss/loadout';
 import {
   oppositeRole,
   mirrorTurnResolutionForGuest,
+  PRIVATE_ROOM_TOKEN_PATTERN,
   type LaunchConfig,
   type NetworkTopState,
   type OnlineLoadout,
@@ -507,16 +508,15 @@ export class Game {
       this.startBattle();
     });
     this.menu.online.addEventListener('click', () => {
-      if (['connecting', 'queued', 'matched', 'in_battle'].includes(this.network.state)) {
-        void this.toggleOnlineQueue();
-      } else {
-        this.lanModal.show();
-      }
+      if (this.onlineActive()) this.cancelOnlineQueue();
+      else this.lanModal.show();
     });
-    this.lanModal.setupCallbacks(
-      (url) => void this.toggleOnlineQueue(url),
-      () => void this.toggleOnlineQueue(),
-    );
+    this.lanModal.setupCallbacks({
+      onRandom: (url, displayName) => void this.startOnlineMatch('random', displayName, url),
+      onCreate: (url, displayName) => void this.startOnlineMatch('create', displayName, url),
+      onJoin: (url, displayName, roomToken) => void this.startOnlineMatch('join', displayName, url, roomToken),
+      onCancel: () => this.cancelOnlineQueue(),
+    });
     this.menu.survival.addEventListener('click', () => {
       this.beginSingleSession();
       this.mode = 'survival';
@@ -618,7 +618,14 @@ export class Game {
     this.refreshBlackMarket();
     this.resize();
     if (this.challenge) void this.startChallengeBattle();
-    else this.showMenu();
+    else {
+      this.showMenu();
+      const roomToken = this.params.get('room');
+      if (roomToken !== null) {
+        this.lanModal.showJoin(roomToken);
+        if (!PRIVATE_ROOM_TOKEN_PATTERN.test(roomToken)) this.lanModal.updateStatus('error', '好友房间链接无效');
+      }
+    }
     window.setTimeout(() => this.introCard.classList.add('intro-card--hidden'), 1800);
 
     this.exposeDiagnostics();
@@ -655,18 +662,20 @@ export class Game {
     return { combat: random.combat, physics: random.physics };
   }
 
-  private async toggleOnlineQueue(customUrl?: string) {
-    if (['connecting', 'queued', 'matched', 'in_battle'].includes(this.network.state)) {
-      this.network.cancelQueue();
-      this.onlineLocalLoadout = null;
-      this.menu.setOnlineState('真人联机', '已取消匹配');
-      this.lanModal.updateStatus('idle', '已取消匹配');
-      return;
-    }
+  private onlineActive() {
+    return ['connecting', 'queued', 'private_waiting', 'matched', 'in_battle'].includes(this.network.state);
+  }
 
-    this.battleMode = 'online';
-    this.mode = 'quick';
-    const loadout: OnlineLoadout = this.nssRequest.kind === 'ready'
+  private cancelOnlineQueue() {
+    this.network.cancelQueue();
+    this.onlineLocalLoadout = null;
+    this.battleMode = 'single';
+    this.menu.setOnlineState('真人联机', '已取消匹配');
+    this.lanModal.updateStatus('idle', '已取消匹配');
+  }
+
+  private createOnlineLoadout(): OnlineLoadout {
+    return this.nssRequest.kind === 'ready'
       ? {
           kind: 'nss-v1',
           comboId: nssCombinationId(this.nssRequest.loadout.combination),
@@ -680,45 +689,61 @@ export class Game {
           upgrades: { ...this.progression.upgrades },
           partUpgrades: { ...this.progression.partUpgrades },
         };
+  }
+
+  private async startOnlineMatch(kind: 'random' | 'create' | 'join', displayName: string, customUrl?: string, roomToken = '') {
+    if (this.onlineActive()) return;
+    this.battleMode = 'online';
+    this.mode = 'quick';
+    const loadout = this.createOnlineLoadout();
     this.onlineLocalLoadout = loadout;
     try {
-      this.lanModal.updateStatus('connecting', '正在连接局域网匹配服务...');
-      await this.network.joinQueue('Player', loadout, customUrl);
+      this.lanModal.updateStatus('connecting', '正在连接真人匹配服务...');
+      if (kind === 'create') await this.network.createPrivateRoom(displayName, loadout, customUrl);
+      else if (kind === 'join') await this.network.joinPrivateRoom(roomToken, displayName, loadout, customUrl);
+      else await this.network.joinQueue(displayName, loadout, customUrl);
     } catch (error) {
+      this.network.disconnect();
       this.battleMode = 'single';
       this.onlineLocalLoadout = null;
-      const msg = error instanceof Error ? error.message : '局域网服务不可用';
+      const msg = error instanceof Error ? error.message : '真人匹配服务不可用';
       this.menu.setOnlineState('真人联机', msg);
-      this.lanModal.updateStatus('idle', msg);
+      this.lanModal.updateStatus('error', msg);
     }
   }
 
   private updateOnlineMenuState(state: string) {
     if (state === 'connecting') {
-      this.menu.setOnlineState('连接中...', '正在连接局域网对战服务', true);
-      this.lanModal.updateStatus(state, '正在连接局域网匹配服务...');
+      this.menu.setOnlineState('连接中...', '正在连接真人对战服务', true);
+      this.lanModal.updateStatus(state, '正在连接真人匹配服务...');
     } else if (state === 'queued') {
-      this.menu.setOnlineState('匹配中...（点击取消）', '等待第二位局域网玩家加入', true);
-      this.lanModal.updateStatus(state, '匹配排队中！请在另一台电脑/手机点击【开始匹配】');
+      this.menu.setOnlineState('匹配中...（点击取消）', '等待另一位玩家加入', true);
+      this.lanModal.updateStatus(state, '随机匹配排队中，等待另一位玩家');
+    } else if (state === 'private_waiting') {
+      this.menu.setOnlineState('好友房间等待中', '复制链接邀请指定朋友', true);
     } else if (state === 'matched') {
       this.menu.setOnlineState('对手已找到', '正在准备战斗场地', true);
-      this.lanModal.updateStatus(state, '已匹配同局域网玩家！正在进入赛场...');
+      this.lanModal.updateStatus(state, '已找到对手，正在进入赛场...');
       setTimeout(() => this.lanModal.hide(), 1200);
     } else if (state === 'in_battle') {
       this.menu.setOnlineState('真人联机', '联机对战进行中', true);
-      this.lanModal.updateStatus(state, '局域网对战进行中');
+      this.lanModal.updateStatus(state, '真人对战进行中');
       this.lanModal.hide();
     } else if (state === 'idle') {
-      this.menu.setOnlineState('真人联机', '局域网 WebSocket 双人对战');
-      this.lanModal.updateStatus(state, '局域网服务就绪');
+      this.menu.setOnlineState('真人联机', '随机匹配或指定好友房间');
+      this.lanModal.updateStatus(state, '请选择匹配方式');
     } else if (state === 'closed' && this.battleMode === 'online' && (this.phase === 'launch' || this.phase === 'battle')) {
-      this.handleOnlineAbort('局域网联机服务已断开');
+      this.handleOnlineAbort('真人联机服务已断开');
     }
   }
 
   private handleNetworkMessage(message: ServerMessage) {
     switch (message.type) {
+      case 'PRIVATE_ROOM_CREATED':
+        this.lanModal.showPrivateRoomLink(this.createPrivateRoomLink(message.roomToken));
+        break;
       case 'MATCHED':
+        this.removePrivateRoomParameter();
         void this.prepareOnlineBattle(message.opponentLoadout, message.opponentName);
         break;
       case 'ALL_READY':
@@ -775,10 +800,40 @@ export class Game {
         this.handleOnlineAbort('\u5bf9\u624b\u5df2\u65ad\u5f00\uff0c\u8054\u673a\u5bf9\u6218\u5df2\u7ed3\u675f');
         break;
       case 'ERROR':
-        if (message.code === 'READY_TIMEOUT' || message.code === 'ROOM_NOT_FOUND') this.handleOnlineAbort(message.message);
+        if (['INVALID_ROOM_TOKEN', 'PRIVATE_ROOM_NOT_FOUND', 'ALREADY_WAITING', 'ALREADY_MATCHED'].includes(message.code)) {
+          const labels: Record<string, string> = {
+            INVALID_ROOM_TOKEN: '好友房间链接无效',
+            PRIVATE_ROOM_NOT_FOUND: '房间已失效，请让好友重新创建',
+            ALREADY_WAITING: '当前已经在等待对手',
+            ALREADY_MATCHED: '当前已经进入其他对战房间',
+          };
+          this.network.disconnect();
+          this.battleMode = 'single';
+          this.onlineLocalLoadout = null;
+          this.lanModal.updateStatus('error', labels[message.code] ?? message.message);
+        } else if (message.code === 'READY_TIMEOUT' || message.code === 'ROOM_NOT_FOUND') this.handleOnlineAbort(message.message);
+        else if (['connecting', 'queued', 'private_waiting'].includes(this.network.state)) {
+          this.network.disconnect();
+          this.battleMode = 'single';
+          this.onlineLocalLoadout = null;
+          this.lanModal.updateStatus('error', message.message);
+        }
         else this.hud.combatLog.log(`Network: ${message.message}`, '#ff7b5b');
         break;
     }
+  }
+
+  private createPrivateRoomLink(roomToken: string) {
+    const url = new URL('/arena/', window.location.origin);
+    url.searchParams.set('room', roomToken);
+    return url.toString();
+  }
+
+  private removePrivateRoomParameter() {
+    if (!this.params.has('room')) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('room');
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
   }
 
   private async prepareOnlineBattle(loadout: OnlineLoadout, opponentName: string) {

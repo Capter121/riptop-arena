@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { networkInterfaces } from 'node:os';
@@ -28,7 +28,9 @@ const server = createArenaHttpServer({ database });
 const wss = new WebSocketServer({ server, maxPayload: MAX_MESSAGE_BYTES });
 const clients = new Map();
 const rooms = new Map();
+const privateRooms = new Map();
 let waitingPlayer = null;
+const PRIVATE_ROOM_TOKEN = /^[A-Za-z0-9_-]{24}$/;
 
 function send(ws, message) {
   if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ v: PROTOCOL_VERSION, ...message }));
@@ -57,6 +59,17 @@ function cleanupRoom(room) {
     meta.role = null;
     meta.ready = false;
   }
+}
+
+function clearWaiting(ws) {
+  if (waitingPlayer === ws) waitingPlayer = null;
+  const meta = clients.get(ws);
+  if (!meta) return;
+  if (meta.privateRoomToken && privateRooms.get(meta.privateRoomToken) === ws) {
+    privateRooms.delete(meta.privateRoomToken);
+  }
+  meta.waitingType = null;
+  meta.privateRoomToken = null;
 }
 
 function peerFor(room, ws) {
@@ -140,6 +153,8 @@ function validJoinIdentity(message) {
 }
 
 function createRoom(host, guest) {
+  clearWaiting(host);
+  clearWaiting(guest);
   const hostMeta = clients.get(host);
   const guestMeta = clients.get(guest);
   const room = {
@@ -203,7 +218,7 @@ function openTurn(room, turnId) {
   }, TURN_TIMEOUT_MS);
 }
 
-function handleJoin(ws, message) {
+function acceptWaitingRequest(ws, message) {
   const meta = clients.get(ws);
   const loadoutError = validateLoadout(message.loadout);
   if (!validJoinIdentity(message) || loadoutError) {
@@ -211,24 +226,62 @@ function handleJoin(ws, message) {
     sendError(ws, code, code === 'CATALOG_MISMATCH'
       ? 'NSS battle catalog does not match the server.'
       : 'Queue request contains an invalid loadout.');
-    return;
+    return false;
   }
   if (meta.roomId) {
     sendError(ws, 'ALREADY_MATCHED', 'Connection is already in a room.', meta.roomId);
-    return;
+    return false;
+  }
+  if (meta.waitingType) {
+    sendError(ws, 'ALREADY_WAITING', 'Connection is already waiting for an opponent.');
+    return false;
   }
   meta.displayName = message.displayName;
   meta.loadout = message.loadout;
+  return true;
+}
+
+function handleJoin(ws, message) {
+  if (!acceptWaitingRequest(ws, message)) return;
+  const meta = clients.get(ws);
+
+  if (waitingPlayer && waitingPlayer.readyState !== WebSocket.OPEN) clearWaiting(waitingPlayer);
 
   if (waitingPlayer && waitingPlayer.readyState === WebSocket.OPEN && waitingPlayer !== ws) {
     const host = waitingPlayer;
-    waitingPlayer = null;
     createRoom(host, ws);
     return;
   }
 
   waitingPlayer = ws;
+  meta.waitingType = 'queue';
   send(ws, { type: 'QUEUED', peerId: meta.id });
+}
+
+function createPrivateRoom(ws, message) {
+  if (!acceptWaitingRequest(ws, message)) return;
+  const meta = clients.get(ws);
+  let roomToken;
+  do roomToken = randomBytes(18).toString('base64url'); while (privateRooms.has(roomToken));
+  privateRooms.set(roomToken, ws);
+  meta.waitingType = 'private';
+  meta.privateRoomToken = roomToken;
+  send(ws, { type: 'PRIVATE_ROOM_CREATED', roomToken });
+}
+
+function joinPrivateRoom(ws, message) {
+  if (typeof message.roomToken !== 'string' || !PRIVATE_ROOM_TOKEN.test(message.roomToken)) {
+    sendError(ws, 'INVALID_ROOM_TOKEN', 'Private room token is invalid.');
+    return;
+  }
+  if (!acceptWaitingRequest(ws, message)) return;
+  const host = privateRooms.get(message.roomToken);
+  if (!host || host.readyState !== WebSocket.OPEN || host === ws) {
+    if (host) clearWaiting(host);
+    sendError(ws, 'PRIVATE_ROOM_NOT_FOUND', 'Private room is no longer available.');
+    return;
+  }
+  createRoom(host, ws);
 }
 
 function handleRoomMessage(ws, message) {
@@ -335,6 +388,8 @@ wss.on('connection', (ws) => {
     ready: false,
     displayName: '',
     loadout: null,
+    waitingType: null,
+    privateRoomToken: null,
     lastPongAt: Date.now(),
   });
 
@@ -367,15 +422,23 @@ wss.on('connection', (ws) => {
       handleJoin(ws, message);
       return;
     }
+    if (message.type === 'CREATE_PRIVATE_ROOM') {
+      createPrivateRoom(ws, message);
+      return;
+    }
+    if (message.type === 'JOIN_PRIVATE_ROOM') {
+      joinPrivateRoom(ws, message);
+      return;
+    }
     if (message.type === 'CANCEL_QUEUE') {
-      if (waitingPlayer === ws) waitingPlayer = null;
+      clearWaiting(ws);
       return;
     }
     handleRoomMessage(ws, message);
   });
 
   ws.on('close', () => {
-    if (waitingPlayer === ws) waitingPlayer = null;
+    clearWaiting(ws);
     const meta = clients.get(ws);
     const room = meta?.roomId ? rooms.get(meta.roomId) : null;
     if (room) {

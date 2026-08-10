@@ -5,6 +5,7 @@ import { deriveWebSocketUrl } from '../../../../src/network/networkClient';
 
 afterEach(() => {
   document.body.innerHTML = '';
+  window.localStorage.clear();
 });
 
 describe('LAN matchmaking modal', () => {
@@ -12,13 +13,19 @@ describe('LAN matchmaking modal', () => {
     const onStart = vi.fn();
     const onCancel = vi.fn();
     const modal = new LanModal();
-    modal.setupCallbacks(onStart, onCancel);
+    modal.setupCallbacks({
+      onRandom: onStart,
+      onCreate: vi.fn(),
+      onJoin: vi.fn(),
+      onCancel,
+    });
 
     expect(deriveWebSocketUrl('http://192.168.1.8:4176/arena/?mode=lan')).toBe('ws://192.168.1.8:8080/');
     expect(modal.urlInput.value).toBe(deriveWebSocketUrl(window.location.href));
+    modal.nameInput.value = 'Nova';
     modal.urlInput.value = '  ws://192.168.1.20:8080/  ';
     modal.matchBtn.click();
-    expect(onStart).toHaveBeenCalledWith('ws://192.168.1.20:8080/');
+    expect(onStart).toHaveBeenCalledWith('ws://192.168.1.20:8080/', 'Nova');
 
     modal.updateStatus('queued', '等待朋友加入');
     expect(modal.cancelBtn.style.display).toBe('inline-block');

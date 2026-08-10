@@ -76,6 +76,14 @@ class TestClient {
   close() {
     this.ws.close();
   }
+
+  closeAndWait() {
+    if (this.ws.readyState === WebSocket.CLOSED) return Promise.resolve();
+    return new Promise((resolve) => {
+      this.ws.once('close', resolve);
+      this.ws.close();
+    });
+  }
 }
 
 function connect() {
@@ -92,6 +100,14 @@ function join(client, name, loadout = legacyLoadout()) {
     displayName: name,
     loadout,
   });
+}
+
+function createPrivateRoom(client, name, loadout = legacyLoadout()) {
+  client.send({ type: 'CREATE_PRIVATE_ROOM', displayName: name, loadout });
+}
+
+function joinPrivateRoom(client, roomToken, name, loadout = legacyLoadout()) {
+  client.send({ type: 'JOIN_PRIVATE_ROOM', roomToken, displayName: name, loadout });
 }
 
 async function matchedPair(prefix, firstLoadout, secondLoadout) {
@@ -135,6 +151,64 @@ try {
   const health = await fetch(`http://127.0.0.1:${PORT}/health`);
   assert.equal(health.status, 200);
   assert.deepEqual(await health.json(), { status: 'ok' });
+
+  const privateHost = await connect();
+  createPrivateRoom(privateHost, 'Nova', nssLoadout());
+  const created = await privateHost.waitFor('PRIVATE_ROOM_CREATED');
+  assert.match(created.roomToken, /^[A-Za-z0-9_-]{24}$/);
+
+  createPrivateRoom(privateHost, 'Nova', nssLoadout());
+  assert.equal((await privateHost.waitFor('ERROR')).code, 'ALREADY_WAITING');
+  joinPrivateRoom(privateHost, created.roomToken, 'Nova', nssLoadout());
+  assert.equal((await privateHost.waitFor('ERROR')).code, 'ALREADY_WAITING');
+
+  const randomWaiting = await connect();
+  join(randomWaiting, 'Random');
+  await randomWaiting.waitFor('QUEUED');
+
+  const privateGuest = await connect();
+  joinPrivateRoom(privateGuest, created.roomToken, 'Rin');
+  const [privateHostMatch, privateGuestMatch] = await Promise.all([
+    privateHost.waitFor('MATCHED'),
+    privateGuest.waitFor('MATCHED'),
+  ]);
+  assert.equal(privateHostMatch.roomId, privateGuestMatch.roomId);
+  assert.equal(privateHostMatch.opponentName, 'Rin');
+  assert.equal(privateGuestMatch.opponentName, 'Nova');
+  assert.equal(privateHostMatch.opponentLoadout.kind, 'legacy');
+  assert.equal(privateGuestMatch.opponentLoadout.kind, 'nss-v1');
+
+  const usedToken = await connect();
+  joinPrivateRoom(usedToken, created.roomToken, 'Late');
+  assert.equal((await usedToken.waitFor('ERROR')).code, 'PRIVATE_ROOM_NOT_FOUND');
+  await usedToken.closeAndWait();
+  await privateHost.closeAndWait();
+  await privateGuest.closeAndWait();
+  await randomWaiting.closeAndWait();
+
+  const invalidToken = await connect();
+  joinPrivateRoom(invalidToken, '../bad', 'Bad Token');
+  assert.equal((await invalidToken.waitFor('ERROR')).code, 'INVALID_ROOM_TOKEN');
+  await invalidToken.closeAndWait();
+
+  const cancelledHost = await connect();
+  createPrivateRoom(cancelledHost, 'Cancelled');
+  const cancelled = await cancelledHost.waitFor('PRIVATE_ROOM_CREATED');
+  cancelledHost.send({ type: 'CANCEL_QUEUE' });
+  const cancelledGuest = await connect();
+  joinPrivateRoom(cancelledGuest, cancelled.roomToken, 'Late Cancel');
+  assert.equal((await cancelledGuest.waitFor('ERROR')).code, 'PRIVATE_ROOM_NOT_FOUND');
+  await cancelledHost.closeAndWait();
+  await cancelledGuest.closeAndWait();
+
+  const disconnectedHost = await connect();
+  createPrivateRoom(disconnectedHost, 'Disconnected');
+  const disconnectedRoom = await disconnectedHost.waitFor('PRIVATE_ROOM_CREATED');
+  await disconnectedHost.closeAndWait();
+  const disconnectedGuest = await connect();
+  joinPrivateRoom(disconnectedGuest, disconnectedRoom.roomToken, 'Late Disconnect');
+  assert.equal((await disconnectedGuest.waitFor('ERROR')).code, 'PRIVATE_ROOM_NOT_FOUND');
+  await disconnectedGuest.closeAndWait();
 
   const battle = await matchedPair('battle');
   battle.host.send({ type: 'CLIENT_READY', roomId: battle.roomId });

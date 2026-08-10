@@ -9,9 +9,10 @@ import type { SkillTier, TurnAction } from '../types/battle';
 export const PROTOCOL_VERSION = 2 as const;
 export const MAX_MESSAGE_BYTES = 16 * 1024;
 export const STATE_INTERVAL_SECONDS = 0.05;
+export const PRIVATE_ROOM_TOKEN_PATTERN = /^[A-Za-z0-9_-]{24}$/;
 
 export type OnlineRole = 'host' | 'guest';
-export type ConnectionState = 'idle' | 'connecting' | 'queued' | 'matched' | 'in_battle' | 'closed';
+export type ConnectionState = 'idle' | 'connecting' | 'queued' | 'private_waiting' | 'matched' | 'in_battle' | 'closed';
 
 export type OnlineLoadout =
   | { kind: 'legacy'; build: BuildSelection; upgrades: UpgradeLevels; partUpgrades: PartUpgradeLevels }
@@ -86,6 +87,8 @@ type RoomMessage<T extends string> = VersionedMessage<T> & { roomId: string };
 
 export type ClientMessage =
   | (VersionedMessage<'JOIN_QUEUE'> & { displayName: string; loadout: OnlineLoadout })
+  | (VersionedMessage<'CREATE_PRIVATE_ROOM'> & { displayName: string; loadout: OnlineLoadout })
+  | (VersionedMessage<'JOIN_PRIVATE_ROOM'> & { roomToken: string; displayName: string; loadout: OnlineLoadout })
   | VersionedMessage<'CANCEL_QUEUE'>
   | RoomMessage<'CLIENT_READY'>
   | (RoomMessage<'MATCH_START'> & { startDelayMs: number; launchConfig: LaunchConfig })
@@ -123,6 +126,7 @@ export type ClientMessage =
 
 export type ServerMessage =
   | (VersionedMessage<'QUEUED'> & { peerId: string })
+  | (VersionedMessage<'PRIVATE_ROOM_CREATED'> & { roomToken: string })
   | (RoomMessage<'MATCHED'> & {
       peerId: string;
       role: OnlineRole;
@@ -172,6 +176,7 @@ export type ServerMessage =
 
 const SERVER_MESSAGE_TYPES = new Set<ServerMessage['type']>([
   'QUEUED',
+  'PRIVATE_ROOM_CREATED',
   'MATCHED',
   'ALL_READY',
   'MATCH_START',
@@ -197,6 +202,8 @@ export function parseServerMessage(raw: string): ServerMessage | null {
     const message = value as Record<string, unknown>;
     if (message.v !== PROTOCOL_VERSION || typeof message.type !== 'string') return null;
     if (!SERVER_MESSAGE_TYPES.has(message.type as ServerMessage['type'])) return null;
+    if (message.type === 'PRIVATE_ROOM_CREATED'
+      && (typeof message.roomToken !== 'string' || !PRIVATE_ROOM_TOKEN_PATTERN.test(message.roomToken))) return null;
     return message as ServerMessage;
   } catch {
     return null;
