@@ -44,7 +44,6 @@ import { BlackMarketPanel } from '../ui/blackMarket';
 import { globalInventory } from '../data/inventoryManager';
 import { SparksSystem } from '../fx/sparks';
 import { TurnChargeParticles } from '../fx/turnChargeParticles';
-import { advanceTurnChargeCadence } from '../fx/turnChargeCadence';
 import type { Phase } from '../utils/state';
 import { SynthAudio } from '../audio/synth';
 import { EnergyRings } from '../fx/energyRings';
@@ -238,7 +237,7 @@ export class Game {
   private voiceAnalyzerRequested = false;
   private turnState: TurnState = 'awaiting';
   private turnTimer = 0;
-  private turnChargeParticleElapsed = 0;
+  private turnChargeParticlesEmitted = false;
   private turnIndex = 1;
   private activeTurnResolution: TurnResolution | null = null;
   private activeClashQte: ClashQteState | null = null;
@@ -2030,16 +2029,10 @@ export class Game {
     }
   }
 
-  private emitTurnChargeParticles(dt: number) {
+  private emitTurnChargeParticles() {
     const resolution = this.activeTurnResolution;
-    if (!resolution) {
-      this.turnChargeParticleElapsed = 0;
-      return;
-    }
-
-    const cadence = advanceTurnChargeCadence(this.turnChargeParticleElapsed, dt);
-    this.turnChargeParticleElapsed = cadence.elapsed;
-    if (!cadence.emit) return;
+    if (!resolution || this.turnChargeParticlesEmitted) return;
+    this.turnChargeParticlesEmitted = true;
 
     if (resolution.playerVisual === 'charge') {
       this.turnChargeParticles.emit(this.player.position.x, this.player.position.y);
@@ -2883,9 +2876,9 @@ export class Game {
       document.body.classList.toggle('vignette-active', this.turnState === 'resolving' || this.turnState === 'clash_qte');
 
       if (this.turnState === 'resolving') {
-        this.emitTurnChargeParticles(dt);
+        this.emitTurnChargeParticles();
       } else {
-        this.turnChargeParticleElapsed = 0;
+        this.turnChargeParticlesEmitted = false;
       }
 
       this.turnPanel.update({

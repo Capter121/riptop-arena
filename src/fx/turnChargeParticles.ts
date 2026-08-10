@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-const MAX_PARTICLES = 192;
+const MAX_PARTICLES = 32;
 const PARTICLES_PER_EMISSION = 16;
 
 interface ParticleState {
@@ -55,12 +55,12 @@ export class TurnChargeParticles {
 
       this.spawnOne(
         px,
-        0.12 + Math.random() * 0.38,
+        0.06 + Math.random() * 0.12,
         pz,
         (inwardX / length) * speed,
-        (Math.random() - 0.2) * 0.8,
+        0,
         (inwardZ / length) * speed,
-        0.2 + Math.random() * 0.15,
+        0.12 + Math.random() * 0.08,
       );
     }
 
