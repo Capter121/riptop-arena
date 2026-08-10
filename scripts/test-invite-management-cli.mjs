@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
+import { authenticateIdentity, redeemInvite } from '../server/auth/invite-service.mjs';
 
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'nss-invite-cli-'));
 const databasePath = join(temporaryRoot, 'arena.sqlite');
@@ -144,7 +145,59 @@ try {
     assert.match(invalid.stderr, /Usage:|unknown/i);
   }
 
-  console.log('Invite management CLI creation and listing tests passed.');
+  const disabled = runCli(['disable', 'GROUP-2026']);
+  assert.equal(disabled.status, 0, disabled.stderr);
+  assert.match(disabled.stdout, /GR\*{6}26/);
+  assert.ok(!disabled.stdout.includes('GROUP-2026'));
+  assert.equal(
+    readDatabase(database => database.prepare('SELECT enabled FROM invites WHERE code = ?').get('GROUP-2026').enabled),
+    0,
+  );
+
+  const disabledAgain = runCli(['disable', 'GROUP-2026']);
+  assert.equal(disabledAgain.status, 0, disabledAgain.stderr);
+  assert.match(disabledAgain.stdout, /already disabled/i);
+  assert.ok(!disabledAgain.stdout.includes('GROUP-2026'));
+
+  const missing = runCli(['disable', 'MISSING-2026']);
+  assert.notEqual(missing.status, 0);
+  assert.match(missing.stderr, /not found/i);
+
+  for (const args of [
+    ['disable'],
+    ['disable', 'GROUP-2026', 'EXTRA'],
+  ]) {
+    const invalid = runCli(args);
+    assert.notEqual(invalid.status, 0, `Expected disable failure for ${JSON.stringify(args)}.`);
+    assert.match(invalid.stderr, /Usage:|requires|unknown/i);
+  }
+
+  const identityCode = 'IDENTITY-2026';
+  const identityInvite = runCli(['create', '--code', identityCode, '--max-uses', '2']);
+  assert.equal(identityInvite.status, 0, identityInvite.stderr);
+  const identityDatabase = new DatabaseSync(databasePath);
+  let identity;
+  try {
+    identity = redeemInvite(identityDatabase, { inviteCode: identityCode, displayName: 'Nova' });
+  } finally {
+    identityDatabase.close();
+  }
+
+  const identityDisabled = runCli(['disable', identityCode]);
+  assert.equal(identityDisabled.status, 0, identityDisabled.stderr);
+  assert.ok(!identityDisabled.stdout.includes(identityCode));
+  const authenticationDatabase = new DatabaseSync(databasePath);
+  try {
+    assert.equal(authenticateIdentity(authenticationDatabase, identity).playerId, identity.playerId);
+    assert.throws(
+      () => redeemInvite(authenticationDatabase, { inviteCode: identityCode, displayName: 'Rin' }),
+      error => error?.code === 'INVITE_DISABLED',
+    );
+  } finally {
+    authenticationDatabase.close();
+  }
+
+  console.log('Invite management CLI tests passed.');
 } finally {
   removeIfPresent(`${emptyDatabasePath}-shm`);
   removeIfPresent(`${emptyDatabasePath}-wal`);

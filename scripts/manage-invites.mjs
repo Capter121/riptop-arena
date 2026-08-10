@@ -4,7 +4,8 @@ import { migrateDatabase } from '../server/storage/migrate.mjs';
 
 const USAGE = `Usage:
   npm run invite -- create [--code CODE] [--max-uses NUMBER]
-  npm run invite -- list [--reveal]`;
+  npm run invite -- list [--reveal]
+  npm run invite -- disable CODE`;
 const CUSTOM_CODE = /^[A-Za-z0-9_-]{6,64}$/;
 
 function parsePositiveInteger(value) {
@@ -53,6 +54,12 @@ function parseListArguments(args) {
   throw new Error(`Unknown argument: ${args[0] ?? ''}`);
 }
 
+function parseDisableArguments(args) {
+  if (args.length === 0 || args[0].length === 0) throw new Error('disable requires an invite code.');
+  if (args.length > 1) throw new Error(`Unknown argument: ${args[1]}`);
+  return { code: args[0] };
+}
+
 function maskCode(code) {
   return `${code.slice(0, 2)}${'*'.repeat(code.length - 4)}${code.slice(-2)}`;
 }
@@ -83,7 +90,9 @@ async function main() {
     ? parseCreateArguments(args)
     : command === 'list'
       ? parseListArguments(args)
-      : null;
+      : command === 'disable'
+        ? parseDisableArguments(args)
+        : null;
   if (!input) throw new Error(`Unknown command: ${command}`);
 
   const databasePath = process.env.DATABASE_PATH || DEFAULT_DATABASE_PATH;
@@ -100,8 +109,17 @@ async function main() {
         }
         throw error;
       }
-    } else {
+    } else if (command === 'list') {
       listInvites(database, input.reveal);
+    } else {
+      const invite = database.prepare('SELECT enabled FROM invites WHERE code = ?').get(input.code);
+      if (!invite) throw new Error('Invite code not found.');
+      if (invite.enabled === 0) {
+        console.log(`Invite ${maskCode(input.code)} is already disabled.`);
+      } else {
+        database.prepare('UPDATE invites SET enabled = 0 WHERE code = ?').run(input.code);
+        console.log(`Disabled invite: ${maskCode(input.code)}`);
+      }
     }
   } finally {
     database.close();
