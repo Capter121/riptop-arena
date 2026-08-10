@@ -129,6 +129,124 @@ try {
   database.prepare('UPDATE challenge_offers SET status = ? WHERE id = ?').run('claimed', full.id);
   assert.throws(() => service.revokeOffer(full.id, CREATOR), hasCode('OFFER_ALREADY_CLAIMED'));
 
+  const changedFriendLoadout = {
+    ...fixture.loadout,
+    affinities: { ...fixture.loadout.affinities, tip: 'DARK' },
+  };
+  database.prepare(`
+    UPDATE player_progression SET snapshot_json = ? WHERE player_id = ?
+  `).run(JSON.stringify(snapshot({ latestNssLoadout: changedFriendLoadout })), FRIEND);
+  insertProgression.run(OTHER, JSON.stringify(snapshot({
+    upgrades: { attack: 4, defense: 3, stamina: 2 },
+    partUpgrades: { round: 3 },
+  })));
+
+  const claimable = service.createOffer(CREATOR, {
+    requestId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    mode: 'fair',
+    arena: 'absolute_zero',
+    message: 'Claim me',
+  });
+  assert.throws(() => service.claimOffer(claimable.id, CREATOR), hasCode('SELF_CLAIM_FORBIDDEN'));
+  const claimed = service.claimOffer(claimable.id, FRIEND);
+  assert.equal(claimed.status, 'pending');
+  assert.equal(claimed.input.player.playerId, FRIEND);
+  assert.equal(claimed.input.enemy.playerId, CREATOR);
+  assert.deepEqual(claimed.input.player.loadout, changedFriendLoadout);
+  assert.deepEqual(claimed.input.player.upgrades, fixture.zeroUpgradeSnapshot);
+  assert.deepEqual(claimed.input.enemy.upgrades, fixture.zeroUpgradeSnapshot);
+  assert.equal(database.prepare('SELECT claimed_challenge_id FROM challenge_offers WHERE id = ?').get(claimable.id).claimed_challenge_id, claimed.id);
+  assert.throws(() => service.claimOffer(claimable.id, OTHER), hasCode('OFFER_ALREADY_CLAIMED'));
+
+  const targeted = service.createOffer(CREATOR, {
+    requestId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    mode: 'fair',
+    arena: 'classic_grid',
+    message: 'For Rin',
+  });
+  database.prepare('UPDATE challenge_offers SET target_player_id = ? WHERE id = ?').run(FRIEND, targeted.id);
+  assert.throws(() => service.claimOffer(targeted.id, OTHER), hasCode('OFFER_FORBIDDEN'));
+
+  const expires = service.createOffer(CREATOR, {
+    requestId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+    mode: 'fair',
+    arena: 'classic_grid',
+    message: 'Too late',
+  });
+  assert.throws(() => futureService.claimOffer(expires.id, OTHER), hasCode('OFFER_EXPIRED'));
+
+  const rollbackOffer = service.createOffer(CREATOR, {
+    requestId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    mode: 'fair',
+    arena: 'classic_grid',
+    message: 'Rollback',
+  });
+  database.exec(`
+    CREATE TRIGGER fail_claim_update
+    BEFORE UPDATE OF status ON challenge_offers
+    WHEN OLD.id = '${rollbackOffer.id}'
+    BEGIN
+      SELECT RAISE(ABORT, 'forced claim failure');
+    END;
+  `);
+  const challengeCountBeforeRollback = database.prepare('SELECT COUNT(*) AS count FROM challenges').get().count;
+  assert.throws(() => service.claimOffer(rollbackOffer.id, OTHER), /forced claim failure/);
+  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM challenges').get().count, challengeCountBeforeRollback);
+  assert.equal(database.prepare('SELECT status FROM challenge_offers WHERE id = ?').get(rollbackOffer.id).status, 'open');
+  database.exec('DROP TRIGGER fail_claim_update');
+  const rollbackClaimed = service.claimOffer(rollbackOffer.id, OTHER);
+  assert.equal(rollbackClaimed.status, 'pending');
+
+  const fullClaimable = service.createOffer(CREATOR, {
+    requestId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    mode: 'full_power',
+    arena: 'neon_magma',
+    message: 'Full power',
+  });
+  const fullClaimed = service.claimOffer(fullClaimable.id, OTHER);
+  assert.deepEqual(fullClaimed.input.enemy.upgrades.upgrades, { attack: 2, defense: 1, stamina: 3 });
+  assert.deepEqual(fullClaimed.input.player.upgrades.upgrades, { attack: 4, defense: 3, stamina: 2 });
+
+  assert.equal(service.getChallenge(claimed.id, CREATOR).id, claimed.id);
+  assert.equal(service.getChallenge(claimed.id, FRIEND).actions.canBattle, true);
+  assert.throws(() => service.getChallenge(claimed.id, OTHER), hasCode('CHALLENGE_FORBIDDEN'));
+
+  const waitingMe = service.listChallenges(FRIEND, { group: 'waiting_me', limit: 20 });
+  assert.equal(waitingMe.pendingCount, waitingMe.items.length);
+  assert.ok(waitingMe.items.some(item => item.kind === 'offer' && item.id === targeted.id));
+  assert.ok(waitingMe.items.some(item => item.kind === 'challenge' && item.id === claimed.id));
+  const firstPage = service.listChallenges(FRIEND, { group: 'waiting_me', limit: 1 });
+  assert.equal(firstPage.items.length, 1);
+  assert.ok(firstPage.nextCursor);
+  const secondPage = service.listChallenges(FRIEND, {
+    group: 'waiting_me',
+    limit: 1,
+    cursor: firstPage.nextCursor,
+  });
+  assert.equal(secondPage.items.length, 1);
+  assert.notEqual(secondPage.items[0].id, firstPage.items[0].id);
+  assert.throws(() => service.listChallenges(FRIEND, { group: 'waiting_me', cursor: 'broken' }), hasCode('INVALID_CHALLENGE_REQUEST'));
+
+  const waitingFriend = service.listChallenges(CREATOR, { group: 'waiting_friend', limit: 50 });
+  assert.ok(waitingFriend.items.some(item => item.kind === 'challenge' && item.id === claimed.id));
+  assert.ok(waitingFriend.items.some(item => item.kind === 'offer' && item.id === targeted.id));
+
+  database.prepare(`
+    UPDATE challenges
+    SET status = 'completed', result_json = '{}', completed_at = ?, updated_at = ?
+    WHERE id = ?
+  `).run(NOW.toISOString(), NOW.toISOString(), claimed.id);
+  const history = service.listChallenges(FRIEND, { group: 'history' });
+  assert.ok(history.items.some(item => item.id === claimed.id));
+  assert.equal(service.getChallenge(claimed.id, FRIEND).actions.canRematch, true);
+  assert.throws(() => service.createRematch(claimed.id, CREATOR), hasCode('REMATCH_FORBIDDEN'));
+  const rematch = service.createRematch(claimed.id, FRIEND);
+  assert.equal(rematch.targetPlayerId, CREATOR);
+  assert.equal(rematch.parentChallengeId, claimed.id);
+  assert.equal(rematch.offer.creator.playerId, FRIEND);
+  assert.equal(service.createRematch(claimed.id, FRIEND).id, rematch.id);
+  assert.throws(() => service.getOffer(rematch.id, OTHER), hasCode('OFFER_FORBIDDEN'));
+
   console.log('Challenge offer lifecycle tests passed.');
 } finally {
   database.close();
