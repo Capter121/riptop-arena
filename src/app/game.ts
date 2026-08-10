@@ -43,7 +43,6 @@ import { ForgePanel } from '../ui/forgePanel';
 import { BlackMarketPanel } from '../ui/blackMarket';
 import { globalInventory } from '../data/inventoryManager';
 import { SparksSystem } from '../fx/sparks';
-import { TurnChargeParticles } from '../fx/turnChargeParticles';
 import type { Phase } from '../utils/state';
 import { SynthAudio } from '../audio/synth';
 import { EnergyRings } from '../fx/energyRings';
@@ -172,7 +171,6 @@ export class Game {
   private readonly physics = new BattlePhysicsSystem(this.events);
   private readonly rules = new RuleSystem();
   private readonly sparks = new SparksSystem();
-  private readonly turnChargeParticles = new TurnChargeParticles();
   private readonly energyRings = new EnergyRings();
   private readonly trails = new TrailsSystem();
   private readonly lightning = new LightningFX();
@@ -237,7 +235,7 @@ export class Game {
   private voiceAnalyzerRequested = false;
   private turnState: TurnState = 'awaiting';
   private turnTimer = 0;
-  private turnChargeParticlesEmitted = false;
+  private turnChargeFeedbackEmitted = false;
   private turnIndex = 1;
   private activeTurnResolution: TurnResolution | null = null;
   private activeClashQte: ClashQteState | null = null;
@@ -331,7 +329,7 @@ export class Game {
       ambient, key,
       cyberBlue1, cyberBlue2, cyberOrange1, cyberOrange2,
       this.arena.root, this.trails.root, this.energyRings.root, this.pickups.root,
-      this.sparks.root, this.turnChargeParticles.root, this.lightning.root, this.shockwave.root, this.player.mesh, this.enemy.mesh,
+      this.sparks.root, this.lightning.root, this.shockwave.root, this.player.mesh, this.enemy.mesh,
     );
 
     // 閳光偓閳光偓 Procedural Environment Map (PMREMGenerator) 閳光偓閳光偓閳光偓閳光偓閳光偓閳光偓
@@ -2029,16 +2027,16 @@ export class Game {
     }
   }
 
-  private emitTurnChargeParticles() {
+  private emitTurnChargeFeedback() {
     const resolution = this.activeTurnResolution;
-    if (!resolution || this.turnChargeParticlesEmitted) return;
-    this.turnChargeParticlesEmitted = true;
+    if (!resolution || this.turnChargeFeedbackEmitted) return;
+    this.turnChargeFeedbackEmitted = true;
 
     if (resolution.playerVisual === 'charge') {
-      this.turnChargeParticles.emit(this.player.position.x, this.player.position.y);
+      this.shockwave.trigger(this.player.position.x, 0.08, this.player.position.y, 0.55, 0xffdd66);
     }
     if (resolution.enemyVisual === 'charge') {
-      this.turnChargeParticles.emit(this.enemy.position.x, this.enemy.position.y);
+      this.shockwave.trigger(this.enemy.position.x, 0.08, this.enemy.position.y, 0.55, 0xffdd66);
     }
   }
 
@@ -2876,9 +2874,9 @@ export class Game {
       document.body.classList.toggle('vignette-active', this.turnState === 'resolving' || this.turnState === 'clash_qte');
 
       if (this.turnState === 'resolving') {
-        this.emitTurnChargeParticles();
+        this.emitTurnChargeFeedback();
       } else {
-        this.turnChargeParticlesEmitted = false;
+        this.turnChargeFeedbackEmitted = false;
       }
 
       this.turnPanel.update({
@@ -2912,7 +2910,6 @@ export class Game {
     this.player.updateEffects(dt);
     this.enemy.updateEffects(dt);
     this.sparks.update(dt);
-    this.turnChargeParticles.update(dt);
     this.lightning.update(dt);
     this.shockwave.update(dt);
     this.floatingTexts.update(dt);
