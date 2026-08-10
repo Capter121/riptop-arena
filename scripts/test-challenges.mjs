@@ -207,6 +207,67 @@ try {
   assert.deepEqual(fullClaimed.input.enemy.upgrades.upgrades, { attack: 2, defense: 1, stamina: 3 });
   assert.deepEqual(fullClaimed.input.player.upgrades.upgrades, { attack: 4, defense: 3, stamina: 2 });
 
+  const resultInputLog = {
+    ...fixture.inputLog,
+    seed: SEED,
+  };
+  const resultOutcome = {
+    ...fixture.outcome,
+    seed: SEED,
+  };
+  const resultEnvelope = {
+    submissionId: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+    inputLog: resultInputLog,
+    outcome: resultOutcome,
+  };
+  assert.throws(() => service.submitChallengeResult(rollbackClaimed.id, CREATOR, resultEnvelope), hasCode('CHALLENGE_RESULT_FORBIDDEN'));
+  assert.throws(() => service.submitChallengeResult(rollbackClaimed.id, OTHER, {
+    ...resultEnvelope,
+    outcome: { ...resultOutcome, seed: '00112233445566778899aabbccddeeff' },
+  }), hasCode('BATTLE_RESULT_MISMATCH'));
+  assert.equal(database.prepare('SELECT status FROM challenges WHERE id = ?').get(rollbackClaimed.id).status, 'pending');
+
+  const completed = service.submitChallengeResult(rollbackClaimed.id, OTHER, resultEnvelope);
+  assert.equal(completed.status, 'completed');
+  assert.equal(completed.completedAt, NOW.toISOString());
+  assert.deepEqual(completed.result, resultEnvelope);
+  const storedResult = database.prepare(`
+    SELECT result_json, result_submission_id FROM challenges WHERE id = ?
+  `).get(rollbackClaimed.id);
+  assert.equal(storedResult.result_submission_id, resultEnvelope.submissionId);
+  assert.deepEqual(JSON.parse(storedResult.result_json), resultEnvelope);
+
+  const reorderedRetry = {
+    outcome: {
+      enemy: resultOutcome.enemy,
+      player: resultOutcome.player,
+      tickCount: resultOutcome.tickCount,
+      turnCount: resultOutcome.turnCount,
+      kind: resultOutcome.kind,
+      winner: resultOutcome.winner,
+      seed: resultOutcome.seed,
+      simulationVersion: resultOutcome.simulationVersion,
+    },
+    inputLog: {
+      turns: resultInputLog.turns,
+      playerVoiceFrames: resultInputLog.playerVoiceFrames,
+      launch: resultInputLog.launch,
+      seed: resultInputLog.seed,
+      simulationVersion: resultInputLog.simulationVersion,
+    },
+    submissionId: resultEnvelope.submissionId,
+  };
+  assert.deepEqual(service.submitChallengeResult(rollbackClaimed.id, OTHER, reorderedRetry).result, resultEnvelope);
+  assert.throws(() => service.submitChallengeResult(rollbackClaimed.id, OTHER, {
+    ...resultEnvelope,
+    outcome: { ...resultOutcome, winner: 'enemy' },
+  }), hasCode('IDEMPOTENCY_MISMATCH'));
+  assert.throws(() => service.submitChallengeResult(rollbackClaimed.id, OTHER, {
+    ...resultEnvelope,
+    submissionId: '12121212-1212-4212-8212-121212121212',
+  }), hasCode('CHALLENGE_ALREADY_COMPLETED'));
+  assert.equal(service.getChallenge(rollbackClaimed.id, OTHER).result.outcome.winner, 'player');
+
   assert.equal(service.getChallenge(claimed.id, CREATOR).id, claimed.id);
   assert.equal(service.getChallenge(claimed.id, FRIEND).actions.canBattle, true);
   assert.throws(() => service.getChallenge(claimed.id, OTHER), hasCode('CHALLENGE_FORBIDDEN'));

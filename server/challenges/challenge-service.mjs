@@ -4,6 +4,7 @@ import {
   ChallengeError,
   normalizeChallengeInput,
   normalizeChallengeOffer,
+  normalizeChallengeResult,
   normalizeCreateOfferRequest,
 } from './challenge-contract.mjs';
 import { readPlayerProgression } from '../progression/progression-service.mjs';
@@ -476,6 +477,63 @@ export function createChallengeService(database, options = {}) {
     return presentOffer(readOfferRow(offerId), viewerId, currentDate);
   }
 
+  function submitChallengeResult(challengeId, viewerId, value) {
+    const currentDate = dateFrom(now());
+    database.exec('BEGIN IMMEDIATE');
+    try {
+      const challenge = readChallengeRow(challengeId);
+      if (challenge.offer_id === null || challenge.recipient_player_id !== viewerId) {
+        fail(403, 'CHALLENGE_RESULT_FORBIDDEN', 'Only the challenge responder can submit its result.');
+      }
+      const input = normalizeChallengeInput(JSON.parse(challenge.input_json));
+      const result = normalizeChallengeResult(value);
+      if (result.inputLog.seed !== input.seed
+        || result.inputLog.simulationVersion !== input.simulationVersion
+        || result.outcome.simulationVersion !== input.simulationVersion) {
+        fail(400, 'BATTLE_RESULT_MISMATCH', 'Battle result does not match the immutable challenge input.');
+      }
+      const resultJson = JSON.stringify(result);
+      if (challenge.status === 'completed') {
+        if (challenge.result_submission_id === result.submissionId) {
+          if (challenge.result_json !== resultJson) {
+            fail(409, 'IDEMPOTENCY_MISMATCH', 'This submission ID was already used with a different result.');
+          }
+          database.exec('COMMIT');
+          return presentChallenge(challenge, viewerId);
+        }
+        fail(409, 'CHALLENGE_ALREADY_COMPLETED', 'This challenge already has a final result.');
+      }
+      if (challenge.status !== 'pending') {
+        fail(409, 'CHALLENGE_STATE_INVALID', 'This challenge cannot accept a result.');
+      }
+
+      // Trust boundary: validate the deterministic record contract, but do not claim
+      // to re-run Three.js physics or prove that the client AI followed its policy.
+      const update = database.prepare(`
+        UPDATE challenges
+        SET status = 'completed', result_json = ?, result_submission_id = ?,
+            completed_at = ?, updated_at = ?
+        WHERE id = ? AND status = 'pending'
+      `).run(
+        resultJson,
+        result.submissionId,
+        currentDate.toISOString(),
+        currentDate.toISOString(),
+        challengeId,
+      );
+      if (update.changes !== 1) fail(409, 'CHALLENGE_ALREADY_COMPLETED', 'This challenge already has a final result.');
+      database.exec('COMMIT');
+    } catch (error) {
+      try {
+        database.exec('ROLLBACK');
+      } catch {
+        // Preserve the original result error.
+      }
+      throw error;
+    }
+    return presentChallenge(readChallengeRow(challengeId), viewerId);
+  }
+
   return {
     claimOffer,
     createOffer,
@@ -484,5 +542,6 @@ export function createChallengeService(database, options = {}) {
     getOffer,
     listChallenges,
     revokeOffer,
+    submitChallengeResult,
   };
 }
