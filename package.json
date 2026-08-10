@@ -17,6 +17,8 @@
     "server": "node server/match-server.mjs",
     "backup:server": "node scripts/backup-private-server.mjs",
     "restore:server": "node scripts/restore-private-server.mjs",
+    "invite": "node scripts/manage-invites.mjs",
+    "test:invite-management": "node scripts/test-invite-management-cli.mjs",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
     "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs && node scripts/test-database.mjs && node scripts/test-auth.mjs && node scripts/test-progression.mjs && npm run test:challenge-contract && npm run test:challenges && npm run test:challenge-http && npm run test:backup",
