@@ -27,18 +27,18 @@ function progression(): ProgressionState {
 }
 
 describe('portal read model', () => {
-  it('defines exactly two open entries and four deterministic locked entries', () => {
+  it('opens friend challenges and keeps three later modes locked', () => {
     expect(PORTAL_MODES).toHaveLength(6);
     expect(PORTAL_MODES.filter(mode => mode.status === 'open')).toEqual([
       expect.objectContaining({ id: 'customizer', href: './customizer/' }),
       expect.objectContaining({ id: 'arena', href: './arena/' }),
+      expect.objectContaining({ id: 'friend-challenge', href: '/challenges/' }),
     ]);
     expect(PORTAL_MODES.filter(mode => mode.status === 'locked').map(mode => ({
       id: mode.id,
       unlockCondition: mode.unlockCondition,
       href: mode.href,
     }))).toEqual([
-      { id: 'friend-challenge', unlockCondition: '阶段 5 解锁', href: undefined },
       { id: 'campaign', unlockCondition: '阶段 6 解锁', href: undefined },
       { id: 'survival', unlockCondition: '阶段 7 解锁', href: undefined },
       { id: 'emblem-workshop', unlockCondition: '阶段 8 解锁', href: undefined },

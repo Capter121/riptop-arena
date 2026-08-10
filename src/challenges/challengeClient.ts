@@ -182,3 +182,5 @@ export function createChallengeClient(identity: LocalIdentity, options: FetchOpt
     async createRematch(id: string) { return parseOffer(await post(`/api/challenges/${id}/rematch`)); },
   };
 }
+
+export type ChallengeClient = ReturnType<typeof createChallengeClient>;

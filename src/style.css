@@ -217,6 +217,164 @@ html[data-app-mode='portal'] body {
   color: #d5bd7c;
 }
 
+.portal-mode-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  min-width: 28px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #07101b;
+  background: #ffd166;
+  font-weight: 900;
+  text-align: center;
+}
+
+.challenge-page {
+  width: min(1180px, 100%);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: max(36px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+
+.challenge-page h1,
+.challenge-page h2,
+.challenge-page p {
+  margin-top: 0;
+}
+
+.challenge-back,
+.challenge-secondary,
+.challenge-small-action {
+  color: #9deeff;
+}
+
+.challenge-intel,
+.challenge-actions,
+.challenge-create,
+.challenge-group {
+  border: 1px solid rgba(126, 240, 255, 0.3);
+  background: rgba(6, 17, 28, 0.9);
+}
+
+.challenge-intel,
+.challenge-actions,
+.challenge-create {
+  margin-top: 18px;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.challenge-intel {
+  display: grid;
+  gap: 10px;
+  border-left: 4px solid #ffd166;
+}
+
+.challenge-message,
+.challenge-feedback,
+.challenge-item-notice,
+.challenge-list-item span {
+  color: #a9bfd2;
+  line-height: 1.55;
+}
+
+.challenge-pending-count {
+  width: fit-content;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 209, 102, 0.42);
+  color: #ffd166;
+  background: rgba(27, 23, 13, 0.55);
+}
+
+.challenge-actions,
+.challenge-create-form,
+.challenge-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.challenge-actions input,
+.challenge-create-form input,
+.challenge-create-form select,
+.challenge-actions button,
+.challenge-create-form button,
+.challenge-small-action,
+.challenge-load-more {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgba(126, 240, 255, 0.38);
+  border-radius: 6px;
+  color: #eef6ff;
+  background: rgba(5, 17, 29, 0.96);
+  font: inherit;
+}
+
+.challenge-actions button,
+.challenge-create-form button,
+.challenge-small-action,
+.challenge-load-more {
+  cursor: pointer;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.challenge-primary {
+  background: linear-gradient(135deg, #177a9d, #0b4666) !important;
+}
+
+.challenge-actions button:disabled,
+.challenge-create-form button:disabled,
+.challenge-list-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+  filter: saturate(0.35);
+}
+
+.challenge-share {
+  flex: 1 1 320px;
+}
+
+.challenge-feedback {
+  flex-basis: 100%;
+  min-height: 24px;
+}
+
+.challenge-groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.challenge-group {
+  min-width: 0;
+  padding: 16px;
+}
+
+.challenge-list {
+  display: grid;
+  gap: 10px;
+}
+
+.challenge-list-item {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-left: 3px solid rgba(126, 240, 255, 0.6);
+  background: rgba(13, 38, 55, 0.72);
+}
+
+.challenge-status--open { color: #ffd166; }
+.challenge-status--claimed { color: #7ef0ff; }
+.challenge-status--revoked,
+.challenge-status--expired { color: #ff9a9a; }
+
+.challenge-page :focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: 3px;
+}
+
 .invite-gate :focus-visible,
 .portal-state :focus-visible,
 .portal-mode--open:focus-visible {
@@ -250,6 +408,15 @@ html[data-app-mode='portal'] body {
 
   .portal-identity {
     justify-items: start;
+  }
+
+  .challenge-groups {
+    grid-template-columns: 1fr;
+  }
+
+  .challenge-actions > *,
+  .challenge-create-form > * {
+    width: 100%;
   }
 }
 

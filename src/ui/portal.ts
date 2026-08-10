@@ -20,6 +20,9 @@ import {
   syncPlayerProgression,
 } from '../progression/progressionClient';
 import { InviteGate } from './inviteGate';
+import { createChallengeClient } from '../challenges/challengeClient';
+import { renderChallengeCenter } from './challengeCenter';
+import { renderChallengeOffer } from './challengeOffer';
 
 export interface PortalMode {
   readonly id: string;
@@ -32,7 +35,7 @@ export interface PortalMode {
 export const PORTAL_MODES: readonly PortalMode[] = [
   { id: 'customizer', title: 'NSS 定制器', status: 'open', href: './customizer/' },
   { id: 'arena', title: 'RIPTOP Arena', status: 'open', href: './arena/' },
-  { id: 'friend-challenge', title: '好友挑战', status: 'locked', unlockCondition: '阶段 5 解锁' },
+  { id: 'friend-challenge', title: '好友挑战', status: 'open', href: '/challenges/' },
   { id: 'campaign', title: '八人战役', status: 'locked', unlockCondition: '阶段 6 解锁' },
   { id: 'survival', title: '生存模式', status: 'locked', unlockCondition: '阶段 7 解锁' },
   { id: 'emblem-workshop', title: '纹章工坊', status: 'locked', unlockCondition: '阶段 8 解锁' },
@@ -81,7 +84,18 @@ function renderAuthenticated(
   player: PublicPlayer,
   progression: ProgressionState,
   syncStatus: PortalSyncStatus,
+  identity: LocalIdentity,
 ) {
+  const client = createChallengeClient(identity);
+  const offerMatch = /^\/challenge\/([0-9a-f-]{36})\/?$/.exec(window.location.pathname);
+  if (offerMatch) {
+    void renderChallengeOffer(mount, identity, client, offerMatch[1]);
+    return;
+  }
+  if (window.location.pathname === '/challenges' || window.location.pathname === '/challenges/') {
+    void renderChallengeCenter(mount, identity, progression, client);
+    return;
+  }
   mount.innerHTML = `
     <main class="portal-shell">
       <header class="portal-header">
@@ -117,6 +131,7 @@ function renderAuthenticated(
   for (const mode of PORTAL_MODES) {
     const entry = document.createElement(mode.status === 'open' ? 'a' : 'div');
     entry.className = `portal-mode portal-mode--${mode.status}`;
+    entry.dataset.modeId = mode.id;
     if (mode.href && entry instanceof HTMLAnchorElement) entry.href = mode.href;
     if (mode.status === 'locked') entry.setAttribute('aria-disabled', 'true');
     const title = document.createElement('strong');
@@ -126,6 +141,15 @@ function renderAuthenticated(
     entry.append(title, detail);
     modes.append(entry);
   }
+  const challengeMode = modes.querySelector<HTMLElement>('[data-mode-id="friend-challenge"]');
+  void client.listChallenges({ group: 'waiting_me', limit: 20 }).then(result => {
+    if (!challengeMode || result.pendingCount < 1) return;
+    const badge = document.createElement('span');
+    badge.className = 'portal-mode-badge';
+    badge.textContent = result.pendingCount > 99 ? '99+' : String(result.pendingCount);
+    badge.setAttribute('aria-label', `${result.pendingCount} 个待处理挑战`);
+    challengeMode.append(badge);
+  }).catch(() => { /* Challenge status must not block other portal modes. */ });
   mount.removeAttribute('aria-busy');
 }
 
@@ -137,7 +161,7 @@ async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity:
     const authoritative = progressionFromServer(result.progression.snapshot, result.progression.coins);
     saveProgression(authoritative, { trackWallet: false });
     commitProgressionSync(identity, result);
-    renderAuthenticated(mount, player, authoritative, result.status === 'conflict' ? 'conflict' : 'synced');
+    renderAuthenticated(mount, player, authoritative, result.status === 'conflict' ? 'conflict' : 'synced', identity);
   } catch (error) {
     if (classifyPortalFailure(error) === 'invalid-identity') {
       clearLocalIdentity();
@@ -150,6 +174,7 @@ async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity:
       player,
       fallback,
       error instanceof ProgressionSyncError && error.status === 400 ? 'error' : 'pending',
+      identity,
     );
   }
 }

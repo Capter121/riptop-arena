@@ -156,7 +156,7 @@ test('keeps authenticated play available when progression sync is offline', asyn
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '私人竞技据点' })).toBeVisible();
   await expect(page.getByText('进度待同步', { exact: true })).toBeVisible();
-  await expect(page.locator('a.portal-mode--open')).toHaveCount(2);
+  await expect(page.locator('a.portal-mode--open')).toHaveCount(3);
   expect(await page.evaluate(key => localStorage.getItem(key), identityKey)).not.toBeNull();
 });
 
@@ -272,12 +272,13 @@ test('renders the authenticated player summary and six mode states', async ({ pa
   const modes = page.getByLabel('游戏模式').locator('.portal-mode');
   await expect(modes).toHaveCount(6);
   const openModes = page.locator('a.portal-mode--open');
-  await expect(openModes).toHaveCount(2);
+  await expect(openModes).toHaveCount(3);
   expect(await openModes.nth(0).getAttribute('href')).toBe('./customizer/');
   expect(await openModes.nth(1).getAttribute('href')).toBe('./arena/');
+  expect(await openModes.nth(2).getAttribute('href')).toBe('/challenges/');
 
   const lockedModes = page.locator('.portal-mode--locked');
-  await expect(lockedModes).toHaveCount(4);
+  await expect(lockedModes).toHaveCount(3);
   expect(await lockedModes.evaluateAll(entries => entries.every(entry => (
     entry.getAttribute('aria-disabled') === 'true' && entry.tagName !== 'A'
   )))).toBe(true);
@@ -306,4 +307,171 @@ test('fits the authenticated portal at 390 by 844 with touch-sized entries', asy
   }
   expect((await page.getByLabel('游戏模式').evaluate(element => getComputedStyle(element).gridTemplateColumns)).split(' '))
     .toHaveLength(1);
+});
+
+test('shows the pending challenge badge without blocking portal modes', async ({ page }) => {
+  await seedIdentity(page);
+  await page.route('**/api/me', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ player: { playerId: identity.playerId, displayName: identity.displayName } }),
+  }));
+  await page.route('**/api/challenges?group=waiting_me&limit=20', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ items: [], nextCursor: null, pendingCount: 3 }),
+  }));
+  await page.goto('/');
+  await expect(page.getByLabel('3 个待处理挑战')).toHaveText('3');
+  await expect(page.locator('a.portal-mode--open')).toHaveCount(3);
+});
+
+test('views a friend offer without claiming and escapes dynamic text', async ({ page }) => {
+  const offerId = '22222222-2222-4222-8222-222222222222';
+  const creatorId = '33333333-3333-4333-8333-333333333333';
+  await seedIdentity(page);
+  await page.route('**/api/me', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ player: { playerId: identity.playerId, displayName: identity.displayName } }),
+  }));
+  let claims = 0;
+  await page.route(`**/api/challenge-offers/${offerId}`, route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      id: offerId,
+      status: 'open',
+      targetPlayerId: null,
+      parentChallengeId: null,
+      claimedChallengeId: null,
+      expiresAt: '2026-08-11T00:00:00.000Z',
+      createdAt: '2026-08-10T00:00:00.000Z',
+      updatedAt: '2026-08-10T00:00:00.000Z',
+      offer: {
+        creator: { playerId: creatorId, displayName: '<img src=x onerror=alert(1)>' },
+        mode: 'fair', arena: 'classic_grid', message: '<script>bad()</script>',
+      },
+      actions: { canClaim: true, canRevoke: false },
+    }),
+  }));
+  await page.route(`**/api/challenge-offers/${offerId}/claim`, route => {
+    claims += 1;
+    return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: { code: 'TEST', message: 'stop' } }) });
+  });
+  await page.goto(`/challenge/${offerId}`);
+  await expect(page.getByRole('heading', { name: '装配幽灵挑战' })).toBeVisible();
+  await expect(page.getByText('<img src=x onerror=alert(1)>', { exact: true })).toBeVisible();
+  await expect(page.getByText('<script>bad()</script>', { exact: true })).toBeVisible();
+  await expect(page.locator('.challenge-intel img, .challenge-intel script')).toHaveCount(0);
+  expect(claims).toBe(0);
+  await expect(page.getByRole('link', { name: '调整我的装配' })).toHaveAttribute('href', '/customizer/');
+  await page.screenshot({ path: 'output/playwright/challenge-offer-desktop.png', fullPage: true });
+  await page.getByRole('button', { name: '认领并应战' }).click();
+  await expect(page.getByText(/认领失败/)).toBeVisible();
+  expect(claims).toBe(1);
+});
+
+test('keeps a challenge deep link through invite redemption without auto-claiming', async ({ page }) => {
+  const offerId = '99999999-9999-4999-8999-999999999999';
+  let claims = 0;
+  await page.route('**/api/invites/redeem', route => route.fulfill({
+    status: 201, contentType: 'application/json', body: JSON.stringify({ identity }),
+  }));
+  await page.route(`**/api/challenge-offers/${offerId}`, route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({
+      id: offerId, status: 'open', targetPlayerId: null, parentChallengeId: null, claimedChallengeId: null,
+      expiresAt: '2026-08-11T00:00:00.000Z', createdAt: '2026-08-10T00:00:00.000Z', updatedAt: '2026-08-10T00:00:00.000Z',
+      offer: { creator: { playerId: '77777777-7777-4777-8777-777777777777', displayName: 'Rin' }, mode: 'fair', arena: 'classic_grid', message: '' },
+      actions: { canClaim: true, canRevoke: false },
+    }),
+  }));
+  await page.route(`**/api/challenge-offers/${offerId}/claim`, route => { claims += 1; return route.abort(); });
+  await page.goto(`/challenge/${offerId}?invite=VALID01`);
+  await expect(page.getByLabel('昵称')).toBeVisible();
+  await page.getByLabel('昵称').fill('Nova');
+  await page.getByRole('button', { name: '进入据点' }).click();
+  await expect(page.getByRole('heading', { name: '装配幽灵挑战' })).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe(`/challenge/${offerId}`);
+  expect(claims).toBe(0);
+});
+
+test('renders three challenge groups and disables creation without NSS loadout', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedIdentity(page);
+  await page.route('**/api/me', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ player: { playerId: identity.playerId, displayName: identity.displayName } }),
+  }));
+  await page.route('**/api/challenges?**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ items: [], nextCursor: null, pendingCount: 0 }),
+  }));
+  await page.goto('/challenges/');
+  await expect(page.getByRole('heading', { name: '好友挑战中心' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '等待我' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '等待朋友' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '历史战报' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '生成邀请链接' })).toBeDisabled();
+  await expect(page.getByRole('link', { name: '前往 NSS 定制器' })).toHaveAttribute('href', '/customizer/');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  for (const box of await page.locator('button, .challenge-small-action').evaluateAll(entries => entries.map(entry => entry.getBoundingClientRect()))) {
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.left).toBeGreaterThanOrEqual(0);
+    expect(box.right).toBeLessThanOrEqual(390);
+  }
+  await page.screenshot({ path: 'output/playwright/challenge-center-mobile.png', fullPage: true });
+});
+
+test('retries one saved result when entering the challenge center', async ({ page }) => {
+  const challengeId = '55555555-5555-4555-8555-555555555555';
+  const pendingKey = `nss.pendingChallengeResult.v1.${identity.playerId}.${challengeId}`;
+  const envelope = {
+    submissionId: '66666666-6666-4666-8666-666666666666',
+    inputLog: {
+      simulationVersion: 1,
+      seed: '00112233445566778899aabbccddeeff',
+      launch: { playerPower: 1, playerAngleDeg: 0, enemyPower: 1, enemyAngleDeg: 0 },
+      playerVoiceFrames: [0],
+      turns: [],
+    },
+    outcome: {
+      simulationVersion: 1,
+      seed: '00112233445566778899aabbccddeeff',
+      winner: 'player', kind: 'timeout', turnCount: 0, tickCount: 1,
+      player: { spin: 1, integrity: 1, stamina: 1, spirit: 0, burst: 0, tilt: 0, alive: true },
+      enemy: { spin: 0, integrity: 0, stamina: 0, spirit: 0, burst: 0, tilt: 1, alive: false },
+    },
+  };
+  await seedIdentity(page);
+  await page.addInitScript(({ key, value, playerId }) => {
+    localStorage.setItem(key, JSON.stringify({ version: 1, playerId, challengeId: value.challengeId, envelope: value.envelope }));
+  }, { key: pendingKey, playerId: identity.playerId, value: { challengeId, envelope } });
+  await page.route('**/api/me', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ player: { playerId: identity.playerId, displayName: identity.displayName } }),
+  }));
+  await page.route('**/api/challenges?**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ items: [], nextCursor: null, pendingCount: 0 }),
+  }));
+  let submissions = 0;
+  await page.route(`**/api/challenges/${challengeId}/results`, route => {
+    submissions += 1;
+    return route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({
+        id: challengeId, status: 'completed', creatorPlayerId: '77777777-7777-4777-8777-777777777777',
+        recipientPlayerId: identity.playerId, offerId: '88888888-8888-4888-8888-888888888888', parentChallengeId: null,
+        createdAt: '2026-08-10T00:00:00.000Z', updatedAt: '2026-08-10T00:01:00.000Z', completedAt: '2026-08-10T00:01:00.000Z',
+        input: {}, result: envelope, actions: { canBattle: false, canRematch: true },
+      }),
+    });
+  });
+  await page.goto('/challenges/');
+  await expect.poll(() => submissions).toBe(1);
+  await expect.poll(() => page.evaluate(key => localStorage.getItem(key), pendingKey)).toBeNull();
 });
