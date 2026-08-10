@@ -158,6 +158,13 @@ export class Hud {
     parent.appendChild(this.touchControls);
   }
 
+  setVisible(visible: boolean) {
+    const display = visible ? '' : 'none';
+    this.root.style.display = display;
+    this.combatLog.root.style.display = display;
+    this.touchControls.style.display = display;
+  }
+
   bindControls(controls: HudControls) {
     this.launchButton.addEventListener('pointerdown', (event) => {
       event.preventDefault();

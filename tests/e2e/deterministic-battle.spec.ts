@@ -83,26 +83,22 @@ test('replays an exact battle outcome across 30Hz and 144Hz render schedules', a
 
 test('changes the outcome record when the seed changes', async ({ browser }) => {
   test.setTimeout(90_000);
-  const first = await openScheduledPage(browser);
-  const second = await openScheduledPage(browser);
-
-  const summaries = await Promise.all([
-    { page: first.page, seed: SEED },
-    { page: second.page, seed: OTHER_SEED },
-  ].map(({ page, seed }) => page.evaluate((battleSeed) => {
-    const api = (window as Window & { __RIPTOP_QA__: QaApi }).__RIPTOP_QA__;
-    api.startBattleWithSeed(battleSeed);
-    api.quickLaunch();
-    api.forceResult('player');
-    return api.getBattleOutcomeSummary();
-  }, seed)));
+  const run = async (seed: string) => {
+    const session = await openScheduledPage(browser);
+    const summary = await session.page.evaluate((battleSeed) => {
+      const api = (window as Window & { __RIPTOP_QA__: QaApi }).__RIPTOP_QA__;
+      api.startBattleWithSeed(battleSeed);
+      api.quickLaunch();
+      api.forceResult('player');
+      return api.getBattleOutcomeSummary();
+    }, seed);
+    expect(session.pageErrors).toEqual([]);
+    await session.context.close();
+    return summary;
+  };
+  const summaries = [await run(SEED), await run(OTHER_SEED)];
 
   expect(summaries[0]).not.toBe(summaries[1]);
   expect(JSON.parse(summaries[0]!).seed).toBe(SEED);
   expect(JSON.parse(summaries[1]!).seed).toBe(OTHER_SEED);
-  expect(first.pageErrors).toEqual([]);
-  expect(second.pageErrors).toEqual([]);
-
-  await first.context.close();
-  await second.context.close();
 });

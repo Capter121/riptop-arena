@@ -147,3 +147,20 @@ export async function retryPendingResultsOnce(
     }
   }
 }
+
+export async function settleChallengeResult(
+  playerId: string,
+  challengeId: string,
+  envelope: PendingChallengeEnvelope,
+  submit: (challengeId: string, envelope: PendingChallengeEnvelope) => Promise<unknown>,
+  storage: PendingStorage = window.localStorage,
+): Promise<'submitted' | 'pending' | 'storage_failed'> {
+  if (!savePendingResult(playerId, challengeId, envelope, storage)) return 'storage_failed';
+  try {
+    await submit(challengeId, envelope);
+    removePendingResult(playerId, challengeId, storage);
+    return 'submitted';
+  } catch {
+    return 'pending';
+  }
+}

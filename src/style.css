@@ -1651,6 +1651,31 @@ select {
   line-height: 1.4;
 }
 
+.results__challenge-details {
+  position: relative;
+  z-index: 1;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(126, 240, 255, 0.24);
+  border-radius: 16px;
+  background: rgba(7, 20, 30, 0.9);
+}
+
+.results__challenge-details > div {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.35fr) 1fr;
+  gap: 12px;
+}
+
+.results__challenge-details span {
+  color: #8fb2d0;
+}
+
+.results__challenge-details strong {
+  color: #f4fbff;
+  overflow-wrap: anywhere;
+}
+
 .results__affinity-summary {
   position: relative;
   z-index: 1;
@@ -2518,6 +2543,10 @@ body.vignette-active::after {
   display: block !important;
   pointer-events: none !important;
   z-index: 1000 !important;
+}
+
+.turn-panel.moba-style[data-visible="false"] {
+  display: none !important;
 }
 
 .turn-panel.moba-style .turn-panel__header {

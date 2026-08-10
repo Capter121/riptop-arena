@@ -100,6 +100,11 @@ import {
   pickAiLaunch,
   pickAiTurnAction as chooseAiTurnAction,
 } from '../gameplay/ai';
+import type { GameChallengeOptions } from '../challenges/challengeBootstrap';
+import {
+  settleChallengeResult,
+  type PendingChallengeEnvelope,
+} from '../challenges/pendingChallengeResult';
 
 const QA_HIT_RANDOM: RandomSource = {
   nextFloat: () => 1,
@@ -233,7 +238,7 @@ export class Game {
   private turnIndex = 1;
   private activeTurnResolution: TurnResolution | null = null;
   private activeClashQte: ClashQteState | null = null;
-  private battleMode: 'single' | 'online' = 'single';
+  private battleMode: 'single' | 'online' | 'challenge' = 'single';
   private onlineTurnId = 0;
   private onlineTurnDeadline = 0;
   private onlineStartAt: number | null = null;
@@ -267,7 +272,8 @@ export class Game {
   private nssBattlePreparing = false;
   private paused = false;
   private readonly camDebugEnabled = this.params.has('camDebug');
-  private readonly qaEnabled = this.params.has('qa') || this.params.has('debug') || this.camDebugEnabled;
+  private readonly qaEnabled = this.params.has('qa') || this.params.has('debug') || this.camDebugEnabled
+    || (import.meta.env.DEV && this.params.has('challenge'));
   private readonly tuningKeys: Array<keyof typeof CAMERA_TUNING> = [
     'chaseDistanceStart',
     'chaseDistanceRange',
@@ -283,9 +289,13 @@ export class Game {
   private selectedTuningKey: keyof typeof CAMERA_TUNING = 'dangerStart';
 
   private readonly mount: HTMLElement;
+  private readonly challenge: GameChallengeOptions | null;
+  private challengeEnvelope: PendingChallengeEnvelope | null = null;
+  private challengeSettlement: 'idle' | 'submitting' | 'submitted' | 'pending' | 'storage_failed' = 'idle';
 
-  constructor(mount: HTMLElement) {
+  constructor(mount: HTMLElement, challenge: GameChallengeOptions | null = null) {
     this.mount = mount;
+    this.challenge = challenge;
     this.scene.background = new THREE.Color('#050910');
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
@@ -566,6 +576,10 @@ export class Game {
     }
 
     this.results.retry.addEventListener('click', () => {
+      if (this.battleMode === 'challenge') {
+        window.location.assign('/challenges/');
+        return;
+      }
       if (this.battleMode === 'online') {
         this.network.disconnect();
         this.battleMode = 'single';
@@ -576,7 +590,14 @@ export class Game {
       this.arena.setTheme(this.garage.stageSelect.value);
       this.startBattle();
     });
-    this.results.garage.addEventListener('click', () => this.showGarage());
+    this.results.garage.addEventListener('click', () => {
+      if (this.battleMode === 'challenge') {
+        if (this.challengeSettlement === 'submitted') void this.createChallengeRematch();
+        else void this.submitChallengeResult();
+        return;
+      }
+      this.showGarage();
+    });
     this.shop.backButton.addEventListener('click', () => this.showGarage());
     this.shop.garageButton.addEventListener('click', () => this.showGarage());
 
@@ -594,11 +615,12 @@ export class Game {
     this.network.onMessage((message) => this.handleNetworkMessage(message));
     this.refreshBlackMarket();
     this.resize();
-    this.showMenu();
+    if (this.challenge) void this.startChallengeBattle();
+    else this.showMenu();
     window.setTimeout(() => this.introCard.classList.add('intro-card--hidden'), 1800);
 
     this.exposeDiagnostics();
-    if (this.params.has('qa')) {
+    if (!this.challenge && this.params.has('qa')) {
       this.enemyPreset = ENEMIES[0];
       this.startBattle();
       this.launchCharge = 0.84;
@@ -1036,7 +1058,7 @@ export class Game {
     this.garage.root.style.display = 'none';
     this.shop.root.style.display = 'none';
     this.results.root.style.display = 'none';
-    this.hud.root.style.display = 'none';
+    this.hud.setVisible(false);
     this.turnPanel.root.style.display = 'none';
     this.activeClashQte = null;
     this.clashQtePanel.hide();
@@ -1077,7 +1099,7 @@ export class Game {
     }
     this.menu.root.style.display = 'none';
     this.garage.root.style.display = 'grid';
-    this.hud.root.style.display = 'none';
+    this.hud.setVisible(false);
     this.shop.root.style.display = 'none';
     this.results.root.style.display = 'none';
   }
@@ -1137,10 +1159,11 @@ export class Game {
     this.garage.root.style.display = 'none';
     this.shop.root.style.display = 'grid';
     this.results.root.style.display = 'none';
-    this.hud.root.style.display = 'none';
+    this.hud.setVisible(false);
   }
 
   private showResult(result: BattleResult) {
+    if (this.battleMode === 'challenge' && this.currentResult) return;
     if (!this.battleOutcomeSummary && this.battleRuntime?.inputLog) {
       const topState = (top: TopEntity) => ({
         spin: top.spin,
@@ -1166,7 +1189,20 @@ export class Game {
     this.activeClashQte = null;
     this.clashQtePanel.hide();
     const progressionBefore = this.captureProgressionSnapshot();
-    if (this.battleMode === 'online') {
+    if (this.battleMode === 'challenge') {
+      this.resultRewardText = '好友幽灵挑战不修改单人成长、金币或零件解锁。';
+      this.retryLabel = '返回挑战中心';
+      this.lastCoinReward = 0;
+      this.featuredUnlockPart = null;
+      this.championMoment = null;
+      if (!this.challengeEnvelope && this.battleRuntime?.inputLog && this.battleOutcomeSummary) {
+        this.challengeEnvelope = {
+          submissionId: crypto.randomUUID(),
+          inputLog: structuredClone(this.battleRuntime.inputLog) as unknown as Record<string, unknown>,
+          outcome: structuredClone(this.battleOutcomeSummary) as unknown as Record<string, unknown>,
+        };
+      }
+    } else if (this.battleMode === 'online') {
       this.resultRewardText = '\u771f\u4eba\u8054\u673a MVP \u4e0d\u8ba1\u5165\u5355\u673a\u6210\u957f\u4e0e\u91d1\u5e01\u3002';
       this.retryLabel = '\u8fd4\u56de\u4e3b\u83dc\u5355';
       this.lastCoinReward = 0;
@@ -1185,20 +1221,62 @@ export class Game {
       this.lastCoinReward,
       this.progression.coins,
       {
-        modeLabel: this.battleMode === 'online' ? '\u771f\u4eba\u8054\u673a' : this.getModeLabelCn(),
-        enemyName: this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
+        modeLabel: this.battleMode === 'challenge' ? '好友幽灵挑战' : this.battleMode === 'online' ? '\u771f\u4eba\u8054\u673a' : this.getModeLabelCn(),
+        enemyName: this.battleMode === 'challenge' ? this.challenge?.enemy.displayName : this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
         growthTitle: '本局成长变化',
-        growthLines: this.battleMode === 'online' ? ['\u8054\u673a\u5bf9\u6218\u4e0d\u4fee\u6539\u5355\u673a\u6210\u957f\u6570\u636e'] : this.getResultGrowthLines(progressionBefore),
+        growthLines: this.battleMode === 'challenge'
+          ? ['挑战结果独立保存，不修改单人成长数据']
+          : this.battleMode === 'online' ? ['\u8054\u673a\u5bf9\u6218\u4e0d\u4fee\u6539\u5355\u673a\u6210\u957f\u6570\u636e'] : this.getResultGrowthLines(progressionBefore),
         affinitySummary: this.affinityDamageSummary,
+        challengeDetails: this.challenge ? {
+          rule: this.challenge.mode === 'fair' ? '公平模式 · 冻结零升级' : '全力模式 · 冻结强化',
+          playerName: this.challenge.player.displayName,
+          enemyName: this.challenge.enemy.displayName,
+          playerLoadout: nssCombinationId(this.challenge.player.loadout.combination),
+          enemyLoadout: nssCombinationId(this.challenge.enemy.loadout.combination),
+          submissionStatus: '正在安全保存…',
+        } : undefined,
       },
     );
     this.menu.root.style.display = 'none';
     this.garage.root.style.display = 'none';
     this.shop.root.style.display = 'none';
     this.forgePanel.root.style.display = 'none';
-    this.hud.root.style.display = 'none';
-    this.turnPanel.root.style.display = 'none';
+    this.hud.setVisible(false);
+    this.turnPanel.update({ visible: false, resolving: false });
+    this.floatingTexts.clear();
     this.results.root.style.display = 'grid';
+    if (this.battleMode === 'challenge') void this.submitChallengeResult();
+  }
+
+  private async submitChallengeResult() {
+    if (!this.challenge || !this.challengeEnvelope || this.challengeSettlement === 'submitting' || this.challengeSettlement === 'submitted') return;
+    this.challengeSettlement = 'submitting';
+    this.results.setChallengeSettlement('正在提交结果…', '重新提交', true);
+    this.challengeSettlement = await settleChallengeResult(
+      this.challenge.identity.playerId,
+      this.challenge.id,
+      this.challengeEnvelope,
+      (id, envelope) => this.challenge!.client.submitResult(id, envelope),
+    );
+    if (this.challengeSettlement === 'submitted') {
+      this.results.setChallengeSettlement('结果已确认', '发起回挑战');
+    } else if (this.challengeSettlement === 'storage_failed') {
+      this.results.setChallengeSettlement('浏览器无法安全保存，结果未发送', '重新提交');
+    } else {
+      this.results.setChallengeSettlement('网络中断，结果已保存在本机', '重新提交');
+    }
+  }
+
+  private async createChallengeRematch() {
+    if (!this.challenge || this.challengeSettlement !== 'submitted') return;
+    this.results.setChallengeSettlement('正在创建回挑战…', '发起回挑战', true);
+    try {
+      const offer = await this.challenge.client.createRematch(this.challenge.id);
+      window.location.assign(`/challenge/${offer.id}`);
+    } catch {
+      this.results.setChallengeSettlement('回挑战创建失败，请重试', '发起回挑战');
+    }
   }
 
   private startBattle(seed?: BattleSeed, preserveReplay = false) {
@@ -1225,7 +1303,28 @@ export class Game {
     this.startBattleWithPlayer(new TopEntity('player', this.build, this.progression.upgrades, this.progression.partUpgrades), battleSeed);
   }
 
-  private startBattleWithPlayer(nextPlayer: TopEntity, seed = createBattleSeed()) {
+  private async startChallengeBattle() {
+    if (!this.challenge) return;
+    this.battleMode = 'challenge';
+    this.mode = 'quick';
+    this.arena.setTheme(this.challenge.arena);
+    this.menu.stageSelect.value = this.challenge.arena;
+    this.garage.stageSelect.value = this.challenge.arena;
+    try {
+      const [player, enemy] = await this.nssLoadouts.createChallengePair(this.challenge.player, this.challenge.enemy);
+      this.startBattleWithPlayer(player, this.challenge.seed, enemy);
+    } catch (error) {
+      this.loop.stop();
+      this.mount.innerHTML = '';
+      const state = document.createElement('main'); state.className = 'portal-state';
+      const title = document.createElement('h1'); title.textContent = '幽灵装配加载失败';
+      const detail = document.createElement('p'); detail.textContent = error instanceof Error ? error.message : '无法读取挑战模型。';
+      const back = document.createElement('a'); back.href = '/challenges/'; back.textContent = '返回挑战中心';
+      state.append(title, detail, back); this.mount.append(state);
+    }
+  }
+
+  private startBattleWithPlayer(nextPlayer: TopEntity, seed = createBattleSeed(), nextEnemy?: TopEntity) {
     this.battleRuntime = new BattleRuntime(seed);
     this.battleOutcomeSummary = null;
     this.playerVoiceVolume = 0;
@@ -1269,7 +1368,7 @@ export class Game {
     this.shop.root.style.display = 'none';
     this.forgePanel.root.style.display = 'none';
     this.results.root.style.display = 'none';
-    this.hud.root.style.display = '';
+    this.hud.setVisible(true);
     this.turnPanel.root.style.display = '';
 
     this.scene.remove(this.player.mesh, this.enemy.mesh);
@@ -1277,7 +1376,7 @@ export class Game {
     this.player = nextPlayer;
     this.playerTeam = [this.player];
     this.activePlayerIndex = 0;
-    this.enemy = new TopEntity('enemy', this.enemyPreset.build);
+    this.enemy = nextEnemy ?? new TopEntity('enemy', this.enemyPreset.build);
     this.scene.add(this.player.mesh, this.enemy.mesh);
     this.player.reset(-6, 0);
     this.enemy.reset(6, 0);
@@ -3073,7 +3172,7 @@ export class Game {
           winner,
           loser: winner === 'player' ? 'enemy' : 'player',
           kind: 'burst finish',
-          label: '鐖嗚缁堢粨',
+          label: '爆裂终结',
         }),
       garage: () => this.showGarage(),
       menu: () => this.showMenu(),

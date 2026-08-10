@@ -63,4 +63,14 @@ export class NssLoadoutController {
     top.attachNssVisual(visual);
     return top;
   }
+
+  createChallengePair(
+    player: { loadout: NssBattleLoadout; upgrades: UpgradeLevels },
+    enemy: { loadout: NssBattleLoadout; upgrades: UpgradeLevels },
+  ) {
+    return Promise.all([
+      this.createTop('player', player.loadout, player.upgrades),
+      this.createTop('enemy', enemy.loadout, enemy.upgrades),
+    ]);
+  }
 }

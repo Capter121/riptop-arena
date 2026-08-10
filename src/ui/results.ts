@@ -20,6 +20,14 @@ export interface ResultRenderMeta {
   growthTitle?: string;
   growthLines?: string[];
   affinitySummary?: AffinityDamageSummary;
+  challengeDetails?: {
+    rule: string;
+    playerName: string;
+    enemyName: string;
+    playerLoadout: string;
+    enemyLoadout: string;
+    submissionStatus: string;
+  };
 }
 
 export class ResultPanel {
@@ -32,6 +40,7 @@ export class ResultPanel {
   readonly summary = document.createElement('div');
   readonly growth = document.createElement('div');
   readonly affinitySummary = document.createElement('div');
+  readonly challengeDetails = document.createElement('div');
   readonly reward = document.createElement('p');
   readonly champion = document.createElement('div');
   readonly unlockCard = document.createElement('div');
@@ -46,6 +55,7 @@ export class ResultPanel {
     this.summary.className = 'results__summary';
     this.growth.className = 'results__growth';
     this.affinitySummary.className = 'results__affinity-summary';
+    this.challengeDetails.className = 'results__challenge-details';
     this.reward.className = 'results__reward';
     this.champion.className = 'champion-panel';
     this.unlockCard.className = 'unlock-card';
@@ -61,6 +71,7 @@ export class ResultPanel {
       this.coins,
       this.summary,
       this.affinitySummary,
+      this.challengeDetails,
       this.growth,
       this.reward,
       this.champion,
@@ -90,9 +101,13 @@ export class ResultPanel {
     this.kicker.textContent = won ? '胜利结算' : '战斗报告';
     this.title.textContent = won ? '胜利' : '战败';
     this.badge.textContent = result.label;
-    this.body.textContent = won
-      ? `你在这场 ${modeLabel} 中压制了 ${enemyName}，本局收益已经结算，可以继续推进养成。`
-      : `${enemyName} 在这场 ${modeLabel} 中打乱了你的节奏。调整部件配置和起手路线后，再来一轮。`;
+    this.body.textContent = meta.challengeDetails
+      ? won
+        ? `你在这场 ${modeLabel} 中压制了 ${enemyName}，结果将安全提交且不影响单人成长。`
+        : `${enemyName} 赢下了这场 ${modeLabel}，结果将安全提交且不影响单人成长。`
+      : won
+        ? `你在这场 ${modeLabel} 中压制了 ${enemyName}，本局收益已经结算，可以继续推进养成。`
+        : `${enemyName} 在这场 ${modeLabel} 中打乱了你的节奏。调整部件配置和起手路线后，再来一轮。`;
 
     this.coins.style.display = coinReward > 0 ? 'grid' : 'none';
     this.coins.innerHTML = coinReward > 0
@@ -106,18 +121,32 @@ export class ResultPanel {
     const settlementItems = [
       { label: '战斗模式', value: modeLabel },
       { label: '终结方式', value: result.label },
-      { label: '结算状态', value: won ? '奖励已入账' : '继续调整后再战' },
+      { label: '结算状态', value: meta.challengeDetails ? '等待挑战结果确认' : won ? '奖励已入账' : '继续调整后再战' },
     ];
-    this.summary.innerHTML = settlementItems
-      .map(
-        (item) => `
-          <div class="results__summary-item">
-            <span>${item.label}</span>
-            <strong>${item.value}</strong>
-          </div>
-        `,
-      )
-      .join('');
+    this.summary.replaceChildren();
+    for (const item of settlementItems) {
+      const entry = document.createElement('div'); entry.className = 'results__summary-item';
+      const label = document.createElement('span'); label.textContent = item.label;
+      const value = document.createElement('strong'); value.textContent = item.value;
+      entry.append(label, value); this.summary.append(entry);
+    }
+
+    this.challengeDetails.replaceChildren();
+    this.challengeDetails.style.display = meta.challengeDetails ? 'grid' : 'none';
+    if (meta.challengeDetails) {
+      const rows = [
+        ['规则', meta.challengeDetails.rule],
+        ['我方', `${meta.challengeDetails.playerName} · ${meta.challengeDetails.playerLoadout}`],
+        ['对手', `${meta.challengeDetails.enemyName} · ${meta.challengeDetails.enemyLoadout}`],
+        ['提交状态', meta.challengeDetails.submissionStatus],
+      ];
+      for (const [labelText, valueText] of rows) {
+        const row = document.createElement('div');
+        const label = document.createElement('span'); label.textContent = labelText;
+        const value = document.createElement('strong'); value.textContent = valueText;
+        row.append(label, value); this.challengeDetails.append(row);
+      }
+    }
 
     const affinitySummary = meta.affinitySummary;
     this.affinitySummary.style.display = affinitySummary ? 'grid' : 'none';
@@ -187,5 +216,12 @@ export class ResultPanel {
       this.unlockCard.className = 'unlock-card';
       this.unlockCard.innerHTML = '';
     }
+  }
+
+  setChallengeSettlement(status: string, secondaryLabel: string, disabled = false) {
+    const row = this.challengeDetails.lastElementChild?.querySelector('strong');
+    if (row) row.textContent = status;
+    this.garage.textContent = secondaryLabel;
+    this.garage.disabled = disabled;
   }
 }
