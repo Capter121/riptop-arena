@@ -66,7 +66,7 @@ describe('deterministic survival waves', () => {
       const wave = generateSurvivalWave(SEED, waveNumber, waveNumber % 4);
       const source = CAMPAIGN_OPPONENTS.find(opponent => opponent.id === wave.sourceOpponentId);
       const loadout = source?.loadouts[wave.sourceLoadoutIndex];
-      expect(loadout).toEqual(wave.enemy);
+      expect(wave.enemy).toEqual({ schemaVersion: 2, interfaceId: 'NSS-V1', ...loadout });
       expect(SURVIVAL_ARENAS).toContain(wave.arena);
       expect(SURVIVAL_AI_PROFILE_IDS).toContain(wave.aiProfileId);
       expect(wave.strengthMultiplier).toBeGreaterThanOrEqual(1);

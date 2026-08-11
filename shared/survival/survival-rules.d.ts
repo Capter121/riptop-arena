@@ -30,6 +30,8 @@ export type SurvivalSummary = Readonly<{
   abandoned: boolean;
 }>;
 export type SurvivalEnemyLoadout = Readonly<{
+  schemaVersion?: 2;
+  interfaceId?: 'NSS-V1';
   combination: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
   affinities: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
 }>;
@@ -79,7 +81,7 @@ export function generateSurvivalWave(
   type: SurvivalWaveType;
   sourceOpponentId: string;
   sourceLoadoutIndex: number;
-  enemy: SurvivalEnemyLoadout;
+  enemy: SurvivalEnemyLoadout & Readonly<{ schemaVersion: 2; interfaceId: 'NSS-V1' }>;
   arena: SurvivalArena;
   aiProfileId: SurvivalAiProfileId;
   riskLevel: number;

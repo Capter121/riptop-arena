@@ -100,7 +100,12 @@ export function generateSurvivalWave(config, campaignCatalog, seed, wave, riskLe
     type,
     sourceOpponentId: selected.sourceOpponentId,
     sourceLoadoutIndex: selected.sourceLoadoutIndex,
-    enemy: selected.enemy,
+    enemy: {
+      schemaVersion: 2,
+      interfaceId: 'NSS-V1',
+      combination: { ...selected.enemy.combination },
+      affinities: { ...selected.enemy.affinities },
+    },
     arena: config.arenas[random.nextInt(0, config.arenas.length)],
     aiProfileId: config.aiProfileIds[random.nextInt(0, config.aiProfileIds.length)],
     riskLevel,
