@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { CAMPAIGN_OPPONENTS } from '../../src/data/campaign/opponents';
 import { CampaignApiError, type CampaignAttempt } from '../../src/campaign/campaignClient';
 import { bootstrapCampaign } from '../../src/campaign/campaignBootstrap';
+import { CampaignController } from '../../src/campaign/campaignController';
 
 const playerId = '11111111-1111-4111-8111-111111111111';
 const attemptId = '22222222-2222-4222-8222-222222222222';
@@ -66,5 +67,55 @@ describe('campaign Arena bootstrap', () => {
       randomUUID: () => requestId,
     });
     expect(result.kind).toBe('ready');
+  });
+
+  it('persists one normalized result before submitting and reuses the in-flight settlement', async () => {
+    const values = new Map<string, string>();
+    const storage = { get length() { return values.size; }, key: (index: number) => [...values.keys()][index] ?? null,
+      getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value), removeItem: (key: string) => values.delete(key) };
+    const settlement = { attemptId, opponentId: 'blaze-fang' };
+    const submitResult = vi.fn(async () => { expect(values.size).toBe(1); return settlement; });
+    const controller = new CampaignController(attempt(), identity, { submitResult } as never);
+    const outcome = {
+      simulationVersion: 1 as const, seed: '00112233445566778899aabbccddeeff', winner: 'player' as const,
+      kind: 'burst finish' as const, turnCount: 4, tickCount: 720,
+      player: { spin: 1, integrity: 1200, stamina: 1, spirit: 0, burst: 0, tilt: 0, alive: true },
+      enemy: { spin: 0, integrity: 0, stamina: 0, spirit: 0, burst: 1, tilt: 1, alive: false },
+    };
+    const first = controller.settle(outcome, { storage, randomUUID: () => requestId });
+    const second = controller.settle(structuredClone(outcome), { storage, randomUUID: () => crypto.randomUUID() });
+    expect(second).toBe(first);
+    await expect(first).resolves.toEqual({ status: 'submitted', settlement });
+    expect(submitResult).toHaveBeenCalledTimes(1);
+    expect(values.size).toBe(0);
+  });
+
+  it('keeps offline results, blocks unsafe storage, and marks conflicts', async () => {
+    const outcome = {
+      simulationVersion: 1 as const, seed: '00112233445566778899aabbccddeeff', winner: 'enemy' as const,
+      kind: 'timeout' as const, turnCount: 8, tickCount: 900,
+      player: { spin: 0, integrity: 0, stamina: 0, spirit: 0, burst: 0, tilt: 1, alive: false },
+      enemy: { spin: 1, integrity: 900, stamina: 1, spirit: 0, burst: 0, tilt: 0, alive: true },
+    };
+    const memory = () => {
+      const values = new Map<string, string>();
+      return { values, storage: { get length() { return values.size; }, key: (index: number) => [...values.keys()][index] ?? null,
+        getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value), removeItem: (key: string) => values.delete(key) } };
+    };
+    const offline = memory();
+    const pending = new CampaignController(attempt(), identity, { submitResult: vi.fn().mockRejectedValue(new TypeError('offline')) } as never);
+    await expect(pending.settle(outcome, { storage: offline.storage, randomUUID: () => requestId })).resolves.toEqual({ status: 'pending' });
+    expect(offline.values.size).toBe(1);
+
+    const blockedSubmit = vi.fn();
+    const blocked = new CampaignController(attempt(), identity, { submitResult: blockedSubmit } as never);
+    const blockedStorage = { ...memory().storage, setItem: () => { throw new Error('blocked'); } };
+    await expect(blocked.settle(outcome, { storage: blockedStorage, randomUUID: () => requestId })).resolves.toEqual({ status: 'storage_failed' });
+    expect(blockedSubmit).not.toHaveBeenCalled();
+
+    const conflictMemory = memory();
+    const conflict = new CampaignController(attempt(), identity, { submitResult: vi.fn().mockRejectedValue(new CampaignApiError(409, 'CAMPAIGN_RESULT_CONFLICT', 'conflict')) } as never);
+    await expect(conflict.settle(outcome, { storage: conflictMemory.storage, randomUUID: () => requestId })).resolves.toEqual({ status: 'conflict' });
+    expect([...conflictMemory.values.values()][0]).toContain('"status":"conflict"');
   });
 });

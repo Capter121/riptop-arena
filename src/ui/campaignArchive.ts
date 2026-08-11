@@ -10,9 +10,11 @@ import {
 } from '../campaign/pendingCampaignResult';
 import type { CampaignOutcome } from '../data/campaign/campaignRules';
 import { campaignObjectiveText } from '../data/campaign/objectives';
-import type { ProgressionState } from '../app/progression';
+import { progressionFromServer, saveProgression, type ProgressionState } from '../app/progression';
 import { mountCampaignPreview } from './campaignPreview';
 import { buildCampaignCustomizerPath } from '../campaign/campaignReturn';
+import { commitProgressionSync } from '../progression/progressionClient';
+import type { CampaignSettlement } from '../campaign/campaignClient';
 
 type CampaignCardState = 'locked' | 'available' | 'defeated';
 const retrySession = createPendingCampaignRetrySession();
@@ -88,11 +90,22 @@ export async function renderCampaignArchive(
 ) {
   mount.setAttribute('aria-busy', 'true');
   mount.innerHTML = '<main class="campaign-page campaign-page--loading"><p role="status">正在读取对手档案…</p></main>';
+  let recoveredSettlement: CampaignSettlement | null = null;
   await retryPendingCampaignResultsOnce(
     identity.playerId,
-    (attemptId, value) => client.submitResult(attemptId, value),
+    async (attemptId, value) => {
+      const settlement = await client.submitResult(attemptId, value);
+      recoveredSettlement = settlement;
+      return settlement;
+    },
     { session: retrySession },
   );
+  if (recoveredSettlement) {
+    const settlement = recoveredSettlement as CampaignSettlement;
+    progression = progressionFromServer(settlement.progression.snapshot, settlement.progression.coins);
+    saveProgression(progression, { trackWallet: false });
+    commitProgressionSync(identity, { status: 'synced', progression: settlement.progression, acknowledgedEventIds: [] });
+  }
 
   let archive;
   try {

@@ -28,6 +28,13 @@ export interface ResultRenderMeta {
     enemyLoadout: string;
     submissionStatus: string;
   };
+  campaignDetails?: {
+    opponentName: string;
+    stars: string;
+    objectives: string;
+    rewards: string;
+    submissionStatus: string;
+  };
 }
 
 export class ResultPanel {
@@ -46,6 +53,10 @@ export class ResultPanel {
   readonly unlockCard = document.createElement('div');
   readonly retry = document.createElement('button');
   readonly garage = document.createElement('button');
+  readonly campaignNext = document.createElement('button');
+  readonly campaignReplay = document.createElement('button');
+  readonly campaignCustomize = document.createElement('button');
+  readonly campaignArchive = document.createElement('button');
 
   constructor() {
     this.root.className = 'card results';
@@ -63,6 +74,14 @@ export class ResultPanel {
     this.retry.textContent = '继续';
     this.garage.className = 'button';
     this.garage.textContent = '返回改装库';
+    for (const button of [this.campaignNext, this.campaignReplay, this.campaignCustomize, this.campaignArchive]) {
+      button.className = 'button';
+      button.style.display = 'none';
+    }
+    this.campaignNext.textContent = '下一名对手';
+    this.campaignReplay.textContent = '重赛';
+    this.campaignCustomize.textContent = '换装';
+    this.campaignArchive.textContent = '返回档案';
     this.root.append(
       this.kicker,
       this.title,
@@ -78,6 +97,10 @@ export class ResultPanel {
       this.unlockCard,
       this.retry,
       this.garage,
+      this.campaignNext,
+      this.campaignReplay,
+      this.campaignCustomize,
+      this.campaignArchive,
     );
   }
 
@@ -101,7 +124,11 @@ export class ResultPanel {
     this.kicker.textContent = won ? '胜利结算' : '战斗报告';
     this.title.textContent = won ? '胜利' : '战败';
     this.badge.textContent = result.label;
-    this.body.textContent = meta.challengeDetails
+    this.body.textContent = meta.campaignDetails
+      ? won
+        ? `你击败了 ${enemyName}，战役进度和奖励正在等待服务器确认。`
+        : `${enemyName} 赢下了这场战役；本场结果仍会提交，但不会提前修改进度。`
+      : meta.challengeDetails
       ? won
         ? `你在这场 ${modeLabel} 中压制了 ${enemyName}，结果将安全提交且不影响单人成长。`
         : `${enemyName} 赢下了这场 ${modeLabel}，结果将安全提交且不影响单人成长。`
@@ -121,7 +148,7 @@ export class ResultPanel {
     const settlementItems = [
       { label: '战斗模式', value: modeLabel },
       { label: '终结方式', value: result.label },
-      { label: '结算状态', value: meta.challengeDetails ? '等待挑战结果确认' : won ? '奖励已入账' : '继续调整后再战' },
+      { label: '结算状态', value: meta.challengeDetails || meta.campaignDetails ? '等待服务器确认' : won ? '奖励已入账' : '继续调整后再战' },
     ];
     this.summary.replaceChildren();
     for (const item of settlementItems) {
@@ -132,7 +159,7 @@ export class ResultPanel {
     }
 
     this.challengeDetails.replaceChildren();
-    this.challengeDetails.style.display = meta.challengeDetails ? 'grid' : 'none';
+    this.challengeDetails.style.display = meta.challengeDetails || meta.campaignDetails ? 'grid' : 'none';
     if (meta.challengeDetails) {
       const rows = [
         ['规则', meta.challengeDetails.rule],
@@ -146,6 +173,8 @@ export class ResultPanel {
         const value = document.createElement('strong'); value.textContent = valueText;
         row.append(label, value); this.challengeDetails.append(row);
       }
+    } else if (meta.campaignDetails) {
+      this.renderCampaignRows(meta.campaignDetails);
     }
 
     const affinitySummary = meta.affinitySummary;
@@ -193,6 +222,12 @@ export class ResultPanel {
 
     this.reward.textContent = rewardText;
     this.retry.textContent = retryLabel;
+    const campaignMode = Boolean(meta.campaignDetails);
+    this.retry.style.display = campaignMode ? 'none' : '';
+    this.garage.style.display = campaignMode ? 'none' : '';
+    for (const button of [this.campaignNext, this.campaignReplay, this.campaignCustomize, this.campaignArchive]) {
+      button.style.display = campaignMode ? '' : 'none';
+    }
     this.reward.style.display = rewardText ? 'block' : 'none';
     this.champion.style.display = championData ? 'grid' : 'none';
     this.champion.innerHTML = championData
@@ -223,5 +258,27 @@ export class ResultPanel {
     if (row) row.textContent = status;
     this.garage.textContent = secondaryLabel;
     this.garage.disabled = disabled;
+  }
+
+  setCampaignSettlement(details: NonNullable<ResultRenderMeta['campaignDetails']>, nextEnabled: boolean, replayEnabled: boolean) {
+    this.challengeDetails.replaceChildren();
+    this.renderCampaignRows(details);
+    this.campaignNext.disabled = !nextEnabled;
+    this.campaignReplay.disabled = !replayEnabled;
+  }
+
+  private renderCampaignRows(details: NonNullable<ResultRenderMeta['campaignDetails']>) {
+    for (const [labelText, valueText] of [
+      ['对手', details.opponentName],
+      ['星级', details.stars],
+      ['目标', details.objectives],
+      ['奖励', details.rewards],
+      ['提交状态', details.submissionStatus],
+    ]) {
+      const row = document.createElement('div');
+      const label = document.createElement('span'); label.textContent = labelText;
+      const value = document.createElement('strong'); value.textContent = valueText;
+      row.append(label, value); this.challengeDetails.append(row);
+    }
   }
 }

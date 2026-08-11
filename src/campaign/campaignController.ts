@@ -3,7 +3,23 @@ import type { UpgradeLevels } from '../app/progression';
 import type { CampaignAiProfileId, CampaignArena, CampaignOpponent } from '../data/campaign/opponents';
 import type { NssBattleLoadoutV2 } from '../nss/types';
 import { parseBattleSeed, type BattleSeed } from '../sim/battleSeed';
-import type { CampaignAttempt, CampaignClient } from './campaignClient';
+import {
+  CampaignApiError,
+  isCampaignOutcome,
+  type CampaignAttempt,
+  type CampaignClient,
+  type CampaignSettlement,
+} from './campaignClient';
+import {
+  loadPendingCampaignResult,
+  pendingCampaignResultKey,
+  savePendingCampaignResult,
+} from './pendingCampaignResult';
+
+type CampaignStorage = Pick<Storage, 'length' | 'key' | 'getItem' | 'setItem' | 'removeItem'>;
+export type CampaignSubmitResult =
+  | { status: 'submitted'; settlement: CampaignSettlement }
+  | { status: 'pending' | 'storage_failed' | 'conflict' };
 
 type CampaignCombatant = {
   displayName: string;
@@ -29,6 +45,7 @@ export class CampaignController {
   readonly attempt: CampaignAttempt;
   readonly identity: LocalIdentity;
   readonly client: CampaignClient;
+  private settlementPromise: Promise<CampaignSubmitResult> | null = null;
 
   constructor(
     attempt: CampaignAttempt,
@@ -65,5 +82,40 @@ export class CampaignController {
       },
       controller: this,
     };
+  }
+
+  settle(
+    outcome: unknown,
+    dependencies: { storage?: CampaignStorage; randomUUID?: () => string } = {},
+  ): Promise<CampaignSubmitResult> {
+    if (this.settlementPromise) return this.settlementPromise;
+    if (!isCampaignOutcome(outcome) || outcome.simulationVersion !== this.attempt.simulationVersion || outcome.seed !== this.attempt.seed) {
+      return Promise.reject(new Error('Campaign outcome does not match frozen attempt'));
+    }
+    const requestId = (dependencies.randomUUID ?? (() => crypto.randomUUID()))();
+    const storage = dependencies.storage ?? window.localStorage;
+    const normalized = structuredClone(outcome) as unknown as Record<string, unknown>;
+    this.settlementPromise = this.submitOnce(requestId, normalized, storage);
+    return this.settlementPromise;
+  }
+
+  private async submitOnce(requestId: string, outcome: Record<string, unknown>, storage: CampaignStorage): Promise<CampaignSubmitResult> {
+    if (!savePendingCampaignResult(this.identity.playerId, requestId, this.attempt.attemptId, outcome, storage)) {
+      return { status: 'storage_failed' };
+    }
+    try {
+      const settlement = await this.client.submitResult(this.attempt.attemptId, { requestId, outcome });
+      storage.removeItem(pendingCampaignResultKey(this.identity.playerId, this.attempt.attemptId));
+      return { status: 'submitted', settlement };
+    } catch (error) {
+      if (error instanceof CampaignApiError && error.code === 'CAMPAIGN_RESULT_CONFLICT') {
+        const pending = loadPendingCampaignResult(this.identity.playerId, this.attempt.attemptId, storage);
+        if (pending) {
+          try { storage.setItem(pendingCampaignResultKey(this.identity.playerId, this.attempt.attemptId), JSON.stringify({ ...pending, status: 'conflict' })); } catch { /* Preserve the pending record. */ }
+        }
+        return { status: 'conflict' };
+      }
+      return { status: 'pending' };
+    }
   }
 }

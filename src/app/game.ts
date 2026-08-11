@@ -102,7 +102,10 @@ import {
   pickAiTurnAction as chooseAiTurnAction,
 } from '../gameplay/ai';
 import type { GameChallengeOptions } from '../challenges/challengeBootstrap';
-import type { GameCampaignOptions } from '../campaign/campaignController';
+import type { CampaignSubmitResult, GameCampaignOptions } from '../campaign/campaignController';
+import { buildCampaignCustomizerPath } from '../campaign/campaignReturn';
+import { campaignObjectiveText } from '../data/campaign/objectives';
+import { commitProgressionSync } from '../progression/progressionClient';
 import {
   settleChallengeResult,
   type PendingChallengeEnvelope,
@@ -145,6 +148,7 @@ import {
   getPartUpgradeLevel,
   getNextUnlock,
   loadProgression,
+  progressionFromServer,
   MAX_PART_UPGRADE_LEVEL,
   MAX_SYSTEM_UPGRADE_LEVEL,
   resetRun,
@@ -296,6 +300,8 @@ export class Game {
   private readonly campaign: GameCampaignOptions | null;
   private challengeEnvelope: PendingChallengeEnvelope | null = null;
   private challengeSettlement: 'idle' | 'submitting' | 'submitted' | 'pending' | 'storage_failed' = 'idle';
+  private campaignSettlement: CampaignSubmitResult | null = null;
+  private campaignNextOpponentId: string | null = null;
 
   constructor(mount: HTMLElement, session: GameChallengeOptions | GameCampaignOptions | null = null) {
     this.mount = mount;
@@ -607,6 +613,18 @@ export class Game {
         return;
       }
       this.showGarage();
+    });
+    this.results.campaignNext.addEventListener('click', () => {
+      if (this.campaignNextOpponentId) window.location.assign(`/arena/?campaign=${encodeURIComponent(this.campaignNextOpponentId)}`);
+    });
+    this.results.campaignReplay.addEventListener('click', () => {
+      if (this.campaign) window.location.assign(`/arena/?campaign=${encodeURIComponent(this.campaign.opponentId)}`);
+    });
+    this.results.campaignCustomize.addEventListener('click', () => {
+      if (this.campaign) window.location.assign(buildCampaignCustomizerPath(this.campaign.opponentId, this.progression.latestNssLoadout));
+    });
+    this.results.campaignArchive.addEventListener('click', () => {
+      if (this.campaign) window.location.assign(`/campaign/?opponent=${encodeURIComponent(this.campaign.opponentId)}`);
     });
     this.shop.backButton.addEventListener('click', () => this.showGarage());
     this.shop.garageButton.addEventListener('click', () => this.showGarage());
@@ -1310,6 +1328,13 @@ export class Game {
           enemyLoadout: nssCombinationId(this.challenge.enemy.loadout.combination),
           submissionStatus: '正在安全保存…',
         } : undefined,
+        campaignDetails: this.campaign ? {
+          opponentName: this.campaign.opponentName,
+          stars: '等待服务器确认',
+          objectives: `策略：${campaignObjectiveText(this.campaign.objectives.strategy)} · 表现：${campaignObjectiveText(this.campaign.objectives.performance)}`,
+          rewards: '确认前不提前发放',
+          submissionStatus: '正在安全保存…',
+        } : undefined,
       },
     );
     this.menu.root.style.display = 'none';
@@ -1321,6 +1346,66 @@ export class Game {
     this.floatingTexts.clear();
     this.results.root.style.display = 'grid';
     if (this.battleMode === 'challenge') void this.submitChallengeResult();
+    if (this.battleMode === 'campaign') {
+      this.results.setCampaignSettlement({
+        opponentName: this.campaign!.opponentName,
+        stars: '等待服务器确认',
+        objectives: '战斗摘要已冻结',
+        rewards: '确认前不提前发放',
+        submissionStatus: '正在提交结果…',
+      }, false, false);
+      void this.submitCampaignResult();
+    }
+  }
+
+  private async submitCampaignResult() {
+    if (!this.campaign || !this.battleOutcomeSummary || this.campaignSettlement) return;
+    this.campaignSettlement = await this.campaign.controller.settle(this.battleOutcomeSummary);
+    if (this.campaignSettlement.status === 'submitted') {
+      const settlement = this.campaignSettlement.settlement;
+      this.progression = progressionFromServer(settlement.progression.snapshot, settlement.progression.coins);
+      saveProgression(this.progression, { trackWallet: false });
+      commitProgressionSync(this.campaign.controller.identity, {
+        status: 'synced', progression: settlement.progression, acknowledgedEventIds: [],
+      });
+      const opponent = settlement.progress.opponents.find(item => item.id === settlement.opponentId);
+      const stars = opponent?.starsMask ?? 0;
+      const totalCoins = settlement.rewards.battleCoins + settlement.rewards.firstWinCoins
+        + settlement.rewards.starCoins + settlement.rewards.partConversionCoins;
+      const rewardParts = [totalCoins ? `${totalCoins} 金币` : '无新增金币'];
+      if (settlement.rewards.partUnlocked) rewardParts.push(`解锁 ${settlement.rewards.partUnlocked}`);
+      if (settlement.rewards.championshipCrowns) rewardParts.push(`冠军王冠 +${settlement.rewards.championshipCrowns}`);
+      const newStars = [1, 2, 4].filter(bit => settlement.newStarsMask & bit).length;
+      const achieved = [
+        settlement.earnedStarsMask & 1 ? '赢得战斗' : '',
+        settlement.earnedStarsMask & 2 ? campaignObjectiveText(this.campaign.objectives.strategy) : '',
+        settlement.earnedStarsMask & 4 ? campaignObjectiveText(this.campaign.objectives.performance) : '',
+      ].filter(Boolean);
+      this.campaignNextOpponentId = this.currentResult?.winner === 'player'
+        && settlement.progress.nextOpponentId !== settlement.opponentId
+        ? settlement.progress.nextOpponentId
+        : null;
+      this.results.setCampaignSettlement({
+        opponentName: this.campaign.opponentName,
+        stars: `${[1, 2, 4].filter(bit => stars & bit).length} / 3${newStars ? ` · 新增 ${newStars}` : ' · 无新增'}`,
+        objectives: achieved.length ? achieved.join(' · ') : '本场未达成星级目标',
+        rewards: rewardParts.join(' · '),
+        submissionStatus: '结果已确认',
+      }, Boolean(this.campaignNextOpponentId), true);
+      return;
+    }
+    const status = {
+      pending: '网络中断，结果已保存在本机并等待确认',
+      storage_failed: '浏览器无法安全保存，结果未发送',
+      conflict: '结果与已提交记录冲突，请返回档案处理',
+    }[this.campaignSettlement.status];
+    this.results.setCampaignSettlement({
+      opponentName: this.campaign.opponentName,
+      stars: '尚未确认',
+      objectives: '确认前不更新目标进度',
+      rewards: '确认前不提前发放',
+      submissionStatus: status,
+    }, false, false);
   }
 
   private async submitChallengeResult() {
