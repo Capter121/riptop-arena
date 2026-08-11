@@ -124,3 +124,4 @@ export function createSurvivalSummary(
   abandoned?: boolean,
 ): SurvivalSummary;
 export function compareSurvivalBest(candidate: SurvivalSummary, incumbent: SurvivalSummary | null): number;
+export function survivalEventUuid(logicalKey: string): string;

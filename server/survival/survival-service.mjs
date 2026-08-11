@@ -3,15 +3,23 @@ import { readPlayerProgression } from '../progression/progression-service.mjs';
 import { campaignNssMaxIntegrity } from '../campaign/campaign-contract.mjs';
 import {
   SURVIVAL_CONFIG,
+  applySurvivalReward,
+  compareSurvivalBest,
+  createSurvivalSummary,
+  generateSurvivalRewards,
   generateSurvivalWave,
+  scoreSurvivalWave,
 } from './survival-config.mjs';
 import {
   SurvivalError,
   normalizeSurvivalAbandonRequest,
+  normalizeSurvivalLeaderboardQuery,
   normalizeSurvivalLoadout,
+  normalizeSurvivalResultRequest,
+  normalizeSurvivalRewardRequest,
   normalizeSurvivalStartRequest,
 } from './survival-contract.mjs';
-import { createSurvivalSummary } from '../../shared/survival/survival-rules.js';
+import { survivalEventUuid } from '../../shared/survival/survival-rules.js';
 
 export { SurvivalError } from './survival-contract.mjs';
 
@@ -108,6 +116,61 @@ export function createSurvivalService(database, options = {}) {
     };
   }
 
+  function completedScores(runId) {
+    return database.prepare(`
+      SELECT wave, result_json, score FROM survival_wave_results WHERE run_id = ? ORDER BY wave
+    `).all(runId).flatMap((result) => {
+      const request = JSON.parse(result.result_json);
+      if (request.outcome.winner !== 'player') return [];
+      return [{
+        wave: result.wave,
+        type: SURVIVAL_CONFIG.wavePattern[(result.wave - 1) % SURVIVAL_CONFIG.wavePattern.length],
+        score: result.score,
+      }];
+    });
+  }
+
+  function bestSummary(row) {
+    if (!row) return null;
+    return {
+      score: row.score,
+      highestCompletedWave: row.highest_completed_wave,
+      bossesDefeated: row.bosses_defeated,
+      finalIntegrity: row.final_integrity,
+      riskLevel: row.risk_level,
+      achievedAt: row.achieved_at,
+      abandoned: false,
+    };
+  }
+
+  function updateBest(row, summary, timestamp) {
+    const incumbent = database.prepare(`
+      SELECT score, highest_completed_wave, bosses_defeated, final_integrity, risk_level, achieved_at
+      FROM survival_best_scores WHERE player_id = ?
+    `).get(row.player_id);
+    if (compareSurvivalBest(summary, bestSummary(incumbent)) <= 0) return;
+    database.prepare(`
+      INSERT INTO survival_best_scores (
+        player_id, run_id, score, highest_completed_wave, bosses_defeated,
+        final_integrity, risk_level, loadout_summary_json, achieved_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT (player_id) DO UPDATE SET
+        run_id = excluded.run_id,
+        score = excluded.score,
+        highest_completed_wave = excluded.highest_completed_wave,
+        bosses_defeated = excluded.bosses_defeated,
+        final_integrity = excluded.final_integrity,
+        risk_level = excluded.risk_level,
+        loadout_summary_json = excluded.loadout_summary_json,
+        achieved_at = excluded.achieved_at,
+        updated_at = excluded.updated_at
+    `).run(
+      row.player_id, row.run_id, summary.score, summary.highestCompletedWave,
+      summary.bossesDefeated, summary.finalIntegrity, summary.riskLevel,
+      row.player_loadout_json, summary.achievedAt, timestamp,
+    );
+  }
+
   function getRun(runId, playerId) {
     const row = readRunRow(runId);
     if (row.player_id !== playerId) fail(403, 'SURVIVAL_RUN_FORBIDDEN', 'Only the run owner can access this survival run.');
@@ -134,7 +197,67 @@ export function createSurvivalService(database, options = {}) {
       activeRun: active ? presentRun(readRunRow(active.run_id)) : null,
       personalBest: presentBest(best),
       milestones: SURVIVAL_CONFIG.milestones.map(milestone => ({ ...milestone, earned: earnedWaves.has(milestone.wave) })),
+      leaderboard: listLeaderboard(playerId, { limit: '20' }),
     };
+  }
+
+  function listLeaderboard(playerId, value = {}) {
+    playerRow(playerId);
+    const query = normalizeSurvivalLeaderboardQuery(value);
+    const rows = database.prepare(`
+      SELECT best.player_id, players.display_name, best.run_id, best.score,
+             best.highest_completed_wave, best.bosses_defeated, best.final_integrity,
+             best.risk_level, best.loadout_summary_json, best.achieved_at
+      FROM survival_best_scores AS best
+      JOIN players ON players.id = best.player_id
+      ORDER BY best.score DESC, best.highest_completed_wave DESC,
+               best.bosses_defeated DESC, best.final_integrity DESC,
+               best.achieved_at ASC, best.player_id ASC
+    `).all();
+    let offset = 0;
+    if (query.cursor !== null) {
+      try {
+        const cursor = JSON.parse(Buffer.from(query.cursor, 'base64url').toString('utf8'));
+        if (!cursor || typeof cursor.playerId !== 'string') throw new Error('invalid');
+        const index = rows.findIndex(row => row.player_id === cursor.playerId
+          && row.score === cursor.score
+          && row.highest_completed_wave === cursor.wave
+          && row.bosses_defeated === cursor.bosses
+          && row.final_integrity === cursor.integrity
+          && row.achieved_at === cursor.achievedAt);
+        if (index < 0) throw new Error('stale');
+        offset = index + 1;
+      } catch {
+        fail(400, 'INVALID_SURVIVAL_CURSOR', 'Survival leaderboard cursor is invalid or stale.');
+      }
+    }
+    const page = rows.slice(offset, offset + query.limit);
+    const entries = page.map((row, index) => ({
+      rank: offset + index + 1,
+      playerId: row.player_id,
+      displayName: row.display_name,
+      runId: row.run_id,
+      score: row.score,
+      highestCompletedWave: row.highest_completed_wave,
+      bossesDefeated: row.bosses_defeated,
+      finalIntegrity: row.final_integrity,
+      riskLevel: row.risk_level,
+      loadoutSummary: JSON.parse(row.loadout_summary_json),
+      achievedAt: row.achieved_at,
+    }));
+    const last = page.at(-1);
+    const nextCursor = offset + page.length < rows.length && last
+      ? Buffer.from(JSON.stringify({
+          playerId: last.player_id,
+          score: last.score,
+          wave: last.highest_completed_wave,
+          bosses: last.bosses_defeated,
+          integrity: last.final_integrity,
+          achievedAt: last.achieved_at,
+        })).toString('base64url')
+      : null;
+    const currentIndex = rows.findIndex(row => row.player_id === playerId);
+    return { entries, nextCursor, currentRank: currentIndex < 0 ? null : currentIndex + 1 };
   }
 
   function startRun(playerId, value) {
@@ -194,6 +317,226 @@ export function createSurvivalService(database, options = {}) {
     }
   }
 
+  function submitWaveResult(runId, playerId, value) {
+    const currentDate = validDate(now());
+    database.exec('BEGIN IMMEDIATE');
+    try {
+      const repeated = value && typeof value === 'object' && typeof value.requestId === 'string'
+        ? database.prepare(`
+            SELECT run_id, result_json, settlement_json FROM survival_wave_results
+            WHERE result_request_id = ?
+          `).get(value.requestId.toLowerCase())
+        : null;
+      if (repeated) {
+        const repeatedRun = readRunRow(repeated.run_id);
+        if (repeatedRun.player_id !== playerId || repeated.run_id !== runId) {
+          fail(409, 'SURVIVAL_REQUEST_CONFLICT', 'This result request ID belongs to another run.');
+        }
+        const stored = JSON.parse(repeated.result_json);
+        const normalized = normalizeSurvivalResultRequest(value, {
+          configVersion: stored.configVersion,
+          simulationVersion: stored.simulationVersion,
+          battleRulesVersion: stored.battleRulesVersion,
+          seed: stored.outcome.seed,
+          wave: stored.wave,
+          maximumIntegrity: repeatedRun.player_max_integrity,
+        });
+        if (JSON.stringify(normalized) !== repeated.result_json) {
+          fail(409, 'SURVIVAL_REQUEST_CONFLICT', 'This result request ID has different content.');
+        }
+        const settlement = JSON.parse(repeated.settlement_json);
+        database.exec('COMMIT');
+        return settlement;
+      }
+
+      const row = readRunRow(runId);
+      if (row.player_id !== playerId) fail(403, 'SURVIVAL_RUN_FORBIDDEN', 'Only the run owner can submit this result.');
+      if (row.status !== 'wave_ready') fail(409, 'STALE_SURVIVAL_STATE', 'This survival wave cannot accept a result.');
+      const wave = JSON.parse(row.current_wave_json);
+      const request = normalizeSurvivalResultRequest(value, {
+        configVersion: row.config_version,
+        simulationVersion: row.simulation_version,
+        battleRulesVersion: row.battle_rules_version,
+        seed: wave.seed,
+        wave: row.current_wave,
+        maximumIntegrity: row.player_max_integrity,
+      });
+      const requestJson = JSON.stringify(request);
+      const won = request.outcome.winner === 'player';
+      const flawless = won && request.outcome.player.integrity >= row.integrity;
+      const flawlessStreak = flawless ? row.flawless_streak + 1 : 0;
+      const score = won ? scoreSurvivalWave({
+        wave: row.current_wave,
+        type: wave.type,
+        finishKind: request.outcome.kind,
+        flawless,
+        flawlessStreak,
+        riskLevel: row.risk_level,
+      }) : {
+        base: 0, waveTypeBonus: 0, finishBonus: 0, flawlessBonus: 0,
+        flawlessStreakBonus: 0, subtotal: 0, riskMultiplier: 1, score: 0,
+      };
+      const rewardState = {
+        growthLevels: JSON.parse(row.growth_levels_json),
+        maximumIntegrity: row.player_max_integrity,
+        integrity: request.outcome.player.integrity,
+        burstRisk: request.outcome.player.burst,
+        persistentDebuffs: JSON.parse(row.persistent_debuffs_json),
+        nextWaveEffect: null,
+        riskLevel: row.risk_level,
+      };
+      const rewardOptions = won ? generateSurvivalRewards(row.seed, row.current_wave, rewardState) : [];
+      database.prepare(`
+        INSERT INTO survival_wave_results (
+          run_id, wave, result_request_id, result_json, score_json, score,
+          settlement_json, reward_options_json, settled_at
+        ) VALUES (?, ?, ?, ?, ?, ?, '{}', ?, ?)
+      `).run(
+        runId, row.current_wave, request.requestId, requestJson, JSON.stringify(score),
+        score.score, JSON.stringify(rewardOptions), currentDate.toISOString(),
+      );
+
+      let progression = readPlayerProgression(database, playerId);
+      let milestone = null;
+      const milestoneDefinition = won
+        ? SURVIVAL_CONFIG.milestones.find(candidate => candidate.wave === row.current_wave)
+        : null;
+      if (milestoneDefinition) {
+        const eventId = survivalEventUuid(`survival:${playerId}:milestone:${row.current_wave}`);
+        const inserted = database.prepare(`
+          INSERT OR IGNORE INTO wallet_events (player_id, event_id, kind, delta, metadata_json)
+          VALUES (?, ?, 'credit', ?, ?)
+        `).run(playerId, eventId, milestoneDefinition.coins, JSON.stringify({
+          source: 'survival', wave: row.current_wave, runId,
+        }));
+        if (inserted.changes === 1) {
+          database.prepare(`
+            UPDATE player_progression
+            SET coins = coins + ?, revision = revision + 1, updated_at = ?
+            WHERE player_id = ?
+          `).run(milestoneDefinition.coins, currentDate.toISOString(), playerId);
+          milestone = { ...milestoneDefinition, eventId };
+          progression = readPlayerProgression(database, playerId);
+        }
+      }
+
+      const nextScore = row.score + score.score;
+      const nextBosses = row.bosses_defeated + (won && wave.type === 'boss' ? 1 : 0);
+      if (won) {
+        database.prepare(`
+          UPDATE survival_runs
+          SET status = 'reward_pending', integrity = ?, burst_risk = ?,
+              next_wave_effect = NULL, score = ?, flawless_streak = ?,
+              bosses_defeated = ?, updated_at = ?
+          WHERE run_id = ? AND status = 'wave_ready' AND current_wave = ?
+        `).run(
+          rewardState.integrity, rewardState.burstRisk, nextScore, flawlessStreak,
+          nextBosses, currentDate.toISOString(), runId, row.current_wave,
+        );
+      } else {
+        const summary = createSurvivalSummary(
+          completedScores(runId), request.outcome.player.integrity, row.risk_level,
+          currentDate.toISOString(), false,
+        );
+        database.prepare(`
+          UPDATE survival_runs
+          SET status = 'completed', integrity = ?, burst_risk = ?, next_wave_effect = NULL,
+              final_summary_json = ?, updated_at = ?, completed_at = ?
+          WHERE run_id = ? AND status = 'wave_ready' AND current_wave = ?
+        `).run(
+          request.outcome.player.integrity, request.outcome.player.burst, JSON.stringify(summary),
+          currentDate.toISOString(), currentDate.toISOString(), runId, row.current_wave,
+        );
+        updateBest(readRunRow(runId), summary, currentDate.toISOString());
+      }
+      const settlement = {
+        run: presentRun(readRunRow(runId)),
+        score,
+        rewardOptions,
+        milestone,
+        progression,
+      };
+      database.prepare(`
+        UPDATE survival_wave_results SET settlement_json = ? WHERE run_id = ? AND wave = ?
+      `).run(JSON.stringify(settlement), runId, row.current_wave);
+      database.exec('COMMIT');
+      return settlement;
+    } catch (error) {
+      try { database.exec('ROLLBACK'); } catch { /* Preserve original error. */ }
+      throw error;
+    }
+  }
+
+  function selectReward(runId, waveNumber, playerId, value) {
+    const request = normalizeSurvivalRewardRequest(value);
+    const requestJson = JSON.stringify(request.reward);
+    const currentDate = validDate(now());
+    database.exec('BEGIN IMMEDIATE');
+    try {
+      const repeated = database.prepare(`
+        SELECT run_id, wave, selected_reward_json, checkpoint_after_json
+        FROM survival_wave_results WHERE reward_request_id = ?
+      `).get(request.requestId);
+      if (repeated) {
+        const repeatedRun = readRunRow(repeated.run_id);
+        if (repeatedRun.player_id !== playerId || repeated.run_id !== runId || repeated.wave !== waveNumber
+          || repeated.selected_reward_json !== requestJson) {
+          fail(409, 'SURVIVAL_REQUEST_CONFLICT', 'This reward request ID has different content.');
+        }
+        const response = JSON.parse(repeated.checkpoint_after_json);
+        database.exec('COMMIT');
+        return response;
+      }
+      const row = readRunRow(runId);
+      if (row.player_id !== playerId) fail(403, 'SURVIVAL_RUN_FORBIDDEN', 'Only the run owner can select this reward.');
+      if (row.status !== 'reward_pending' || row.current_wave !== waveNumber) {
+        fail(409, 'STALE_SURVIVAL_STATE', 'This survival reward is no longer pending.');
+      }
+      const audit = database.prepare(`
+        SELECT reward_options_json FROM survival_wave_results WHERE run_id = ? AND wave = ?
+      `).get(runId, waveNumber);
+      const options = JSON.parse(audit.reward_options_json);
+      if (!options.some(candidate => JSON.stringify(candidate) === requestJson)) {
+        fail(400, 'INVALID_SURVIVAL_REWARD', 'The selected reward is not one of the frozen choices.');
+      }
+      const state = applySurvivalReward({
+        growthLevels: JSON.parse(row.growth_levels_json),
+        maximumIntegrity: row.player_max_integrity,
+        integrity: row.integrity,
+        burstRisk: row.burst_risk,
+        persistentDebuffs: JSON.parse(row.persistent_debuffs_json),
+        nextWaveEffect: row.next_wave_effect,
+        riskLevel: row.risk_level,
+      }, request.reward);
+      const nextWaveNumber = waveNumber + 1;
+      const nextWave = generateSurvivalWave(row.seed, nextWaveNumber, state.riskLevel);
+      database.prepare(`
+        UPDATE survival_runs
+        SET status = 'wave_ready', current_wave = ?, current_wave_json = ?,
+            integrity = ?, burst_risk = ?, persistent_debuffs_json = ?,
+            growth_levels_json = ?, next_wave_effect = ?, risk_level = ?, updated_at = ?
+        WHERE run_id = ? AND status = 'reward_pending' AND current_wave = ?
+      `).run(
+        nextWaveNumber, JSON.stringify(nextWave), state.integrity, state.burstRisk,
+        JSON.stringify(state.persistentDebuffs), JSON.stringify(state.growthLevels),
+        state.nextWaveEffect, state.riskLevel, currentDate.toISOString(), runId, waveNumber,
+      );
+      const response = { run: presentRun(readRunRow(runId)) };
+      database.prepare(`
+        UPDATE survival_wave_results
+        SET reward_request_id = ?, selected_reward_json = ?, checkpoint_after_json = ?, rewarded_at = ?
+        WHERE run_id = ? AND wave = ? AND reward_request_id IS NULL
+      `).run(
+        request.requestId, requestJson, JSON.stringify(response), currentDate.toISOString(), runId, waveNumber,
+      );
+      database.exec('COMMIT');
+      return response;
+    } catch (error) {
+      try { database.exec('ROLLBACK'); } catch { /* Preserve original error. */ }
+      throw error;
+    }
+  }
+
   function abandonRun(runId, playerId, value) {
     const request = normalizeSurvivalAbandonRequest(value);
     const currentDate = validDate(now());
@@ -209,20 +552,16 @@ export function createSurvivalService(database, options = {}) {
         }
         fail(409, 'STALE_SURVIVAL_STATE', 'This survival run is already completed.');
       }
-      const scores = database.prepare(`
-        SELECT wave, score FROM survival_wave_results WHERE run_id = ? ORDER BY wave
-      `).all(runId).map(result => ({
-        wave: result.wave,
-        type: SURVIVAL_CONFIG.wavePattern[(result.wave - 1) % SURVIVAL_CONFIG.wavePattern.length],
-        score: result.score,
-      }));
-      const summary = createSurvivalSummary(scores, row.integrity, row.risk_level, currentDate.toISOString(), true);
+      const summary = createSurvivalSummary(
+        completedScores(runId), row.integrity, row.risk_level, currentDate.toISOString(), true,
+      );
       database.prepare(`
         UPDATE survival_runs
         SET status = 'completed', abandon_request_id = ?, final_summary_json = ?,
             updated_at = ?, completed_at = ?
         WHERE run_id = ? AND status != 'completed'
       `).run(request.requestId, JSON.stringify(summary), currentDate.toISOString(), currentDate.toISOString(), runId);
+      updateBest(readRunRow(runId), summary, currentDate.toISOString());
       const run = presentRun(readRunRow(runId));
       database.exec('COMMIT');
       return run;
@@ -232,5 +571,5 @@ export function createSurvivalService(database, options = {}) {
     }
   }
 
-  return { abandonRun, getHub, getRun, startRun };
+  return { abandonRun, getHub, getRun, listLeaderboard, selectReward, startRun, submitWaveResult };
 }

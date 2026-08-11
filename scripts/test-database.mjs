@@ -312,8 +312,8 @@ try {
 
   const insertSurvivalWave = database.prepare(`
     INSERT INTO survival_wave_results (
-      run_id, wave, result_request_id, result_json, score_json, score, reward_options_json
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      run_id, wave, result_request_id, result_json, score_json, score, settlement_json, reward_options_json
+    ) VALUES (?, ?, ?, ?, ?, ?, '{}', ?)
   `);
   insertSurvivalWave.run(run[0], 1, '26262626-2626-4626-8626-262626262626', '{"winner":"player"}', '{"score":125}', 125, '[]');
   assert.throws(() => insertSurvivalWave.run(run[0], 1, '27272727-2727-4727-8727-272727272727', '{}', '{}', 0, '[]'));

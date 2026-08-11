@@ -307,3 +307,22 @@ export function compareSurvivalBest(candidate, incumbent) {
   ];
   return Math.sign(comparisons.find(value => value !== 0) ?? 0);
 }
+
+export function survivalEventUuid(logicalKey) {
+  if (typeof logicalKey !== 'string' || !/^survival:[a-z0-9:-]+$/.test(logicalKey)) {
+    throw new Error('Survival event key is invalid');
+  }
+  const random = createMulberry32(hashString32(`nss-arena|survival-event-v1|${logicalKey}`));
+  const bytes = new Uint8Array(16);
+  for (let index = 0; index < bytes.length; index += 4) {
+    const word = random.nextUint32();
+    bytes[index] = word >>> 24;
+    bytes[index + 1] = word >>> 16;
+    bytes[index + 2] = word >>> 8;
+    bytes[index + 3] = word;
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x50;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map(value => value.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}

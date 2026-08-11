@@ -47,6 +47,7 @@ CREATE TABLE survival_wave_results (
   result_json TEXT NOT NULL CHECK (json_valid(result_json)),
   score_json TEXT NOT NULL CHECK (json_valid(score_json)),
   score INTEGER NOT NULL CHECK (score >= 0),
+  settlement_json TEXT NOT NULL CHECK (json_valid(settlement_json)),
   reward_options_json TEXT NOT NULL CHECK (
     json_valid(reward_options_json) AND json_type(reward_options_json) = 'array'
   ),
