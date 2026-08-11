@@ -21,7 +21,7 @@
     "test:invite-management": "node scripts/test-invite-management-cli.mjs",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
-    "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs && node scripts/test-database.mjs && node scripts/test-auth.mjs && npm run test:invite-management && node scripts/test-progression.mjs && npm run test:challenge-contract && npm run test:challenges && npm run test:challenge-http && npm run test:campaign-contract && npm run test:campaign-service && npm run test:campaign-http && npm run test:backup",
+    "test:server": "node scripts/test-match-server.mjs && node scripts/test-http-server.mjs && node scripts/test-database.mjs && node scripts/test-auth.mjs && npm run test:invite-management && node scripts/test-progression.mjs && npm run test:challenge-contract && npm run test:challenges && npm run test:challenge-http && npm run test:campaign-contract && npm run test:campaign-service && npm run test:campaign-http && npm run test:survival-contract && npm run test:survival-service && npm run test:survival-http && npm run test:backup",
     "test:backup": "node scripts/test-private-server-archive.mjs",
     "test:http": "node scripts/test-http-server.mjs",
     "test:database": "node scripts/test-database.mjs",
@@ -33,6 +33,9 @@
     "test:campaign-contract": "node scripts/test-campaign-contract.mjs",
     "test:campaign-service": "node scripts/test-campaign-service.mjs",
     "test:campaign-http": "node scripts/test-campaign-http.mjs",
+    "test:survival-contract": "node scripts/test-survival-contract.mjs",
+    "test:survival-service": "node scripts/test-survival-service.mjs",
+    "test:survival-http": "node scripts/test-survival-http.mjs",
     "test:nss-contract": "node scripts/test-nss-contract.mjs",
     "inspect:canvas": "node scripts/inspect-threejs-canvas.mjs"
   },

@@ -7,6 +7,7 @@ import { AuthError, redeemInvite } from './auth/invite-service.mjs';
 import { ProgressionError, syncProgression } from './progression/progression-service.mjs';
 import { ChallengeError, createChallengeService } from './challenges/challenge-service.mjs';
 import { CampaignError, createCampaignService } from './campaign/campaign-service.mjs';
+import { SurvivalError, createSurvivalService } from './survival/survival-service.mjs';
 
 const DEFAULT_JSON_BODY_BYTES = 64 * 1024;
 const CHALLENGE_RESULT_BODY_BYTES = 2 * 1024 * 1024;
@@ -14,6 +15,8 @@ const UUID_PATH = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const OFFER_PATH = new RegExp(`^/api/challenge-offers/(${UUID_PATH})(?:/(claim|revoke))?$`);
 const CHALLENGE_PATH = new RegExp(`^/api/challenges/(${UUID_PATH})(?:/(results|rematch))?$`);
 const CAMPAIGN_RESULT_PATH = new RegExp(`^/api/campaign/attempts/(${UUID_PATH})/result$`);
+const SURVIVAL_ABANDON_PATH = new RegExp(`^/api/survival/runs/(${UUID_PATH})/abandon$`);
+const SURVIVAL_WAVE_PATH = new RegExp(`^/api/survival/runs/(${UUID_PATH})/waves/([1-9][0-9]*)/(result|reward)$`);
 const DEFAULT_SITE_ROOT = fileURLToPath(new URL('../dist/site/', import.meta.url));
 const CONTENT_TYPES = {
   '.avif': 'image/avif',
@@ -136,6 +139,9 @@ export function createArenaHttpServer(options = {}) {
   const campaignService = database
     ? createCampaignService(database, options.campaignServiceOptions)
     : null;
+  const survivalService = database
+    ? createSurvivalService(database, options.survivalServiceOptions)
+    : null;
 
   return createServer(async (request, response) => {
     try {
@@ -162,6 +168,60 @@ export function createArenaHttpServer(options = {}) {
         if (!database) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Identity database is unavailable.');
         const player = authenticateRequest(database, request);
         sendJson(response, 200, syncProgression(database, player.playerId, await readJsonBody(request, maxJsonBodyBytes)));
+        return;
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/survival') {
+        if (!survivalService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Survival database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 200, survivalService.getHub(player.playerId));
+        return;
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/survival/runs') {
+        if (!survivalService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Survival database is unavailable.');
+        const player = authenticateRequest(database, request);
+        const result = survivalService.startRun(player.playerId, await readJsonBody(request, maxJsonBodyBytes));
+        sendJson(response, result.created ? 201 : 200, result);
+        return;
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/survival/leaderboard') {
+        if (!survivalService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Survival database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 200, survivalService.listLeaderboard(
+          player.playerId,
+          Object.fromEntries(url.searchParams.entries()),
+        ));
+        return;
+      }
+
+      const survivalAbandonMatch = SURVIVAL_ABANDON_PATH.exec(url.pathname);
+      if (request.method === 'POST' && survivalAbandonMatch) {
+        if (!survivalService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Survival database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 200, survivalService.abandonRun(
+          survivalAbandonMatch[1],
+          player.playerId,
+          await readJsonBody(request, maxJsonBodyBytes),
+        ));
+        return;
+      }
+
+      const survivalWaveMatch = SURVIVAL_WAVE_PATH.exec(url.pathname);
+      if (request.method === 'POST' && survivalWaveMatch) {
+        if (!survivalService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Survival database is unavailable.');
+        const player = authenticateRequest(database, request);
+        const wave = Number(survivalWaveMatch[2]);
+        if (!Number.isSafeInteger(wave)) throw new HttpError(400, 'INVALID_SURVIVAL_REQUEST', 'Survival wave is out of range.');
+        const body = await readJsonBody(request, maxJsonBodyBytes);
+        if (survivalWaveMatch[3] === 'result' && body?.wave !== wave) {
+          throw new HttpError(400, 'INVALID_SURVIVAL_REQUEST', 'Survival body wave does not match the request path.');
+        }
+        const result = survivalWaveMatch[3] === 'result'
+          ? survivalService.submitWaveResult(survivalWaveMatch[1], player.playerId, body)
+          : survivalService.selectReward(survivalWaveMatch[1], wave, player.playerId, body);
+        sendJson(response, 200, result);
         return;
       }
 
@@ -273,6 +333,8 @@ export function createArenaHttpServer(options = {}) {
           || url.pathname === '/challenges/'
           || url.pathname === '/campaign'
           || url.pathname === '/campaign/'
+          || url.pathname === '/survival'
+          || url.pathname === '/survival/'
           || new RegExp(`^/challenge/${UUID_PATH}/?$`).test(url.pathname);
         const staticPathname = portalFallback
           ? '/index.html'
@@ -309,6 +371,10 @@ export function createArenaHttpServer(options = {}) {
         return;
       }
       if (error instanceof CampaignError) {
+        sendError(response, error.status, error.code, error.message);
+        return;
+      }
+      if (error instanceof SurvivalError) {
         sendError(response, error.status, error.code, error.message);
         return;
       }
