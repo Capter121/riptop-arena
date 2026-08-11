@@ -1,3 +1,5 @@
+import { createMulberry32, hashString32 } from '../sim/rng.js';
+
 export const SURVIVAL_ARENAS = ['classic_grid', 'neon_magma', 'absolute_zero'];
 export const SURVIVAL_AI_PROFILE_IDS = ['assault', 'skirmisher', 'control', 'sustain', 'ringout', 'counter', 'mixup', 'fortress'];
 
@@ -56,4 +58,50 @@ export function assertSurvivalCatalog(value) {
   for (const [key, expected] of Object.entries(EXPECTED)) {
     if (!same(value[key], expected)) throw new Error(`Invalid survival catalog field: ${key}`);
   }
+}
+
+function requireWaveInputs(seed, wave, riskLevel, campaignCatalog) {
+  if (typeof seed !== 'string' || !/^[0-9a-f]{32}$/.test(seed)) throw new Error('Invalid survival seed');
+  if (!Number.isSafeInteger(wave) || wave < 1) throw new Error('Invalid survival wave');
+  if (!Number.isSafeInteger(riskLevel) || riskLevel < 0 || riskLevel > 3) throw new Error('Invalid survival risk level');
+  if (!campaignCatalog || campaignCatalog.configVersion !== 'campaign-v1'
+    || !Array.isArray(campaignCatalog.opponents)) throw new Error('Invalid survival source catalog');
+}
+
+export function generateSurvivalWave(config, campaignCatalog, seed, wave, riskLevel) {
+  assertSurvivalCatalog(config);
+  requireWaveInputs(seed, wave, riskLevel, campaignCatalog);
+  const loadouts = campaignCatalog.opponents.flatMap(opponent => opponent.loadouts.map((enemy, sourceLoadoutIndex) => ({
+    enemy,
+    sourceOpponentId: opponent.id,
+    sourceLoadoutIndex,
+  })));
+  if (loadouts.length !== 17) throw new Error('Invalid survival loadout pool');
+
+  const random = createMulberry32(hashString32(`nss-arena|survival-v1|${seed}|${wave}`));
+  const battleSeed = Array.from({ length: 4 }, () => random.nextUint32().toString(16).padStart(8, '0')).join('');
+  const selected = loadouts[random.nextInt(0, loadouts.length)];
+  const chapter = Math.floor((wave - 1) / config.difficulty.chapterSize) + 1;
+  const type = config.wavePattern[(wave - 1) % config.wavePattern.length];
+  const chapterMultiplier = 1 + (chapter - 1) * config.difficulty.chapterStep;
+  const strengthMultiplier = Number(Math.min(
+    config.difficulty.maximumMultiplier,
+    chapterMultiplier * config.waveTypeMultipliers[type] + config.riskLevels[riskLevel].enemyStrength,
+  ).toFixed(4));
+
+  return {
+    configVersion: config.configVersion,
+    simulationVersion: config.simulationVersion,
+    seed: battleSeed,
+    wave,
+    chapter,
+    type,
+    sourceOpponentId: selected.sourceOpponentId,
+    sourceLoadoutIndex: selected.sourceLoadoutIndex,
+    enemy: selected.enemy,
+    arena: config.arenas[random.nextInt(0, config.arenas.length)],
+    aiProfileId: config.aiProfileIds[random.nextInt(0, config.aiProfileIds.length)],
+    riskLevel,
+    strengthMultiplier,
+  };
 }

@@ -4,6 +4,10 @@ export const SURVIVAL_AI_PROFILE_IDS: readonly ['assault', 'skirmisher', 'contro
 export type SurvivalArena = (typeof SURVIVAL_ARENAS)[number];
 export type SurvivalAiProfileId = (typeof SURVIVAL_AI_PROFILE_IDS)[number];
 export type SurvivalWaveType = 'normal' | 'elite' | 'boss';
+export type SurvivalEnemyLoadout = Readonly<{
+  combination: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
+  affinities: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
+}>;
 
 export type SurvivalCatalog = Readonly<{
   schemaVersion: 1;
@@ -32,3 +36,27 @@ export type SurvivalCatalog = Readonly<{
 }>;
 
 export function assertSurvivalCatalog(value: unknown): asserts value is SurvivalCatalog;
+export function generateSurvivalWave(
+  config: SurvivalCatalog,
+  campaignCatalog: Readonly<{
+    configVersion: 'campaign-v1';
+    opponents: readonly Readonly<{ id: string; loadouts: readonly SurvivalEnemyLoadout[] }>[];
+  }>,
+  seed: string,
+  wave: number,
+  riskLevel: number,
+): Readonly<{
+  configVersion: 'survival-v1';
+  simulationVersion: 1;
+  seed: string;
+  wave: number;
+  chapter: number;
+  type: SurvivalWaveType;
+  sourceOpponentId: string;
+  sourceLoadoutIndex: number;
+  enemy: SurvivalEnemyLoadout;
+  arena: SurvivalArena;
+  aiProfileId: SurvivalAiProfileId;
+  riskLevel: number;
+  strengthMultiplier: number;
+}>;

@@ -1,8 +1,10 @@
 import catalogJson from '../../../shared/survival/survival-v1.json';
+import campaignJson from '../../../shared/campaign/campaign-v1.json';
 import {
   SURVIVAL_AI_PROFILE_IDS,
   SURVIVAL_ARENAS,
   assertSurvivalCatalog as assertSharedSurvivalCatalog,
+  generateSurvivalWave as generateSharedSurvivalWave,
   type SurvivalCatalog,
 } from '../../../shared/survival/survival-rules.js';
 
@@ -16,3 +18,8 @@ export function assertSurvivalCatalog(value: unknown = catalogJson): asserts val
 assertSurvivalCatalog(catalogJson);
 
 export const SURVIVAL_CONFIG = catalogJson as SurvivalCatalog;
+const campaignCatalog = campaignJson as typeof campaignJson & { configVersion: 'campaign-v1' };
+
+export function generateSurvivalWave(seed: string, wave: number, riskLevel: number) {
+  return generateSharedSurvivalWave(SURVIVAL_CONFIG, campaignCatalog, seed, wave, riskLevel);
+}
