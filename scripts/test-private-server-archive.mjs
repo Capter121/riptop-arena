@@ -219,7 +219,7 @@ try {
       path: 'arena.sqlite',
       bytes: backupResult.totalBytes,
       sha256: await sha256(join(liveBackupPath, 'arena.sqlite')),
-      migrationVersions: [1, 2, 3, 4, 5],
+      migrationVersions: [1, 2, 3, 4, 5, 6],
       quickCheck: 'ok',
     },
     uploads: {
@@ -469,7 +469,7 @@ try {
   const futureManifest = structuredClone(originalLiveManifest);
   futureManifest.database.bytes = (await stat(futureDatabasePath)).size;
   futureManifest.database.sha256 = await sha256(futureDatabasePath);
-  futureManifest.database.migrationVersions = [1, 2, 3, 4, 5, 999];
+  futureManifest.database.migrationVersions = [1, 2, 3, 4, 5, 6, 999];
   await writeFile(join(futureBackupPath, 'manifest.json'), `${JSON.stringify(futureManifest, null, 2)}\n`, 'utf8');
   await assert.rejects(
     () => restorePrivateServer({
@@ -574,11 +574,11 @@ try {
     databasePath: oldRestoreDatabasePath,
   });
   restoredOldDatabase = openDatabase(oldRestoreDatabasePath);
-  assert.deepEqual(await migrateDatabase(restoredOldDatabase), [2, 3, 4, 5]);
+  assert.deepEqual(await migrateDatabase(restoredOldDatabase), [2, 3, 4, 5, 6]);
   assert.deepEqual(
     restoredOldDatabase.prepare('SELECT version FROM schema_migrations ORDER BY version').all()
       .map(row => row.version),
-    [1, 2, 3, 4, 5],
+    [1, 2, 3, 4, 5, 6],
   );
   restoredOldDatabase.close();
   restoredOldDatabase = null;

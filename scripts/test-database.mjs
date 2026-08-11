@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rmdir, unlink, writeFile } from 'node:fs/promises';
+import { copyFile, mkdtemp, mkdir, rmdir, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openDatabase } from '../server/storage/database.mjs';
@@ -9,7 +9,14 @@ const root = await mkdtemp(join(tmpdir(), 'nss-database-'));
 const databasePath = join(root, 'arena.sqlite');
 const failureDatabasePath = join(root, 'failure.sqlite');
 const failureMigrations = join(root, 'failure-migrations');
+const legacyDatabasePath = join(root, 'legacy.sqlite');
+const legacyMigrations = join(root, 'legacy-migrations');
+const sourceMigrations = join(process.cwd(), 'server', 'storage', 'migrations');
 await mkdir(failureMigrations);
+await mkdir(legacyMigrations);
+for (const filename of ['001_identity.sql', '002_builds_and_challenges.sql', '003_player_progression.sql', '004_challenge_offers.sql', '005_campaign_progress.sql']) {
+  await copyFile(join(sourceMigrations, filename), join(legacyMigrations, filename));
+}
 
 async function unlinkIfPresent(path) {
   try {
@@ -21,15 +28,16 @@ async function unlinkIfPresent(path) {
 
 let database;
 let failureDatabase;
+let legacyDatabase;
 try {
   database = openDatabase(databasePath);
   assert.equal(database.prepare('PRAGMA foreign_keys').get().foreign_keys, 1);
   assert.equal(database.prepare('PRAGMA busy_timeout').get().timeout, 5_000);
   assert.equal(database.prepare('PRAGMA journal_mode').get().journal_mode, 'wal');
 
-  assert.deepEqual(await migrateDatabase(database), [1, 2, 3, 4, 5]);
+  assert.deepEqual(await migrateDatabase(database), [1, 2, 3, 4, 5, 6]);
   assert.deepEqual(await migrateDatabase(database), []);
-  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 5);
+  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 6);
 
   const tables = database.prepare(`
     SELECT name FROM sqlite_schema
@@ -46,6 +54,9 @@ try {
     'player_progression',
     'players',
     'schema_migrations',
+    'survival_best_scores',
+    'survival_runs',
+    'survival_wave_results',
     'wallet_events',
   ]);
 
@@ -267,6 +278,63 @@ try {
     '13131313-1313-4313-8313-131313131313', 'ffffffff-ffff-4fff-8fff-ffffffffffff',
   ));
 
+  const insertSurvivalRun = database.prepare(`
+    INSERT INTO survival_runs (
+      run_id, player_id, config_version, simulation_version, battle_rules_version,
+      seed, status, player_loadout_json, player_max_integrity, current_wave,
+      current_wave_json, integrity, burst_risk, persistent_debuffs_json,
+      growth_levels_json, next_wave_effect, risk_level, score,
+      flawless_streak, bosses_defeated, start_request_id
+    ) VALUES (?, ?, 'survival-v1', 1, 2, ?, 'wave_ready', ?, 100, 1, ?, 100, 0, '[]', ?, NULL, 0, 0, 0, 0, ?)
+  `);
+  const run = [
+    '20202020-2020-4020-8020-202020202020', 'player-1', '2'.repeat(32),
+    '{"schemaVersion":2}', '{"wave":1}',
+    '{"attack-calibration":0,"coordination":0,"affinity-tuning":0,"pickup-tuning":0}',
+    '21212121-2121-4121-8121-212121212121',
+  ];
+  insertSurvivalRun.run(...run);
+  assert.throws(() => insertSurvivalRun.run(
+    '22222222-2222-4222-8222-222222222222', 'player-1', '3'.repeat(32),
+    '{}', '{}', '{}', '23232323-2323-4323-8323-232323232323',
+  ));
+  assert.throws(() => database.prepare(`
+    INSERT INTO survival_runs (
+      run_id, player_id, config_version, simulation_version, battle_rules_version,
+      seed, status, player_loadout_json, player_max_integrity, current_wave,
+      current_wave_json, integrity, burst_risk, persistent_debuffs_json,
+      growth_levels_json, risk_level, score, flawless_streak, bosses_defeated, start_request_id
+    ) VALUES (?, ?, 'survival-v1', 1, 2, ?, 'wave_ready', '{', 100, 1, '{}', 100, 0, '[]', '{}', 0, 0, 0, 0, ?)
+  `).run(
+    '24242424-2424-4424-8424-242424242424', 'player-2', '4'.repeat(32),
+    '25252525-2525-4525-8525-252525252525',
+  ));
+
+  const insertSurvivalWave = database.prepare(`
+    INSERT INTO survival_wave_results (
+      run_id, wave, result_request_id, result_json, score_json, score, reward_options_json
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+  insertSurvivalWave.run(run[0], 1, '26262626-2626-4626-8626-262626262626', '{"winner":"player"}', '{"score":125}', 125, '[]');
+  assert.throws(() => insertSurvivalWave.run(run[0], 1, '27272727-2727-4727-8727-272727272727', '{}', '{}', 0, '[]'));
+  assert.throws(() => insertSurvivalWave.run(run[0], 2, '26262626-2626-4626-8626-262626262626', '{}', '{}', 0, '[]'));
+  assert.throws(() => database.prepare(`
+    UPDATE survival_wave_results SET reward_request_id = ? WHERE run_id = ? AND wave = 1
+  `).run('28282828-2828-4828-8828-282828282828', run[0]));
+
+  database.prepare(`
+    INSERT INTO survival_best_scores (
+      player_id, run_id, score, highest_completed_wave, bosses_defeated,
+      final_integrity, risk_level, loadout_summary_json, achieved_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run('player-1', run[0], 125, 1, 0, 100, 0, '{}', '2026-08-12T00:00:00.000Z');
+  assert.throws(() => database.prepare(`
+    INSERT INTO survival_best_scores (
+      player_id, run_id, score, highest_completed_wave, bosses_defeated,
+      final_integrity, risk_level, loadout_summary_json, achieved_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run('player-1', run[0], 0, 0, 0, 0, 0, '{}', '2026-08-12T01:00:00.000Z'));
+
   const eventId = '11111111-1111-4111-8111-111111111111';
   const insertWalletEvent = database.prepare(`
     INSERT INTO wallet_events (player_id, event_id, kind, delta, metadata_json)
@@ -294,6 +362,16 @@ try {
   assert.equal(database.prepare('SELECT display_name FROM players WHERE id = ?').get('player-1').display_name, 'Nova');
   assert.equal(database.prepare('SELECT COUNT(*) AS count FROM challenges').get().count, 2);
 
+  legacyDatabase = openDatabase(legacyDatabasePath);
+  assert.deepEqual(await migrateDatabase(legacyDatabase, { migrationsDir: legacyMigrations }), [1, 2, 3, 4, 5]);
+  legacyDatabase.prepare('INSERT INTO invites (code, max_uses) VALUES (?, ?)').run('LEGACY-FRIENDS', 1);
+  await copyFile(join(sourceMigrations, '006_survival.sql'), join(legacyMigrations, '006_survival.sql'));
+  assert.deepEqual(await migrateDatabase(legacyDatabase, { migrationsDir: legacyMigrations }), [6]);
+  assert.equal(legacyDatabase.prepare('SELECT max_uses FROM invites WHERE code = ?').get('LEGACY-FRIENDS').max_uses, 1);
+  assert.equal(legacyDatabase.prepare(`
+    SELECT COUNT(*) AS count FROM sqlite_schema WHERE type = 'table' AND name = 'survival_runs'
+  `).get().count, 1);
+
   await writeFile(join(failureMigrations, '001_stable.sql'), 'CREATE TABLE stable (id TEXT PRIMARY KEY);', 'utf8');
   await writeFile(join(failureMigrations, '002_failure.sql'), `
     CREATE TABLE leaked (id TEXT PRIMARY KEY);
@@ -314,14 +392,25 @@ try {
 } finally {
   database?.close();
   failureDatabase?.close();
+  legacyDatabase?.close();
   await unlinkIfPresent(join(failureMigrations, '002_failure.sql'));
   await unlinkIfPresent(join(failureMigrations, '001_stable.sql'));
   await unlinkIfPresent(`${failureDatabasePath}-shm`);
   await unlinkIfPresent(`${failureDatabasePath}-wal`);
   await unlinkIfPresent(failureDatabasePath);
+  await unlinkIfPresent(join(legacyMigrations, '006_survival.sql'));
+  await unlinkIfPresent(join(legacyMigrations, '005_campaign_progress.sql'));
+  await unlinkIfPresent(join(legacyMigrations, '004_challenge_offers.sql'));
+  await unlinkIfPresent(join(legacyMigrations, '003_player_progression.sql'));
+  await unlinkIfPresent(join(legacyMigrations, '002_builds_and_challenges.sql'));
+  await unlinkIfPresent(join(legacyMigrations, '001_identity.sql'));
+  await unlinkIfPresent(`${legacyDatabasePath}-shm`);
+  await unlinkIfPresent(`${legacyDatabasePath}-wal`);
+  await unlinkIfPresent(legacyDatabasePath);
   await unlinkIfPresent(`${databasePath}-shm`);
   await unlinkIfPresent(`${databasePath}-wal`);
   await unlinkIfPresent(databasePath);
   await rmdir(failureMigrations);
+  await rmdir(legacyMigrations);
   await rmdir(root);
 }
