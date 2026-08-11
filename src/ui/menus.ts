@@ -24,7 +24,7 @@ export class MenuPanel {
     this.survival.className = 'button';
     this.survival.textContent = '🛡️ 生存模式';
     this.tournament.className = 'button';
-    this.tournament.textContent = '🏆 锦标赛';
+    this.tournament.textContent = '🏆 八人战役';
 
     // 🛠️ Nova Spin 3D Assembly Button
     this.nssCustomizer.className = 'button button--nss-customizer';

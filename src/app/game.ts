@@ -102,6 +102,7 @@ import {
   pickAiTurnAction as chooseAiTurnAction,
 } from '../gameplay/ai';
 import type { GameChallengeOptions } from '../challenges/challengeBootstrap';
+import type { GameCampaignOptions } from '../campaign/campaignController';
 import {
   settleChallengeResult,
   type PendingChallengeEnvelope,
@@ -240,7 +241,7 @@ export class Game {
   private turnIndex = 1;
   private activeTurnResolution: TurnResolution | null = null;
   private activeClashQte: ClashQteState | null = null;
-  private battleMode: 'single' | 'online' | 'challenge' = 'single';
+  private battleMode: 'single' | 'online' | 'challenge' | 'campaign' = 'single';
   private onlineTurnId = 0;
   private onlineTurnDeadline = 0;
   private onlineStartAt: number | null = null;
@@ -275,7 +276,7 @@ export class Game {
   private paused = false;
   private readonly camDebugEnabled = this.params.has('camDebug');
   private readonly qaEnabled = this.params.has('qa') || this.params.has('debug') || this.camDebugEnabled
-    || (import.meta.env.DEV && this.params.has('challenge'));
+    || (import.meta.env.DEV && (this.params.has('challenge') || this.params.has('campaign')));
   private readonly tuningKeys: Array<keyof typeof CAMERA_TUNING> = [
     'chaseDistanceStart',
     'chaseDistanceRange',
@@ -292,12 +293,14 @@ export class Game {
 
   private readonly mount: HTMLElement;
   private readonly challenge: GameChallengeOptions | null;
+  private readonly campaign: GameCampaignOptions | null;
   private challengeEnvelope: PendingChallengeEnvelope | null = null;
   private challengeSettlement: 'idle' | 'submitting' | 'submitted' | 'pending' | 'storage_failed' = 'idle';
 
-  constructor(mount: HTMLElement, challenge: GameChallengeOptions | null = null) {
+  constructor(mount: HTMLElement, session: GameChallengeOptions | GameCampaignOptions | null = null) {
     this.mount = mount;
-    this.challenge = challenge;
+    this.campaign = session && 'battleKind' in session && session.battleKind === 'campaign' ? session : null;
+    this.challenge = session && !('battleKind' in session) ? session : null;
     this.scene.background = new THREE.Color('#050910');
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
@@ -524,10 +527,7 @@ export class Game {
       this.startBattle();
     });
     this.menu.tournament.addEventListener('click', () => {
-      this.beginSingleSession();
-      this.mode = 'tournament';
-      this.enemyPreset = this.getTournamentEnemy();
-      this.startBattle();
+      window.location.assign('/campaign/');
     });
     this.menu.garage.addEventListener('click', () => this.showGarage());
     this.menu.forge.addEventListener('click', () => {
@@ -578,6 +578,10 @@ export class Game {
     }
 
     this.results.retry.addEventListener('click', () => {
+      if (this.battleMode === 'campaign') {
+        window.location.assign(`/campaign/?opponent=${encodeURIComponent(this.campaign!.opponentId)}`);
+        return;
+      }
       if (this.battleMode === 'challenge') {
         window.location.assign('/challenges/');
         return;
@@ -593,6 +597,10 @@ export class Game {
       this.startBattle();
     });
     this.results.garage.addEventListener('click', () => {
+      if (this.battleMode === 'campaign') {
+        window.location.assign(`/campaign/?opponent=${encodeURIComponent(this.campaign!.opponentId)}`);
+        return;
+      }
       if (this.battleMode === 'challenge') {
         if (this.challengeSettlement === 'submitted') void this.createChallengeRematch();
         else void this.submitChallengeResult();
@@ -618,6 +626,7 @@ export class Game {
     this.refreshBlackMarket();
     this.resize();
     if (this.challenge) void this.startChallengeBattle();
+    else if (this.campaign) void this.startCampaignBattle();
     else {
       this.showMenu();
       const roomToken = this.params.get('room');
@@ -629,7 +638,7 @@ export class Game {
     window.setTimeout(() => this.introCard.classList.add('intro-card--hidden'), 1800);
 
     this.exposeDiagnostics();
-    if (!this.challenge && this.params.has('qa')) {
+    if (!this.challenge && !this.campaign && this.params.has('qa')) {
       this.enemyPreset = ENEMIES[0];
       this.startBattle();
       this.launchCharge = 0.84;
@@ -1220,7 +1229,7 @@ export class Game {
   }
 
   private showResult(result: BattleResult) {
-    if (this.battleMode === 'challenge' && this.currentResult) return;
+    if ((this.battleMode === 'challenge' || this.battleMode === 'campaign') && this.currentResult) return;
     if (!this.battleOutcomeSummary && this.battleRuntime?.inputLog) {
       const topState = (top: TopEntity) => ({
         spin: top.spin,
@@ -1259,6 +1268,12 @@ export class Game {
           outcome: structuredClone(this.battleOutcomeSummary) as unknown as Record<string, unknown>,
         };
       }
+    } else if (this.battleMode === 'campaign') {
+      this.resultRewardText = '战役结果等待服务器确认，不在本地提前发放奖励。';
+      this.retryLabel = '返回战役档案';
+      this.lastCoinReward = 0;
+      this.featuredUnlockPart = null;
+      this.championMoment = null;
     } else if (this.battleMode === 'online') {
       this.resultRewardText = '\u771f\u4eba\u8054\u673a MVP \u4e0d\u8ba1\u5165\u5355\u673a\u6210\u957f\u4e0e\u91d1\u5e01\u3002';
       this.retryLabel = '\u8fd4\u56de\u4e3b\u83dc\u5355';
@@ -1278,10 +1293,12 @@ export class Game {
       this.lastCoinReward,
       this.progression.coins,
       {
-        modeLabel: this.battleMode === 'challenge' ? '好友幽灵挑战' : this.battleMode === 'online' ? '\u771f\u4eba\u8054\u673a' : this.getModeLabelCn(),
-        enemyName: this.battleMode === 'challenge' ? this.challenge?.enemy.displayName : this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
+        modeLabel: this.battleMode === 'campaign' ? '八人战役' : this.battleMode === 'challenge' ? '好友幽灵挑战' : this.battleMode === 'online' ? '\u771f\u4eba\u8054\u673a' : this.getModeLabelCn(),
+        enemyName: this.battleMode === 'campaign' ? this.campaign?.opponentName : this.battleMode === 'challenge' ? this.challenge?.enemy.displayName : this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
         growthTitle: '本局成长变化',
-        growthLines: this.battleMode === 'challenge'
+        growthLines: this.battleMode === 'campaign'
+          ? ['等待服务端确认战役进度与奖励']
+          : this.battleMode === 'challenge'
           ? ['挑战结果独立保存，不修改单人成长数据']
           : this.battleMode === 'online' ? ['\u8054\u673a\u5bf9\u6218\u4e0d\u4fee\u6539\u5355\u673a\u6210\u957f\u6570\u636e'] : this.getResultGrowthLines(progressionBefore),
         affinitySummary: this.affinityDamageSummary,
@@ -1377,6 +1394,27 @@ export class Game {
       const title = document.createElement('h1'); title.textContent = '幽灵装配加载失败';
       const detail = document.createElement('p'); detail.textContent = error instanceof Error ? error.message : '无法读取挑战模型。';
       const back = document.createElement('a'); back.href = '/challenges/'; back.textContent = '返回挑战中心';
+      state.append(title, detail, back); this.mount.append(state);
+    }
+  }
+
+  private async startCampaignBattle() {
+    if (!this.campaign) return;
+    this.battleMode = 'campaign';
+    this.mode = 'quick';
+    this.arena.setTheme(this.campaign.arena);
+    this.menu.stageSelect.value = this.campaign.arena;
+    this.garage.stageSelect.value = this.campaign.arena;
+    try {
+      const [player, enemy] = await this.nssLoadouts.createChallengePair(this.campaign.player, this.campaign.enemy);
+      this.startBattleWithPlayer(player, this.campaign.seed, enemy);
+    } catch (error) {
+      this.loop.stop();
+      this.mount.innerHTML = '';
+      const state = document.createElement('main'); state.className = 'portal-state';
+      const title = document.createElement('h1'); title.textContent = '战役装配加载失败';
+      const detail = document.createElement('p'); detail.textContent = error instanceof Error ? error.message : '无法读取战役模型。';
+      const back = document.createElement('a'); back.href = `/campaign/?opponent=${encodeURIComponent(this.campaign.opponentId)}`; back.textContent = '返回战役档案';
       state.append(title, detail, back); this.mount.append(state);
     }
   }
@@ -1910,6 +1948,8 @@ export class Game {
       playerHasStealthEffect: this.player.stats.hasStealthEffect === true,
       enemySpirit: this.enemy.spirit,
       enemyTacticalMode: this.enemy.tacticalMode,
+      enemyFreeDefensiveMoves: this.enemy.freeDefensiveMoves,
+      campaignAiProfileId: this.campaign?.aiProfileId,
     }, this.battleRandom().ai);
   }
 
