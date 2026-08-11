@@ -6,12 +6,14 @@ import { authenticateRequest } from './auth/auth-middleware.mjs';
 import { AuthError, redeemInvite } from './auth/invite-service.mjs';
 import { ProgressionError, syncProgression } from './progression/progression-service.mjs';
 import { ChallengeError, createChallengeService } from './challenges/challenge-service.mjs';
+import { CampaignError, createCampaignService } from './campaign/campaign-service.mjs';
 
 const DEFAULT_JSON_BODY_BYTES = 64 * 1024;
 const CHALLENGE_RESULT_BODY_BYTES = 2 * 1024 * 1024;
 const UUID_PATH = '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}';
 const OFFER_PATH = new RegExp(`^/api/challenge-offers/(${UUID_PATH})(?:/(claim|revoke))?$`);
 const CHALLENGE_PATH = new RegExp(`^/api/challenges/(${UUID_PATH})(?:/(results|rematch))?$`);
+const CAMPAIGN_RESULT_PATH = new RegExp(`^/api/campaign/attempts/(${UUID_PATH})/result$`);
 const DEFAULT_SITE_ROOT = fileURLToPath(new URL('../dist/site/', import.meta.url));
 const CONTENT_TYPES = {
   '.avif': 'image/avif',
@@ -131,6 +133,9 @@ export function createArenaHttpServer(options = {}) {
   const challengeService = database
     ? createChallengeService(database, options.challengeServiceOptions)
     : null;
+  const campaignService = database
+    ? createCampaignService(database, options.campaignServiceOptions)
+    : null;
 
   return createServer(async (request, response) => {
     try {
@@ -157,6 +162,35 @@ export function createArenaHttpServer(options = {}) {
         if (!database) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Identity database is unavailable.');
         const player = authenticateRequest(database, request);
         sendJson(response, 200, syncProgression(database, player.playerId, await readJsonBody(request, maxJsonBodyBytes)));
+        return;
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/campaign') {
+        if (!campaignService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Campaign database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 200, campaignService.getArchive(player.playerId));
+        return;
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/campaign/attempts') {
+        if (!campaignService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Campaign database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 201, campaignService.startAttempt(
+          player.playerId,
+          await readJsonBody(request, maxJsonBodyBytes),
+        ));
+        return;
+      }
+
+      const campaignResultMatch = CAMPAIGN_RESULT_PATH.exec(url.pathname);
+      if (request.method === 'POST' && campaignResultMatch) {
+        if (!campaignService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Campaign database is unavailable.');
+        const player = authenticateRequest(database, request);
+        sendJson(response, 200, campaignService.submitResult(
+          campaignResultMatch[1],
+          player.playerId,
+          await readJsonBody(request, maxJsonBodyBytes),
+        ));
         return;
       }
 
@@ -237,6 +271,8 @@ export function createArenaHttpServer(options = {}) {
           || url.pathname === '/join/'
           || url.pathname === '/challenges'
           || url.pathname === '/challenges/'
+          || url.pathname === '/campaign'
+          || url.pathname === '/campaign/'
           || new RegExp(`^/challenge/${UUID_PATH}/?$`).test(url.pathname);
         const staticPathname = portalFallback
           ? '/index.html'
@@ -269,6 +305,10 @@ export function createArenaHttpServer(options = {}) {
         return;
       }
       if (error instanceof ChallengeError) {
+        sendError(response, error.status, error.code, error.message);
+        return;
+      }
+      if (error instanceof CampaignError) {
         sendError(response, error.status, error.code, error.message);
         return;
       }

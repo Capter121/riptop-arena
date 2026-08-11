@@ -44,7 +44,7 @@ try {
   readDatabase(database => {
     assert.deepEqual(
       database.prepare('SELECT version FROM schema_migrations ORDER BY version').all().map(row => row.version),
-      [1, 2, 3, 4],
+      [1, 2, 3, 4, 5],
     );
     assert.deepEqual(
       { ...database.prepare('SELECT code, enabled, max_uses, use_count FROM invites WHERE code = ?').get(generatedCode) },

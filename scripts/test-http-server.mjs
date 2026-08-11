@@ -82,6 +82,10 @@ try {
   assert.equal(challengesHead.status, 200);
   assert.equal(await challengesHead.text(), '');
 
+  const campaign = await fetch(`${URL}/campaign/`);
+  assert.equal(campaign.status, 200);
+  assert.equal(await campaign.text(), '<!doctype html><title>NSS Portal</title>');
+
   const arena = await fetch(`${URL}/arena/`);
   assert.equal(arena.status, 200);
   assert.equal(await arena.text(), '<!doctype html><title>RIPTOP Arena</title>');
