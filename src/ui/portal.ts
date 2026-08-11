@@ -28,6 +28,7 @@ import { parseChallengeReturn, type ChallengeReturnParseResult } from '../challe
 import { createCampaignClient } from '../campaign/campaignClient';
 import { listPendingCampaignResults } from '../campaign/pendingCampaignResult';
 import { campaignPortalText, renderCampaignArchive } from './campaignArchive';
+import { parseCampaignReturn, type CampaignReturnParseResult } from '../campaign/campaignReturn';
 
 export interface PortalMode {
   readonly id: string;
@@ -179,13 +180,20 @@ async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity:
   const challengeReturn: ChallengeReturnParseResult = isChallengeOffer
     ? parseChallengeReturn(window.location.search)
     : { kind: 'none' };
+  const isCampaignArchive = window.location.pathname === '/campaign' || window.location.pathname === '/campaign/';
+  const campaignReturn: CampaignReturnParseResult = isCampaignArchive
+    ? parseCampaignReturn(window.location.search)
+    : { kind: 'none' };
   mount.setAttribute('aria-busy', 'true');
-  if (challengeReturn.kind === 'invalid') {
-    renderChallengeReturnPending(mount, '返回参数无效，请从挑战页重新进入定制器。');
+  if (challengeReturn.kind === 'invalid' || campaignReturn.kind === 'invalid') {
+    renderChallengeReturnPending(mount, '返回参数无效，请从原页面重新进入定制器。');
     return;
   }
-  if (challengeReturn.kind === 'ready') {
-    localProgression = setNssLoadout(localProgression, challengeReturn.loadout);
+  const returnedLoadout = challengeReturn.kind === 'ready'
+    ? challengeReturn.loadout
+    : campaignReturn.kind === 'ready' ? campaignReturn.loadout : null;
+  if (returnedLoadout) {
+    localProgression = setNssLoadout(localProgression, returnedLoadout);
     saveProgression(localProgression, { trackWallet: false });
   }
   try {
@@ -193,8 +201,11 @@ async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity:
     const authoritative = progressionFromServer(result.progression.snapshot, result.progression.coins);
     saveProgression(authoritative, { trackWallet: false });
     commitProgressionSync(identity, result);
-    if (challengeReturn.kind === 'ready') {
-      window.history.replaceState(null, '', window.location.pathname);
+    if (returnedLoadout) {
+      const returnPath = campaignReturn.kind === 'ready'
+        ? `/campaign/?opponent=${encodeURIComponent(campaignReturn.opponentId)}`
+        : window.location.pathname;
+      window.history.replaceState(null, '', returnPath);
     }
     renderAuthenticated(mount, player, authoritative, result.status === 'conflict' ? 'conflict' : 'synced', identity);
   } catch (error) {
@@ -203,7 +214,7 @@ async function syncAndRender(mount: HTMLElement, player: PublicPlayer, identity:
       renderGuest(mount, '本地身份已失效，请使用新的邀请码。');
       return;
     }
-    if (challengeReturn.kind === 'ready') {
+    if (returnedLoadout) {
       renderChallengeReturnPending(mount, '新装配尚未同步，认领已暂停。请联网后重试。');
       return;
     }

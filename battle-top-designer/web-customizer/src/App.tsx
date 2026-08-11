@@ -20,6 +20,11 @@ import { createShareLink } from './sharing/combinationUrl';
 import { copyShareLink } from './sharing/shareLink';
 import { createArenaLink } from './integration/arenaLink';
 import { createChallengeReturnLink, parseChallengeReturnPath } from './integration/challengeReturn';
+import {
+  createCampaignCancelLink,
+  createCampaignReturnLink,
+  parseCampaignReturnTarget,
+} from './integration/campaignReturn';
 import { currentSnapshot, useCustomizer } from './store';
 import { emitUsabilityAction } from './usability/events';
 import { AffinityBadge } from './affinity/AffinityBadge';
@@ -126,6 +131,15 @@ export default function App() {
     challengeReturnPath,
     { combination: state.combination, affinities: state.affinities },
   ) : null, [challengeReturnPath, state.affinities, state.combination]);
+  const campaignReturnTarget = useMemo(() => parseCampaignReturnTarget(window.location.search), []);
+  const campaignReturnLink = useMemo(() => campaignReturnTarget ? createCampaignReturnLink(
+    campaignReturnTarget,
+    { combination: state.combination, affinities: state.affinities },
+  ) : null, [campaignReturnTarget, state.affinities, state.combination]);
+  const campaignCancelLink = useMemo(
+    () => campaignReturnTarget ? createCampaignCancelLink(campaignReturnTarget) : null,
+    [campaignReturnTarget],
+  );
   const currentLibraryEntry = [...library.favorites, ...library.recent].find(entry => entry.id === id);
   const automaticName = combinationName(state.combination);
   const focusSessionId = useCustomizer(current => current.focusState.sessionId);
@@ -515,6 +529,8 @@ export default function App() {
               <button data-testid="share" onClick={() => setShareOpen(value => !value)}>分享</button>
               <button className="primary" data-testid="enter-arena" onClick={() => window.location.assign(arenaLink)}>⚔️ 进入竞技场</button>
               {challengeReturnLink && <button className="primary" data-testid="return-challenge" onClick={() => window.location.assign(challengeReturnLink)}>返回挑战</button>}
+              {campaignReturnLink && <button className="primary" data-testid="return-campaign" onClick={() => window.location.assign(campaignReturnLink)}>保存装配并返回战役</button>}
+              {campaignCancelLink && <button data-testid="cancel-campaign" onClick={() => window.location.assign(campaignCancelLink)}>取消并返回战役</button>}
               <button data-testid="export-card" disabled={cardExporting || state.loadState !== 'ready'} onClick={exportCard}>{cardExporting ? '正在生成装备卡…' : '导出 PNG 装备卡'}</button>
               <button data-testid="library" onClick={() => setLibraryOpen(value => !value)}>组合库</button>
               <button data-testid="undo" disabled={!state.canUndo || state.loadState !== 'ready'} onClick={() => { beginPartSwitch(); state.undo(); }}>撤销</button>

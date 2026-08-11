@@ -12,6 +12,7 @@ import type { CampaignOutcome } from '../data/campaign/campaignRules';
 import { campaignObjectiveText } from '../data/campaign/objectives';
 import type { ProgressionState } from '../app/progression';
 import { mountCampaignPreview } from './campaignPreview';
+import { buildCampaignCustomizerPath } from '../campaign/campaignReturn';
 
 type CampaignCardState = 'locked' | 'available' | 'defeated';
 const retrySession = createPendingCampaignRetrySession();
@@ -166,7 +167,7 @@ export async function renderCampaignArchive(
         <p class="campaign-reward"><strong>奖励</strong><span>${rewardText(opponent)}</span></p>
         <div class="campaign-actions">
           ${hasLoadout ? `<a class="campaign-primary" href="/arena/?campaign=${encodeURIComponent(opponent.id)}">挑战 ${opponent.name}</a>` : '<span class="campaign-action-disabled" aria-disabled="true">需要先完成一套 NSS 装配</span>'}
-          <a href="/customizer/?return=campaign&amp;opponent=${encodeURIComponent(opponent.id)}">调整我的装配</a>
+          <a href="${buildCampaignCustomizerPath(opponent.id, progression.latestNssLoadout)}">调整我的装配</a>
         </div>
       </div>`;
     const preview = detail.querySelector<HTMLElement>('.campaign-preview');

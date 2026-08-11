@@ -6,7 +6,7 @@ import versions from '../../../shared/nss/versions.json';
 
 const combinationsById = new Map(enumerateCombinations().map(combination => [combinationId(combination), combination]));
 const v2RequiredParameters = ['sv', 'cv', 'rv', 'combo', 'a'] as const;
-const v2AllowedParameters = new Set([...v2RequiredParameters, 'emblem', 'test', 'returnTo']);
+const v2AllowedParameters = new Set([...v2RequiredParameters, 'emblem', 'test', 'returnTo', 'return', 'opponent']);
 const legacyAllowedParameters = new Set(['combo', 'test']);
 const emblemPattern = /^emblem_[a-z0-9_-]{1,48}$/;
 
@@ -64,6 +64,11 @@ export function parseShareSearch(search: string): ParsedShareSearch {
 
   const keys = [...parameters.keys()];
   if (keys.every(key => key === 'test')) return { kind: 'none', testMode: test.testMode };
+  if (!parameters.has('sv')
+    && keys.every(key => key === 'return' || key === 'opponent' || key === 'test')
+    && parameters.get('return') === 'campaign' && parameters.has('opponent')) {
+    return { kind: 'none', testMode: test.testMode };
+  }
 
   if (!parameters.has('sv')) {
     if (!keys.every(key => legacyAllowedParameters.has(key)) || !parameters.has('combo')) {
