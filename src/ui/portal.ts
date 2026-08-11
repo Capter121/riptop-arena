@@ -25,6 +25,9 @@ import { createChallengeClient } from '../challenges/challengeClient';
 import { renderChallengeCenter } from './challengeCenter';
 import { renderChallengeOffer } from './challengeOffer';
 import { parseChallengeReturn, type ChallengeReturnParseResult } from '../challenges/challengeReturn';
+import { createCampaignClient } from '../campaign/campaignClient';
+import { listPendingCampaignResults } from '../campaign/pendingCampaignResult';
+import { campaignPortalText, renderCampaignArchive } from './campaignArchive';
 
 export interface PortalMode {
   readonly id: string;
@@ -38,7 +41,7 @@ export const PORTAL_MODES: readonly PortalMode[] = [
   { id: 'customizer', title: 'NSS 定制器', status: 'open', href: './customizer/' },
   { id: 'arena', title: 'RIPTOP Arena', status: 'open', href: './arena/' },
   { id: 'friend-challenge', title: '好友挑战', status: 'open', href: '/challenges/' },
-  { id: 'campaign', title: '八人战役', status: 'locked', unlockCondition: '阶段 6 解锁' },
+  { id: 'campaign', title: '八人战役', status: 'open', href: '/campaign/' },
   { id: 'survival', title: '生存模式', status: 'locked', unlockCondition: '阶段 7 解锁' },
   { id: 'emblem-workshop', title: '纹章工坊', status: 'locked', unlockCondition: '阶段 8 解锁' },
 ];
@@ -89,6 +92,11 @@ function renderAuthenticated(
   identity: LocalIdentity,
 ) {
   const client = createChallengeClient(identity);
+  const campaignClient = createCampaignClient(identity);
+  if (window.location.pathname === '/campaign' || window.location.pathname === '/campaign/') {
+    void renderCampaignArchive(mount, identity, progression, campaignClient);
+    return;
+  }
   const offerMatch = /^\/challenge\/([0-9a-f-]{36})\/?$/.exec(window.location.pathname);
   if (offerMatch) {
     void renderChallengeOffer(mount, identity, client, offerMatch[1], progression);
@@ -152,6 +160,16 @@ function renderAuthenticated(
     badge.setAttribute('aria-label', `${result.pendingCount} 个待处理挑战`);
     challengeMode.append(badge);
   }).catch(() => { /* Challenge status must not block other portal modes. */ });
+  const campaignMode = modes.querySelector<HTMLElement>('[data-mode-id="campaign"]');
+  const campaignDetail = campaignMode?.querySelector<HTMLElement>('span');
+  const pendingCampaignCount = listPendingCampaignResults(identity.playerId).length;
+  void campaignClient.getArchive().then(archive => {
+    if (!campaignDetail) return;
+    const next = archive.opponents.find(opponent => opponent.id === archive.nextOpponentId);
+    campaignDetail.textContent = campaignPortalText(archive.totalStars, next?.name ?? '已通关', pendingCampaignCount);
+  }).catch(() => {
+    if (campaignDetail && pendingCampaignCount) campaignDetail.textContent = `${pendingCampaignCount} 个结果待同步`;
+  });
   mount.removeAttribute('aria-busy');
 }
 

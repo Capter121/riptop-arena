@@ -27,19 +27,19 @@ function progression(): ProgressionState {
 }
 
 describe('portal read model', () => {
-  it('opens friend challenges and keeps three later modes locked', () => {
+  it('opens the campaign and keeps two later modes locked', () => {
     expect(PORTAL_MODES).toHaveLength(6);
     expect(PORTAL_MODES.filter(mode => mode.status === 'open')).toEqual([
       expect.objectContaining({ id: 'customizer', href: './customizer/' }),
       expect.objectContaining({ id: 'arena', href: './arena/' }),
       expect.objectContaining({ id: 'friend-challenge', href: '/challenges/' }),
+      expect.objectContaining({ id: 'campaign', href: '/campaign/' }),
     ]);
     expect(PORTAL_MODES.filter(mode => mode.status === 'locked').map(mode => ({
       id: mode.id,
       unlockCondition: mode.unlockCondition,
       href: mode.href,
     }))).toEqual([
-      { id: 'campaign', unlockCondition: '阶段 6 解锁', href: undefined },
       { id: 'survival', unlockCondition: '阶段 7 解锁', href: undefined },
       { id: 'emblem-workshop', unlockCondition: '阶段 8 解锁', href: undefined },
     ]);
