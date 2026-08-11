@@ -27,9 +27,9 @@ try {
   assert.equal(database.prepare('PRAGMA busy_timeout').get().timeout, 5_000);
   assert.equal(database.prepare('PRAGMA journal_mode').get().journal_mode, 'wal');
 
-  assert.deepEqual(await migrateDatabase(database), [1, 2, 3, 4]);
+  assert.deepEqual(await migrateDatabase(database), [1, 2, 3, 4, 5]);
   assert.deepEqual(await migrateDatabase(database), []);
-  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 4);
+  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 5);
 
   const tables = database.prepare(`
     SELECT name FROM sqlite_schema
@@ -38,6 +38,8 @@ try {
   `).all().map(row => row.name);
   assert.deepEqual(tables, [
     'builds',
+    'campaign_attempts',
+    'campaign_progress',
     'challenge_offers',
     'challenges',
     'invites',
@@ -211,6 +213,60 @@ try {
   assert.throws(() => insertProgression.run('player-2', '{}', -1));
   insertProgression.run('player-2', '{}', 0);
 
+  const insertCampaignProgress = database.prepare(`
+    INSERT INTO campaign_progress (player_id, opponent_id, stars_mask, defeated, attempt_count, best_outcome_json)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+  insertCampaignProgress.run('player-1', 'blaze-fang', 3, 1, 2, '{"winner":"player"}');
+  assert.throws(() => insertCampaignProgress.run('player-1', 'blaze-fang', 0, 0, 0, null));
+  assert.throws(() => insertCampaignProgress.run('player-1', 'sky-gale', 8, 0, 0, null));
+  assert.throws(() => insertCampaignProgress.run('player-1', 'unknown', 0, 0, 0, null));
+  assert.throws(() => insertCampaignProgress.run('player-2', 'sky-gale', 0, 0, -1, null));
+  insertCampaignProgress.run('player-2', 'sky-gale', 0, 0, 0, null);
+
+  const insertCampaignAttempt = database.prepare(`
+    INSERT INTO campaign_attempts (
+      attempt_id, player_id, opponent_id, config_version, simulation_version,
+      seed, loadout_index, arena, ai_profile_id,
+      player_loadout_json, player_upgrades_json, enemy_loadout_json, enemy_upgrades_json,
+      player_max_integrity, start_request_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const attempt = [
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'player-1', 'blaze-fang', 'campaign-v1', 1,
+    '0'.repeat(32), 0, 'neon_magma', 'assault', '{}', '{}', '{}', '{}', 100,
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+  ];
+  insertCampaignAttempt.run(...attempt);
+  assert.throws(() => insertCampaignAttempt.run(
+    'cccccccc-cccc-4ccc-8ccc-cccccccccccc', ...attempt.slice(1),
+  ));
+  assert.throws(() => insertCampaignAttempt.run(
+    'dddddddd-dddd-4ddd-8ddd-dddddddddddd', 'player-1', 'blaze-fang', 'campaign-v1', 1,
+    '0'.repeat(32), 2, 'neon_magma', 'assault', '{}', '{}', '{}', '{}', 100,
+    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+  ));
+  database.prepare(`
+    UPDATE campaign_attempts
+    SET result_request_id = ?, result_json = ?, settlement_json = ?, completed_at = ?
+    WHERE attempt_id = ?
+  `).run(
+    'ffffffff-ffff-4fff-8fff-ffffffffffff', '{"winner":"player"}', '{"coins":100}',
+    '2026-08-11T00:00:00.000Z', attempt[0],
+  );
+  assert.throws(() => database.prepare(`
+    INSERT INTO campaign_attempts (
+      attempt_id, player_id, opponent_id, config_version, simulation_version,
+      seed, loadout_index, arena, ai_profile_id,
+      player_loadout_json, player_upgrades_json, enemy_loadout_json, enemy_upgrades_json,
+      player_max_integrity, start_request_id, result_request_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    '12121212-1212-4212-8212-121212121212', 'player-1', 'sky-gale', 'campaign-v1', 1,
+    '1'.repeat(32), 0, 'classic_grid', 'skirmisher', '{}', '{}', '{}', '{}', 100,
+    '13131313-1313-4313-8313-131313131313', 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+  ));
+
   const eventId = '11111111-1111-4111-8111-111111111111';
   const insertWalletEvent = database.prepare(`
     INSERT INTO wallet_events (player_id, event_id, kind, delta, metadata_json)
@@ -229,6 +285,7 @@ try {
   database.prepare('DELETE FROM players WHERE id = ?').run('player-2');
   assert.equal(database.prepare('SELECT COUNT(*) AS count FROM player_progression WHERE player_id = ?').get('player-2').count, 0);
   assert.equal(database.prepare('SELECT COUNT(*) AS count FROM wallet_events WHERE player_id = ?').get('player-2').count, 0);
+  assert.equal(database.prepare('SELECT COUNT(*) AS count FROM campaign_progress WHERE player_id = ?').get('player-2').count, 0);
 
   database.close();
   database = null;

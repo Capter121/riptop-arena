@@ -194,6 +194,10 @@ try {
     INSERT INTO player_progression (player_id, snapshot_json, coins, initial_coins_imported)
     VALUES (?, ?, ?, ?)
   `).run('backup-player', '{"ladderIndex":1}', 275, 1);
+  liveDatabase.prepare(`
+    INSERT INTO campaign_progress (player_id, opponent_id, stars_mask, defeated, attempt_count)
+    VALUES (?, ?, ?, ?, ?)
+  `).run('backup-player', 'blaze-fang', 7, 1, 3);
 
   const backupResult = await backupPrivateServer({
     databasePath: liveDatabasePath,
@@ -215,7 +219,7 @@ try {
       path: 'arena.sqlite',
       bytes: backupResult.totalBytes,
       sha256: await sha256(join(liveBackupPath, 'arena.sqlite')),
-      migrationVersions: [1, 2, 3, 4],
+      migrationVersions: [1, 2, 3, 4, 5],
       quickCheck: 'ok',
     },
     uploads: {
@@ -234,6 +238,9 @@ try {
     const progression = snapshot.prepare(`
       SELECT coins, initial_coins_imported FROM player_progression WHERE player_id = ?
     `).get('backup-player');
+    assert.equal(snapshot.prepare(`
+      SELECT stars_mask FROM campaign_progress WHERE player_id = ? AND opponent_id = ?
+    `).get('backup-player', 'blaze-fang').stars_mask, 7);
     assert.equal(progression.coins, 275);
     assert.equal(progression.initial_coins_imported, 1);
   } finally {
@@ -462,7 +469,7 @@ try {
   const futureManifest = structuredClone(originalLiveManifest);
   futureManifest.database.bytes = (await stat(futureDatabasePath)).size;
   futureManifest.database.sha256 = await sha256(futureDatabasePath);
-  futureManifest.database.migrationVersions = [1, 2, 3, 4, 999];
+  futureManifest.database.migrationVersions = [1, 2, 3, 4, 5, 999];
   await writeFile(join(futureBackupPath, 'manifest.json'), `${JSON.stringify(futureManifest, null, 2)}\n`, 'utf8');
   await assert.rejects(
     () => restorePrivateServer({
@@ -535,6 +542,12 @@ try {
         .get('backup-player').coins,
       275,
     );
+    assert.equal(
+      restoredLiveDatabase.prepare(`
+        SELECT stars_mask FROM campaign_progress WHERE player_id = ? AND opponent_id = ?
+      `).get('backup-player', 'blaze-fang').stars_mask,
+      7,
+    );
   } finally {
     restoredLiveDatabase.close();
   }
@@ -561,11 +574,11 @@ try {
     databasePath: oldRestoreDatabasePath,
   });
   restoredOldDatabase = openDatabase(oldRestoreDatabasePath);
-  assert.deepEqual(await migrateDatabase(restoredOldDatabase), [2, 3, 4]);
+  assert.deepEqual(await migrateDatabase(restoredOldDatabase), [2, 3, 4, 5]);
   assert.deepEqual(
     restoredOldDatabase.prepare('SELECT version FROM schema_migrations ORDER BY version').all()
       .map(row => row.version),
-    [1, 2, 3, 4],
+    [1, 2, 3, 4, 5],
   );
   restoredOldDatabase.close();
   restoredOldDatabase = null;
