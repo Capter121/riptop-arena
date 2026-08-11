@@ -4,12 +4,19 @@ import {
   SURVIVAL_AI_PROFILE_IDS,
   SURVIVAL_ARENAS,
   assertSurvivalCatalog as assertSharedSurvivalCatalog,
+  applySurvivalReward as applySharedSurvivalReward,
   generateSurvivalWave as generateSharedSurvivalWave,
+  generateSurvivalRewards as generateSharedSurvivalRewards,
+  normalizeSurvivalRewardState,
   type SurvivalCatalog,
+  type SurvivalRewardChoice,
+  type SurvivalRewardState,
 } from '../../../shared/survival/survival-rules.js';
 
 export { SURVIVAL_AI_PROFILE_IDS, SURVIVAL_ARENAS };
 export type { SurvivalAiProfileId, SurvivalArena, SurvivalWaveType } from '../../../shared/survival/survival-rules.js';
+export { normalizeSurvivalRewardState };
+export type { SurvivalRewardChoice, SurvivalRewardState };
 
 export function assertSurvivalCatalog(value: unknown = catalogJson): asserts value is SurvivalCatalog {
   assertSharedSurvivalCatalog(value);
@@ -22,4 +29,12 @@ const campaignCatalog = campaignJson as typeof campaignJson & { configVersion: '
 
 export function generateSurvivalWave(seed: string, wave: number, riskLevel: number) {
   return generateSharedSurvivalWave(SURVIVAL_CONFIG, campaignCatalog, seed, wave, riskLevel);
+}
+
+export function generateSurvivalRewards(seed: string, wave: number, state: SurvivalRewardState) {
+  return generateSharedSurvivalRewards(SURVIVAL_CONFIG, seed, wave, state);
+}
+
+export function applySurvivalReward(state: SurvivalRewardState, reward: SurvivalRewardChoice) {
+  return applySharedSurvivalReward(SURVIVAL_CONFIG, state, reward);
 }

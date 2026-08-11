@@ -4,6 +4,21 @@ export const SURVIVAL_AI_PROFILE_IDS: readonly ['assault', 'skirmisher', 'contro
 export type SurvivalArena = (typeof SURVIVAL_ARENAS)[number];
 export type SurvivalAiProfileId = (typeof SURVIVAL_AI_PROFILE_IDS)[number];
 export type SurvivalWaveType = 'normal' | 'elite' | 'boss';
+export type SurvivalGrowthRewardId = 'attack-calibration' | 'coordination' | 'affinity-tuning' | 'pickup-tuning';
+export type SurvivalTemporaryRewardId = 'temporary-overdrive' | 'temporary-bulwark' | 'temporary-endurance';
+export type SurvivalRewardChoice =
+  | Readonly<{ kind: 'growth'; id: SurvivalGrowthRewardId; level: number }>
+  | Readonly<{ kind: 'instant'; id: 'emergency-repair' | 'burst-vent' | SurvivalTemporaryRewardId }>
+  | Readonly<{ kind: 'risk'; id: 'risk-contract'; level: number }>;
+export type SurvivalRewardState = Readonly<{
+  growthLevels: Record<SurvivalGrowthRewardId, number>;
+  maximumIntegrity: number;
+  integrity: number;
+  burstRisk: number;
+  persistentDebuffs: readonly string[];
+  nextWaveEffect: SurvivalTemporaryRewardId | null;
+  riskLevel: number;
+}>;
 export type SurvivalEnemyLoadout = Readonly<{
   combination: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
   affinities: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
@@ -60,3 +75,15 @@ export function generateSurvivalWave(
   riskLevel: number;
   strengthMultiplier: number;
 }>;
+export function normalizeSurvivalRewardState(value: unknown): SurvivalRewardState;
+export function generateSurvivalRewards(
+  config: SurvivalCatalog,
+  seed: string,
+  wave: number,
+  state: SurvivalRewardState,
+): readonly SurvivalRewardChoice[];
+export function applySurvivalReward(
+  config: SurvivalCatalog,
+  state: SurvivalRewardState,
+  reward: SurvivalRewardChoice,
+): SurvivalRewardState;

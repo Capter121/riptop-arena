@@ -18,7 +18,9 @@
   "instantRewards": [
     { "id": "emergency-repair", "integrityRatio": 0.18 },
     { "id": "burst-vent", "burstReduction": 15, "clearDebuffCount": 1 },
-    { "id": "temporary-overdrive", "durationWaves": 1, "output": 0.1, "mobility": 0.1 }
+    { "id": "temporary-overdrive", "durationWaves": 1, "output": 0.1, "mobility": 0.1 },
+    { "id": "temporary-bulwark", "durationWaves": 1, "defense": 0.1, "stability": 0.1 },
+    { "id": "temporary-endurance", "durationWaves": 1, "spinEfficiency": 0.1, "pickupEffect": 0.1 }
   ],
   "riskLevels": [
     { "level": 0, "scoreMultiplier": 1, "enemyStrength": 0 },
