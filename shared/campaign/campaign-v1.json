@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "configVersion": "campaign-v1",
+  "aiProfiles": {
+    "assault": { "attack": 50, "dodge": 10, "guard": 10, "charge": 20, "reflectLight": 5, "reflectHeavy": 5 },
+    "skirmisher": { "attack": 20, "dodge": 30, "guard": 10, "charge": 25, "reflectLight": 10, "reflectHeavy": 5 },
+    "control": { "attack": 15, "dodge": 10, "guard": 25, "charge": 20, "reflectLight": 20, "reflectHeavy": 10 },
+    "sustain": { "attack": 10, "dodge": 10, "guard": 30, "charge": 30, "reflectLight": 10, "reflectHeavy": 10 },
+    "ringout": { "attack": 35, "dodge": 25, "guard": 10, "charge": 15, "reflectLight": 10, "reflectHeavy": 5 },
+    "counter": { "attack": 10, "dodge": 10, "guard": 20, "charge": 15, "reflectLight": 25, "reflectHeavy": 20 },
+    "mixup": { "attack": 25, "dodge": 15, "guard": 15, "charge": 15, "reflectLight": 15, "reflectHeavy": 15 },
+    "fortress": { "attack": 10, "dodge": 5, "guard": 30, "charge": 20, "reflectLight": 10, "reflectHeavy": 25 }
+  },
+  "opponents": [
+    {
+      "index": 0,
+      "id": "blaze-fang",
+      "name": "烈焰獠牙",
+      "theme": "火属性强攻",
+      "description": "全力压上的进攻型陀螺，用第一关教会玩家利用属性克制和行动成本。",
+      "tutorial": "用水属性压制火属性，并观察强攻后的能量空窗。",
+      "coreAffinity": "LIGHT",
+      "upgrades": { "attack": 0, "defense": 0, "stamina": 0 },
+      "aiProfileId": "assault",
+      "arenas": ["neon_magma"],
+      "objectives": {
+        "strategy": { "kind": "primary_affinity", "affinity": "WATER" },
+        "performance": { "kind": "turn_limit", "maximum": 6 }
+      },
+      "rewards": { "firstWinCoins": 100, "starCoins": 40, "unlockPartId": "slash", "championshipCrowns": 0 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_air", "gear": "gear_low", "tip": "tip_flat_attack" },
+          "affinities": { "core": "LIGHT", "blade": "FIRE", "assist": "FIRE", "gear": "FIRE", "tip": "EARTH" }
+        },
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_dual_comet", "assist": "assist_air", "gear": "gear_medium", "tip": "tip_flat_attack" },
+          "affinities": { "core": "LIGHT", "blade": "FIRE", "assist": "FIRE", "gear": "WIND", "tip": "FIRE" }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "id": "sky-gale",
+      "name": "苍穹风刃",
+      "theme": "风属性机动",
+      "description": "利用闪避和蓄能改变节奏的机动型对手。",
+      "tutorial": "用木属性克制风属性，并保留足够完整度完成战斗。",
+      "coreAffinity": "DARK",
+      "upgrades": { "attack": 1, "defense": 0, "stamina": 1 },
+      "aiProfileId": "skirmisher",
+      "arenas": ["classic_grid"],
+      "objectives": {
+        "strategy": { "kind": "primary_affinity", "affinity": "WOOD" },
+        "performance": { "kind": "integrity_ratio", "minimum": 0.5 }
+      },
+      "rewards": { "firstWinCoins": 125, "starCoins": 50, "unlockPartId": "drift", "championshipCrowns": 0 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_storm_fang", "assist": "assist_air", "gear": "gear_low", "tip": "tip_flat_attack" },
+          "affinities": { "core": "DARK", "blade": "WIND", "assist": "WIND", "gear": "WIND", "tip": "EARTH" }
+        },
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_dual_comet", "assist": "assist_air", "gear": "gear_medium", "tip": "tip_taper_balance" },
+          "affinities": { "core": "LIGHT", "blade": "WIND", "assist": "WIND", "gear": "WATER", "tip": "WIND" }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "id": "abyss-tide",
+      "name": "碧潮回旋",
+      "theme": "水属性消耗",
+      "description": "以防守和反射拖长战线，迫使玩家管理旋转资源。",
+      "tutorial": "用土属性克制水属性，并尝试以旋转终结获胜。",
+      "coreAffinity": "LIGHT",
+      "upgrades": { "attack": 1, "defense": 1, "stamina": 1 },
+      "aiProfileId": "control",
+      "arenas": ["absolute_zero"],
+      "objectives": {
+        "strategy": { "kind": "primary_affinity", "affinity": "EARTH" },
+        "performance": { "kind": "finish", "finish": "spin" }
+      },
+      "rewards": { "firstWinCoins": 150, "starCoins": 60, "unlockPartId": "light", "championshipCrowns": 0 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_orbit_halo", "assist": "assist_guard", "gear": "gear_high", "tip": "tip_needle_stamina" },
+          "affinities": { "core": "LIGHT", "blade": "WATER", "assist": "WATER", "gear": "WATER", "tip": "EARTH" }
+        },
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_dual_comet", "assist": "assist_guard", "gear": "gear_medium", "tip": "tip_needle_stamina" },
+          "affinities": { "core": "DARK", "blade": "WATER", "assist": "WATER", "gear": "WIND", "tip": "WATER" }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "id": "forest-crown",
+      "name": "森罗根冠",
+      "theme": "木属性持久",
+      "description": "以持久、防守和蓄能维持优势的耐久型对手。",
+      "tutorial": "用火属性克制木属性，并寻找爆裂终结窗口。",
+      "coreAffinity": "LIGHT",
+      "upgrades": { "attack": 2, "defense": 1, "stamina": 2 },
+      "aiProfileId": "sustain",
+      "arenas": ["classic_grid"],
+      "objectives": {
+        "strategy": { "kind": "primary_affinity", "affinity": "FIRE" },
+        "performance": { "kind": "finish", "finish": "burst" }
+      },
+      "rewards": { "firstWinCoins": 175, "starCoins": 70, "unlockPartId": "bulwark", "championshipCrowns": 0 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_orbit_halo", "assist": "assist_guard", "gear": "gear_high", "tip": "tip_needle_stamina" },
+          "affinities": { "core": "LIGHT", "blade": "WOOD", "assist": "WOOD", "gear": "EARTH", "tip": "WOOD" }
+        },
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_iron_bastion", "assist": "assist_heavy", "gear": "gear_high", "tip": "tip_taper_balance" },
+          "affinities": { "core": "DARK", "blade": "WOOD", "assist": "EARTH", "gear": "WOOD", "tip": "WOOD" }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "id": "rift-drift",
+      "name": "裂隙漂移",
+      "theme": "土属性稳定与边缘控制",
+      "description": "沿边缘游走并寻找场外终结角度的控制型对手。",
+      "tutorial": "用风属性克制土属性，并主动争取场外终结。",
+      "coreAffinity": "DARK",
+      "upgrades": { "attack": 2, "defense": 2, "stamina": 3 },
+      "aiProfileId": "ringout",
+      "arenas": ["neon_magma"],
+      "objectives": {
+        "strategy": { "kind": "primary_affinity", "affinity": "WIND" },
+        "performance": { "kind": "finish", "finish": "ringout" }
+      },
+      "rewards": { "firstWinCoins": 225, "starCoins": 90, "unlockPartId": "heavy", "championshipCrowns": 0 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_dual_comet", "assist": "assist_heavy", "gear": "gear_low", "tip": "tip_taper_balance" },
+          "affinities": { "core": "DARK", "blade": "EARTH", "assist": "WIND", "gear": "EARTH", "tip": "EARTH" }
+        },
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_orbit_halo", "assist": "assist_air", "gear": "gear_medium", "tip": "tip_ball_defense" },
+          "affinities": { "core": "DARK", "blade": "EARTH", "assist": "EARTH", "gear": "WATER", "tip": "EARTH" }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "id": "dawn-verdict",
+      "name": "曙光裁决",
+      "theme": "光属性反击",
+      "description": "等待对手露出破绽后用反射行动夺回节奏。",
+      "tutorial": "用暗属性克制光属性，并在五回合内结束战斗。",
+      "coreAffinity": "LIGHT",
+      "upgrades": { "attack": 3, "defense": 3, "stamina": 3 },
+      "aiProfileId": "counter",
+      "arenas": ["classic_grid"],
+      "objectives": {
+        "strategy": { "kind": "primary_affinity", "affinity": "DARK" },
+        "performance": { "kind": "turn_limit", "maximum": 5 }
+      },
+      "rewards": { "firstWinCoins": 275, "starCoins": 110, "unlockPartId": "rush", "championshipCrowns": 0 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_dual_comet", "assist": "assist_guard", "gear": "gear_medium", "tip": "tip_taper_balance" },
+          "affinities": { "core": "LIGHT", "blade": "LIGHT", "assist": "LIGHT", "gear": "WIND", "tip": "EARTH" }
+        },
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_storm_fang", "assist": "assist_air", "gear": "gear_low", "tip": "tip_flat_attack" },
+          "affinities": { "core": "LIGHT", "blade": "LIGHT", "assist": "WIND", "gear": "LIGHT", "tip": "FIRE" }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "id": "night-eclipse",
+      "name": "永夜蚀翼",
+      "theme": "暗属性压制",
+      "description": "行动分布均衡、难以预测的终盘压制型对手。",
+      "tutorial": "用光属性克制暗属性，并控制最终倾斜。",
+      "coreAffinity": "DARK",
+      "upgrades": { "attack": 4, "defense": 4, "stamina": 4 },
+      "aiProfileId": "mixup",
+      "arenas": ["absolute_zero"],
+      "objectives": {
+        "strategy": { "kind": "primary_affinity", "affinity": "LIGHT" },
+        "performance": { "kind": "tilt_limit", "maximum": 0.6 }
+      },
+      "rewards": { "firstWinCoins": 350, "starCoins": 140, "unlockPartId": null, "championshipCrowns": 0 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_storm_fang", "assist": "assist_air", "gear": "gear_low", "tip": "tip_flat_attack" },
+          "affinities": { "core": "DARK", "blade": "DARK", "assist": "DARK", "gear": "WIND", "tip": "EARTH" }
+        },
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_dual_comet", "assist": "assist_guard", "gear": "gear_medium", "tip": "tip_taper_balance" },
+          "affinities": { "core": "DARK", "blade": "DARK", "assist": "WATER", "gear": "DARK", "tip": "EARTH" }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "id": "atlas-guardian",
+      "name": "阿特拉斯守卫",
+      "theme": "五属性协调共鸣",
+      "description": "沉重稳定的最终守卫，在三种场地和三套协调装配间轮换。",
+      "tutorial": "使用任一协调共鸣装配，在持久战中保留至少四成完整度。",
+      "coreAffinity": "LIGHT",
+      "upgrades": { "attack": 5, "defense": 5, "stamina": 5 },
+      "aiProfileId": "fortress",
+      "arenas": ["classic_grid", "neon_magma", "absolute_zero"],
+      "objectives": {
+        "strategy": { "kind": "harmony" },
+        "performance": { "kind": "integrity_ratio", "minimum": 0.4 }
+      },
+      "rewards": { "firstWinCoins": 500, "starCoins": 200, "unlockPartId": null, "championshipCrowns": 1 },
+      "loadouts": [
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_iron_bastion", "assist": "assist_heavy", "gear": "gear_high", "tip": "tip_ball_defense" },
+          "affinities": { "core": "LIGHT", "blade": "EARTH", "assist": "WATER", "gear": "WIND", "tip": "WOOD" }
+        },
+        {
+          "combination": { "core": "core_void_falcon", "blade": "blade_orbit_halo", "assist": "assist_guard", "gear": "gear_medium", "tip": "tip_needle_stamina" },
+          "affinities": { "core": "DARK", "blade": "WATER", "assist": "EARTH", "gear": "WOOD", "tip": "FIRE" }
+        },
+        {
+          "combination": { "core": "core_solar_wolf", "blade": "blade_dual_comet", "assist": "assist_guard", "gear": "gear_high", "tip": "tip_taper_balance" },
+          "affinities": { "core": "LIGHT", "blade": "WOOD", "assist": "FIRE", "gear": "WATER", "tip": "EARTH" }
+        }
+      ]
+    }
+  ]
+}
