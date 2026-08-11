@@ -120,7 +120,7 @@ function progressionSnapshot(state: ProgressionState): ProgressionSnapshotData {
   };
 }
 
-function parseProgression(value: unknown): ServerProgressionV1 {
+export function parseServerProgression(value: unknown): ServerProgressionV1 {
   if (!isRecord(value)
     || value.schemaVersion !== 1
     || !Number.isSafeInteger(value.revision)
@@ -189,7 +189,7 @@ async function performSync(
     if (response.status === 409 && isRecord(body) && isRecord(body.progression)) {
       return {
         status: 'conflict',
-        progression: parseProgression(body.progression),
+        progression: parseServerProgression(body.progression),
         acknowledgedEventIds: [],
       };
     }
@@ -202,7 +202,7 @@ async function performSync(
       || batch.some(event => !acknowledgedEventIds.includes(event.eventId))) {
       throw new ProgressionSyncError(response.status, 'INVALID_RESPONSE', 'Server did not acknowledge the submitted wallet batch.');
     }
-    const serverProgression = parseProgression(body.progression);
+    const serverProgression = parseServerProgression(body.progression);
     if (syncState.pendingWalletEvents.length <= MAX_EVENTS_PER_REQUEST) {
       return { status: 'synced', progression: serverProgression, acknowledgedEventIds };
     }
