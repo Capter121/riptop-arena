@@ -15,8 +15,9 @@ if (arenaMode) {
   const arenaParameters = new URLSearchParams(window.location.search);
   const challengeRequested = arenaParameters.has('challenge');
   const campaignRequested = arenaParameters.has('campaign');
-  if (challengeRequested && campaignRequested) {
-    mount.innerHTML = '<main class="portal-state"><h1>竞技场链接无效</h1><p>同一链接不能同时进入好友挑战和八人战役。</p><a class="challenge-primary" href="/">返回竞技据点</a></main>';
+  const survivalRequested = arenaParameters.has('survival');
+  if ([challengeRequested, campaignRequested, survivalRequested].filter(Boolean).length > 1) {
+    mount.innerHTML = '<main class="portal-state"><h1>竞技场链接无效</h1><p>同一链接不能同时进入好友挑战、八人战役和生存模式。</p><a class="challenge-primary" href="/">返回竞技据点</a></main>';
   } else if (challengeRequested) {
     const { bootstrapChallenge } = await import('./challenges/challengeBootstrap');
     const result = await bootstrapChallenge(window.location.search);
@@ -61,6 +62,26 @@ if (arenaMode) {
       } as const;
       const [title, detail] = messages[result.kind];
       mount.innerHTML = `<main class="portal-state"><p class="portal-eyebrow">CAMPAIGN ARENA</p><h1>${title}</h1><p>${detail}</p><a class="challenge-primary" href="/campaign/">返回战役档案</a></main>`;
+    }
+  } else if (survivalRequested) {
+    const { bootstrapSurvival } = await import('./survival/survivalBootstrap');
+    const result = await bootstrapSurvival(window.location.search);
+    if (result.kind === 'ready') {
+      const { Game } = await import('./app/game');
+      const game = new Game(mount, result.controller.gameOptions());
+      game.start();
+    } else {
+      const messages = {
+        invalid_link: ['生存链接无效', '请从生存中心重新进入当前波次。'],
+        missing_identity: ['需要先验证身份', '返回私人竞技据点验证身份后再进入生存模式。'],
+        forbidden: ['无法进入这场生存运行', '当前身份没有对应的活动运行。'],
+        completed: ['这场生存运行已经结束', '返回生存中心查看最终成绩。'],
+        reward_pending: ['本波奖励尚未选择', '返回生存中心确认奖励后才能进入下一波。'],
+        unsupported: ['生存版本不兼容', '请刷新到最新版本后重试。'],
+        offline: ['暂时无法恢复生存运行', '开战前必须连接服务器读取权威检查点。'],
+      } as const;
+      const [title, detail] = messages[result.kind];
+      mount.innerHTML = `<main class="portal-state"><p class="portal-eyebrow">SURVIVAL ARENA</p><h1>${title}</h1><p>${detail}</p><a class="challenge-primary" href="/survival/">返回生存中心</a></main>`;
     }
   } else {
     const { Game } = await import('./app/game');

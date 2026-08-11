@@ -103,6 +103,7 @@ import {
 } from '../gameplay/ai';
 import type { GameChallengeOptions } from '../challenges/challengeBootstrap';
 import type { CampaignSubmitResult, GameCampaignOptions } from '../campaign/campaignController';
+import type { GameSurvivalOptions, SurvivalSubmitResult } from '../survival/survivalController';
 import { buildCampaignCustomizerPath } from '../campaign/campaignReturn';
 import { campaignObjectiveText } from '../data/campaign/objectives';
 import { commitProgressionSync } from '../progression/progressionClient';
@@ -245,7 +246,7 @@ export class Game {
   private turnIndex = 1;
   private activeTurnResolution: TurnResolution | null = null;
   private activeClashQte: ClashQteState | null = null;
-  private battleMode: 'single' | 'online' | 'challenge' | 'campaign' = 'single';
+  private battleMode: 'single' | 'online' | 'challenge' | 'campaign' | 'survival' = 'single';
   private onlineTurnId = 0;
   private onlineTurnDeadline = 0;
   private onlineStartAt: number | null = null;
@@ -280,7 +281,7 @@ export class Game {
   private paused = false;
   private readonly camDebugEnabled = this.params.has('camDebug');
   private readonly qaEnabled = this.params.has('qa') || this.params.has('debug') || this.camDebugEnabled
-    || (import.meta.env.DEV && (this.params.has('challenge') || this.params.has('campaign')));
+    || (import.meta.env.DEV && (this.params.has('challenge') || this.params.has('campaign') || this.params.has('survival')));
   private readonly tuningKeys: Array<keyof typeof CAMERA_TUNING> = [
     'chaseDistanceStart',
     'chaseDistanceRange',
@@ -298,14 +299,17 @@ export class Game {
   private readonly mount: HTMLElement;
   private readonly challenge: GameChallengeOptions | null;
   private readonly campaign: GameCampaignOptions | null;
+  private readonly survival: GameSurvivalOptions | null;
   private challengeEnvelope: PendingChallengeEnvelope | null = null;
   private challengeSettlement: 'idle' | 'submitting' | 'submitted' | 'pending' | 'storage_failed' = 'idle';
   private campaignSettlement: CampaignSubmitResult | null = null;
   private campaignNextOpponentId: string | null = null;
+  private survivalSettlement: SurvivalSubmitResult | null = null;
 
-  constructor(mount: HTMLElement, session: GameChallengeOptions | GameCampaignOptions | null = null) {
+  constructor(mount: HTMLElement, session: GameChallengeOptions | GameCampaignOptions | GameSurvivalOptions | null = null) {
     this.mount = mount;
     this.campaign = session && 'battleKind' in session && session.battleKind === 'campaign' ? session : null;
+    this.survival = session && 'battleKind' in session && session.battleKind === 'survival' ? session : null;
     this.challenge = session && !('battleKind' in session) ? session : null;
     this.scene.background = new THREE.Color('#050910');
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -527,10 +531,7 @@ export class Game {
       onCancel: () => this.cancelOnlineQueue(),
     });
     this.menu.survival.addEventListener('click', () => {
-      this.beginSingleSession();
-      this.mode = 'survival';
-      this.enemyPreset = pick(ENEMIES);
-      this.startBattle();
+      window.location.assign('/survival/');
     });
     this.menu.tournament.addEventListener('click', () => {
       window.location.assign('/campaign/');
@@ -588,6 +589,10 @@ export class Game {
         window.location.assign(`/campaign/?opponent=${encodeURIComponent(this.campaign!.opponentId)}`);
         return;
       }
+      if (this.battleMode === 'survival') {
+        window.location.assign('/survival/');
+        return;
+      }
       if (this.battleMode === 'challenge') {
         window.location.assign('/challenges/');
         return;
@@ -605,6 +610,11 @@ export class Game {
     this.results.garage.addEventListener('click', () => {
       if (this.battleMode === 'campaign') {
         window.location.assign(`/campaign/?opponent=${encodeURIComponent(this.campaign!.opponentId)}`);
+        return;
+      }
+      if (this.battleMode === 'survival') {
+        if (this.survivalSettlement?.status === 'submitted' || this.survivalSettlement?.status === 'conflict') window.location.assign('/survival/');
+        else void this.submitSurvivalResult();
         return;
       }
       if (this.battleMode === 'challenge') {
@@ -645,6 +655,7 @@ export class Game {
     this.resize();
     if (this.challenge) void this.startChallengeBattle();
     else if (this.campaign) void this.startCampaignBattle();
+    else if (this.survival) void this.startSurvivalBattle();
     else {
       this.showMenu();
       const roomToken = this.params.get('room');
@@ -656,7 +667,7 @@ export class Game {
     window.setTimeout(() => this.introCard.classList.add('intro-card--hidden'), 1800);
 
     this.exposeDiagnostics();
-    if (!this.challenge && !this.campaign && this.params.has('qa')) {
+    if (!this.challenge && !this.campaign && !this.survival && this.params.has('qa')) {
       this.enemyPreset = ENEMIES[0];
       this.startBattle();
       this.launchCharge = 0.84;
@@ -1247,7 +1258,7 @@ export class Game {
   }
 
   private showResult(result: BattleResult) {
-    if ((this.battleMode === 'challenge' || this.battleMode === 'campaign') && this.currentResult) return;
+    if ((this.battleMode === 'challenge' || this.battleMode === 'campaign' || this.battleMode === 'survival') && this.currentResult) return;
     if (!this.battleOutcomeSummary && this.battleRuntime?.inputLog) {
       const topState = (top: TopEntity) => ({
         spin: top.spin,
@@ -1292,6 +1303,12 @@ export class Game {
       this.lastCoinReward = 0;
       this.featuredUnlockPart = null;
       this.championMoment = null;
+    } else if (this.battleMode === 'survival') {
+      this.resultRewardText = '生存结果等待服务器确认；胜利后必须返回生存中心选择奖励。';
+      this.retryLabel = '返回生存中心';
+      this.lastCoinReward = 0;
+      this.featuredUnlockPart = null;
+      this.championMoment = null;
     } else if (this.battleMode === 'online') {
       this.resultRewardText = '\u771f\u4eba\u8054\u673a MVP \u4e0d\u8ba1\u5165\u5355\u673a\u6210\u957f\u4e0e\u91d1\u5e01\u3002';
       this.retryLabel = '\u8fd4\u56de\u4e3b\u83dc\u5355';
@@ -1311,10 +1328,12 @@ export class Game {
       this.lastCoinReward,
       this.progression.coins,
       {
-        modeLabel: this.battleMode === 'campaign' ? '八人战役' : this.battleMode === 'challenge' ? '好友幽灵挑战' : this.battleMode === 'online' ? '\u771f\u4eba\u8054\u673a' : this.getModeLabelCn(),
-        enemyName: this.battleMode === 'campaign' ? this.campaign?.opponentName : this.battleMode === 'challenge' ? this.challenge?.enemy.displayName : this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
+        modeLabel: this.battleMode === 'survival' ? `生存模式 · 第 ${this.survival!.waveNumber} 波` : this.battleMode === 'campaign' ? '八人战役' : this.battleMode === 'challenge' ? '好友幽灵挑战' : this.battleMode === 'online' ? '\u771f\u4eba\u8054\u673a' : this.getModeLabelCn(),
+        enemyName: this.battleMode === 'survival' ? this.survival?.enemy.displayName : this.battleMode === 'campaign' ? this.campaign?.opponentName : this.battleMode === 'challenge' ? this.challenge?.enemy.displayName : this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
         growthTitle: '本局成长变化',
-        growthLines: this.battleMode === 'campaign'
+        growthLines: this.battleMode === 'survival'
+          ? ['局内状态由服务器检查点冻结，确认前不推进波次或奖励']
+          : this.battleMode === 'campaign'
           ? ['等待服务端确认战役进度与奖励']
           : this.battleMode === 'challenge'
           ? ['挑战结果独立保存，不修改单人成长数据']
@@ -1334,6 +1353,12 @@ export class Game {
           objectives: `策略：${campaignObjectiveText(this.campaign.objectives.strategy)} · 表现：${campaignObjectiveText(this.campaign.objectives.performance)}`,
           rewards: '确认前不提前发放',
           submissionStatus: '正在安全保存…',
+        } : undefined,
+        survivalDetails: this.survival ? {
+          wave: this.survival.waveNumber,
+          waveType: this.survival.waveType,
+          score: this.survival.controller.run.checkpoint.score,
+          submissionStatus: '正在提交结果…',
         } : undefined,
       },
     );
@@ -1356,6 +1381,32 @@ export class Game {
       }, false, false);
       void this.submitCampaignResult();
     }
+    if (this.battleMode === 'survival') void this.submitSurvivalResult();
+  }
+
+  private async submitSurvivalResult() {
+    if (!this.survival || !this.battleOutcomeSummary) return;
+    this.results.setSurvivalSettlement('正在提交结果…', '正在提交…', true);
+    this.survivalSettlement = await this.survival.controller.settle(this.battleOutcomeSummary);
+    if (this.survivalSettlement.status === 'submitted') {
+      const settlement = this.survivalSettlement.settlement;
+      this.progression = progressionFromServer(settlement.progression.snapshot, settlement.progression.coins);
+      saveProgression(this.progression, { trackWallet: false });
+      commitProgressionSync(this.survival.controller.identity, {
+        status: 'synced', progression: settlement.progression, acknowledgedEventIds: [],
+      });
+      const status = settlement.run.status === 'reward_pending'
+        ? '结果已确认，返回生存中心选择奖励'
+        : '战败已确认，本次运行结束';
+      this.results.setSurvivalSettlement(status, '返回生存中心');
+      return;
+    }
+    const status = {
+      pending: '网络中断；战败结果已安全排队，胜利结果保留在当前页面等待重试',
+      storage_failed: '浏览器无法安全保存，战败结果未发送',
+      conflict: '服务器状态已变化，请返回生存中心刷新',
+    }[this.survivalSettlement.status];
+    this.results.setSurvivalSettlement(status, this.survivalSettlement.status === 'conflict' ? '返回生存中心' : '重新提交');
   }
 
   private async submitCampaignResult() {
@@ -1504,6 +1555,27 @@ export class Game {
     }
   }
 
+  private async startSurvivalBattle() {
+    if (!this.survival) return;
+    this.battleMode = 'survival';
+    this.mode = 'survival';
+    this.arena.setTheme(this.survival.arena);
+    this.menu.stageSelect.value = this.survival.arena;
+    this.garage.stageSelect.value = this.survival.arena;
+    try {
+      const [player, enemy] = await this.nssLoadouts.createChallengePair(this.survival.player, this.survival.enemy);
+      this.startBattleWithPlayer(player, this.survival.seed, enemy);
+    } catch (error) {
+      this.loop.stop();
+      this.mount.innerHTML = '';
+      const state = document.createElement('main'); state.className = 'portal-state';
+      const title = document.createElement('h1'); title.textContent = '生存装配加载失败';
+      const detail = document.createElement('p'); detail.textContent = error instanceof Error ? error.message : '无法读取当前波次模型。';
+      const back = document.createElement('a'); back.href = '/survival/'; back.textContent = '返回生存中心';
+      state.append(title, detail, back); this.mount.append(state);
+    }
+  }
+
   private startBattleWithPlayer(nextPlayer: TopEntity, seed = createBattleSeed(), nextEnemy?: TopEntity) {
     this.battleRuntime = new BattleRuntime(seed);
     this.battleOutcomeSummary = null;
@@ -1527,8 +1599,8 @@ export class Game {
     this.timeScale = 1;
     this.hitStop = 0;
     this.dragDirection.set(0, 0);
-    this.survivalWave = 1;
-    this.survivalScore = 0;
+    this.survivalWave = this.survival?.waveNumber ?? 1;
+    this.survivalScore = this.survival?.controller.run.checkpoint.score ?? 0;
     this.turnState = 'awaiting';
     this.turnTimer = 0;
     this.turnIndex = 1;
@@ -2034,7 +2106,7 @@ export class Game {
       enemySpirit: this.enemy.spirit,
       enemyTacticalMode: this.enemy.tacticalMode,
       enemyFreeDefensiveMoves: this.enemy.freeDefensiveMoves,
-      campaignAiProfileId: this.campaign?.aiProfileId,
+      campaignAiProfileId: this.campaign?.aiProfileId ?? this.survival?.aiProfileId,
     }, this.battleRandom().ai);
   }
 
@@ -2978,7 +3050,7 @@ export class Game {
         enemyEnergy: this.enemy.spirit,
         timeLeft: this.rules.timeLeft,
         result: this.currentResult,
-        enemyName: this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
+        enemyName: this.battleMode === 'survival' ? this.survival!.enemy.displayName : this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
         launchPower: this.launchCharge,
         angleDeg: this.launchAngleDeg,
         phase: this.phase,
@@ -3153,7 +3225,7 @@ export class Game {
       enemyEnergy: this.enemy.spirit,
       timeLeft: this.rules.timeLeft,
       result: this.currentResult,
-      enemyName: this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
+      enemyName: this.battleMode === 'survival' ? this.survival!.enemy.displayName : this.battleMode === 'online' ? this.onlineOpponentName : this.enemyPreset.name,
       launchPower: this.launchCharge,
       angleDeg: this.launchAngleDeg,
       phase: this.phase,

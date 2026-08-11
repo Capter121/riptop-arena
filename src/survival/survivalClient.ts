@@ -1,5 +1,6 @@
 import type { LocalIdentity } from '../auth/localIdentity';
 import { CAMPAIGN_OPPONENT_BY_ID } from '../data/campaign/opponents';
+import type { CampaignAiProfileId, CampaignArena } from '../data/campaign/opponents';
 import { isNssBattleLoadoutV2 } from '../nss/loadout';
 import type { NssBattleLoadoutV2 } from '../nss/types';
 import { parseServerProgression, type ServerProgressionV1 } from '../progression/progressionClient';
@@ -20,6 +21,42 @@ export type SurvivalResultRequest = {
   outcome: Record<string, unknown>;
 };
 
+export type SurvivalGrowthLevels = {
+  'attack-calibration': number;
+  coordination: number;
+  'affinity-tuning': number;
+  'pickup-tuning': number;
+};
+
+export interface SurvivalWave {
+  configVersion: 'survival-v1';
+  simulationVersion: 1;
+  seed: string;
+  wave: number;
+  chapter: number;
+  type: 'normal' | 'elite' | 'boss';
+  sourceOpponentId: string;
+  sourceLoadoutIndex: number;
+  enemy: NssBattleLoadoutV2;
+  arena: CampaignArena;
+  aiProfileId: CampaignAiProfileId;
+  riskLevel: number;
+  strengthMultiplier: number;
+}
+
+export interface SurvivalCheckpoint {
+  currentWave: number;
+  integrity: number;
+  burstRisk: number;
+  persistentDebuffs: string[];
+  growthLevels: SurvivalGrowthLevels;
+  nextWaveEffect: 'temporary-overdrive' | 'temporary-bulwark' | 'temporary-endurance' | null;
+  riskLevel: number;
+  score: number;
+  flawlessStreak: number;
+  bossesDefeated: number;
+}
+
 export interface SurvivalRun {
   runId: string;
   configVersion: 'survival-v1';
@@ -28,8 +65,8 @@ export interface SurvivalRun {
   seed: string;
   status: 'wave_ready' | 'reward_pending' | 'completed';
   player: { playerId: string; displayName: string; loadout: NssBattleLoadoutV2; upgrades: UpgradeLevels; maximumIntegrity: number };
-  wave: JsonRecord;
-  checkpoint: JsonRecord;
+  wave: SurvivalWave;
+  checkpoint: SurvivalCheckpoint;
   finalSummary: JsonRecord | null;
   createdAt: string;
   updatedAt: string;
@@ -119,7 +156,7 @@ function parseWave(value: unknown) {
   const opponent = CAMPAIGN_OPPONENT_BY_ID.get(value.sourceOpponentId);
   if (!opponent || Number(value.sourceLoadoutIndex) >= opponent.loadouts.length) invalid();
   parseLoadout(value.enemy);
-  return value;
+  return value as unknown as SurvivalWave;
 }
 
 function parseCheckpoint(value: unknown) {
@@ -133,7 +170,7 @@ function parseCheckpoint(value: unknown) {
     || !integer(value.flawlessStreak, 0) || !integer(value.bossesDefeated, 0)) invalid();
   const growthLevels = value.growthLevels as JsonRecord;
   if (GROWTH_IDS.some(id => !integer(growthLevels[id], 0, 3))) invalid();
-  return value;
+  return value as unknown as SurvivalCheckpoint;
 }
 
 function parseRun(value: unknown, playerId: string): SurvivalRun {

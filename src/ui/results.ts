@@ -35,6 +35,12 @@ export interface ResultRenderMeta {
     rewards: string;
     submissionStatus: string;
   };
+  survivalDetails?: {
+    wave: number;
+    waveType: string;
+    score: number;
+    submissionStatus: string;
+  };
 }
 
 export class ResultPanel {
@@ -124,7 +130,11 @@ export class ResultPanel {
     this.kicker.textContent = won ? '胜利结算' : '战斗报告';
     this.title.textContent = won ? '胜利' : '战败';
     this.badge.textContent = result.label;
-    this.body.textContent = meta.campaignDetails
+    this.body.textContent = meta.survivalDetails
+      ? won
+        ? `第 ${meta.survivalDetails.wave} 波获胜，服务器确认后才能选择奖励。`
+        : `第 ${meta.survivalDetails.wave} 波战败，服务器确认后本次运行结束。`
+      : meta.campaignDetails
       ? won
         ? `你击败了 ${enemyName}，战役进度和奖励正在等待服务器确认。`
         : `${enemyName} 赢下了这场战役；本场结果仍会提交，但不会提前修改进度。`
@@ -148,7 +158,7 @@ export class ResultPanel {
     const settlementItems = [
       { label: '战斗模式', value: modeLabel },
       { label: '终结方式', value: result.label },
-      { label: '结算状态', value: meta.challengeDetails || meta.campaignDetails ? '等待服务器确认' : won ? '奖励已入账' : '继续调整后再战' },
+      { label: '结算状态', value: meta.challengeDetails || meta.campaignDetails || meta.survivalDetails ? '等待服务器确认' : won ? '奖励已入账' : '继续调整后再战' },
     ];
     this.summary.replaceChildren();
     for (const item of settlementItems) {
@@ -159,7 +169,7 @@ export class ResultPanel {
     }
 
     this.challengeDetails.replaceChildren();
-    this.challengeDetails.style.display = meta.challengeDetails || meta.campaignDetails ? 'grid' : 'none';
+    this.challengeDetails.style.display = meta.challengeDetails || meta.campaignDetails || meta.survivalDetails ? 'grid' : 'none';
     if (meta.challengeDetails) {
       const rows = [
         ['规则', meta.challengeDetails.rule],
@@ -175,6 +185,8 @@ export class ResultPanel {
       }
     } else if (meta.campaignDetails) {
       this.renderCampaignRows(meta.campaignDetails);
+    } else if (meta.survivalDetails) {
+      this.renderSurvivalRows(meta.survivalDetails);
     }
 
     const affinitySummary = meta.affinitySummary;
@@ -267,12 +279,33 @@ export class ResultPanel {
     this.campaignReplay.disabled = !replayEnabled;
   }
 
+  setSurvivalSettlement(status: string, secondaryLabel: string, disabled = false) {
+    const row = this.challengeDetails.lastElementChild?.querySelector('strong');
+    if (row) row.textContent = status;
+    this.garage.textContent = secondaryLabel;
+    this.garage.disabled = disabled;
+  }
+
   private renderCampaignRows(details: NonNullable<ResultRenderMeta['campaignDetails']>) {
     for (const [labelText, valueText] of [
       ['对手', details.opponentName],
       ['星级', details.stars],
       ['目标', details.objectives],
       ['奖励', details.rewards],
+      ['提交状态', details.submissionStatus],
+    ]) {
+      const row = document.createElement('div');
+      const label = document.createElement('span'); label.textContent = labelText;
+      const value = document.createElement('strong'); value.textContent = valueText;
+      row.append(label, value); this.challengeDetails.append(row);
+    }
+  }
+
+  private renderSurvivalRows(details: NonNullable<ResultRenderMeta['survivalDetails']>) {
+    const type = { normal: '普通', elite: '精英', boss: 'BOSS' }[details.waveType] ?? details.waveType;
+    for (const [labelText, valueText] of [
+      ['波次', `第 ${details.wave} 波 · ${type}`],
+      ['累计分数', String(details.score)],
       ['提交状态', details.submissionStatus],
     ]) {
       const row = document.createElement('div');
