@@ -4,9 +4,12 @@ import {
   SURVIVAL_ARENAS,
   applySurvivalReward as applySharedSurvivalReward,
   assertSurvivalCatalog,
+  compareSurvivalBest,
+  createSurvivalSummary,
   generateSurvivalWave as generateSharedSurvivalWave,
   generateSurvivalRewards as generateSharedSurvivalRewards,
   normalizeSurvivalRewardState,
+  scoreSurvivalWave as scoreSharedSurvivalWave,
 } from '../../shared/survival/survival-rules.js';
 
 const catalogUrl = new URL('../../shared/survival/survival-v1.json', import.meta.url);
@@ -16,7 +19,14 @@ export const SURVIVAL_CONFIG = JSON.parse(readFileSync(catalogUrl, 'utf8'));
 const campaignCatalog = JSON.parse(readFileSync(campaignUrl, 'utf8'));
 assertSurvivalCatalog(SURVIVAL_CONFIG);
 
-export { SURVIVAL_AI_PROFILE_IDS, SURVIVAL_ARENAS, assertSurvivalCatalog, normalizeSurvivalRewardState };
+export {
+  SURVIVAL_AI_PROFILE_IDS,
+  SURVIVAL_ARENAS,
+  assertSurvivalCatalog,
+  compareSurvivalBest,
+  createSurvivalSummary,
+  normalizeSurvivalRewardState,
+};
 
 export function generateSurvivalWave(seed, wave, riskLevel) {
   return generateSharedSurvivalWave(SURVIVAL_CONFIG, campaignCatalog, seed, wave, riskLevel);
@@ -28,4 +38,8 @@ export function generateSurvivalRewards(seed, wave, state) {
 
 export function applySurvivalReward(state, reward) {
   return applySharedSurvivalReward(SURVIVAL_CONFIG, state, reward);
+}
+
+export function scoreSurvivalWave(input) {
+  return scoreSharedSurvivalWave(SURVIVAL_CONFIG, input);
 }

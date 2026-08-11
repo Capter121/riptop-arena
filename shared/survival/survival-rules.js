@@ -218,3 +218,87 @@ export function applySurvivalReward(config, state, reward) {
   }
   throw new Error('Survival reward has no effect');
 }
+
+const FINISH_KINDS = ['ring out', 'spin finish', 'burst finish', 'timeout'];
+
+export function scoreSurvivalWave(config, input) {
+  assertSurvivalCatalog(config);
+  if (!input || typeof input !== 'object' || Array.isArray(input)
+    || !exactKeys(input, ['wave', 'type', 'finishKind', 'flawless', 'flawlessStreak', 'riskLevel'])
+    || !Number.isSafeInteger(input.wave) || input.wave < 1
+    || !config.wavePattern.includes(input.type)
+    || !FINISH_KINDS.includes(input.finishKind)
+    || typeof input.flawless !== 'boolean'
+    || !Number.isSafeInteger(input.flawlessStreak) || input.flawlessStreak < 0
+    || (!input.flawless && input.flawlessStreak !== 0)
+    || !Number.isSafeInteger(input.riskLevel) || input.riskLevel < 0 || input.riskLevel > 3) {
+    throw new Error('Invalid survival score input');
+  }
+  const base = config.scoring.base + config.scoring.waveStep * (input.wave - 1);
+  const waveTypeBonus = config.scoring.waveTypeBonus[input.type];
+  const finishBonus = config.scoring.finishBonus[input.finishKind];
+  const flawlessBonus = input.flawless ? config.scoring.flawless : 0;
+  const flawlessStreakBonus = input.flawless
+    ? Math.min(input.flawlessStreak, config.scoring.flawlessStreakMaximum) * config.scoring.flawlessStreakStep
+    : 0;
+  const subtotal = base + waveTypeBonus + finishBonus + flawlessBonus + flawlessStreakBonus;
+  const riskMultiplier = config.riskLevels[input.riskLevel].scoreMultiplier;
+  return {
+    base,
+    waveTypeBonus,
+    finishBonus,
+    flawlessBonus,
+    flawlessStreakBonus,
+    subtotal,
+    riskMultiplier,
+    score: Math.round(subtotal * riskMultiplier),
+  };
+}
+
+export function createSurvivalSummary(waves, finalIntegrity, riskLevel, achievedAt, abandoned = false) {
+  if (!Array.isArray(waves) || waves.some(result => !result || typeof result !== 'object' || Array.isArray(result)
+    || !exactKeys(result, ['wave', 'type', 'score'])
+    || !Number.isSafeInteger(result.wave) || result.wave < 1
+    || !['normal', 'elite', 'boss'].includes(result.type)
+    || !Number.isSafeInteger(result.score) || result.score < 0)
+    || !Number.isFinite(finalIntegrity) || finalIntegrity < 0
+    || !Number.isSafeInteger(riskLevel) || riskLevel < 0 || riskLevel > 3
+    || typeof achievedAt !== 'string' || !Number.isFinite(Date.parse(achievedAt))
+    || typeof abandoned !== 'boolean') {
+    throw new Error('Invalid survival summary input');
+  }
+  return {
+    score: waves.reduce((total, result) => total + result.score, 0),
+    highestCompletedWave: waves.reduce((highest, result) => Math.max(highest, result.wave), 0),
+    bossesDefeated: waves.filter(result => result.type === 'boss').length,
+    finalIntegrity,
+    riskLevel,
+    achievedAt,
+    abandoned,
+  };
+}
+
+function validSummary(value) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    && exactKeys(value, ['score', 'highestCompletedWave', 'bossesDefeated', 'finalIntegrity', 'riskLevel', 'achievedAt', 'abandoned'])
+    && [value.score, value.highestCompletedWave, value.bossesDefeated].every(number => Number.isSafeInteger(number) && number >= 0)
+    && Number.isFinite(value.finalIntegrity) && value.finalIntegrity >= 0
+    && Number.isSafeInteger(value.riskLevel) && value.riskLevel >= 0 && value.riskLevel <= 3
+    && typeof value.achievedAt === 'string' && Number.isFinite(Date.parse(value.achievedAt))
+    && typeof value.abandoned === 'boolean';
+}
+
+export function compareSurvivalBest(candidate, incumbent) {
+  if (!validSummary(candidate) || (incumbent !== null && !validSummary(incumbent))) {
+    throw new Error('Invalid survival best summary');
+  }
+  if (incumbent === null) return 1;
+  const comparisons = [
+    candidate.score - incumbent.score,
+    candidate.highestCompletedWave - incumbent.highestCompletedWave,
+    candidate.bossesDefeated - incumbent.bossesDefeated,
+    candidate.finalIntegrity - incumbent.finalIntegrity,
+    Date.parse(incumbent.achievedAt) - Date.parse(candidate.achievedAt),
+  ];
+  return Math.sign(comparisons.find(value => value !== 0) ?? 0);
+}

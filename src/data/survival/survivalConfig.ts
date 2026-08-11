@@ -5,18 +5,25 @@ import {
   SURVIVAL_ARENAS,
   assertSurvivalCatalog as assertSharedSurvivalCatalog,
   applySurvivalReward as applySharedSurvivalReward,
+  compareSurvivalBest,
+  createSurvivalSummary,
   generateSurvivalWave as generateSharedSurvivalWave,
   generateSurvivalRewards as generateSharedSurvivalRewards,
   normalizeSurvivalRewardState,
+  scoreSurvivalWave as scoreSharedSurvivalWave,
   type SurvivalCatalog,
   type SurvivalRewardChoice,
   type SurvivalRewardState,
+  type SurvivalFinishKind,
+  type SurvivalSummary,
+  type SurvivalWaveType,
 } from '../../../shared/survival/survival-rules.js';
 
 export { SURVIVAL_AI_PROFILE_IDS, SURVIVAL_ARENAS };
 export type { SurvivalAiProfileId, SurvivalArena, SurvivalWaveType } from '../../../shared/survival/survival-rules.js';
 export { normalizeSurvivalRewardState };
-export type { SurvivalRewardChoice, SurvivalRewardState };
+export { compareSurvivalBest, createSurvivalSummary };
+export type { SurvivalFinishKind, SurvivalRewardChoice, SurvivalRewardState, SurvivalSummary };
 
 export function assertSurvivalCatalog(value: unknown = catalogJson): asserts value is SurvivalCatalog {
   assertSharedSurvivalCatalog(value);
@@ -37,4 +44,15 @@ export function generateSurvivalRewards(seed: string, wave: number, state: Survi
 
 export function applySurvivalReward(state: SurvivalRewardState, reward: SurvivalRewardChoice) {
   return applySharedSurvivalReward(SURVIVAL_CONFIG, state, reward);
+}
+
+export function scoreSurvivalWave(input: Readonly<{
+  wave: number;
+  type: SurvivalWaveType;
+  finishKind: SurvivalFinishKind;
+  flawless: boolean;
+  flawlessStreak: number;
+  riskLevel: number;
+}>) {
+  return scoreSharedSurvivalWave(SURVIVAL_CONFIG, input);
 }

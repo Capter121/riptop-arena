@@ -19,6 +19,16 @@ export type SurvivalRewardState = Readonly<{
   nextWaveEffect: SurvivalTemporaryRewardId | null;
   riskLevel: number;
 }>;
+export type SurvivalFinishKind = 'ring out' | 'spin finish' | 'burst finish' | 'timeout';
+export type SurvivalSummary = Readonly<{
+  score: number;
+  highestCompletedWave: number;
+  bossesDefeated: number;
+  finalIntegrity: number;
+  riskLevel: number;
+  achievedAt: string;
+  abandoned: boolean;
+}>;
 export type SurvivalEnemyLoadout = Readonly<{
   combination: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
   affinities: Readonly<Record<'core' | 'blade' | 'assist' | 'gear' | 'tip', string>>;
@@ -87,3 +97,28 @@ export function applySurvivalReward(
   state: SurvivalRewardState,
   reward: SurvivalRewardChoice,
 ): SurvivalRewardState;
+export function scoreSurvivalWave(config: SurvivalCatalog, input: Readonly<{
+  wave: number;
+  type: SurvivalWaveType;
+  finishKind: SurvivalFinishKind;
+  flawless: boolean;
+  flawlessStreak: number;
+  riskLevel: number;
+}>): Readonly<{
+  base: number;
+  waveTypeBonus: number;
+  finishBonus: number;
+  flawlessBonus: number;
+  flawlessStreakBonus: number;
+  subtotal: number;
+  riskMultiplier: number;
+  score: number;
+}>;
+export function createSurvivalSummary(
+  waves: readonly Readonly<{ wave: number; type: SurvivalWaveType; score: number }>[],
+  finalIntegrity: number,
+  riskLevel: number,
+  achievedAt: string,
+  abandoned?: boolean,
+): SurvivalSummary;
+export function compareSurvivalBest(candidate: SurvivalSummary, incumbent: SurvivalSummary | null): number;
