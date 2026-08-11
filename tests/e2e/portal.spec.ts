@@ -156,7 +156,7 @@ test('keeps authenticated play available when progression sync is offline', asyn
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '私人竞技据点' })).toBeVisible();
   await expect(page.getByText('进度待同步', { exact: true })).toBeVisible();
-  await expect(page.locator('a.portal-mode--open')).toHaveCount(3);
+  await expect(page.locator('a.portal-mode--open')).toHaveCount(4);
   expect(await page.evaluate(key => localStorage.getItem(key), identityKey)).not.toBeNull();
 });
 
@@ -272,13 +272,14 @@ test('renders the authenticated player summary and six mode states', async ({ pa
   const modes = page.getByLabel('游戏模式').locator('.portal-mode');
   await expect(modes).toHaveCount(6);
   const openModes = page.locator('a.portal-mode--open');
-  await expect(openModes).toHaveCount(3);
+  await expect(openModes).toHaveCount(4);
   expect(await openModes.nth(0).getAttribute('href')).toBe('./customizer/');
   expect(await openModes.nth(1).getAttribute('href')).toBe('./arena/');
   expect(await openModes.nth(2).getAttribute('href')).toBe('/challenges/');
+  expect(await openModes.nth(3).getAttribute('href')).toBe('/campaign/');
 
   const lockedModes = page.locator('.portal-mode--locked');
-  await expect(lockedModes).toHaveCount(3);
+  await expect(lockedModes).toHaveCount(2);
   expect(await lockedModes.evaluateAll(entries => entries.every(entry => (
     entry.getAttribute('aria-disabled') === 'true' && entry.tagName !== 'A'
   )))).toBe(true);
@@ -323,7 +324,7 @@ test('shows the pending challenge badge without blocking portal modes', async ({
   }));
   await page.goto('/');
   await expect(page.getByLabel('3 个待处理挑战')).toHaveText('3');
-  await expect(page.locator('a.portal-mode--open')).toHaveCount(3);
+  await expect(page.locator('a.portal-mode--open')).toHaveCount(4);
 });
 
 test('views a friend offer without claiming and escapes dynamic text', async ({ page }) => {

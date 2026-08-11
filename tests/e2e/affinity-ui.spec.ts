@@ -33,7 +33,8 @@ for (const viewport of viewports) {
     await expect(versus.locator('.affinity-badge')).toHaveCount(2);
     await expect(versus.locator('.affinity-versus__relation')).not.toBeEmpty();
     await versus.evaluate(element => {
-      element.classList.remove('affinity-versus--hidden');
+      element.classList.remove('affinity-versus--hidden', 'affinity-versus--active');
+      void (element as HTMLElement).offsetWidth;
       element.classList.add('affinity-versus--active');
       element.style.opacity = '1';
       element.style.visibility = 'visible';

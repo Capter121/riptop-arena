@@ -1,4 +1,31 @@
-import { expect, test, type APIRequestContext, type BrowserContext } from '@playwright/test';
+import { expect, request as playwrightRequest, test, type APIRequestContext, type BrowserContext } from '@playwright/test';
+import { randomUUID } from 'node:crypto';
+import { rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createArenaHttpServer } from '../../server/http-server.mjs';
+import { openDatabase } from '../../server/storage/database.mjs';
+import { migrateDatabase } from '../../server/storage/migrate.mjs';
+
+const databasePath = join(tmpdir(), `nss-friend-challenge-e2e-${randomUUID()}.sqlite`);
+const database = openDatabase(databasePath);
+await migrateDatabase(database);
+database.prepare('INSERT INTO invites (code, max_uses) VALUES (?, ?)').run('E2E-FRIENDS', 3);
+const server = createArenaHttpServer({ database });
+await new Promise<void>((resolve, reject) => {
+  server.once('error', reject);
+  server.listen(0, '127.0.0.1', resolve);
+});
+const address = server.address();
+const apiBase = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
+
+test.afterAll(async () => {
+  await new Promise<void>(resolve => server.close(() => resolve()));
+  database.close();
+  await rm(databasePath, { force: true });
+  await rm(`${databasePath}-wal`, { force: true });
+  await rm(`${databasePath}-shm`, { force: true });
+});
 
 const identityKey = 'nss.inviteIdentity.v1';
 const progressionKey = 'riptop-progression-v1';
@@ -61,10 +88,19 @@ async function seedContext(context: BrowserContext, identity: unknown) {
     localStorage.setItem(identityKey, JSON.stringify(identity));
     localStorage.setItem(progressionKey, JSON.stringify(progression));
   }, { identityKey, progressionKey, identity, progression: progression() });
+  await context.route('**/models/parts/*.glb', route => route.continue({
+    url: route.request().url().replace('/models/parts/', '/battle-top-designer/public/models/parts/'),
+  }));
+  await context.route('**/api/**', async route => {
+    const url = new URL(route.request().url());
+    const response = await route.fetch({ url: `${apiBase}${url.pathname}${url.search}` });
+    await route.fulfill({ response });
+  });
 }
 
-test('completes a two-identity challenge, idempotent retry, and targeted rematch', async ({ browser, request }) => {
+test('completes a two-identity challenge, idempotent retry, and targeted rematch', async ({ browser }) => {
   test.setTimeout(240_000);
+  const request = await playwrightRequest.newContext({ baseURL: apiBase });
   const creator = await redeem(request, 'Creator');
   const responder = await redeem(request, 'Responder');
   const competitor = await redeem(request, 'Competitor');
@@ -110,7 +146,7 @@ test('completes a two-identity challenge, idempotent retry, and targeted rematch
   await responderPage.route(`**/api/challenges/${challengeId}/results`, async route => {
     if (droppedResponse) return route.continue();
     droppedResponse = true;
-    const response = await route.fetch();
+    const response = await route.fetch({ url: `${apiBase}/api/challenges/${challengeId}/results` });
     expect(response.status()).toBe(200);
     await route.abort('failed');
   });
@@ -153,4 +189,5 @@ test('completes a two-identity challenge, idempotent retry, and targeted rematch
 
   await creatorContext.close();
   await responderContext.close();
+  await request.dispose();
 });
