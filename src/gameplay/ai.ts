@@ -4,11 +4,15 @@ import { ELEMENT_ATTACKS, type SkillTier, type TacticalMode, type TurnAction } f
 import { FIXED_BATTLE_DT } from '../sim/fixedStep';
 import type { RandomSource } from '../sim/rng';
 import type { TopEntity } from './top';
+import { getCampaignAiWeights } from './aiProfiles';
+import type { CampaignAiProfileId } from '../data/campaign/opponents';
 
 export type TurnAiInput = {
   playerHasStealthEffect: boolean;
   enemySpirit: number;
   enemyTacticalMode: TacticalMode;
+  enemyFreeDefensiveMoves?: number;
+  campaignAiProfileId?: CampaignAiProfileId;
 };
 
 export type AiQteInput = {
@@ -31,6 +35,31 @@ export function pickAiTurnAction(input: TurnAiInput, random: RandomSource): Turn
       return { kind: 'attack', skillId: affordableAttacks[random.nextInt(0, affordableAttacks.length)]! };
     }
     return { kind: 'charge' };
+  }
+
+  if (input.campaignAiProfileId) {
+    const weights = getCampaignAiWeights(input.campaignAiProfileId);
+    const candidates: Array<{ kind: TurnAction['kind']; weight: number }> = [];
+    if (affordableAttacks.length > 0) candidates.push({ kind: 'attack', weight: weights.attack });
+    if (input.enemySpirit >= 1 || (input.enemyFreeDefensiveMoves ?? 0) > 0) {
+      candidates.push({ kind: 'evade', weight: weights.dodge });
+      candidates.push({ kind: 'defense', weight: weights.guard });
+    }
+    candidates.push(
+      { kind: 'charge', weight: weights.charge },
+      { kind: 'light_reflect', weight: weights.reflectLight },
+      { kind: 'heavy_reflect', weight: weights.reflectHeavy },
+    );
+    const available = candidates.filter(candidate => candidate.weight > 0);
+    const total = available.reduce((sum, candidate) => sum + candidate.weight, 0);
+    let roll = random.nextFloat() * total;
+    const selected = available.find((candidate) => {
+      roll -= candidate.weight;
+      return roll < 0;
+    }) ?? available[available.length - 1]!;
+    if (selected.kind !== 'attack') return { kind: selected.kind } as TurnAction;
+    const skillId = affordableAttacks[random.nextInt(0, affordableAttacks.length)]!;
+    return { kind: 'attack', skillId };
   }
 
   const isAssault = input.enemyTacticalMode === 'assault';
