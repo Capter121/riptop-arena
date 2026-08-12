@@ -199,6 +199,10 @@ try {
   assert.equal(loss.run.status, 'completed');
   assert.equal(loss.run.finalSummary.highestCompletedWave, 0);
   assert.equal(restarted.getHub(OTHER).activeRun, null);
+  assert.deepEqual(restarted.listHistory(PLAYER), { items: [], nextCursor: null });
+  const otherHistory = restarted.listHistory(OTHER);
+  assert.equal(otherHistory.items.length, 1);
+  assert.equal(otherHistory.items[0].runId, RUN_2);
 
   database.prepare(`
     INSERT INTO survival_best_scores (
@@ -209,6 +213,7 @@ try {
   const abandoned = restarted.abandonRun(RUN_1, PLAYER, { requestId: ABANDON_1 });
   assert.equal(abandoned.status, 'completed');
   assert.equal(abandoned.finalSummary.abandoned, true);
+  assert.deepEqual(restarted.listHistory(PLAYER), { items: [], nextCursor: null });
   assert.equal(abandoned.finalSummary.score, settled.score.score + bossSettlement.score.score);
   assert.equal(restarted.getHub(PLAYER).activeRun, null);
   assert.deepEqual(restarted.abandonRun(RUN_1, PLAYER, { requestId: ABANDON_1 }), abandoned);

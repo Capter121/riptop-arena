@@ -44,6 +44,7 @@ const leaderboard = {
   entries: [{ rank: 1, playerId: identity.playerId, displayName: 'Nova', ...best }],
   nextCursor: null, currentRank: 1,
 };
+const history = { items: [best], nextCursor: 'next_page' };
 const hub = {
   configVersion: 'survival-v1', activeRun: run, personalBest: best,
   milestones: [
@@ -85,7 +86,8 @@ describe('survival client', () => {
       .mockResolvedValueOnce(json(settlement))
       .mockResolvedValueOnce(json({ run }))
       .mockResolvedValueOnce(json({ ...run, status: 'completed', finalSummary: summary, completedAt: summary.achievedAt }))
-      .mockResolvedValueOnce(json(leaderboard));
+      .mockResolvedValueOnce(json(leaderboard))
+      .mockResolvedValueOnce(json(history));
     const client = createSurvivalClient(identity, { baseUrl: 'https://arena.test/', fetchImpl });
 
     expect((await client.getHub()).activeRun?.runId).toBe(runId);
@@ -94,6 +96,7 @@ describe('survival client', () => {
     expect((await client.selectReward(runId, 1, { requestId, reward: settlement.rewardOptions[0] })).run.runId).toBe(runId);
     expect((await client.abandonRun(runId, { requestId })).status).toBe('completed');
     expect((await client.getLeaderboard({ limit: 20 })).entries[0].rank).toBe(1);
+    expect((await client.getHistory({ limit: 20, cursor: 'page_1' })).items[0].runId).toBe(runId);
     expect(fetchImpl.mock.calls.map(call => [call[0], call[1]?.method ?? 'GET'])).toEqual([
       ['https://arena.test/api/survival', 'GET'],
       ['https://arena.test/api/survival/runs', 'POST'],
@@ -101,6 +104,7 @@ describe('survival client', () => {
       [`https://arena.test/api/survival/runs/${runId}/waves/1/reward`, 'POST'],
       [`https://arena.test/api/survival/runs/${runId}/abandon`, 'POST'],
       ['https://arena.test/api/survival/leaderboard?limit=20', 'GET'],
+      ['https://arena.test/api/survival/history?limit=20&cursor=page_1', 'GET'],
     ]);
     for (const [, init] of fetchImpl.mock.calls) {
       expect(init.headers).toMatchObject({ Authorization: `Bearer ${identity.deviceToken}`, 'X-Player-Id': identity.playerId });
@@ -114,6 +118,8 @@ describe('survival client', () => {
       { ...hub, activeRun: { ...run, player: { ...run.player, loadout: { ...loadout, schemaVersion: 1 } } } },
       { ...settlement, rewardOptions: [{ kind: 'instant', id: 'unknown' }] },
       { ...leaderboard, entries: [{ ...leaderboard.entries[0], rank: 0 }] },
+      { ...history, items: [{ ...best, achievedAt: 'invalid' }] },
+      { ...history, nextCursor: '*' },
     ];
     const calls = [
       (client: ReturnType<typeof createSurvivalClient>) => client.getHub(),
@@ -121,6 +127,8 @@ describe('survival client', () => {
       (client: ReturnType<typeof createSurvivalClient>) => client.getHub(),
       (client: ReturnType<typeof createSurvivalClient>) => client.submitWaveResult(runId, 1, { requestId, configVersion: 'survival-v1', simulationVersion: 1, battleRulesVersion: 2, wave: 1, outcome }),
       (client: ReturnType<typeof createSurvivalClient>) => client.getLeaderboard(),
+      (client: ReturnType<typeof createSurvivalClient>) => client.getHistory(),
+      (client: ReturnType<typeof createSurvivalClient>) => client.getHistory(),
     ];
     for (let index = 0; index < invalidValues.length; index += 1) {
       const client = createSurvivalClient(identity, { fetchImpl: vi.fn().mockResolvedValue(json(invalidValues[index])) });

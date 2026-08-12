@@ -14,6 +14,7 @@ import {
   SurvivalError,
   normalizeSurvivalAbandonRequest,
   normalizeSurvivalLeaderboardQuery,
+  normalizeSurvivalHistoryQuery,
   normalizeSurvivalLoadout,
   normalizeSurvivalResultRequest,
   normalizeSurvivalRewardRequest,
@@ -258,6 +259,47 @@ export function createSurvivalService(database, options = {}) {
       : null;
     const currentIndex = rows.findIndex(row => row.player_id === playerId);
     return { entries, nextCursor, currentRank: currentIndex < 0 ? null : currentIndex + 1 };
+  }
+
+  function listHistory(playerId, value = {}) {
+    playerRow(playerId);
+    const query = normalizeSurvivalHistoryQuery(value);
+    const rows = database.prepare(`
+      SELECT run_id, player_loadout_json, final_summary_json, completed_at
+      FROM survival_runs
+      WHERE player_id = ? AND status = 'completed' AND final_summary_json IS NOT NULL
+      ORDER BY completed_at DESC, run_id DESC
+    `).all(playerId).filter(row => JSON.parse(row.final_summary_json).abandoned === false);
+    let offset = 0;
+    if (query.cursor !== null) {
+      try {
+        const cursor = JSON.parse(Buffer.from(query.cursor, 'base64url').toString('utf8'));
+        const index = rows.findIndex(row => row.run_id === cursor.runId && row.completed_at === cursor.achievedAt);
+        if (index < 0) throw new Error('stale');
+        offset = index + 1;
+      } catch {
+        fail(400, 'INVALID_SURVIVAL_HISTORY_CURSOR', 'Survival history cursor is invalid or stale.');
+      }
+    }
+    const page = rows.slice(offset, offset + query.limit);
+    const items = page.map(row => {
+      const summary = JSON.parse(row.final_summary_json);
+      return {
+        runId: row.run_id,
+        score: summary.score,
+        highestCompletedWave: summary.highestCompletedWave,
+        bossesDefeated: summary.bossesDefeated,
+        finalIntegrity: summary.finalIntegrity,
+        riskLevel: summary.riskLevel,
+        loadoutSummary: JSON.parse(row.player_loadout_json),
+        achievedAt: summary.achievedAt,
+      };
+    });
+    const last = page.at(-1);
+    const nextCursor = offset + page.length < rows.length && last
+      ? Buffer.from(JSON.stringify({ runId: last.run_id, achievedAt: last.completed_at })).toString('base64url')
+      : null;
+    return { items, nextCursor };
   }
 
   function startRun(playerId, value) {
@@ -571,5 +613,5 @@ export function createSurvivalService(database, options = {}) {
     }
   }
 
-  return { abandonRun, getHub, getRun, listLeaderboard, selectReward, startRun, submitWaveResult };
+  return { abandonRun, getHub, getRun, listHistory, listLeaderboard, selectReward, startRun, submitWaveResult };
 }

@@ -4,6 +4,7 @@ import {
   SurvivalError,
   normalizeSurvivalAbandonRequest,
   normalizeSurvivalLeaderboardQuery,
+  normalizeSurvivalHistoryQuery,
   normalizeSurvivalLoadout,
   normalizeSurvivalResultRequest,
   normalizeSurvivalRewardRequest,
@@ -85,6 +86,12 @@ assert.deepEqual(normalizeSurvivalLeaderboardQuery({ limit: '50', cursor: 'abc_1
 assert.throws(() => normalizeSurvivalLeaderboardQuery({ limit: '51' }));
 assert.throws(() => normalizeSurvivalLeaderboardQuery({ cursor: '*'.repeat(10) }));
 assert.throws(() => normalizeSurvivalLeaderboardQuery({ limit: '20', extra: 'true' }));
+
+assert.deepEqual(normalizeSurvivalHistoryQuery({}), { limit: 20, cursor: null });
+assert.deepEqual(normalizeSurvivalHistoryQuery({ limit: '50', cursor: 'abc_123-' }), { limit: 50, cursor: 'abc_123-' });
+for (const query of [{ limit: '0' }, { limit: '51' }, { limit: '1.5' }, { cursor: '' }, { cursor: '*' }, { extra: 'true' }]) {
+  assert.throws(() => normalizeSurvivalHistoryQuery(query));
+}
 
 assert.throws(
   () => normalizeSurvivalStartRequest({ requestId: 'not-a-uuid' }),

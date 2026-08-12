@@ -29,6 +29,8 @@ import { createCampaignClient } from '../campaign/campaignClient';
 import { listPendingCampaignResults } from '../campaign/pendingCampaignResult';
 import { campaignPortalText, renderCampaignArchive } from './campaignArchive';
 import { parseCampaignReturn, type CampaignReturnParseResult } from '../campaign/campaignReturn';
+import { createSurvivalClient } from '../survival/survivalClient';
+import { renderSurvivalCenter } from './survivalCenter';
 
 export interface PortalMode {
   readonly id: string;
@@ -43,7 +45,7 @@ export const PORTAL_MODES: readonly PortalMode[] = [
   { id: 'arena', title: 'RIPTOP Arena', status: 'open', href: './arena/' },
   { id: 'friend-challenge', title: '好友挑战', status: 'open', href: '/challenges/' },
   { id: 'campaign', title: '八人战役', status: 'open', href: '/campaign/' },
-  { id: 'survival', title: '生存模式', status: 'locked', unlockCondition: '阶段 7 解锁' },
+  { id: 'survival', title: '生存模式', status: 'open', href: '/survival/' },
   { id: 'emblem-workshop', title: '纹章工坊', status: 'locked', unlockCondition: '阶段 8 解锁' },
 ];
 
@@ -94,6 +96,10 @@ function renderAuthenticated(
 ) {
   const client = createChallengeClient(identity);
   const campaignClient = createCampaignClient(identity);
+  if (window.location.pathname === '/survival' || window.location.pathname === '/survival/') {
+    void renderSurvivalCenter(mount, identity, progression, createSurvivalClient(identity));
+    return;
+  }
   if (window.location.pathname === '/campaign' || window.location.pathname === '/campaign/') {
     void renderCampaignArchive(mount, identity, progression, campaignClient);
     return;

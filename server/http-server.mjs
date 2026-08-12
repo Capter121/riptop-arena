@@ -196,6 +196,19 @@ export function createArenaHttpServer(options = {}) {
         return;
       }
 
+      if (request.method === 'GET' && url.pathname === '/api/survival/history') {
+        if (!survivalService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Survival database is unavailable.');
+        const player = authenticateRequest(database, request);
+        if (url.searchParams.getAll('limit').length > 1 || url.searchParams.getAll('cursor').length > 1) {
+          throw new HttpError(400, 'INVALID_SURVIVAL_REQUEST', 'Survival history query contains repeated parameters.');
+        }
+        sendJson(response, 200, survivalService.listHistory(
+          player.playerId,
+          Object.fromEntries(url.searchParams.entries()),
+        ));
+        return;
+      }
+
       const survivalAbandonMatch = SURVIVAL_ABANDON_PATH.exec(url.pathname);
       if (request.method === 'POST' && survivalAbandonMatch) {
         if (!survivalService) throw new HttpError(503, 'DATABASE_UNAVAILABLE', 'Survival database is unavailable.');

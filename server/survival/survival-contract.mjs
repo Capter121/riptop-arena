@@ -146,3 +146,18 @@ export function normalizeSurvivalLeaderboardQuery(value) {
   }
   return { limit, cursor };
 }
+
+export function normalizeSurvivalHistoryQuery(value) {
+  if (!record(value) || Object.keys(value).some(key => key !== 'limit' && key !== 'cursor')) {
+    invalid('Survival history query contains invalid keys.');
+  }
+  const rawLimit = value.limit ?? '20';
+  if (typeof rawLimit !== 'string' || !/^[1-9][0-9]*$/.test(rawLimit)) invalid('History limit is invalid.');
+  const limit = Number(rawLimit);
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 50) invalid('History limit is out of range.');
+  const cursor = value.cursor ?? null;
+  if (cursor !== null && (typeof cursor !== 'string' || cursor.length < 1 || cursor.length > 512 || !CURSOR.test(cursor))) {
+    invalid('History cursor is invalid.');
+  }
+  return { limit, cursor };
+}

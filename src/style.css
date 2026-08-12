@@ -1045,6 +1045,77 @@ select {
   .survival-summary__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+.survival-center {
+  min-height: 100vh;
+  padding: max(28px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(36px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  color: #edfaff;
+  background: radial-gradient(circle at 15% 0%, rgba(12, 117, 133, 0.2), transparent 32%), linear-gradient(145deg, #020910, #071721 60%, #0b151a);
+}
+.survival-center__header,
+.survival-center__section-head,
+.survival-center__actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.survival-center__header { max-width: 1180px; margin: 0 auto 28px; border-bottom: 1px solid rgba(126, 240, 255, 0.3); padding-bottom: 20px; }
+.survival-center__header h1 { margin: 4px 0; font-size: clamp(2rem, 5vw, 4rem); }
+.survival-center__header a,
+.survival-center__secondary { color: #aeefff; }
+.survival-center__command,
+.survival-center__section { max-width: 1180px; margin: 0 auto 22px; }
+.survival-center__command { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; }
+.survival-center__run,
+.survival-center__best,
+.survival-center__section,
+.survival-center__loading,
+.survival-center__empty { border: 1px solid rgba(126, 240, 255, 0.3); background: rgba(5, 18, 27, 0.88); box-shadow: inset 0 0 32px rgba(15, 187, 220, 0.04); }
+.survival-center__run,
+.survival-center__best { min-height: 245px; padding: clamp(22px, 3vw, 36px); }
+.survival-center__label { margin: 0; color: #7ef0ff; font-size: 0.72rem; letter-spacing: 0.2em; }
+.survival-center__score { display: block; min-width: 8ch; margin: 18px 0 8px; color: #fff2b0; font: 800 clamp(2.6rem, 7vw, 5.3rem)/0.9 ui-monospace, monospace; }
+.survival-center__loadout { color: #9db7c1; overflow-wrap: anywhere; }
+.survival-center__actions { justify-content: flex-start; margin-top: 24px; }
+.survival-center__primary,
+.survival-center__secondary,
+.survival-center__more { min-height: 48px; padding: 11px 20px; border: 1px solid #54d8e9; background: rgba(8, 52, 63, 0.9); color: #effcff; cursor: pointer; }
+.survival-center__primary:hover:not(:disabled),
+.survival-center__more:hover:not(:disabled),
+.survival-center__primary:focus-visible,
+.survival-center__more:focus-visible { outline: 2px solid #fff2b0; outline-offset: 2px; background: rgba(11, 78, 91, 0.95); }
+.survival-center__primary:disabled,
+.survival-center__more:disabled { opacity: 0.5; cursor: default; }
+.survival-center__section { padding: clamp(18px, 3vw, 30px); }
+.survival-center__section-head { margin-bottom: 15px; }
+.survival-center__section-head h2 { margin: 4px 0 0; }
+.survival-center__ranking { border-top: 1px solid rgba(126, 240, 255, 0.25); }
+.survival-center__rank { display: grid; grid-template-columns: 56px minmax(100px, 1fr) minmax(90px, auto) minmax(210px, auto); gap: 12px; align-items: center; min-height: 58px; border-bottom: 1px solid rgba(126, 240, 255, 0.14); }
+.survival-center__rank[data-self="true"] { background: linear-gradient(90deg, rgba(255, 209, 102, 0.15), transparent); }
+.survival-center__rank-number { color: #7ef0ff; }
+.survival-center__rank-name { overflow-wrap: anywhere; }
+.survival-center__rank-score,
+.survival-center__history-score { min-width: 8ch; color: #fff2b0; font-family: ui-monospace, monospace; }
+.survival-center__rank-meta { color: #9db7c1; text-align: right; }
+.survival-center__history { display: grid; gap: 8px; }
+.survival-center__history-row { display: grid; grid-template-columns: minmax(100px, auto) 1fr minmax(260px, 1.5fr); gap: 16px; align-items: center; min-height: 68px; padding: 10px 0; border-bottom: 1px solid rgba(126, 240, 255, 0.14); }
+.survival-center__more { margin-top: 16px; }
+.survival-center__feedback { min-height: 1.4em; color: #ffb38f; }
+.survival-center__loading,
+.survival-center__empty { max-width: 700px; margin: 10vh auto; padding: 34px; text-align: center; }
+
+@media (max-width: 720px) {
+  .survival-center { padding: max(18px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); }
+  .survival-center__header { align-items: flex-start; }
+  .survival-center__command { grid-template-columns: 1fr; }
+  .survival-center__run,
+  .survival-center__best { min-height: 0; padding: 20px 16px; }
+  .survival-center__section { padding: 18px 14px; }
+  .survival-center__section-head { align-items: flex-start; flex-direction: column; }
+  .survival-center__rank { grid-template-columns: 42px minmax(0, 1fr) minmax(86px, auto); }
+  .survival-center__rank-meta { grid-column: 2 / -1; padding-bottom: 10px; text-align: left; }
+  .survival-center__history-row { grid-template-columns: 1fr; gap: 5px; }
+  .survival-center__primary,
+  .survival-center__secondary,
+  .survival-center__more { width: 100%; text-align: center; }
+  .survival-center__actions { align-items: stretch; flex-direction: column; }
+}
+
 .affinity-versus {
   position: absolute;
   inset: 0;

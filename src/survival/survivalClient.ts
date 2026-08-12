@@ -83,6 +83,32 @@ export interface SurvivalFinalSummary {
   abandoned: boolean;
 }
 
+export interface SurvivalBest {
+  runId: string;
+  score: number;
+  highestCompletedWave: number;
+  bossesDefeated: number;
+  finalIntegrity: number;
+  riskLevel: number;
+  loadoutSummary: NssBattleLoadoutV2;
+  achievedAt: string;
+}
+
+export interface SurvivalLeaderboardEntry extends SurvivalBest {
+  rank: number;
+  playerId: string;
+  displayName: string;
+}
+
+export interface SurvivalLeaderboardPage {
+  entries: SurvivalLeaderboardEntry[];
+  nextCursor: string | null;
+  currentRank: number | null;
+}
+
+export type SurvivalHistoryEntry = SurvivalBest;
+export interface SurvivalHistoryPage { items: SurvivalHistoryEntry[]; nextCursor: string | null }
+
 export interface SurvivalSettlement {
   run: SurvivalRun;
   score: { base: number; waveTypeBonus: number; finishBonus: number; flawlessBonus: number; flawlessStreakBonus: number; subtotal: number; riskMultiplier: number; score: number };
@@ -104,6 +130,7 @@ export class SurvivalApiError extends Error {
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const CURSOR = /^[A-Za-z0-9_-]+$/;
 const SEED = /^[0-9a-f]{32}$/;
 const ARENAS = ['classic_grid', 'neon_magma', 'absolute_zero'];
 const AI_PROFILES = ['assault', 'skirmisher', 'control', 'sustain', 'ringout', 'counter', 'mixup', 'fortress'];
@@ -212,17 +239,17 @@ function parseReward(value: unknown): SurvivalReward {
   invalid();
 }
 
-function parseBest(value: unknown) {
+function parseBest(value: unknown): SurvivalBest {
   if (!exact(value, ['runId', 'score', 'highestCompletedWave', 'bossesDefeated', 'finalIntegrity', 'riskLevel', 'loadoutSummary', 'achievedAt'])
     || typeof value.runId !== 'string' || !UUID.test(value.runId)) invalid();
   parseSummary({ score: value.score, highestCompletedWave: value.highestCompletedWave, bossesDefeated: value.bossesDefeated, finalIntegrity: value.finalIntegrity, riskLevel: value.riskLevel, achievedAt: value.achievedAt }, false);
   parseLoadout(value.loadoutSummary);
-  return value;
+  return value as unknown as SurvivalBest;
 }
 
-function parseLeaderboard(value: unknown) {
+function parseLeaderboard(value: unknown): SurvivalLeaderboardPage {
   if (!exact(value, ['entries', 'nextCursor', 'currentRank']) || !Array.isArray(value.entries)
-    || !(value.nextCursor === null || (typeof value.nextCursor === 'string' && value.nextCursor.length > 0 && value.nextCursor.length <= 512))
+    || !(value.nextCursor === null || (typeof value.nextCursor === 'string' && value.nextCursor.length > 0 && value.nextCursor.length <= 512 && CURSOR.test(value.nextCursor)))
     || !(value.currentRank === null || integer(value.currentRank, 1))) invalid();
   const entries = value.entries.map((entry) => {
     if (!exact(entry, ['rank', 'playerId', 'displayName', 'runId', 'score', 'highestCompletedWave', 'bossesDefeated', 'finalIntegrity', 'riskLevel', 'loadoutSummary', 'achievedAt'])
@@ -235,7 +262,13 @@ function parseLeaderboard(value: unknown) {
     });
     return entry;
   });
-  return { entries, nextCursor: value.nextCursor as string | null, currentRank: value.currentRank as number | null };
+  return { entries: entries as unknown as SurvivalLeaderboardEntry[], nextCursor: value.nextCursor as string | null, currentRank: value.currentRank as number | null };
+}
+
+function parseHistory(value: unknown): SurvivalHistoryPage {
+  if (!exact(value, ['items', 'nextCursor']) || !Array.isArray(value.items)
+    || !(value.nextCursor === null || (typeof value.nextCursor === 'string' && value.nextCursor.length > 0 && value.nextCursor.length <= 512 && CURSOR.test(value.nextCursor)))) invalid();
+  return { items: value.items.map(parseBest), nextCursor: value.nextCursor as string | null };
 }
 
 function parseHub(value: unknown, playerId: string) {
@@ -317,6 +350,13 @@ export function createSurvivalClient(identity: LocalIdentity, options: FetchOpti
       if (query.cursor !== undefined) params.set('cursor', query.cursor);
       const suffix = params.size === 0 ? '' : `?${params}`;
       return parseLeaderboard(await request(`/api/survival/leaderboard${suffix}`));
+    },
+    async getHistory(query: { limit?: number; cursor?: string } = {}) {
+      const params = new URLSearchParams();
+      if (query.limit !== undefined) params.set('limit', String(query.limit));
+      if (query.cursor !== undefined) params.set('cursor', query.cursor);
+      const suffix = params.size === 0 ? '' : `?${params}`;
+      return parseHistory(await request(`/api/survival/history${suffix}`));
     },
   };
 }

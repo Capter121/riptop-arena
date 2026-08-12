@@ -113,6 +113,13 @@ try {
   assert.equal(leaderboard.status, 200);
   assert.deepEqual((await leaderboard.json()).entries, []);
 
+  assert.equal((await fetch(`${baseUrl}/api/survival/history`)).status, 401);
+  const history = await fetch(`${baseUrl}/api/survival/history?limit=20`, { headers: headers(player) });
+  assert.equal(history.status, 200);
+  assert.deepEqual(await history.json(), { items: [], nextCursor: null });
+  assert.equal((await fetch(`${baseUrl}/api/survival/history?limit=51`, { headers: headers(player) })).status, 400);
+  assert.equal((await fetch(`${baseUrl}/api/survival/history?limit=20&limit=10`, { headers: headers(player) })).status, 400);
+
   const abandonResponse = await fetch(`${baseUrl}/api/survival/runs/${RUN}/abandon`, {
     method: 'POST', headers: headers(player), body: JSON.stringify({ requestId: ABANDON }),
   });
