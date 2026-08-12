@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { brotliCompressSync, constants as zlibConstants, gzipSync } from 'node:zlib';
 import { authenticateRequest } from './auth/auth-middleware.mjs';
 import { AuthError, redeemInvite } from './auth/invite-service.mjs';
 import { ProgressionError, syncProgression } from './progression/progression-service.mjs';
@@ -41,6 +42,9 @@ const CONTENT_TYPES = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
 };
+const COMPRESSIBLE_TYPES = new Set(['.css', '.html', '.js', '.json', '.mjs', '.svg']);
+const COMPRESSION_THRESHOLD_BYTES = 1024;
+const HASHED_ASSET_PATH = /(?:^|\/)assets\/[^/]+-[A-Za-z0-9_-]{8,}\.[^/]+$/;
 
 class HttpError extends Error {
   constructor(status, code, message) {
@@ -50,14 +54,33 @@ class HttpError extends Error {
   }
 }
 
+function encodeBody(request, body, compressible) {
+  if (!compressible || body.length < COMPRESSION_THRESHOLD_BYTES) return { body, encoding: null };
+  const accepted = String(request.headers['accept-encoding'] ?? '').toLowerCase();
+  if (/(?:^|,)\s*br(?:\s*;[^,]*)?(?:,|$)/.test(accepted) && !/br\s*;\s*q=0(?:\.0*)?(?:,|$)/.test(accepted)) {
+    return {
+      body: brotliCompressSync(body, {
+        params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 4 },
+      }),
+      encoding: 'br',
+    };
+  }
+  if (/(?:^|,)\s*gzip(?:\s*;[^,]*)?(?:,|$)/.test(accepted) && !/gzip\s*;\s*q=0(?:\.0*)?(?:,|$)/.test(accepted)) {
+    return { body: gzipSync(body), encoding: 'gzip' };
+  }
+  return { body, encoding: null };
+}
+
 function sendJson(response, status, value) {
-  const body = JSON.stringify(value);
+  const encoded = encodeBody(response.req, Buffer.from(JSON.stringify(value)), true);
   response.writeHead(status, {
     'content-type': 'application/json; charset=utf-8',
-    'content-length': Buffer.byteLength(body),
+    'content-length': encoded.body.length,
+    'cache-control': 'no-store',
+    ...(encoded.encoding ? { 'content-encoding': encoded.encoding, vary: 'Accept-Encoding' } : {}),
     'x-content-type-options': 'nosniff',
   });
-  response.end(body);
+  response.end(encoded.body);
 }
 
 function sendError(response, status, code, message) {
@@ -115,12 +138,22 @@ async function serveStatic(request, response, siteRoot, pathname) {
     if (entry.isDirectory()) filePath = resolve(filePath, 'index.html');
     else if (!entry.isFile()) return false;
     const body = await readFile(filePath);
+    const extension = extname(filePath).toLowerCase();
+    const encoded = encodeBody(request, body, COMPRESSIBLE_TYPES.has(extension));
+    const cacheControl = extension === '.html'
+      ? 'no-cache'
+      : HASHED_ASSET_PATH.test(relativePath.replaceAll('\\', '/'))
+        ? 'public, max-age=31536000, immutable'
+        : 'no-cache';
     response.writeHead(200, {
-      'content-type': CONTENT_TYPES[extname(filePath).toLowerCase()] ?? 'application/octet-stream',
-      'content-length': body.length,
+      'content-type': CONTENT_TYPES[extension] ?? 'application/octet-stream',
+      'content-length': encoded.body.length,
+      'cache-control': cacheControl,
+      ...(COMPRESSIBLE_TYPES.has(extension) ? { vary: 'Accept-Encoding' } : {}),
+      ...(encoded.encoding ? { 'content-encoding': encoded.encoding } : {}),
       'x-content-type-options': 'nosniff',
     });
-    response.end(request.method === 'HEAD' ? undefined : body);
+    response.end(request.method === 'HEAD' ? undefined : encoded.body);
     return true;
   } catch (error) {
     if (error?.code === 'ENOENT') return false;

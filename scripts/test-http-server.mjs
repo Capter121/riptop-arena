@@ -8,9 +8,13 @@ const PORT = 8092;
 const URL = `http://127.0.0.1:${PORT}`;
 const siteRoot = await mkdtemp(join(tmpdir(), 'nss-http-server-'));
 const arenaRoot = join(siteRoot, 'arena');
+const arenaAssetsRoot = join(arenaRoot, 'assets');
 await mkdir(arenaRoot);
+await mkdir(arenaAssetsRoot);
 await writeFile(join(siteRoot, 'index.html'), '<!doctype html><title>NSS Portal</title>', 'utf8');
 await writeFile(join(arenaRoot, 'index.html'), '<!doctype html><title>RIPTOP Arena</title>', 'utf8');
+const bundle = `export const payload = '${'compress-me-'.repeat(200)}';`;
+await writeFile(join(arenaAssetsRoot, 'game-AbCd1234.js'), bundle, 'utf8');
 
 const server = spawn(process.execPath, ['server/match-server.mjs'], {
   cwd: process.cwd(),
@@ -38,10 +42,12 @@ try {
 
   const health = await fetch(`${URL}/health`);
   assert.equal(health.status, 200);
+  assert.equal(health.headers.get('cache-control'), 'no-store');
   assert.deepEqual(await health.json(), { status: 'ok' });
 
   const missing = await fetch(`${URL}/api/missing`);
   assert.equal(missing.status, 404);
+  assert.equal(missing.headers.get('cache-control'), 'no-store');
   assert.deepEqual(await missing.json(), {
     error: { code: 'NOT_FOUND', message: 'Resource not found.' },
   });
@@ -64,6 +70,7 @@ try {
 
   const portal = await fetch(`${URL}/`);
   assert.equal(portal.status, 200);
+  assert.equal(portal.headers.get('cache-control'), 'no-cache');
   assert.equal(await portal.text(), '<!doctype html><title>NSS Portal</title>');
 
   const join = await fetch(`${URL}/join`);
@@ -94,6 +101,28 @@ try {
   assert.equal(arena.status, 200);
   assert.equal(await arena.text(), '<!doctype html><title>RIPTOP Arena</title>');
 
+  const brotliBundle = await fetch(`${URL}/arena/assets/game-AbCd1234.js`, {
+    headers: { 'accept-encoding': 'br' },
+  });
+  assert.equal(brotliBundle.status, 200);
+  assert.equal(brotliBundle.headers.get('content-encoding'), 'br');
+  assert.equal(brotliBundle.headers.get('vary'), 'Accept-Encoding');
+  assert.equal(brotliBundle.headers.get('cache-control'), 'public, max-age=31536000, immutable');
+  assert.equal(await brotliBundle.text(), bundle);
+  assert.ok(Number(brotliBundle.headers.get('content-length')) < Buffer.byteLength(bundle));
+
+  const gzipBundle = await fetch(`${URL}/arena/assets/game-AbCd1234.js`, {
+    headers: { 'accept-encoding': 'gzip' },
+  });
+  assert.equal(gzipBundle.headers.get('content-encoding'), 'gzip');
+  assert.equal(await gzipBundle.text(), bundle);
+
+  const identityBundle = await fetch(`${URL}/arena/assets/game-AbCd1234.js`, {
+    headers: { 'accept-encoding': 'identity' },
+  });
+  assert.equal(identityBundle.headers.get('content-encoding'), null);
+  assert.equal(identityBundle.headers.get('vary'), 'Accept-Encoding');
+
   const unknown = await fetch(`${URL}/unknown-route`);
   assert.equal(unknown.status, 404);
   assert.equal((await unknown.json()).error.code, 'NOT_FOUND');
@@ -101,8 +130,10 @@ try {
   console.log('HTTP server smoke tests passed.');
 } finally {
   server.kill();
+  await unlink(join(arenaAssetsRoot, 'game-AbCd1234.js'));
   await unlink(join(arenaRoot, 'index.html'));
   await unlink(join(siteRoot, 'index.html'));
+  await rmdir(arenaAssetsRoot);
   await rmdir(arenaRoot);
   await rmdir(siteRoot);
 }
