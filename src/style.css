@@ -1000,6 +1000,7 @@ select {
 .survival-reward__status { min-height: 1.5rem; color: #ffd166 !important; }
 .survival-reward__choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 12px; }
 .survival-reward__choice {
+  pointer-events: auto;
   min-height: 144px;
   padding: 18px;
   border: 1px solid rgba(126, 240, 255, 0.34);
