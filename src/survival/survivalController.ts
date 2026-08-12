@@ -12,6 +12,7 @@ import {
   SurvivalApiError,
   type SurvivalClient,
   type SurvivalResultRequest,
+  type SurvivalReward,
   type SurvivalRun,
   type SurvivalSettlement,
 } from './survivalClient';
@@ -22,6 +23,10 @@ type SurvivalCombatant = { displayName: string; loadout: NssBattleLoadoutV2; upg
 export type SurvivalSubmitResult =
   | { status: 'submitted'; settlement: SurvivalSettlement }
   | { status: 'pending' | 'storage_failed' | 'conflict' };
+
+export type SurvivalRewardSubmitResult =
+  | { status: 'selected'; run: SurvivalRun }
+  | { status: 'pending' | 'invalid' | 'conflict' };
 
 export interface GameSurvivalOptions {
   battleKind: 'survival';
@@ -45,6 +50,9 @@ export class SurvivalController {
   private outcomeJson: string | null = null;
   private settlementPromise: Promise<SurvivalSubmitResult> | null = null;
   private confirmed: SurvivalSubmitResult | null = null;
+  private rewardRequest: { requestId: string; reward: SurvivalReward } | null = null;
+  private rewardPromise: Promise<SurvivalRewardSubmitResult> | null = null;
+  private selectedReward: SurvivalRewardSubmitResult | null = null;
 
   constructor(run: SurvivalRun, identity: LocalIdentity, client: SurvivalClient) {
     if (run.configVersion !== 'survival-v1' || run.simulationVersion !== 1 || run.battleRulesVersion !== 2) {
@@ -140,5 +148,36 @@ export class SurvivalController {
       }
       return { status: 'pending' };
     }
+  }
+
+  selectReward(
+    frozenOptions: readonly SurvivalReward[],
+    reward: SurvivalReward,
+    dependencies: { randomUUID?: () => string } = {},
+  ): Promise<SurvivalRewardSubmitResult> {
+    if (!frozenOptions.some(candidate => JSON.stringify(candidate) === JSON.stringify(reward))) {
+      return Promise.resolve({ status: 'invalid' });
+    }
+    if (this.selectedReward) return Promise.resolve(this.selectedReward);
+    if (this.rewardRequest && JSON.stringify(this.rewardRequest.reward) !== JSON.stringify(reward)) {
+      return Promise.resolve({ status: 'invalid' });
+    }
+    if (this.rewardPromise) return this.rewardPromise;
+    this.rewardRequest ??= {
+      requestId: (dependencies.randomUUID ?? (() => crypto.randomUUID()))(),
+      reward: structuredClone(reward),
+    };
+    this.rewardPromise = this.client.selectReward(this.run.runId, this.run.wave.wave, this.rewardRequest)
+      .then(({ run }) => {
+        const result = { status: 'selected' as const, run };
+        this.selectedReward = result;
+        return result;
+      })
+      .catch((error: unknown) => error instanceof SurvivalApiError
+        && (error.code === 'SURVIVAL_REQUEST_CONFLICT' || error.code === 'STALE_SURVIVAL_STATE')
+        ? { status: 'conflict' as const }
+        : { status: 'pending' as const })
+      .finally(() => { this.rewardPromise = null; });
+    return this.rewardPromise;
   }
 }

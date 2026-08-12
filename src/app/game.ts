@@ -104,7 +104,10 @@ import {
 import type { GameChallengeOptions } from '../challenges/challengeBootstrap';
 import type { CampaignSubmitResult, GameCampaignOptions } from '../campaign/campaignController';
 import type { GameSurvivalOptions, SurvivalSubmitResult } from '../survival/survivalController';
+import type { SurvivalReward, SurvivalSettlement } from '../survival/survivalClient';
 import { applySurvivalBattleRuntime } from '../gameplay/survival/survivalRun';
+import { SurvivalRewardPanel, describeSurvivalReward } from '../ui/survivalRewardPanel';
+import { SurvivalResults } from '../ui/survivalResults';
 import { buildCampaignCustomizerPath } from '../campaign/campaignReturn';
 import { campaignObjectiveText } from '../data/campaign/objectives';
 import { commitProgressionSync } from '../progression/progressionClient';
@@ -304,6 +307,9 @@ export class Game {
   private campaignSettlement: CampaignSubmitResult | null = null;
   private campaignNextOpponentId: string | null = null;
   private survivalSettlement: SurvivalSubmitResult | null = null;
+  private readonly survivalRewards = new SurvivalRewardPanel();
+  private readonly survivalResults = new SurvivalResults();
+  private survivalNetworkStatus: 'syncing' | 'synced' | 'pending' | 'conflict' = 'synced';
 
   constructor(mount: HTMLElement, session: GameChallengeOptions | GameCampaignOptions | GameSurvivalOptions | null = null) {
     this.mount = mount;
@@ -403,7 +409,7 @@ export class Game {
     `;
     this.mount.innerHTML = '';
     this.mount.append(this.renderer.domElement, this.overlay, this.launchFlash, this.introCard, this.affinityVersus);
-    this.overlay.append(this.menu.root, this.garage.root, this.shop.root, this.results.root, this.cutinPanel.root, this.forgePanel.root, this.blackMarket.root);
+    this.overlay.append(this.menu.root, this.garage.root, this.shop.root, this.results.root, this.survivalRewards.root, this.survivalResults.root, this.cutinPanel.root, this.forgePanel.root, this.blackMarket.root);
     if (this.camDebugEnabled) {
       this.mount.append(this.cameraDebug);
     }
@@ -635,6 +641,10 @@ export class Game {
     this.results.campaignArchive.addEventListener('click', () => {
       if (this.campaign) window.location.assign(`/campaign/?opponent=${encodeURIComponent(this.campaign.opponentId)}`);
     });
+    this.survivalRewards.bind(
+      reward => void this.selectSurvivalReward(reward),
+      () => window.location.assign(`/arena/?survival=${encodeURIComponent(this.survival!.runId)}`),
+    );
     this.shop.backButton.addEventListener('click', () => this.showGarage());
     this.shop.garageButton.addEventListener('click', () => this.showGarage());
 
@@ -665,13 +675,13 @@ export class Game {
     }
     window.setTimeout(() => this.introCard.classList.add('intro-card--hidden'), 1800);
 
-    this.exposeDiagnostics();
     if (!this.challenge && !this.campaign && !this.survival && this.params.has('qa')) {
       this.enemyPreset = ENEMIES[0];
       this.startBattle();
       this.launchCharge = 0.84;
       this.doLaunch();
     }
+    this.exposeDiagnostics();
   }
 
   start() {
@@ -1152,6 +1162,8 @@ export class Game {
     this.garage.root.style.display = 'none';
     this.shop.root.style.display = 'none';
     this.results.root.style.display = 'none';
+    this.survivalRewards.hide();
+    this.survivalResults.hide();
     this.hud.setVisible(false);
     this.turnPanel.root.style.display = 'none';
     this.activeClashQte = null;
@@ -1385,6 +1397,7 @@ export class Game {
 
   private async submitSurvivalResult() {
     if (!this.survival || !this.battleOutcomeSummary) return;
+    this.survivalNetworkStatus = 'syncing';
     this.results.setSurvivalSettlement('正在提交结果…', '正在提交…', true);
     this.survivalSettlement = await this.survival.controller.settle(this.battleOutcomeSummary);
     if (this.survivalSettlement.status === 'submitted') {
@@ -1394,10 +1407,18 @@ export class Game {
       commitProgressionSync(this.survival.controller.identity, {
         status: 'synced', progression: settlement.progression, acknowledgedEventIds: [],
       });
-      const status = settlement.run.status === 'reward_pending'
-        ? '结果已确认，返回生存中心选择奖励'
-        : '战败已确认，本次运行结束';
-      this.results.setSurvivalSettlement(status, '返回生存中心');
+      this.survivalNetworkStatus = 'synced';
+      if (settlement.run.status === 'reward_pending') {
+        if (settlement.rewardOptions.length !== 3) {
+          this.results.setSurvivalSettlement('服务器奖励候选异常，已停止推进；不会使用本地随机奖励。', '返回生存中心');
+          return;
+        }
+        this.results.root.style.display = 'none';
+        this.survivalRewards.show(settlement);
+        return;
+      }
+      this.results.root.style.display = 'none';
+      this.survivalResults.show(settlement, () => window.location.assign('/survival/'));
       return;
     }
     const status = {
@@ -1405,7 +1426,28 @@ export class Game {
       storage_failed: '浏览器无法安全保存，战败结果未发送',
       conflict: '服务器状态已变化，请返回生存中心刷新',
     }[this.survivalSettlement.status];
+    this.survivalNetworkStatus = this.survivalSettlement.status === 'conflict' ? 'conflict' : 'pending';
     this.results.setSurvivalSettlement(status, this.survivalSettlement.status === 'conflict' ? '返回生存中心' : '重新提交');
+  }
+
+  private async selectSurvivalReward(reward: SurvivalReward) {
+    const settlement = this.survivalSettlement?.status === 'submitted' ? this.survivalSettlement.settlement : null;
+    if (!this.survival || !settlement || settlement.run.status !== 'reward_pending') return;
+    const label = describeSurvivalReward(reward).title;
+    this.survivalRewards.setBusy(true);
+    const result = await this.survival.controller.selectReward(settlement.rewardOptions, reward);
+    if (result.status === 'selected') {
+      this.survivalNetworkStatus = 'synced';
+      this.survivalRewards.setSelected(label);
+      return;
+    }
+    if (result.status === 'conflict') {
+      this.survivalNetworkStatus = 'conflict';
+      this.survivalRewards.setError('服务器检查点已变化，请返回生存中心刷新。');
+      return;
+    }
+    this.survivalNetworkStatus = 'pending';
+    this.survivalRewards.setError(result.status === 'invalid' ? '该奖励不属于本波冻结候选。' : '网络中断，点击同一奖励即可安全重试。');
   }
 
   private async submitCampaignResult() {
@@ -1617,6 +1659,9 @@ export class Game {
     this.shop.root.style.display = 'none';
     this.forgePanel.root.style.display = 'none';
     this.results.root.style.display = 'none';
+    this.survivalRewards.hide();
+    this.survivalResults.hide();
+    this.survivalNetworkStatus = 'synced';
     this.hud.setVisible(true);
     this.turnPanel.root.style.display = '';
 
@@ -3064,6 +3109,20 @@ export class Game {
         mode: this.mode,
         wave: this.survival?.waveNumber ?? 1,
         score: this.survival?.controller.run.checkpoint.score ?? 0,
+        survivalState: this.survival ? {
+          wave: this.survival.waveNumber,
+          waveType: this.survival.waveType,
+          score: this.survival.controller.run.checkpoint.score,
+          riskLevel: this.survival.runtime.riskLevel,
+          strengthMultiplier: this.survival.runtime.strengthMultiplier,
+          integrity: this.survival.runtime.integrity,
+          maximumIntegrity: this.survival.runtime.maximumIntegrity,
+          burstRisk: this.survival.runtime.burstRisk,
+          persistentDebuffs: this.survival.runtime.persistentDebuffs,
+          growthLevels: this.survival.runtime.growthLevels,
+          nextWaveEffect: this.survival.runtime.nextWaveEffect,
+          networkStatus: this.survivalNetworkStatus,
+        } : undefined,
         playerAttributes: this.player.stats.attributes,
         enemyAttributes: this.enemy.stats.attributes,
         playerAffinity: this.player.stats.affinity,
@@ -3239,6 +3298,20 @@ export class Game {
       mode: this.mode,
       wave: this.survival?.waveNumber ?? 1,
       score: this.survival?.controller.run.checkpoint.score ?? 0,
+      survivalState: this.survival ? {
+        wave: this.survival.waveNumber,
+        waveType: this.survival.waveType,
+        score: this.survival.controller.run.checkpoint.score,
+        riskLevel: this.survival.runtime.riskLevel,
+        strengthMultiplier: this.survival.runtime.strengthMultiplier,
+        integrity: this.survival.runtime.integrity,
+        maximumIntegrity: this.survival.runtime.maximumIntegrity,
+        burstRisk: this.survival.runtime.burstRisk,
+        persistentDebuffs: this.survival.runtime.persistentDebuffs,
+        growthLevels: this.survival.runtime.growthLevels,
+        nextWaveEffect: this.survival.runtime.nextWaveEffect,
+        networkStatus: this.survivalNetworkStatus,
+      } : undefined,
       playerAttributes: this.player.stats.attributes,
       enemyAttributes: this.enemy.stats.attributes,
       playerAffinity: this.player.stats.affinity,
@@ -3287,6 +3360,33 @@ export class Game {
     return this.battleOutcomeSummary
       ? stringifyBattleOutcomeSummary(this.battleOutcomeSummary)
       : null;
+  }
+
+  private previewQaSurvivalUi(kind: 'rewards' | 'summary') {
+    const run = {
+      runId: '22222222-2222-4222-8222-222222222222', configVersion: 'survival-v1', simulationVersion: 1,
+      battleRulesVersion: 2, seed: 'ffeeddccbbaa99887766554433221100', status: kind === 'rewards' ? 'reward_pending' : 'completed',
+      player: { playerId: '11111111-1111-4111-8111-111111111111', displayName: 'QA', loadout: DEFAULT_NSS_LOADOUT, upgrades: { attack: 0, defense: 0, stamina: 0 }, maximumIntegrity: 2000 },
+      wave: { configVersion: 'survival-v1', simulationVersion: 1, seed: '00112233445566778899aabbccddeeff', wave: 5, chapter: 1, type: 'boss', sourceOpponentId: 'ember-fang', sourceLoadoutIndex: 0, enemy: DEFAULT_NSS_LOADOUT, arena: 'classic_grid', aiProfileId: 'assault', riskLevel: 2, strengthMultiplier: 1.44 },
+      checkpoint: { currentWave: 5, integrity: 1234, burstRisk: 18, persistentDebuffs: ['scuffed'], growthLevels: { 'attack-calibration': 2, coordination: 1, 'affinity-tuning': 3, 'pickup-tuning': 0 }, nextWaveEffect: null, riskLevel: 2, score: 4200, flawlessStreak: 1, bossesDefeated: 1 },
+      finalSummary: kind === 'summary' ? { score: 4200, highestCompletedWave: 4, bossesDefeated: 1, finalIntegrity: 0, riskLevel: 2, achievedAt: '2026-08-12T10:00:00.000Z', abandoned: false } : null,
+      createdAt: '2026-08-12T09:00:00.000Z', updatedAt: '2026-08-12T10:00:00.000Z', completedAt: kind === 'summary' ? '2026-08-12T10:00:00.000Z' : null,
+    } as SurvivalSettlement['run'];
+    const settlement = {
+      run,
+      score: { base: 100, waveTypeBonus: 200, finishBonus: 50, flawlessBonus: 0, flawlessStreakBonus: 0, subtotal: 350, riskMultiplier: 1.55, score: 543 },
+      rewardOptions: [
+        { kind: 'growth', id: 'attack-calibration', level: 3 },
+        { kind: 'instant', id: 'emergency-repair' },
+        { kind: 'risk', id: 'risk-contract', level: 3 },
+      ],
+      milestone: { wave: 5, coins: 100, eventId: '33333333-3333-4333-8333-333333333333' },
+      progression: {} as SurvivalSettlement['progression'],
+    } satisfies SurvivalSettlement;
+    this.results.root.style.display = 'none';
+    this.hud.setVisible(false);
+    if (kind === 'rewards') this.survivalRewards.show(settlement);
+    else this.survivalResults.show(settlement, () => undefined);
   }
 
   private exposeDiagnostics() {
@@ -3384,6 +3484,7 @@ export class Game {
       getBattleInputLog: () => this.getQaBattleInputLog(),
       startBattleReplay: (log: BattleInputLogV1) => this.startQaBattleReplay(log),
       getBattleOutcomeSummary: () => this.getQaBattleOutcomeSummary(),
+      previewSurvivalUi: (kind: 'rewards' | 'summary') => this.previewQaSurvivalUi(kind),
       quickLaunch: () => {
         this.launchCharge = 0.82;
         this.doLaunch();
@@ -3622,6 +3723,13 @@ export class Game {
       dashCenter: () => this.physics.dashPlayer(this.player, new THREE.Vector3(0, 0, 0), this.energy),
       state: () => globalWindow.__THREE_GAME_DIAGNOSTICS__,
     };
+    const survivalUiPreview = new URLSearchParams(window.location.search).get('survivalUi')
+      ?? new URLSearchParams(window.location.hash.slice(1)).get('survivalUi');
+    if ((survivalUiPreview === 'rewards' || survivalUiPreview === 'summary')
+      && this.mount.dataset.survivalUiPreview !== survivalUiPreview) {
+      this.mount.dataset.survivalUiPreview = survivalUiPreview;
+      this.previewQaSurvivalUi(survivalUiPreview);
+    }
   }
 
   private triggerLaunchFlash(power: number) {

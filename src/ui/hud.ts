@@ -3,6 +3,44 @@ import type { Phase } from '../utils/state';
 import { CombatLog } from './combatLog';
 import { getAffinityBadge, renderAffinityBadge } from './affinityPresentation';
 import type { BattleAffinityProfile } from '../gameplay/battleAffinity';
+import type { SurvivalGrowthLevels } from '../survival/survivalClient';
+
+export type SurvivalHudState = {
+  wave: number;
+  waveType: 'normal' | 'elite' | 'boss';
+  score: number;
+  riskLevel: number;
+  strengthMultiplier: number;
+  integrity: number;
+  maximumIntegrity: number;
+  burstRisk: number;
+  persistentDebuffs: string[];
+  growthLevels: SurvivalGrowthLevels;
+  nextWaveEffect: 'temporary-overdrive' | 'temporary-bulwark' | 'temporary-endurance' | null;
+  networkStatus: 'syncing' | 'synced' | 'pending' | 'conflict';
+};
+
+export function createSurvivalHudPresentation(state: SurvivalHudState) {
+  const waveType = { normal: '普通', elite: '精英', boss: 'BOSS' }[state.waveType];
+  const growthLabels: Array<[keyof SurvivalGrowthLevels, string]> = [
+    ['attack-calibration', '攻击校准'], ['coordination', '协同'], ['affinity-tuning', '属性调谐'], ['pickup-tuning', '补给调谐'],
+  ];
+  const temporaryLabels: Record<NonNullable<SurvivalHudState['nextWaveEffect']>, string> = {
+    'temporary-overdrive': '临时超频', 'temporary-bulwark': '临时壁垒', 'temporary-endurance': '临时耐久',
+  };
+  const temporary = state.nextWaveEffect ? temporaryLabels[state.nextWaveEffect] : '无单波效果';
+  const network = { syncing: '正在同步', synced: '检查点已同步', pending: '等待网络确认', conflict: '检查点冲突' }[state.networkStatus];
+  return {
+    eyebrow: `${waveType} · 第 ${state.wave} 波`,
+    score: state.score.toLocaleString('zh-CN'),
+    risk: `风险 ${state.riskLevel}`,
+    strength: `敌方 ${Math.round(state.strengthMultiplier * 100)}%`,
+    inherited: `完整度 ${Math.round(state.integrity).toLocaleString('zh-CN')}/${Math.round(state.maximumIntegrity).toLocaleString('zh-CN')} · 爆裂 ${Math.round(state.burstRisk)}% · 持续状态 ${state.persistentDebuffs.length}`,
+    growth: growthLabels.filter(([id]) => state.growthLevels[id] > 0).map(([id, label]) => `${label} Lv.${state.growthLevels[id]}`).join(' · ') || '尚无局内强化',
+    temporary,
+    network,
+  };
+}
 
 export type RoundHud = {
   playerSpin: number;
@@ -30,6 +68,7 @@ export type RoundHud = {
   mode: 'quick' | 'tournament' | 'survival';
   wave?: number;
   score?: number;
+  survivalState?: SurvivalHudState;
   playerAttributes?: Record<string, number>;
   enemyAttributes?: Record<string, number>;
   playerAffinity?: BattleAffinityProfile;
@@ -91,7 +130,7 @@ export class Hud {
       </div>
       <div class="hud__center">
         <div class="hud__timer js-timer">45.0</div>
-        <div class="hud__survival js-survival" style="display: none; font-size: 24px; font-weight: bold; text-align: center; font-family: monospace;"></div>
+        <div class="hud__survival js-survival" style="display: none;"></div>
         <div class="hud__callout js-callout"></div>
         <div class="hud__hint js-hint"></div>
         <div class="launch-meter"><div class="launch-meter__fill js-launch"></div></div>
@@ -224,7 +263,15 @@ export class Hud {
     if (state.mode === 'survival') {
       this.timer.style.display = 'none';
       this.survival.style.display = 'block';
-      this.survival.innerHTML = `第 ${state.wave || 1} 波 - 得分：${state.score || 0}`;
+      const view = state.survivalState ? createSurvivalHudPresentation(state.survivalState) : null;
+      this.survival.innerHTML = view ? `
+        <span class="hud__survival-wave">${view.eyebrow}</span>
+        <strong class="hud__survival-score">${view.score}</strong>
+        <span class="hud__survival-meta">${view.risk} · ${view.strength}</span>
+        <span class="hud__survival-state">${view.inherited}</span>
+        <span class="hud__survival-growth">${view.growth} · ${view.temporary}</span>
+        <span class="hud__survival-network">${view.network}</span>
+      ` : `第 ${state.wave ?? 1} 波 · ${state.score ?? 0}`;
     } else {
       this.timer.style.display = 'block';
       this.survival.style.display = 'none';

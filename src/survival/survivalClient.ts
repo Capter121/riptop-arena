@@ -67,10 +67,20 @@ export interface SurvivalRun {
   player: { playerId: string; displayName: string; loadout: NssBattleLoadoutV2; upgrades: UpgradeLevels; maximumIntegrity: number };
   wave: SurvivalWave;
   checkpoint: SurvivalCheckpoint;
-  finalSummary: JsonRecord | null;
+  finalSummary: SurvivalFinalSummary | null;
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;
+}
+
+export interface SurvivalFinalSummary {
+  score: number;
+  highestCompletedWave: number;
+  bossesDefeated: number;
+  finalIntegrity: number;
+  riskLevel: number;
+  achievedAt: string;
+  abandoned: boolean;
 }
 
 export interface SurvivalSettlement {
