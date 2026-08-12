@@ -76,15 +76,21 @@ export function calculateAffinityDamage(
   attacker: BattleAffinityProfile,
   defender: BattleAffinityProfile,
   armor: number,
+  affinityEffectMultiplier = 1,
 ): AffinityDamageBreakdown {
   if (rawDamage <= 0) return emptyAffinityDamage(attacker, defender);
 
   const relation = resolveBattleAffinityRelation(attacker, defender);
   const neutralRaw = adjustedRawDamage(rawDamage, 1, 'neutral').combinedRaw;
   const resonantRaw = adjustedRawDamage(rawDamage, attacker.modifiers.elementalPower, 'neutral').combinedRaw;
-  const adjusted = adjustedRawDamage(rawDamage, attacker.modifiers.elementalPower, relation);
+  const baseAdjusted = adjustedRawDamage(rawDamage, attacker.modifiers.elementalPower, relation);
+  const resonantCombinedRaw = neutralRaw + (resonantRaw - neutralRaw) * affinityEffectMultiplier;
+  const adjusted = {
+    physicalRaw: baseAdjusted.physicalRaw,
+    combinedRaw: neutralRaw + (baseAdjusted.combinedRaw - neutralRaw) * affinityEffectMultiplier,
+  };
   const neutralFinal = calculateArmoredDamage(neutralRaw, armor).finalDamage;
-  const resonanceFinal = calculateArmoredDamage(resonantRaw, armor).finalDamage;
+  const resonanceFinal = calculateArmoredDamage(resonantCombinedRaw, armor).finalDamage;
   const armored = calculateArmoredDamage(adjusted.combinedRaw, armor);
   const physicalDamage = Math.min(
     armored.finalDamage,

@@ -94,5 +94,15 @@ export function resolveModifiers(top: TopEntity): PhysicsModifiers {
     });
   }
 
+  if (top.survivalCombatTuning) {
+    resolved = multiplyModifiers(resolved, {
+      defenseMultiplier: top.survivalCombatTuning.defenseMultiplier,
+      damageMultiplier: top.survivalCombatTuning.outputMultiplier,
+      spinLossMultiplier: top.survivalCombatTuning.spinLossMultiplier,
+      dashImpulseMultiplier: top.survivalCombatTuning.mobilityMultiplier,
+      lockStabilityLossMultiplier: top.survivalCombatTuning.stabilityLossMultiplier,
+    });
+  }
+
   return resolved;
 }

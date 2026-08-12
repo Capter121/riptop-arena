@@ -81,7 +81,11 @@ export function calculateTurnDamage(ctx: DamageContext): DamageResult {
     return result;
   }
 
-  let rawDamage = (skillBaseDamage + attackBonus) * effectiveContextMultiplier;
+  const attackerTuning = attacker.survivalCombatTuning;
+  const defenderTuning = defender.survivalCombatTuning;
+  let rawDamage = (skillBaseDamage + attackBonus) * effectiveContextMultiplier
+    * (attackerTuning?.outputMultiplier ?? 1)
+    / (defenderTuning?.defenseMultiplier ?? 1);
 
   if (!isCounter && !isClash) {
     if (random.nextFloat() < defender.stats.evasion) {
@@ -116,6 +120,7 @@ export function calculateTurnDamage(ctx: DamageContext): DamageResult {
     attacker.stats.affinity,
     defender.stats.affinity,
     defender.stats.armor,
+    attackerTuning?.affinityEffectMultiplier ?? 1,
   ));
 
   return result;

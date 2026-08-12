@@ -104,6 +104,7 @@ import {
 import type { GameChallengeOptions } from '../challenges/challengeBootstrap';
 import type { CampaignSubmitResult, GameCampaignOptions } from '../campaign/campaignController';
 import type { GameSurvivalOptions, SurvivalSubmitResult } from '../survival/survivalController';
+import { applySurvivalBattleRuntime } from '../gameplay/survival/survivalRun';
 import { buildCampaignCustomizerPath } from '../campaign/campaignReturn';
 import { campaignObjectiveText } from '../data/campaign/objectives';
 import { commitProgressionSync } from '../progression/progressionClient';
@@ -256,8 +257,6 @@ export class Game {
   private onlineLocalLoadout: OnlineLoadout | null = null;
 
   private mode: 'quick' | 'tournament' | 'survival' = 'quick';
-  private survivalWave = 1;
-  private survivalScore = 0;
   private launchCharge = 0;
   private launchAngleDeg = 0;
   private charging = false;
@@ -1599,8 +1598,6 @@ export class Game {
     this.timeScale = 1;
     this.hitStop = 0;
     this.dragDirection.set(0, 0);
-    this.survivalWave = this.survival?.waveNumber ?? 1;
-    this.survivalScore = this.survival?.controller.run.checkpoint.score ?? 0;
     this.turnState = 'awaiting';
     this.turnTimer = 0;
     this.turnIndex = 1;
@@ -1632,6 +1629,9 @@ export class Game {
     this.scene.add(this.player.mesh, this.enemy.mesh);
     this.player.reset(-6, 0);
     this.enemy.reset(6, 0);
+    if (this.battleMode === 'survival' && this.survival) {
+      applySurvivalBattleRuntime(this.player, this.enemy, this.survival.runtime);
+    }
     this.rig.reset();
     this.physics.reset();
     this.arena.setDangerLevel(0);
@@ -2989,6 +2989,9 @@ export class Game {
     }
 
     const random = this.battleRandom();
+    if (this.battleMode === 'survival') {
+      this.pickups.update(input.dt, this.time, this.player, random.spawn);
+    }
     this.skillManager.updateSimulation(this.player, input.dt, this.enemy, random.physics);
     this.skillManager.updateSimulation(this.enemy, input.dt, this.player, random.physics);
 
@@ -3059,8 +3062,8 @@ export class Game {
         dangerLevel: 0,
         touchMode: this.touchMode,
         mode: this.mode,
-        wave: this.survivalWave,
-        score: this.survivalScore,
+        wave: this.survival?.waveNumber ?? 1,
+        score: this.survival?.controller.run.checkpoint.score ?? 0,
         playerAttributes: this.player.stats.attributes,
         enemyAttributes: this.enemy.stats.attributes,
         playerAffinity: this.player.stats.affinity,
@@ -3234,8 +3237,8 @@ export class Game {
       dangerLevel: this.phase === 'battle' ? Math.max(0, (edgeDanger - 0.58) / 0.24) : 0,
       touchMode: this.touchMode,
       mode: this.mode,
-      wave: this.survivalWave,
-      score: this.survivalScore,
+      wave: this.survival?.waveNumber ?? 1,
+      score: this.survival?.controller.run.checkpoint.score ?? 0,
       playerAttributes: this.player.stats.attributes,
       enemyAttributes: this.enemy.stats.attributes,
       playerAffinity: this.player.stats.affinity,

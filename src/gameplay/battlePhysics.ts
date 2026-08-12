@@ -723,12 +723,14 @@ export class BattlePhysicsSystem {
       arenaManager.getAngularDampingMultiplier(),
       top.stats.affinity,
     );
-    top.spin = Math.max(0, top.spin - spinLoss);
-    top.stamina = Math.max(0, top.stamina - spinLoss * 0.86);
+    const survivalSpinLoss = spinLoss * (top.survivalCombatTuning?.spinLossMultiplier ?? 1);
+    top.spin = Math.max(0, top.spin - survivalSpinLoss);
+    top.stamina = Math.max(0, top.stamina - survivalSpinLoss * 0.86);
 
     const tiltTarget = clamp(1 - top.spin / top.stats.maxSpin, 0, 1);
     top.tilt = clamp(
-      top.tilt + calculateLowSpinTiltDelta(top.tilt, tiltTarget, dt, top.stats.affinity),
+      top.tilt + calculateLowSpinTiltDelta(top.tilt, tiltTarget, dt, top.stats.affinity)
+        * (top.survivalCombatTuning?.stabilityLossMultiplier ?? 1),
       0,
       1.3,
     );
@@ -842,12 +844,14 @@ export class BattlePhysicsSystem {
     }
 
     a.tilt = clamp(
-      a.tilt + calculateCollisionTiltGain(impulseMagnitude, a.stats.affinity, shieldedA, suppressDamage),
+      a.tilt + calculateCollisionTiltGain(impulseMagnitude, a.stats.affinity, shieldedA, suppressDamage)
+        * (a.survivalCombatTuning?.stabilityLossMultiplier ?? 1),
       0,
       1.3,
     );
     b.tilt = clamp(
-      b.tilt + calculateCollisionTiltGain(impulseMagnitude, b.stats.affinity, shieldedB, suppressDamage),
+      b.tilt + calculateCollisionTiltGain(impulseMagnitude, b.stats.affinity, shieldedB, suppressDamage)
+        * (b.survivalCombatTuning?.stabilityLossMultiplier ?? 1),
       0,
       1.3,
     );

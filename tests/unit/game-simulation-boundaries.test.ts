@@ -1,10 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { BattleRuntime } from '../../src/sim/battleRuntime';
+import { resolveModifiers } from '../../src/gameplay/modifiers';
+import type { TopEntity } from '../../src/gameplay/top';
 
 const SEED = '0123456789abcdef0123456789abcdef';
 const LAUNCH = { playerPower: 0.8, playerAngleDeg: 5, enemyPower: 0.84, enemyAngleDeg: -3 };
 
 describe('battle simulation boundaries', () => {
+  it('keeps all modifiers at their existing defaults without survival tuning', () => {
+    const top = {
+      tacticalMode: 'balance', statusEffects: [], flags: { ignoreNextCollisionDamage: false }, hasRubberTip: false,
+      survivalCombatTuning: null,
+    } as unknown as TopEntity;
+    expect(resolveModifiers(top)).toEqual({
+      attackMultiplier: 1, defenseMultiplier: 1, staminaDrainMultiplier: 1,
+      burstResistanceMultiplier: 1, collisionImpulseMultiplier: 1, wallGripMultiplier: 1,
+      damageMultiplier: 1, spinLossMultiplier: 1, dashImpulseMultiplier: 1,
+      lockStabilityLossMultiplier: 1, velocityReflectionMultiplier: 1,
+    });
+  });
+
   it('records the same fixed ticks and voice bytes at 30Hz and 144Hz', () => {
     const run = (fps: number) => {
       const runtime = new BattleRuntime(SEED);

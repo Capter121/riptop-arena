@@ -10,6 +10,10 @@ export function createPickupSpawnPosition(random: RandomSource) {
   return { x: Math.cos(angle) * radius, z: Math.sin(angle) * radius };
 }
 
+export function calculatePickupRecovery(maxSpin: number, effectMultiplier = 1) {
+  return Math.max(120, maxSpin * 0.15) * effectMultiplier;
+}
+
 export class PickupManager {
   readonly root = new THREE.Group();
   private readonly geo: THREE.BufferGeometry;
@@ -131,7 +135,10 @@ export class PickupManager {
     this.respawnTimer = 2.0;
     
     // Grant spin (15% of max spin or fixed amount)
-    const healAmount = Math.max(120, player.stats.maxSpin * 0.15);
+    const healAmount = calculatePickupRecovery(
+      player.stats.maxSpin,
+      player.survivalCombatTuning?.pickupEffectMultiplier ?? 1,
+    );
     player.spin = Math.min(player.stats.maxSpin, player.spin + healAmount);
     // Also heal stamina to prevent spin finish logic
     player.stamina = Math.min(player.stats.maxSpin, player.stamina + healAmount);

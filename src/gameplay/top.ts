@@ -24,6 +24,7 @@ import {
   type TurnVisual,
 } from '../types/battle';
 import type { PartUpgradeLevels, UpgradeLevels } from '../app/progression';
+import type { SurvivalCombatTuning } from './survival/survivalRun';
 
 export type TopSide = 'player' | 'enemy';
 
@@ -79,6 +80,8 @@ export class TopEntity {
   integrity: number;
   lockStability: number;
   burst: number;
+  survivalCombatTuning: SurvivalCombatTuning | null = null;
+  survivalPersistentDebuffs: string[] = [];
   /** Permanent MOI (moment of inertia) penalty from nuclear impact hits. */
   moiPenalty = 0;
   shieldHits = 0;
@@ -322,6 +325,8 @@ export class TopEntity {
     this.integrity = this.stats.maxIntegrity;
     this.lockStability = 100;
     this.burst = 0;
+    this.survivalCombatTuning = null;
+    this.survivalPersistentDebuffs = [];
     this.moiPenalty = 0;
     this.shieldHits = 0;
     this.tacticalMode = DEFAULT_TACTICAL_MODE;
